@@ -29,7 +29,7 @@
 #'  set \code{updateFrom=NA}. The default is \code{"1900-1-1"}.
 #' @param updateTo is a date string specifying the end date for the AWAP data. If
 #'  \code{ncdfFilename} and \code{ncdfSolarFilename} are specified and exist, then the netCDF grids will be
-#'  updated with new data to \code{updateFrom}. The default is yesterday's date as YYYY-MM-DD.
+#'  updated with new data to \code{updateFrom}. The default is two days ago as YYYY-MM-DD.
 #' @param workingFolder is the file path (as string) in which to download the AWAP grid files. The default is \code{getwd()}.
 #' @param keepFiles is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.
 #' @param compressionLevel is the netCDF compression level between 1 (low) and 9 (high), and \code{NA} for no compression.
@@ -83,7 +83,7 @@ makeNetCDF_file <- function(
   ncdfFilename=file.path(getwd(),'AWAP.nc'),
   ncdfSolarFilename=file.path(getwd(),'AWAP_solar.nc'),
   updateFrom = as.Date("1900-01-01","%Y-%m-%d"),
-  updateTo  = as.Date(Sys.Date()-1,"%Y-%m-%d"),
+  updateTo  = as.Date(Sys.Date()-2,"%Y-%m-%d"),
   workingFolder=getwd(),
   keepFiles=FALSE,
   compressionLevel = 5,
