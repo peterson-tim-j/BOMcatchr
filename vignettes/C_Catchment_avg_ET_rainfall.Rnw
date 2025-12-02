@@ -1,5 +1,5 @@
 ---
-title: "Extract daily area weighted potential evapotranspiration (PET) and precipitation"
+title: "Extract daily area weighted potential PET and precipitation"
 description: >
   This vignette shows how to build a netCDF AWAP data file and then
   extract the area weighted PET and precipitation data for a catchment over a usr defined period.
@@ -35,13 +35,13 @@ If the latter two dates were not input then data would be downloaded from 1/1/19
 Often users run _makeNetCDF_file_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _makeNetCDF_file_ is run with the the netCDF file names pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to yesterday.
 
 ```{r}
-netCDF_filename = 'AWAP_demo.nc'
-netCDF_solar_filename = 'AWAP_solar_demo.nc'
+ncdfFilename = tempfile(fileext='.nc')
+ncdfSolarFilename = tempfile(fileext='.nc')
 date.from = as.Date("2010-08-01","%Y-%m-%d")
 date.to = as.Date("2010-10-01","%Y-%m-%d")
 
-fnames = makeNetCDF_file(ncdfFilename = netCDF_filename,
-                         ncdfSolarFilename = netCDF_solar_filename,
+fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
+                         ncdfSolarFilename = ncdfSolarFilename,
                          updateFrom = date.from,
                          updateTo = date.to)
 ```
@@ -69,12 +69,13 @@ To extract the spatial data, and not some statistic of the spatial data such as 
 
 To extract the weekly total precipitation, _temporal.timestep_ is set to _'weekly'_  and _temporal.function.name_ to _'sum'_. For the former, the options are _daily_, _weekly_, _monthly_, _quarterly_ and _annual_. For the latter, any built-in function or user-defined function that accepts a single vector of data and returns a single number should work.
 
-```{r}
-weeklyPrecipData = extractCatchmentData(ncdfFilename=netCDF_filename,
-                                         ncdfSolarFilename=netCDF_solar_filename,
+```{r, fig.width= 8, fig.heght=8}
+weeklyPrecipData = extractCatchmentData(ncdfFilename=ncdfFilename,
+                                         ncdfSolarFilename=ncdfSolarFilename,
                                          extractFrom=date.from, extractTo=date.to,
                                          locations=catchments,
-                                         getTmin = F, getTmax = F, getVprp = F, getSolarrad = F, getET = F,
+                                         getTmin = F, getTmax = F, getVprp = F,
+                                         getSolarrad = F, getET = F,
                                          spatial.function.name = '',
                                          temporal.timestep = 'weekly',
                                          temporal.function.name = 'sum')
@@ -86,13 +87,13 @@ sp::spplot(weeklyPrecipData,2:ncol(weeklyPrecipData), sp.layout = list(v))
 
 
 ## Extract daily precipitation and PET data
-Here the daily area weighted average precipitation and PET is extracted across the two catchments. The data is extracted from the netCDF files _netCDF_filename_ and _netCDF_solar_filename_, between the dates _extract.from_ and _extract.to_. The other _AWAPer_ variables *are* extracted because they are need for the calculation of Morton's PET. Note the netCDF files must be in the working directory or the full file path must be given.
+Here the daily area weighted average precipitation and PET is extracted across the two catchments. The data is extracted from the netCDF files _ncdfFilename_ and _ncdfSolarFilename_, between the dates _extract.from_ and _extract.to_. The other _AWAPer_ variables *are* extracted because they are need for the calculation of Morton's PET. Note the netCDF files must be in the working directory or the full file path must be given.
 
 Here the estimation of PET was undertaken using Morton's wet-environment areal evapotranspiration (other options are available). The use of Morton's CREA formulation is defined by setting the _ET.function_ variable to _'ET.MortonCRAE'_. The calculation of the areal wet environment PET is defined by setting Morton's specific variable _ET.Mortons.est_ to _'wet areal ET'_ (note, other options exist within _AWAPer_ for both variables). Lastly, following https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf, here Morton's PET is calculated at a monthly timestep (not daily) to improve its reliability. The monthly estimate is then interpolated to daily.
 
 ```{r}
-climateData.daily = extractCatchmentData(ncdfFilename=netCDF_filename,
-                                        ncdfSolarFilename=netCDF_solar_filename,
+climateData.daily = extractCatchmentData(ncdfFilename=ncdfFilename,
+                                        ncdfSolarFilename=ncdfSolarFilename,
                                         extractFrom=date.from, extractTo=date.to,
                                         locations=catchments, temporal.timestep = 'daily',
                                         temporal.function.name='sum',spatial.function.name='var',
@@ -104,7 +105,7 @@ climateData.daily = extractCatchmentData(ncdfFilename=netCDF_filename,
 ## Plot the daily precipitation and PET
 Here time series of the extracted daily precipitation and PET for each catchment are plotted. The precipitation plots show both the area weighted estimate and the spatial variability on each day (as +/- one standard deviation).
 
-```{r}
+```{r, fig.width= 8, fig.heght=6}
 # Change the plot margins and setup two rows of plots
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
@@ -115,8 +116,8 @@ for (i in 1:length(catchments$CatchID)) {
 
   # Convert year, month and day columns from extractions to a date.
   climateData.daily.date = as.Date(paste0(climateData.daily$catchmentTemporal.sum$year[filt], "-",
-                                                     climateData.daily$catchmentTemporal.sum$month[filt], "-",
-                                                     climateData.daily$catchmentTemporal.sum$day[filt]))
+                           climateData.daily$catchmentTemporal.sum$month[filt], "-",
+                           climateData.daily$catchmentTemporal.sum$day[filt]))
 
 
   # Plot rainfall and standard deviation against observations

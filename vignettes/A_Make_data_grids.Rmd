@@ -1,5 +1,5 @@
 ---
-title: "Make and update source data grids"
+title: "Make source data grids"
 description: >
   This vignette shows how to build the netCDF data file and then
   update it to new start and end dates.
@@ -10,7 +10,7 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
-``` r
+```{r setup}
 library(AWAPer, warn.conflicts = FALSE)
 ```
 This example shows how to build the required data files and then update them.
