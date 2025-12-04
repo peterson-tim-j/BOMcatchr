@@ -65,13 +65,13 @@
 #' @param ET.function character string for the evapotranspiration function to be used. The methods that can be derived from the AWAP data are are \code{\link[Evapotranspiration]{ET.Abtew}},
 #' \code{\link[Evapotranspiration]{ET.HargreavesSamani}}, \code{\link[Evapotranspiration]{ET.JensenHaise}}, \code{\link[Evapotranspiration]{ET.Makkink}}, \code{\link[Evapotranspiration]{ET.McGuinnessBordne}}, \code{\link[Evapotranspiration]{ET.MortonCRAE}} ,
 #' \code{\link[Evapotranspiration]{ET.MortonCRWE}}, \code{\link[Evapotranspiration]{ET.Turc}}. Default is \code{\link[Evapotranspiration]{ET.MortonCRAE}}.
-#' @param ET.Mortons.est character string for the type of Mortons Et estimate. For \code{ET.MortonCRAE}, the options are \code{potential ET},\code{wet areal ET} or \code{actual areal ET}.
+#' @param ET.Mortons.est character string for the type of Morton's ET estimate. For \code{ET.MortonCRAE}, the options are \code{potential ET},\code{wet areal ET} or \code{actual areal ET}.
 #'  For \code{ET.MortonCRWE}, the options are \code{potential ET} or \code{shallow lake ET}. The default is \code{potential ET}.
 #' @param ET.Turc.humid logical variable for the Turc function using the humid adjustment.See \code{\link[Evapotranspiration]{ET.Turc}}. For now this is fixed at \code{F}.
 #' @param ET.timestep character string for the evapotranpiration time step. Options are \code{daily},  \code{monthly}, \code{annual} but the options are dependent upon the chosen \code{ET.function}. The default is \code{monthly}.
 #' @param ET.interp_missing_days T or F, indicating if missing days should be interpolated for PET calculation. Default is \code{T}. See \code{\link[Evapotranspiration]{ReadInputs}}
 #' @param ET.interp_missing_entries T or F, indicating if missing data entries should be interpolated for PET calculation. Default is \code{T}. See \code{\link[Evapotranspiration]{ReadInputs}}
-#' @param ET.interp_abnormal T or F, indicating if abnormal valuses should be interpolated for PET calculation. Default is \code{T}. See \code{\link[Evapotranspiration]{ReadInputs}}
+#' @param ET.interp_abnormal T or F, indicating if abnormal values should be interpolated for PET calculation. Default is \code{T}. See \code{\link[Evapotranspiration]{ReadInputs}}
 #' @param ET.constants list of constants from Evapotranspiration package required for ET calculations. To get the data use the command \code{data(constants)}. Default is \code{list()}.
 #'
 #' @return
