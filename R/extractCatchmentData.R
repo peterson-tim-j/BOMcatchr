@@ -222,17 +222,22 @@ extractCatchmentData <- function(
 
   # Check ET inputs
   if (getET) {
+    if (!exists('ET.constants'))
+      stop('ET.constants must be input when getET = TRUE. Use the command: data(constants)')
+
+    if (!is.list(ET.constants))
+      stop('ET.constants must be a list variable when getET = TRUE. Use the command: data(constants)')
 
     if (length(ET.constants)==0)
-      stop('ET.constants must be input from Evapotranspiration package using the command: data(constants)')
+      stop('ET.constants must be a list variable when getET = TRUE. Using the command: data(constants)')
 
-    # Check the ET function is one of the accetable forms
+    # Check the ET function is one of the acceptable forms
     ET.function.all =c('ET.Abtew', 'ET.HargreavesSamani', 'ET.JensenHaise','ET.Makkink', 'ET.McGuinnessBordne','ET.MortonCRAE' , 'ET.MortonCRWE','ET.Turc')
     if (!any(ET.function == ET.function.all)) {
       stop(paste('The ET.function must be one of the following:',ET.function.all))
     }
 
-    # Check the ET function is one of the accetable forms
+    # Check the ET function is one of the acceptable forms
     ET.timestep.all =c('daily', 'monthly', 'annual')
     if (!any(ET.timestep == ET.timestep.all)) {
       stop(paste('The ET.timestep must be one of the following:',ET.timestep.all))
@@ -680,11 +685,7 @@ extractCatchmentData <- function(
     }
   }
 
-  # Loop though each catchment and calculate the catchment averager and variance.
-  if (getET) {
-    if (!exists('ET.constants') || !is.list(ET.constants))
-      stop('ET.constants is empty or not a list.')
-  }
+  # Loop though each catchment and calculate the catchment average and variance.
   message('... Calculating catchment weighted daily data.')
   for (i in 1:length(locations)) {
 
