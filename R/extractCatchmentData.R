@@ -68,10 +68,9 @@
 #' @param ET.Mortons.est character string for the type of Morton's ET estimate. For \code{ET.MortonCRAE}, the options are \code{potential ET},\code{wet areal ET} or \code{actual areal ET}.
 #'  For \code{ET.MortonCRWE}, the options are \code{potential ET} or \code{shallow lake ET}. The default is \code{potential ET}.
 #' @param ET.Turc.humid logical variable for the Turc function using the humid adjustment.See \code{\link[Evapotranspiration]{ET.Turc}}. For now this is fixed at \code{F}.
-#' @param ET.timestep character string for the evapotranpiration time step. Options are \code{daily},  \code{monthly}, \code{annual} but the options are dependent upon the chosen \code{ET.function}. The default is \code{monthly}.
-#' @param ET.interp_missing_days T or F, indicating if missing days should be interpolated for PET calculation. Default is \code{T}. See \code{\link[Evapotranspiration]{ReadInputs}}
-#' @param ET.interp_missing_entries T or F, indicating if missing data entries should be interpolated for PET calculation. Default is \code{T}. See \code{\link[Evapotranspiration]{ReadInputs}}
-#' @param ET.interp_abnormal T or F, indicating if abnormal values should be interpolated for PET calculation. Default is \code{T}. See \code{\link[Evapotranspiration]{ReadInputs}}
+#' @param ET.timestep character string for the evapotranpiration time step. Options are \code{daily},  \code{monthly}, \code{annual} but the options are dependent upon the chosen \code{ET.function}. The default is \code{"monthly"}.
+#' @param ET.missing_method character string for interpolation method for missing variables required for ET calculation. The options are \code{"monthly average"}, \code{"seasonal average"}, \code{"DoY average"} and \code{"neighbouring average"}. Default is \code{"DoY average"} but when the extraction duration is less than two years, the default is \code{"neighbouring average}. See \code{\link[Evapotranspiration]{ReadInputs}}
+#' @param ET.abnormal_method character string for interpolation method for abnormal variables required for ET calculation (e.g. Tmin > Tmax). Options and defaults are as for \code{ET.missing_method}. See \code{\link[Evapotranspiration]{ReadInputs}}
 #' @param ET.constants list of constants from Evapotranspiration package required for ET calculations. To get the data use the command \code{data(constants)}. Default is \code{list()}.
 #'
 #' @return
@@ -158,9 +157,8 @@ extractCatchmentData <- function(
   ET.Mortons.est = 'potential ET',
   ET.Turc.humid=F,
   ET.timestep = 'monthly',
-  ET.interp_missing_days=T,
-  ET.interp_missing_entries=T,
-  ET.interp_abnormal=T,
+  ET.missing_method="DoY average",
+  ET.abnormal_method='DoY average',
   ET.constants=list())  {
 
   # Open NetCDF grids
@@ -297,6 +295,8 @@ extractCatchmentData <- function(
 
     if (DEM.res < 1 || DEM.res>15)
       stop('DEM.res must be a numeric value between 1 anf 15.')
+
+
   }
 
   # Open file with polygons
@@ -470,11 +470,25 @@ extractCatchmentData <- function(
     stop('extractTo date is less than the extractFrom date.')
   }
 
+  message(paste('    Data will be extracted from ',format.Date(extractFrom,'%Y-%m-%d'),' to ', format.Date(extractTo,'%Y-%m-%d'),' at ',length(locations),' locations '));
+
+  # Check ET interpolation methods are appropriate if duration is <2 years
+  if (getET) {
+    if ( (extractTo - extractFrom) < 2*365){
+      if (ET.missing_method!='neighbouring average' || ET.abnormal_method!='neighbouring average' ) {
+        message('    WARNING: The extraction duration is < 2 years and getET = TRUE.');
+        message('             Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".');
+
+        ET.missing_method = "neighbouring average"
+        ET.abnormal_method = "neighbouring average"
+      }
+    }
+  }
+
+  message('Starting data extraction:')
+
   # Recalculate the time points to extract.
   timepoints2Extract = seq( as.Date(extractFrom,'%Y-%m-%d'), by="day", to=as.Date(extractTo,'%Y-%m-%d'))
-
-  message(paste('    Data will be extracted from ',format.Date(extractFrom,'%Y-%m-%d'),' to ', format.Date(extractTo,'%Y-%m-%d'),' at ',length(locations),' locations '));
-  message('Starting data extraction:')
 
   # Get one netCDF layer.
   precipGrd = raster::raster(ncdfFilename, band=nTimePoints, varname='precip',lvar=3)
@@ -742,8 +756,8 @@ extractCatchmentData <- function(
         # Convert to required format for ET package.
         # Note, missing_method changed from NULL to "DoY average" because individual grid cells can be NA. eg
         dataPP=Evapotranspiration::ReadInputs(ET.var.names ,dataRAW,constants=NA,stopmissing = c(99,99,99),
-                                              interp_missing_days=ET.interp_missing_days, interp_missing_entries=ET.interp_missing_entries, interp_abnormal=ET.interp_abnormal,
-                                              missing_method="DoY average", abnormal_method='DoY average', message = "no")
+                                              interp_missing_days=T, interp_missing_entries=T, interp_abnormal=T,
+                                              missing_method=ET.missing_method, abnormal_method=ET.abnormal_method, message = "no")
 
         # Update constants for the site
         ET.constants$Elev = DEMpoints[j]

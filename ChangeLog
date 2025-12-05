@@ -107,3 +107,7 @@ Dec 30 2020
 
 24 Nov 2025
 * Tests added for three OS's (Windows, Ubuntu, Mac) plus badges for each.
+
+5 Nov 2025
+* ET.interp_missing_days, ET.interp_missing_entries and ET.interp_missing_entries removed as inputs and hard coded to TRUE. Done to ensure ET calculations do not crash.
+* ET.missing_method and ET.abnormal_method added as inputs. Defaults to "DoY average" when duration > 2 years, else "neighbouring average" to ensure functionality.
