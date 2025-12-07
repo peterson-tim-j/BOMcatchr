@@ -161,6 +161,9 @@ extractCatchmentData <- function(
   ET.abnormal_method='DoY average',
   ET.constants=list())  {
 
+  # Get system time to estimate run time at the end.
+  sys.start.time = Sys.time()
+
   # Open NetCDF grids
   awap <- ncdf4::nc_open(ncdfFilename)
 
@@ -562,7 +565,8 @@ extractCatchmentData <- function(
   }
 
   # Initialise the outputs
-  precip = matrix(NA,length(timepoints2Extract),length(w.all))
+  ntimepoints2Extract = length(timepoints2Extract)
+  precip = matrix(NA, ntimepoints2Extract,length(w.all))
   tmin =  precip;
   tmax =  precip;
   vprp =  precip;
@@ -573,23 +577,27 @@ extractCatchmentData <- function(
   # Initialise the outputs. NOTE: the matrix is initiliased to have the same
   # number of rows as the non-solar data.
   if (getSolarrad) {
-    solarrad = matrix(NA,length(timepoints2Extract),length(w.all))
+    solarrad = matrix(NA, ntimepoints2Extract,length(w.all))
     extractYear_solar = c();
     extractMonth_solar = c();
     extractDay_solar = c();
   }
 
   message('... Starting to extract data across all locations:')
-  for (j in 1:length(timepoints2Extract)){
 
-    #if (j>=8466)
-    #  browser()
+  # Setup progress bar
+  pbar <- progress::progress_bar$new(
+    format = "    :current of :total  [:bar] :percent in :elapsed",
+    total = ntimepoints2Extract, clear = FALSE, width= 80)
+
+  for (j in 1:ntimepoints2Extract){
+
     # Find index to the date to update within the net CDF grid
     ind = as.integer(difftime(timepoints2Extract[j], as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))+1
 
-    if (j%%(365*5) ==0 ) {
-      message(paste('    ... Extracting data for time point ', j,' of ',length(timepoints2Extract)));
-    }
+    # Update progress bar
+    pbar$tick()
+
     if (getPrecip)
       precip[j,1:length(w.all)]  <- raster::extract(raster::raster(ncdfFilename, band=ind, varname='precip',lvar=3), longLat.all, method=interpMethod)
     if (getTmin)
@@ -700,12 +708,11 @@ extractCatchmentData <- function(
   }
 
   # Loop though each catchment and calculate the catchment average and variance.
-  message('... Calculating catchment weighted daily data.')
-  for (i in 1:length(locations)) {
+  message('... Calculating area weighted daily data.')
 
-    if (j%%100 ==0 ) {
-      message(paste('    ... Calculating location ', i,' of ',length(locations)));
-    }
+  nlocations = length(locations)
+
+  for (i in 1:nlocations) {
 
     # Get the weights for the catchment
     ind = location.lookup[i,1]:location.lookup[i,2]
@@ -716,14 +723,21 @@ extractCatchmentData <- function(
       # Initialise outputa
       mortAPET = matrix(NA,length(timepoints2Extract),length(ind))
 
+      # Setup progress bar
+      message(paste('    Working on ET for location',i,'of',nlocations))
+      pbar <- progress::progress_bar$new(
+        format = "    :current grid cells of :total  [:bar] :percent in :elapsed",
+        total = length(ind), clear = FALSE, width= 80)
+
       # Loop through each grid cell
       k=0;
       for (j in ind) {
 
+        # Update progress bar
+        pbar$tick()
+
+        # Update grid cell counter
         k=k+1
-        if (k==1 || k%%25 ==0 ) {
-          message(paste('           ... Calculating PET for grid cell', k,' of ',length(w)));
-        }
 
         # Check lat, Elev and precip are finite scalers.
         if (any(!is.finite(precip[,j])) || !is.finite(DEMpoints[j]) || !is.finite(longLat.all[j,2])) {
@@ -740,18 +754,6 @@ extractCatchmentData <- function(
         # Build data from of daily climate data
         dataRAW = data.frame(Year =  as.integer(format.Date(timepoints2Extract,"%Y")), Month= as.integer(format.Date(timepoints2Extract,"%m")), Day= as.integer(format.Date(timepoints2Extract,"%d")),
                              Tmin=tmin[,j], Tmax=tmax[,j], Rs=solarrad_interp[,j], va=vprp[,j]/10.0, Precip=precip[,j])
-
-        # # Filter out columns not needed.
-        # if (!ET.inputdata.filt$Tmin)
-        #   dataRAW$Tmin = NULL
-        # if (!ET.inputdata.filt$Tmax)
-        #   dataRAW$Tmax = NULL
-        # if (!ET.inputdata.filt$Rs)
-        #   dataRAW$Rs = NULL
-        # if (!ET.inputdata.filt$va)
-        #   dataRAW$va = NULL
-        # if (!ET.inputdata.filt$Precip)
-        #   dataRAW$Precip = NULL
 
         # Convert to required format for ET package.
         # Note, missing_method changed from NULL to "DoY average" because individual grid cells can be NA. eg
@@ -823,7 +825,6 @@ extractCatchmentData <- function(
     # Calculate catchment stats and add data to the data.frame for all locations
     #----------------------------------------------------------------------------------------
     extractDate = ISOdate(year=extractYear,month=extractMonth,day=extractDay)
-
 
     # Do the temporal aggregation
     #-----------------------------
@@ -1088,6 +1089,7 @@ extractCatchmentData <- function(
     }
   }
 
-  message('Data extraction FINISHED..')
+  message('Data extraction FINISHED.')
+  message(paste('Run time:',  round(Sys.time() - sys.start.time,2)))
   return(catchmentAvg)
 }

@@ -99,6 +99,9 @@ makeNetCDF_file <- function(
   # path <- find.package("AWAPer")
   # system(paste(shQuote(file.path(R.home("bin"), "R")),"CMD", "Rd2pdf", shQuote(path)))
 
+  # Get system time to estimate run time at the end.
+  sys.start.time = Sys.time()
+
   # Check that the ncdf files
   doUpdate = F;
   doUpdate_solar = F;
@@ -384,22 +387,31 @@ makeNetCDF_file <- function(
     if (length(timepoints2Update)==0)
         stop('The dates to update produce a zero vector of dates of zero length. Check the inputs dates are as YYYY-MM-DD')
 
-    message(paste('... NetCDF data will be  updated from ',format.Date(updateFrom,'%Y-%m-%d'),' to ', format.Date(updateTo,'%Y-%m-%d')));
+    message(paste('    NetCDF data will be updated from ',format.Date(updateFrom,'%Y-%m-%d'),' to ', format.Date(updateTo,'%Y-%m-%d')));
 
     # Update the netCDF file time units to give the new dates for data.
     timepoints = seq( as.Date("1900-01-01","%Y-%m-%d"), by="day", to=updateTo)
     ncdf4::nc_redef(ncout)
     timedim <- ncdf4::ncdim_def("time",paste("days since 1900-01-01 00:00:00.0 -0:00. DATA FROM:",updateFrom,'. DATA TO:', updateTo),
                                 unlim=T, vals=0:(length(timepoints)-1), calendar='standard')
+    ntimepoints2Update = length(timepoints2Update)
+
     ncdf4::nc_enddef(ncout)
 
+    # Setup progress bar
+    pbar <- progress::progress_bar$new(
+      format = "    :current of :total  [:bar] :percent in :elapsed",
+      total = ntimepoints2Update, clear = FALSE, width= 80)
+
     # Start Filling the netCDF grid.
-    message('... Starting to add data AWAP netcdf file.')
-    for (date in 1:length(timepoints2Update)){
+    message('... Downloading non-solar data and importing to netcdf file:')
+    for (date in 1:ntimepoints2Update){
+
+      # Update progress bar
+      pbar$tick()
 
       # Get datestring for input filenames
       datestring<-format(timepoints2Update[date], "%Y%m%d")
-      message(paste('    ... Working on grid time point:', format(timepoints2Update[date], "%Y-%m-%d")))
 
       # Find index to the date to update within the net CDF grid
       ind = as.integer(difftime(timepoints2Update[date], as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))+1
@@ -615,23 +627,32 @@ makeNetCDF_file <- function(
     if (length(timepoints2Update)==0)
       stop('The dates to update produce a zero vector of dates of zero length. Check the inputs dates are as YYYY-MM-DD')
 
-    message(paste('... NetCDF Solar data will be  updated from ',format.Date(updateFrom,'%Y-%m-%d'),' to ', format.Date(updateTo,'%Y-%m-%d')));
+    message(paste('    NetCDF Solar data will be updated from ',format.Date(updateFrom,'%Y-%m-%d'),' to ', format.Date(updateTo,'%Y-%m-%d')));
 
     # Update the netCDF file time units to give the new dates for data.
     ncdf4::nc_redef(ncout)
     timedim <- ncdf4::ncdim_def("time",paste("days since 1900-01-01 00:00:00.0 -0:00. DATA FROM:",updateFrom,'. DATA TO:', updateTo),
                                 unlim=T, vals=0:(length(timepoints)-1), calendar='standard')
+    ntimepoints2Update = length(timepoints2Update)
+
     ncdf4::nc_enddef(ncout)
 
-    # Start Filling the netCDF grid.
-    message('... Starting to add data AWAP Solar netcdf file.')
+    # Setup progress bar
+    pbar <- progress::progress_bar$new(
+      format = "    :current of :total  [:bar] :percent in :elapsed",
+      total = ntimepoints2Update, clear = FALSE, width= 80)
 
     # Start Filling the netCDF grid.
-    for (date in 1:length(timepoints2Update)){
+    message('... Downloading solar data and importing to netcdf file:')
+
+    # Start Filling the netCDF grid.
+    for (date in 1:ntimepoints2Update){
+
+      # Update progress bar
+      pbar$tick()
 
       # Get datestring for input filenames
       datestring<-format(timepoints2Update[date], "%Y%m%d")
-      message(paste('    ... Working on solar grid time point:', format(timepoints2Update[date], "%Y-%m-%d")))
 
       # Find index to the date to update within the net CDF grid
       ind = as.integer(difftime(timepoints2Update[date], as.Date("1990-1-1",'%Y-%m-%d'),units = "days" ))+1
@@ -685,6 +706,7 @@ makeNetCDF_file <- function(
   }
 
   message('Data construction FINISHED.')
+  message(paste('Run time:',  round(Sys.time() - sys.start.time,2)))
   return(list(ncdfFilename=ncdfFilename, ncdfSolarFilename = ncdfSolarFilename))
 
 }
