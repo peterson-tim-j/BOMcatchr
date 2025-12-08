@@ -1,0 +1,120 @@
+# *AWAPer* - an R-package for catchment-weighted climate data anywhere in Australia
+
+This R package builds netCDF files of the Bureau of Meteorology
+Australian Water Availability Project daily national climate grids and
+allows efficient extraction of daily, weekly, monthly, quarterly or
+annual catchment average precipitation, Tmin, Tmax, vapour pressure,
+solar radiation and then estimation of various measures of potential
+evaporation.
+
+The package development was funded by the Victorian Government The
+Department of Environment, Land, Water and Planning *Climate and Water
+Initiate*
+(<https://www.water.vic.gov.au/climate-change/research/vicwaci>).
+
+For details of the approach see the paper “Peterson, Tim J, Wasko, C,
+Saft, M, Peel, MC. AWAPer: An R package for area weighted catchment
+daily meteorological data anywhere within Australia. *Hydrological
+Processes*. 2020; 34: 1301– 1306. <https://doi.org/10.1002/hyp.13637>”.
+
+Using the default compression settings, each meteorological variable
+requires ~5GB of hard-drive storage for the full record (1900 to 2019).
+Additionally, the netCDF files should be stored locally, and not over a
+network, to minimise the time for data extraction. Below are details of
+the system requirements, how to install AWAPer and the following
+examples: 1. Building and updating the required netCDF files (![see
+here](https://github.com/peterson-tim-j/AWAPer#example-1-build-netcdf-files)) 1.
+Extract and check daily point precipitation data against rain gauge
+observations (![see
+here](https://github.com/peterson-tim-j/AWAPer#example-2-extract-point-precip-data-and-check-with-osberved-data)) 1.
+Extract daily areal weighted precipitation and calculate two measures of
+ET (![see
+here](https://github.com/peterson-tim-j/AWAPer#example-3-calculate-precip-and-evapotranspiration)) 1.
+Calculate all measures of ET possible with AWAPer (![see
+here](https://github.com/peterson-tim-j/AWAPer#example-4-calculate-evapotranspiration))
+
+# System Requiements
+
+On Windows OS only the program “7z” is required to uzip the “.Z”
+compressed grid files. Follow the steps below to download and install
+7z.
+
+1.  Download and intall 7z from <https://www.7-zip.org/download.html>
+2.  Click “Search Windows”, search “Edit environmental variables for
+    your account” and click on it.
+3.  In the “User variables” window, select the “Path”, and click
+    “Edit…”.
+4.  In the “Edit environmental variable” window, click “New”.
+5.  Paste the path to the 7zip application folder, and click OK.
+6.  Restart Windows.
+7.  Check the setup by opening the “Command Prompt” and enter the
+    command “7z”. If 7z is correctly setup, output details such as the
+    version, descriptions of commands, etc should be shown.’)
+
+# Getting Started
+
+The package will soon be submitted to the R library (i.e. CRAN). In the
+meantime, you can install it from github using the following R command:
+
+``` r
+remotes::install_github("peterson-tim-j/AWAPer")
+```
+
+Once installed, browse the package examples using the R-command:
+
+``` r
+browseVignettes("AWAPer")
+```
+
+# Package index
+
+## All functions
+
+- [`catchments`](https://peterson-tim-j.github.io/AWAPer/reference/catchments.md)
+  : Example catchment boundary polygons.
+
+- [`extractCatchmentData()`](https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.md)
+  :
+
+  `extractCatchmentData` extracts catchment average climate data from
+  netCDF files containing Australian climate data.
+
+- [`getURLs()`](https://peterson-tim-j.github.io/AWAPer/reference/getURLs.md)
+  : Get default URLs for loading data.
+
+- [`makeNetCDF_file()`](https://peterson-tim-j.github.io/AWAPer/reference/makeNetCDF_file.md)
+  : Build netCDF files of the Bureau of Meteorology (Australia) national
+  gridded climate data.
+
+# Articles
+
+### All vignettes
+
+- [Make source data
+  grids](https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.md):
+
+  This vignette shows how to build the netCDF data file and then update
+  it to new start and end dates.
+
+- [Extract daily point
+  precipitation](https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.md):
+
+  This vignette shows how to build a netCDF AWAP data file and then
+  extract the point precipitation data at a few locations over a usr
+  defined period. The extracted data is then compared with precipitation
+  gauge data.
+
+- [Extract daily area weighted potential PET and precipitation and
+  map](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.md):
+
+  This vignette shows how to build the netCDF data file and then extract
+  the area weighted PET and precipitation data for a catchment over a
+  user defined period. The errors introduced from not using area
+  weighted methods (e.g centrod) are then demonstrated. output:
+  rmarkdown::html_vignette
+
+- [Extract various measures of
+  evapotranspiration](https://peterson-tim-j.github.io/AWAPer/articles/D_Catchment_avg_ET_types.md):
+
+  This vignette shows how to estimate various measures of the area
+  weighted evapotranspiration.
