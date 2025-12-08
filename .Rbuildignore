@@ -1,7 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 AWAPer.pdf
-^\vignettes\.Rnw$
+^\.Rnw$
 ^\.RData$
 ^LICENSE\.md$
 build_commands.R
