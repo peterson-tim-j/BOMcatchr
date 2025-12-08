@@ -706,7 +706,12 @@ makeNetCDF_file <- function(
   }
 
   message('Data construction FINISHED.')
-  message(paste('Run time:',  round(Sys.time() - sys.start.time,2)))
+  duration <- difftime(Sys.time(), sys.start.time, units="secs")
+  x <- abs(as.numeric(duration))
+  message(sprintf("Total run time (DD:HH:MM:SS): %02d:%02d:%02d:%02d",
+            x %/% 86400,  x %% 86400 %/%
+            3600, x %% 3600 %/% 60,  x %% 60 %/% 1))
+
   return(list(ncdfFilename=ncdfFilename, ncdfSolarFilename = ncdfSolarFilename))
 
 }
