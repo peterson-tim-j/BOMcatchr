@@ -13,6 +13,7 @@ library(rmarkdown)
 knitr::knit("vignettes/A_Make_data_grids.Rnw", output = "vignettes/A_Make_data_grids.Rmd")
 knitr::knit("vignettes/B_Point_rainfall.Rnw", output = "vignettes/B_Point_rainfall.Rmd")
 knitr::knit("vignettes/C_Catchment_avg_ET_rainfall.Rnw", output = "vignettes/C_Catchment_avg_ET_rainfall.Rmd")
+knitr::knit("vignettes/D_Catchment_avg_ET_types.Rnw", output = "vignettes/D_Catchment_avg_ET_types.Rmd")
 browseVignettes("AWAPer")
 
 # Build the pavkage for CRAN
