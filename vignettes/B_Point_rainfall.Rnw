@@ -66,7 +66,9 @@ climateData.data = extractCatchmentData(ncdfFilename=ncdfFilename,
 ## Plot the daily precipitation at each site
 Plot time series of the etracted daily precipitation.
 
-```{r, fig.width= 8, fig.heght=6}
+```{r}
+#| fig.width = 6,
+#| fig.height = 6
 for (i in 1:nrow(coordinates.data)){
   filt = climateData.data$CatchmentID.ID == coordinates.data$ID[i]
 
@@ -103,19 +105,22 @@ Now let's compare the extracted rainfall against the gauge rainfall data.
 
 The left plot shows that the gauge and extracted data plot along the 1:1. This shows that the extracted data is unbiased. The scatter does, however, show that there is some difference in the estimates. This arises because the source grids are at a 0.05 degree resolution, or about 5 km x 5 km, and this introduces some error with the gauge is not at the centre of the grid cell and the location to be extracted is not also at the centre.
 
-```{r, fig.width= 8, fig.heght=6}
+```{r}
+#| fig.width = 8,
+#| fig.height = 4
 par(mfrow = c(1, 2))
 
 filt2 = climateData.data$CatchmentID.ID=='Rain-63005'
 plot(obsPrecip$precip_mm,climateData.data$precip_mm[filt2],
      xlim = c(0,35),ylim = c(0,35),
      main='Obs. vs. AWAPer precip.',
-     xlab='Obs. [mm/d]', ylab='AWAPer [mm/d]', cex=0.2)
+     xlab='Obs. [mm/d]', ylab='AWAPer [mm/d]', cex=1)
+
 abline(0,1, col='grey', lty=2)
 
 plot(cumsum(obsPrecip$precip_mm),cumsum(climateData.data$precip_mm[filt2]),
      xlim = c(0,175),ylim = c(0,175),
      main='Cum. obs. vs. AWAPer precip.',
-     xlab='Obs. [mm]', ylab='AWAPer [mm]', type='l', cex=0.2)
+     xlab='Obs. [mm]', ylab='AWAPer [mm]', type='l', cex=1)
 abline(0,1, col='grey', lty=2)
 ```
