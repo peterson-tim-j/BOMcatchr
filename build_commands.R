@@ -16,5 +16,8 @@ knitr::knit("vignettes/C_Catchment_avg_ET_rainfall.Rnw", output = "vignettes/C_C
 knitr::knit("vignettes/D_Catchment_avg_ET_types.Rnw", output = "vignettes/D_Catchment_avg_ET_types.Rmd")
 browseVignettes("AWAPer")
 
+# devtools checks added
+devtools::check('C:/Users/tpet0008/Documents/AWAPer',args=c("--no-examples"))
+
 # Build the pavkage for CRAN
 devtools::build(".")

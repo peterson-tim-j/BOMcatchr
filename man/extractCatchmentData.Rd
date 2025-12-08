@@ -25,9 +25,8 @@ extractCatchmentData(
   ET.Mortons.est = "potential ET",
   ET.Turc.humid = F,
   ET.timestep = "monthly",
-  ET.interp_missing_days = T,
-  ET.interp_missing_entries = T,
-  ET.interp_abnormal = T,
+  ET.missing_method = "DoY average",
+  ET.abnormal_method = "DoY average",
   ET.constants = list()
 )
 }
@@ -74,27 +73,25 @@ is \code{''}. This will set the interpolation to \code{'simple'} when \code{loca
 \code{\link[Evapotranspiration]{ET.HargreavesSamani}}, \code{\link[Evapotranspiration]{ET.JensenHaise}}, \code{\link[Evapotranspiration]{ET.Makkink}}, \code{\link[Evapotranspiration]{ET.McGuinnessBordne}}, \code{\link[Evapotranspiration]{ET.MortonCRAE}} ,
 \code{\link[Evapotranspiration]{ET.MortonCRWE}}, \code{\link[Evapotranspiration]{ET.Turc}}. Default is \code{\link[Evapotranspiration]{ET.MortonCRAE}}.}
 
-\item{ET.Mortons.est}{character string for the type of Mortons Et estimate. For \code{ET.MortonCRAE}, the options are \code{potential ET},\code{wet areal ET} or \code{actual areal ET}.
+\item{ET.Mortons.est}{character string for the type of Morton's ET estimate. For \code{ET.MortonCRAE}, the options are \code{potential ET},\code{wet areal ET} or \code{actual areal ET}.
 For \code{ET.MortonCRWE}, the options are \code{potential ET} or \code{shallow lake ET}. The default is \code{potential ET}.}
 
 \item{ET.Turc.humid}{logical variable for the Turc function using the humid adjustment.See \code{\link[Evapotranspiration]{ET.Turc}}. For now this is fixed at \code{F}.}
 
-\item{ET.timestep}{character string for the evapotranpiration time step. Options are \code{daily},  \code{monthly}, \code{annual} but the options are dependent upon the chosen \code{ET.function}. The default is \code{monthly}.}
+\item{ET.timestep}{character string for the evapotranpiration time step. Options are \code{daily},  \code{monthly}, \code{annual} but the options are dependent upon the chosen \code{ET.function}. The default is \code{'monthly'}.}
 
-\item{ET.interp_missing_days}{T or F, indicating if missing days should be interpolated for PET calculation. Default is \code{T}. See \code{\link[Evapotranspiration]{ReadInputs}}}
+\item{ET.missing_method}{character string for interpolation method for missing variables required for ET calculation. The options are \code{'monthly average'}, \code{'seasonal average'}, \code{'DoY average'} and \code{'neighbouring average'}. Default is \code{'DoY average'} but when the extraction duration is less than two years, the default is \code{'neighbouring average'}. See \code{\link[Evapotranspiration]{ReadInputs}}}
 
-\item{ET.interp_missing_entries}{T or F, indicating if missing data entries should be interpolated for PET calculation. Default is \code{T}. See \code{\link[Evapotranspiration]{ReadInputs}}}
-
-\item{ET.interp_abnormal}{T or F, indicating if abnormal valuses should be interpolated for PET calculation. Default is \code{T}. See \code{\link[Evapotranspiration]{ReadInputs}}}
+\item{ET.abnormal_method}{character string for interpolation method for abnormal variables required for ET calculation (e.g. Tmin > Tmax). Options and defaults are as for \code{ET.missing_method}. See \code{\link[Evapotranspiration]{ReadInputs}}}
 
 \item{ET.constants}{list of constants from Evapotranspiration package required for ET calculations. To get the data use the command \code{data(constants)}. Default is \code{list()}.}
 }
 \value{
-When \code{locations} are polygons and \code{spatial.function.name} is not \code{NA} or \code{""}, then the returned variable is a list variable containing two data.frames. The first is the areal aggreggated climate
+When \code{locations} are polygons and \code{spatial.function.name} is not \code{NA} or \code{""}, then the returned variable is a list variable containing two data.frames. The first is the areal aggregated climate
 metrics named \code{catchmentTemporal.} with a suffix as defined by \code{temporal.function.name}). The second is the measure of spatial variability
 named \code{catchmentSpatial.} with a suffix as defined by \code{spatial.function.name}).
 
-When \code{locations} are polygons and \code{spatial.function.name} does equal \code{NA} or \code{""}, then the returned variable is a \code{sp::SpatialPixelsDataFrame} where the first colum is the location/catchmet IDs
+When \code{locations} are polygons and \code{spatial.function.name} does equal \code{NA} or \code{""}, then the returned variable is a \code{sp::SpatialPixelsDataFrame} where the first column is the location/catchment IDs
 and the latter columns are the results for each variable at each time point as defined by \code{temporal.timestep}.
 
 When \code{locations} are points, the returned variable is a data.frame containing daily climate data at each point.

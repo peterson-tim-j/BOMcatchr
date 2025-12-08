@@ -27,7 +27,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    progress
 VignetteBuilder: knitr
 BugReports: https://github.com/peterson-tim-j/AWAPer/issues
 URL: https://github.com/peterson-tim-j/AWAPer

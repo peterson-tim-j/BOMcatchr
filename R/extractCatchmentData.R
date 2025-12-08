@@ -68,17 +68,17 @@
 #' @param ET.Mortons.est character string for the type of Morton's ET estimate. For \code{ET.MortonCRAE}, the options are \code{potential ET},\code{wet areal ET} or \code{actual areal ET}.
 #'  For \code{ET.MortonCRWE}, the options are \code{potential ET} or \code{shallow lake ET}. The default is \code{potential ET}.
 #' @param ET.Turc.humid logical variable for the Turc function using the humid adjustment.See \code{\link[Evapotranspiration]{ET.Turc}}. For now this is fixed at \code{F}.
-#' @param ET.timestep character string for the evapotranpiration time step. Options are \code{daily},  \code{monthly}, \code{annual} but the options are dependent upon the chosen \code{ET.function}. The default is \code{"monthly"}.
-#' @param ET.missing_method character string for interpolation method for missing variables required for ET calculation. The options are \code{"monthly average"}, \code{"seasonal average"}, \code{"DoY average"} and \code{"neighbouring average"}. Default is \code{"DoY average"} but when the extraction duration is less than two years, the default is \code{"neighbouring average}. See \code{\link[Evapotranspiration]{ReadInputs}}
+#' @param ET.timestep character string for the evapotranpiration time step. Options are \code{daily},  \code{monthly}, \code{annual} but the options are dependent upon the chosen \code{ET.function}. The default is \code{'monthly'}.
+#' @param ET.missing_method character string for interpolation method for missing variables required for ET calculation. The options are \code{'monthly average'}, \code{'seasonal average'}, \code{'DoY average'} and \code{'neighbouring average'}. Default is \code{'DoY average'} but when the extraction duration is less than two years, the default is \code{'neighbouring average'}. See \code{\link[Evapotranspiration]{ReadInputs}}
 #' @param ET.abnormal_method character string for interpolation method for abnormal variables required for ET calculation (e.g. Tmin > Tmax). Options and defaults are as for \code{ET.missing_method}. See \code{\link[Evapotranspiration]{ReadInputs}}
 #' @param ET.constants list of constants from Evapotranspiration package required for ET calculations. To get the data use the command \code{data(constants)}. Default is \code{list()}.
 #'
 #' @return
-#' When \code{locations} are polygons and \code{spatial.function.name} is not \code{NA} or \code{""}, then the returned variable is a list variable containing two data.frames. The first is the areal aggreggated climate
+#' When \code{locations} are polygons and \code{spatial.function.name} is not \code{NA} or \code{""}, then the returned variable is a list variable containing two data.frames. The first is the areal aggregated climate
 #' metrics named \code{catchmentTemporal.} with a suffix as defined by \code{temporal.function.name}). The second is the measure of spatial variability
 #' named \code{catchmentSpatial.} with a suffix as defined by \code{spatial.function.name}).
 #'
-#' When \code{locations} are polygons and \code{spatial.function.name} does equal \code{NA} or \code{""}, then the returned variable is a \code{sp::SpatialPixelsDataFrame} where the first colum is the location/catchmet IDs
+#' When \code{locations} are polygons and \code{spatial.function.name} does equal \code{NA} or \code{""}, then the returned variable is a \code{sp::SpatialPixelsDataFrame} where the first column is the location/catchment IDs
 #' and the latter columns are the results for each variable at each time point as defined by \code{temporal.timestep}.
 #'
 #' When \code{locations} are points, the returned variable is a data.frame containing daily climate data at each point.
@@ -166,7 +166,7 @@ extractCatchmentData <- function(
 
   # Check ncdfFilename file exist
   if (!file.exists(ncdfFilename))
-    stop(paste('The following ncdfFilename input data file could not be found:',ncdfFilename))
+    stop(paste("The following ncdfFilename input data file could not be found:",ncdfFilename))
 
   # Open NetCDF grids
   awap <- ncdf4::nc_open(ncdfFilename)
