@@ -164,6 +164,10 @@ extractCatchmentData <- function(
   # Get system time to estimate run time at the end.
   sys.start.time = Sys.time()
 
+  # Check ncdfFilename file exist
+  if (!file.exists(ncdfFilename))
+    stop(paste('The following ncdfFilename input data file could not be found:',ncdfFilename))
+
   # Open NetCDF grids
   awap <- ncdf4::nc_open(ncdfFilename)
 
@@ -299,7 +303,8 @@ extractCatchmentData <- function(
     if (DEM.res < 1 || DEM.res>15)
       stop('DEM.res must be a numeric value between 1 anf 15.')
 
-
+    if (!file.exists(ncdfSolarFilename))
+      stop(paste('The following ncdfSolarFilename input data file could not be found:',ncdfSolarFilename))
   }
 
   # Open file with polygons
@@ -1090,6 +1095,11 @@ extractCatchmentData <- function(
   }
 
   message('Data extraction FINISHED.')
-  message(paste('Run time:',  round(Sys.time() - sys.start.time,2)))
+  duration <- difftime(Sys.time(), sys.start.time, units="secs")
+  x <- abs(as.numeric(duration))
+  message(sprintf("Total run time (DD:HH:MM:SS): %02d:%02d:%02d:%02d",
+                  x %/% 86400,  x %% 86400 %/%
+                    3600, x %% 3600 %/% 60,  x %% 60 %/% 1))
+
   return(catchmentAvg)
 }
