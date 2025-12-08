@@ -6,3 +6,6 @@ AWAPer.pdf
 ^LICENSE\.md$
 build_commands.R
 ^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
