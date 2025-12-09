@@ -15,7 +15,8 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/AWAPer.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/A_Make_data_grids.html">Make source data grids</a></li>
@@ -23,6 +24,7 @@
     <li><a class="dropdown-item" href="../articles/C_Catchment_avg_ET_rainfall.html">Extract daily area weighted potential PET and precipitation and map</a></li>
     <li><a class="dropdown-item" href="../articles/D_Catchment_avg_ET_types.html">Extract various measures of evapotranspiration</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/peterson-tim-j/AWAPer/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -185,7 +187,7 @@ Australian Meteorological and Oceanographic Journal, 58 , p233-248.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     NetCDF Solar data will be updated from  2025-11-23  to  2025-12-03</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ... Downloading solar data and importing to netcdf file:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Data construction FINISHED.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Total run time (DD:HH:MM:SS): 00:00:00:50</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Total run time (DD:HH:MM:SS): 00:00:00:57</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Now, to demonstrate updating the netCDF grids to one day ago, rerun with</span></span></span>
 <span class="r-in"><span><span class="co"># the same file names but \code{updateFrom=NA}.</span></span></span>
@@ -202,12 +204,12 @@ Australian Meteorological and Oceanographic Journal, 58 , p233-248.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ... Testing downloading of AWAP solar grid</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ... Getting grid gemoetry from file.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ... Deleting /home/runner/work/AWAPer/AWAPer/docs/reference/solarrad.20000101.grid.gz</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     NetCDF data will be updated from  2025-12-03  to  2025-12-06</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     NetCDF data will be updated from  2025-12-03  to  2025-12-07</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ... Downloading non-solar data and importing to netcdf file:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     NetCDF Solar data will be updated from  2025-12-03  to  2025-12-06</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     NetCDF Solar data will be updated from  2025-12-03  to  2025-12-07</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ... Downloading solar data and importing to netcdf file:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Data construction FINISHED.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Total run time (DD:HH:MM:SS): 00:00:00:18</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Total run time (DD:HH:MM:SS): 00:00:00:31</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span> <span class="co"># Remove temp. files</span></span></span>
 <span class="r-in"><span> <span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">ncdfFilename</span><span class="op">)</span></span></span>
@@ -220,7 +222,7 @@ Australian Meteorological and Oceanographic Journal, 58 , p233-248.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Tim Peterson.</p>
+  <p>Developed by Tim Peterson, Conrad Wasko.</p>
 </div>
 
 <div class="pkgdown-footer-right">

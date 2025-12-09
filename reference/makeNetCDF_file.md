@@ -167,7 +167,7 @@ file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
 #>     NetCDF Solar data will be updated from  2025-11-23  to  2025-12-03
 #> ... Downloading solar data and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:50
+#> Total run time (DD:HH:MM:SS): 00:00:00:57
 
 # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 # the same file names but \code{updateFrom=NA}.
@@ -184,12 +184,12 @@ file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
 #> ... Testing downloading of AWAP solar grid
 #> ... Getting grid gemoetry from file.
 #> ... Deleting /home/runner/work/AWAPer/AWAPer/docs/reference/solarrad.20000101.grid.gz
-#>     NetCDF data will be updated from  2025-12-03  to  2025-12-06
+#>     NetCDF data will be updated from  2025-12-03  to  2025-12-07
 #> ... Downloading non-solar data and importing to netcdf file:
-#>     NetCDF Solar data will be updated from  2025-12-03  to  2025-12-06
+#>     NetCDF Solar data will be updated from  2025-12-03  to  2025-12-07
 #> ... Downloading solar data and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:18
+#> Total run time (DD:HH:MM:SS): 00:00:00:31
 
  # Remove temp. files
  unlink(ncdfFilename)

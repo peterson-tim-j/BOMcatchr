@@ -3,10 +3,11 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   A_Make_data_grids: A_Make_data_grids.html
+  AWAPer: AWAPer.html
   B_Point_rainfall: B_Point_rainfall.html
   C_Catchment_avg_ET_rainfall: C_Catchment_avg_ET_rainfall.html
   D_Catchment_avg_ET_types: D_Catchment_avg_ET_types.html
-last_built: 2025-12-08T07:10Z
+last_built: 2025-12-08T23:58Z
 urls:
   reference: https://peterson-tim-j.github.io/AWAPer/reference
   article: https://peterson-tim-j.github.io/AWAPer/articles

@@ -69,7 +69,7 @@ fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
 #>     NetCDF Solar data will be updated from  2010-07-01  to  2010-10-31
 #> ... Downloading solar data and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:08:59
+#> Total run time (DD:HH:MM:SS): 00:00:11:11
 ```
 
 ## Load a catchment boundary
@@ -144,7 +144,7 @@ climateData.daily = extractCatchmentData(ncdfFilename=ncdfFilename,
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:29
+#> Total run time (DD:HH:MM:SS): 00:00:00:27
 ```
 
 Next time series of the extracted daily precipitation and PET for each
@@ -293,7 +293,7 @@ metData.monthly = extractCatchmentData(ncdfFilename=ncdfFilename,
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:29
+#> Total run time (DD:HH:MM:SS): 00:00:00:27
 ```
 
 The monthly total PET can then be mapped to show the spatial
@@ -396,7 +396,7 @@ metData.monthly.weighted = extractCatchmentData(ncdfFilename=ncdfFilename,
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:29
+#> Total run time (DD:HH:MM:SS): 00:00:00:27
 
 metData.monthly.centroid = extractCatchmentData(ncdfFilename=ncdfFilename,
                      ncdfSolarFilename=ncdfSolarFilename,
@@ -425,7 +425,7 @@ metData.monthly.centroid = extractCatchmentData(ncdfFilename=ncdfFilename,
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:25
+#> Total run time (DD:HH:MM:SS): 00:00:00:23
 ```
 
 Now let’s compare the two estimates of precipitation, PET and rainfall

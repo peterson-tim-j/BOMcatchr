@@ -46,12 +46,12 @@ makeNetCDF_file(ncdfFilename = ncdfFilename,
 #> ... Downloading solar data and importing to netcdf file:
 #> Syncing 365 days of data to netCDF file. The time point to be synched is: 2010-12-31
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:26:21
+#> Total run time (DD:HH:MM:SS): 00:00:33:20
 #> $ncdfFilename
-#> [1] "/tmp/RtmpzGMmEa/file67655ae21b02.nc"
+#> [1] "/tmp/RtmpI6rj84/file68361f0e24dc.nc"
 #> 
 #> $ncdfSolarFilename
-#> [1] "/tmp/RtmpzGMmEa/file676531b7f1f0.nc"
+#> [1] "/tmp/RtmpI6rj84/file6836371979fc.nc"
 ```
 
 ## Load a catchment boundary
@@ -108,7 +108,7 @@ climateData.ET.HargreavesSamani = extractCatchmentData(ncdfFilename= ncdfFilenam
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:11
+#> Total run time (DD:HH:MM:SS): 00:00:01:08
 
 climateData.ET.JensenHaise = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 ncdfSolarFilename= ncdfSolarFilename,
@@ -137,7 +137,7 @@ climateData.ET.JensenHaise = extractCatchmentData(ncdfFilename= ncdfFilename,
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:11
+#> Total run time (DD:HH:MM:SS): 00:00:01:08
 
 climateData.ET.Makkink = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 ncdfSolarFilename= ncdfSolarFilename,
@@ -166,7 +166,7 @@ climateData.ET.Makkink = extractCatchmentData(ncdfFilename= ncdfFilename,
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:11
+#> Total run time (DD:HH:MM:SS): 00:00:01:08
 
 climateData.ET.McGuinnessBordne = extractCatchmentData(ncdfFilename= ncdfFilename,
                                ncdfSolarFilename= ncdfSolarFilename,
@@ -195,7 +195,7 @@ climateData.ET.McGuinnessBordne = extractCatchmentData(ncdfFilename= ncdfFilenam
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:14
+#> Total run time (DD:HH:MM:SS): 00:00:01:09
 
 climateData.ET.MortonCRAE = extractCatchmentData(ncdfFilename= ncdfFilename,
                                ncdfSolarFilename= ncdfSolarFilename,
@@ -224,7 +224,7 @@ climateData.ET.MortonCRAE = extractCatchmentData(ncdfFilename= ncdfFilename,
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:18
+#> Total run time (DD:HH:MM:SS): 00:00:01:12
 
 climateData.ET.MortonCRAE.potentialET = extractCatchmentData(ncdfFilename= ncdfFilename,
                                ncdfSolarFilename= ncdfSolarFilename,
@@ -254,7 +254,7 @@ climateData.ET.MortonCRAE.potentialET = extractCatchmentData(ncdfFilename= ncdfF
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:17
+#> Total run time (DD:HH:MM:SS): 00:00:01:12
 
 climateData.ET.MortonCRAE.wetarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 ncdfSolarFilename= ncdfSolarFilename,
@@ -284,7 +284,7 @@ climateData.ET.MortonCRAE.wetarealET = extractCatchmentData(ncdfFilename= ncdfFi
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:16
+#> Total run time (DD:HH:MM:SS): 00:00:01:12
 
 climateData.ET.MortonCRAE.actualarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
                                  ncdfSolarFilename= ncdfSolarFilename,
@@ -314,7 +314,7 @@ climateData.ET.MortonCRAE.actualarealET = extractCatchmentData(ncdfFilename= ncd
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:17
+#> Total run time (DD:HH:MM:SS): 00:00:01:12
 
 climateData.ET.MortonCRWE = extractCatchmentData(ncdfFilename= ncdfFilename,
                                  ncdfSolarFilename= ncdfSolarFilename,
@@ -343,7 +343,7 @@ climateData.ET.MortonCRWE = extractCatchmentData(ncdfFilename= ncdfFilename,
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:17
+#> Total run time (DD:HH:MM:SS): 00:00:01:12
 
 climateData.ET.MortonCRWE.shallowLake = extractCatchmentData(ncdfFilename= ncdfFilename,
                                  ncdfSolarFilename= ncdfSolarFilename,
@@ -373,7 +373,7 @@ climateData.ET.MortonCRWE.shallowLake = extractCatchmentData(ncdfFilename= ncdfF
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:16
+#> Total run time (DD:HH:MM:SS): 00:00:01:12
 
 climateData.ET.Turc = extractCatchmentData(ncdfFilename= ncdfFilename,
                                  ncdfSolarFilename= ncdfSolarFilename,
@@ -402,7 +402,7 @@ climateData.ET.Turc = extractCatchmentData(ncdfFilename= ncdfFilename,
 #>     Working on ET for location 1 of 2
 #>     Working on ET for location 2 of 2
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:14
+#> Total run time (DD:HH:MM:SS): 00:00:01:09
 ```
 
 Next each estimate is plotted over time.

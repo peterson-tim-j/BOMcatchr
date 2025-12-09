@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/404.html</loc></url>
+<url><loc>https://peterson-tim-j.github.io/AWAPer/articles/AWAPer.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html</loc></url>
@@ -7,6 +8,7 @@
 <url><loc>https://peterson-tim-j.github.io/AWAPer/articles/index.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/authors.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/index.html</loc></url>
+<url><loc>https://peterson-tim-j.github.io/AWAPer/news/index.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/reference/catchments.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/reference/download.ASCII.file.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.html</loc></url>

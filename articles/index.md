@@ -8,6 +8,12 @@
   This vignette shows how to build the netCDF data file and then update
   it to new start and end dates.
 
+- [Gettings started with
+  AWAPer](https://peterson-tim-j.github.io/AWAPer/articles/AWAPer.md):
+
+  This vignette outlines the key steps of building the netCDF data and
+  then extracting data.
+
 - [Extract daily point
   precipitation](https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.md):
 

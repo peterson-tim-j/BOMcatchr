@@ -5,8 +5,7 @@
 - **Tim Peterson**. Author, maintainer.
   [](https://orcid.org/0000-0002-1885-0826)
 
-- **Conrad Wasko**. Contributor.
-  [](https://orcid.org/0000-0002-9166-8289)
+- **Conrad Wasko**. Author. [](https://orcid.org/0000-0002-9166-8289)
 
 ## Citation
 

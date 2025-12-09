@@ -52,12 +52,12 @@ file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
 #> ... Getting grid gemoetry from file.
 #> ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/solarrad.20000101.grid.gz
 #> ... Building AWAP netcdf file.
-#>     NetCDF data will be updated from  2025-11-23  to  2025-12-03
+#>     NetCDF data will be updated from  2025-11-24  to  2025-12-04
 #> ... Downloading non-solar data and importing to netcdf file:
-#>     NetCDF Solar data will be updated from  2025-11-23  to  2025-12-03
+#>     NetCDF Solar data will be updated from  2025-11-24  to  2025-12-04
 #> ... Downloading solar data and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:50
+#> Total run time (DD:HH:MM:SS): 00:00:01:13
 ```
 
 ## Update existing data grids
@@ -88,10 +88,10 @@ file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
 #> ... Testing downloading of AWAP solar grid
 #> ... Getting grid gemoetry from file.
 #> ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/solarrad.20000101.grid.gz
-#>     NetCDF data will be updated from  2025-12-03  to  2025-12-06
+#>     NetCDF data will be updated from  2025-12-04  to  2025-12-07
 #> ... Downloading non-solar data and importing to netcdf file:
-#>     NetCDF Solar data will be updated from  2025-12-03  to  2025-12-06
+#>     NetCDF Solar data will be updated from  2025-12-04  to  2025-12-07
 #> ... Downloading solar data and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:17
+#> Total run time (DD:HH:MM:SS): 00:00:00:26
 ```

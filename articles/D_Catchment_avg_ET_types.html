@@ -33,6 +33,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/AWAPer.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -43,6 +44,7 @@
     <li><a class="dropdown-item" href="../articles/D_Catchment_avg_ET_types.html">Extract various measures of evapotranspiration</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -110,12 +112,12 @@ file names.</p>
 <span><span class="co">#&gt; ... Downloading solar data and importing to netcdf file:</span></span>
 <span><span class="co">#&gt; Syncing 365 days of data to netCDF file. The time point to be synched is: 2010-12-31</span></span>
 <span><span class="co">#&gt; Data construction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:26:21</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:33:20</span></span>
 <span><span class="co">#&gt; $ncdfFilename</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpzGMmEa/file67655ae21b02.nc"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmpI6rj84/file68361f0e24dc.nc"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $ncdfSolarFilename</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpzGMmEa/file676531b7f1f0.nc"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/RtmpI6rj84/file6836371979fc.nc"</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="load-a-catchment-boundary">Load a catchment boundary<a class="anchor" aria-label="anchor" href="#load-a-catchment-boundary"></a>
 </h2>
@@ -166,7 +168,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:11</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
 <span></span>
 <span><span class="va">climateData.ET.JensenHaise</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
@@ -195,7 +197,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:11</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
 <span></span>
 <span><span class="va">climateData.ET.Makkink</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
@@ -224,7 +226,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:11</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
 <span></span>
 <span><span class="va">climateData.ET.McGuinnessBordne</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                               ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
@@ -253,7 +255,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:14</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:09</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRAE</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                               ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
@@ -282,7 +284,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:18</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRAE.potentialET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                               ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
@@ -312,7 +314,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:17</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRAE.wetarealET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
@@ -342,7 +344,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:16</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRAE.actualarealET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                 ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
@@ -372,7 +374,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:17</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRWE</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                 ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
@@ -401,7 +403,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:17</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRWE.shallowLake</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                 ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
@@ -431,7 +433,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:16</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
 <span></span>
 <span><span class="va">climateData.ET.Turc</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                 ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
@@ -460,7 +462,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:14</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:09</span></span></code></pre></div>
 <p>Next each estimate is plotted over time.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
@@ -557,7 +559,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Tim Peterson.</p>
+  <p>Developed by Tim Peterson, Conrad Wasko.</p>
 </div>
 
 <div class="pkgdown-footer-right">

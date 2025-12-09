@@ -300,7 +300,7 @@ file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
 #> ... Downloading non-solar data and importing to netcdf file:
 #> Warning: Note, the solar radiation data netCDF file will not be built or updated.
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:10
+#> Total run time (DD:HH:MM:SS): 00:00:00:12
 
 # Load example catchment boundaries and remove all but the first.
 # Note, this is done only to speed up the example runtime.

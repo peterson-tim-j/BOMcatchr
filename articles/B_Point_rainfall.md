@@ -51,7 +51,7 @@ fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
 #> as.Date("2010-08-01", : Note, the solar radiation data netCDF file will not be
 #> built or updated.
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:33
+#> Total run time (DD:HH:MM:SS): 00:00:00:45
 ```
 
 ## Set the points for data extraction
@@ -95,7 +95,7 @@ climateData.data = extractCatchmentData(ncdfFilename=ncdfFilename,
 #> ... Starting to extract data across all locations:
 #> ... Calculating area weighted daily data.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:06
+#> Total run time (DD:HH:MM:SS): 00:00:00:05
 ```
 
 ## Plot the daily precipitation at each site

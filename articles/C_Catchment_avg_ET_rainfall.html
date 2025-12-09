@@ -33,6 +33,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/AWAPer.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -43,6 +44,7 @@
     <li><a class="dropdown-item" href="../articles/D_Catchment_avg_ET_types.html">Extract various measures of evapotranspiration</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -132,7 +134,7 @@ file names.</p>
 <span><span class="co">#&gt;     NetCDF Solar data will be updated from  2010-07-01  to  2010-10-31</span></span>
 <span><span class="co">#&gt; ... Downloading solar data and importing to netcdf file:</span></span>
 <span><span class="co">#&gt; Data construction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:08:59</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:11:11</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="load-a-catchment-boundary">Load a catchment boundary<a class="anchor" aria-label="anchor" href="#load-a-catchment-boundary"></a>
@@ -201,7 +203,7 @@ default of to .</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:29</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:27</span></span></code></pre></div>
 <p>Next time series of the extracted daily precipitation and PET for
 each catchment is plotted. The precipitation plots show both the area
 weighted estimate and the spatial variability on each day (as +/- one
@@ -340,7 +342,7 @@ map.</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:29</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:27</span></span></code></pre></div>
 <p>The monthly total PET can then be mapped to show the spatial
 variability. The map below shows considerable spatial variability. Much
 of this variability would not emerges if only point PET at the catchment
@@ -428,7 +430,7 @@ weighted approach and centroids.</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:29</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:27</span></span>
 <span></span>
 <span><span class="va">metData.monthly.centroid</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
 <span>                     ncdfSolarFilename<span class="op">=</span><span class="va">ncdfSolarFilename</span>,</span>
@@ -457,7 +459,7 @@ weighted approach and centroids.</p>
 <span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
 <span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:25</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:23</span></span></code></pre></div>
 <p>Now let’s compare the two estimates of precipitation, PET and
 rainfall deficit. The right most plots below show the the rainfall
 deficit. It shows that using centroid estimate introduces errors of upto
@@ -532,7 +534,7 @@ deficit. It shows that using centroid estimate introduces errors of upto
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Tim Peterson.</p>
+  <p>Developed by Tim Peterson, Conrad Wasko.</p>
 </div>
 
 <div class="pkgdown-footer-right">
