@@ -41,13 +41,11 @@ date.from = as.Date("2010-07-01","%Y-%m-%d")
 date.to = as.Date("2010-10-31","%Y-%m-%d")
 
 ncdfFilename = tempfile(fileext='.nc')
-ncdfSolarFilename = tempfile(fileext='.nc')
 ```
 
 Next, let's make the data grids over this period.
 ```{r}
 fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
-                         ncdfSolarFilename = ncdfSolarFilename,
                          updateFrom = date.from,
                          updateTo = date.to)
 ```
@@ -71,7 +69,6 @@ data(constants,package='Evapotranspiration')
 The area weighted daily meteorological variables and PET can then be calculated as follows. Note, because only two months are being extracted and \code{getET=TRUE}, the default method to handle missing data and anomalies (e.g. Tmin > Tmax) during ET calculations is automatically changed from the default of \code{"DoY average"} to \code{"neighbouring average"}.
 ```{r}
 climateData.daily = extractCatchmentData(ncdfFilename=ncdfFilename,
-                      ncdfSolarFilename=ncdfSolarFilename,
                       extractFrom=date.from, extractTo=date.to,
                       locations=catchments, temporal.timestep = 'daily',
                       temporal.function.name='sum',spatial.function.name='var',
@@ -150,7 +147,6 @@ First let's extract only precipitation _getPrecip_ is set to _TRUE and _getTmin_
 
 ```{r}
 PrecipData.monthly = extractCatchmentData(ncdfFilename=ncdfFilename,
-                     ncdfSolarFilename=ncdfSolarFilename,
                      extractFrom=date.from, extractTo=date.to,
                      locations=catchments,
                      getTmin = F, getTmax = F, getVprp = F,
@@ -173,7 +169,6 @@ Next let's extract all variables and calculate the PET and then map.
 
 ```{r}
 metData.monthly = extractCatchmentData(ncdfFilename=ncdfFilename,
-                     ncdfSolarFilename=ncdfSolarFilename,
                      extractFrom=date.from, extractTo=date.to,
                      locations=catchments,
                      spatial.function.name = '',
@@ -243,7 +238,6 @@ sp::proj4string(coordinates.data) = '+proj=longlat +ellps=GRS80 +no_defs'
 Next, the meteorological data and PET are derived using both the area weighted approach and centroids.
 ```{r}
 metData.monthly.weighted = extractCatchmentData(ncdfFilename=ncdfFilename,
-                     ncdfSolarFilename=ncdfSolarFilename,
                      extractFrom=date.from, extractTo=date.to,
                      locations=catchments,
                      spatial.function.name = 'sum',
@@ -254,7 +248,6 @@ metData.monthly.weighted = extractCatchmentData(ncdfFilename=ncdfFilename,
                      ET.Mortons.est='wet areal ET', ET.constants= constants)
 
 metData.monthly.centroid = extractCatchmentData(ncdfFilename=ncdfFilename,
-                     ncdfSolarFilename=ncdfSolarFilename,
                      extractFrom=date.from, extractTo=date.to,
                      locations=coordinates.data,
                      temporal.timestep = 'monthly',

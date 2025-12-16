@@ -29,13 +29,11 @@ date.from = as.Date("2010-01-01","%Y-%m-%d")
 date.to = as.Date("2010-12-31","%Y-%m-%d")
 
 ncdfFilename = tempfile(fileext='.nc')
-ncdfSolarFilename = tempfile(fileext='.nc')
 ```
 
 Next, let's make the data grids over this period.
 ```{r}
 makeNetCDF_file(ncdfFilename = ncdfFilename,
-                   ncdfSolarFilename = ncdfSolarFilename,
                    updateFrom = date.from,
                    updateTo = date.to)
 ```
@@ -57,7 +55,6 @@ data(constants,package='Evapotranspiration')
 Next, all 11 ET measures are derived. For each measure, only the following commands change: _ET.function_ , _ET.timestep_ and _ET.Mortons.est_ (when Morton's estimate is derived).
 ```{R}
 climateData.ET.HargreavesSamani = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                ncdfSolarFilename= ncdfSolarFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 locations=catchments,
@@ -67,7 +64,6 @@ climateData.ET.HargreavesSamani = extractCatchmentData(ncdfFilename= ncdfFilenam
                                 ET.constants= constants);
 
 climateData.ET.JensenHaise = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                ncdfSolarFilename= ncdfSolarFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 locations=catchments,
@@ -77,7 +73,6 @@ climateData.ET.JensenHaise = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 ET.constants= constants);
 
 climateData.ET.Makkink = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                ncdfSolarFilename= ncdfSolarFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 locations=catchments,
@@ -87,7 +82,6 @@ climateData.ET.Makkink = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 ET.constants= constants);
 
 climateData.ET.McGuinnessBordne = extractCatchmentData(ncdfFilename= ncdfFilename,
-                               ncdfSolarFilename= ncdfSolarFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
                                locations=catchments,
@@ -97,7 +91,6 @@ climateData.ET.McGuinnessBordne = extractCatchmentData(ncdfFilename= ncdfFilenam
                                ET.constants= constants);
 
 climateData.ET.MortonCRAE = extractCatchmentData(ncdfFilename= ncdfFilename,
-                               ncdfSolarFilename= ncdfSolarFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
                                locations=catchments,
@@ -107,7 +100,6 @@ climateData.ET.MortonCRAE = extractCatchmentData(ncdfFilename= ncdfFilename,
                                ET.constants= constants);
 
 climateData.ET.MortonCRAE.potentialET = extractCatchmentData(ncdfFilename= ncdfFilename,
-                               ncdfSolarFilename= ncdfSolarFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
                                locations=catchments,
@@ -118,7 +110,6 @@ climateData.ET.MortonCRAE.potentialET = extractCatchmentData(ncdfFilename= ncdfF
                                ET.constants= constants);
 
 climateData.ET.MortonCRAE.wetarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                ncdfSolarFilename= ncdfSolarFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 locations=catchments,
@@ -129,7 +120,6 @@ climateData.ET.MortonCRAE.wetarealET = extractCatchmentData(ncdfFilename= ncdfFi
                                 ET.constants= constants);
 
 climateData.ET.MortonCRAE.actualarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                 ncdfSolarFilename= ncdfSolarFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  locations=catchments,
@@ -140,7 +130,6 @@ climateData.ET.MortonCRAE.actualarealET = extractCatchmentData(ncdfFilename= ncd
                                  ET.constants= constants);
 
 climateData.ET.MortonCRWE = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                 ncdfSolarFilename= ncdfSolarFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  locations=catchments,
@@ -150,7 +139,6 @@ climateData.ET.MortonCRWE = extractCatchmentData(ncdfFilename= ncdfFilename,
                                  ET.constants= constants);
 
 climateData.ET.MortonCRWE.shallowLake = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                 ncdfSolarFilename= ncdfSolarFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  locations=catchments,
@@ -161,7 +149,6 @@ climateData.ET.MortonCRWE.shallowLake = extractCatchmentData(ncdfFilename= ncdfF
                                  ET.constants= constants);
 
 climateData.ET.Turc = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                 ncdfSolarFilename= ncdfSolarFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  locations=catchments,
