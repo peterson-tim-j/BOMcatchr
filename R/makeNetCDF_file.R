@@ -27,16 +27,16 @@
 #' @param updateTo is a date string specifying the end date for the AWAP data. If
 #'  \code{ncdfFilename} and \code{ncdfSolarFilename} are specified and exist, then the netCDF grids will be
 #'  updated with new data to \code{updateFrom}. The default is two days ago as YYYY-MM-DD.
+#' @param vars is a vector of variables names to build or update. The available variables are: daily precipitation,
+#' daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
+#' Any or all of the defaults are available. The default is \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad')} and
+#' provided by \code{rownames(get.variableSource())}.
 #' @param workingFolder is the file path (as string) in which to download the AWAP grid files. The default is \code{getwd()}.
 #' @param keepFiles is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.
 #' @param compressionLevel is the netCDF compression level between 1 (low) and 9 (high), and \code{NA} for no compression.
 #' Note, data extraction runtime may slightly increase with the level of compression. The default is \code{5}.
-#' @param urlPrecip URL to the folder containing the AWAP daily precipitation grids. The default is from \code{getURLs()$precip}.
-#' @param urlTmin URL to the folder containing the AWAP daily minimum temperature grids. The default is from \code{getURLs()$Tmin}.
-#' @param urlTmax URL to the folder containing the AWAP daily maximum temperature grids. The default is from \code{getURLs()$Tmax}.
-#' @param urlVprp URL to the folder containing the AWAP daily vapour pressure grids. The default is from \code{getURLs()$vprp}.
-#' @param urlSolarrad URL to the folder containing the AWAP daily solar radiation grids. The default is from \code{getURLs()$solarrad}.
-#'
+#' @param vars.sourceData is a data.frame of variable unit, time step and source URLs. This input is provided in-case the default URLs need to be changed.
+#' The default is \code{get.variableSource())}
 #' @return
 #' A string containing the full file name to the netCDF file.
 #'
@@ -78,14 +78,11 @@ makeNetCDF_file <- function(
   ncdfSolarFilename=file.path(getwd(),'AWAP_solar.nc'),
   updateFrom = as.Date("1900-01-01","%Y-%m-%d"),
   updateTo  = as.Date(Sys.Date()-2,"%Y-%m-%d"),
+  vars = rownames(get.variableSource()),
   workingFolder=getwd(),
   keepFiles=FALSE,
   compressionLevel = 5,
-  urlPrecip = getURLs()$precip,
-  urlTmin = getURLs()$Tmin,
-  urlTmax = getURLs()$Tmax,
-  urlVprp = getURLs()$vprp,
-  urlSolarrad = getURLs()$solarrad)  {
+  vars.sourceData = get.variableSource() )  {
 
   # To Update HTML documentationm:
   # devtools::document()
@@ -96,16 +93,60 @@ makeNetCDF_file <- function(
   # Get system time to estimate run time at the end.
   sys.start.time = Sys.time()
 
-  # Check that the ncdf files
-  doUpdate = F;
-  if (file.exists(ncdfFilename)) {
-    doUpdate = TRUE
-    message('Starting to update netCDF grids.')
-  } else {
-    message('Starting to build new netCDF grids.')
-  }
+  if (!is.character(ncdfFilename))
+    stop('ncdfFilename is invalid. It must be a character string for the file name.')
 
-  # Check the compresion level is NA or an integer b/w 1 and 9
+  # Check the input variables
+  vars.all = get.variableSource()
+  vars.all.names = rownames(vars.all)
+  if (length(vars)==0)
+    stop('The input data variable names,  vars, must be input.')
+  if ( !all(unique(vars) %in% vars.all.names))
+    stop(paste('The input vars contain unhandled variable names. The available inputs vars are:',vars.all))
+
+  # Set number of variables
+  nvars = length(vars)
+
+  # Check that the ncdf files
+  ncdf.exists = F;
+  vars.prior = c()
+  vars.prior.wgrid = vars.prior
+  if (file.exists(ncdfFilename)) {
+    ncdf.exists = TRUE
+
+    # open netcdf file
+    ncout <- ncdf4::nc_open(ncdfFilename, write=F)
+
+    # Get the list of existing variables.
+    vars.prior = names(ncout$var)
+    vars.prior.wgrid = vars.prior
+    vars.prior = sub(".*?/", "", vars.prior)
+    ncdf4::nc_close(ncout)
+
+    # Get new variables to add to netCDF file
+    ind.vars2add = !(vars %in% vars.prior)
+    vars.2add = vars[ind.vars2add]
+
+    # Set variables to update. Note this is all of
+    # the existing variables in the netCDF file,
+    # *(excludes those variable to add).
+    # This is done because, if the updateFrom
+    # or updateTo for vars extends beyond the
+    # current data range, then all variables need
+    # to be updated. Later, vars.2update is filtered
+    # based on updateFrom and updateTo period.
+    ind.vars2update = vars.prior
+    vars.2update = vars.prior
+  } else {
+    vars.2update = c()
+    vars.2add = vars
+  }
+  vars.2modify = c(vars.2add, vars.2update)
+  nvars.2modify = length(vars.2modify)
+  nvars.2update = length(vars.2update)
+  nvars.2add = length(vars.2add)
+
+  # Check the compression level is NA or an integer b/w 1 and 9
   if (is.numeric(compressionLevel)) {
     if (compressionLevel<1 || compressionLevel>9) {
       stop('compressionLevel input must be NA or an integer between 1 and 9')
@@ -114,485 +155,343 @@ makeNetCDF_file <- function(
     stop('compressionLevel input must be NA or an integer between 1 and 9')
   }
 
-
-  # Increase maximum file download time from 60 sec to 300 sec.
-  # This is following the requat from Em. Prof. Brian Ripley on 9/12/2020.
-  options(timeout = max(300, getOption("timeout")))
-
-  # Test the AWAP downloading
-  filedate_str = '20000101'
-  haveGridGeometry = FALSE;
-  haveGridGeometry_solar = FALSE;
-  if (!is.na(urlPrecip)) {
-    message('... Testing downloading of AWAP precip. grid')
-    destFile <- AWAPer::download.ASCII.file(urlPrecip, 'precip.', workingFolder, filedate_str)
-
-    # Get the grid geometry of the non solar data
-    headerData <- AWAPer::get.ASCII.file.header('precip.', workingFolder, filedate_str, remove.file=T)
-    nCols  <- headerData$nCols
-    nRows  <- headerData$nRows
-    SWLong <- headerData$SWLong
-    SWLat  <- headerData$SWLat
-    DPixel <- headerData$DPixel
-    nodata <- headerData$nodata
-    haveGridGeometry = TRUE;
+  # Check input dates and convert and check input time dates
+  if (is.na(updateFrom) || nchar(updateFrom)==0) {
+    updateFrom = NA
+  } else if (is.character(updateFrom))
+    updateFrom = as.Date(updateFrom,'%Y-%m-%d');
+  if (is.na(updateTo) || nchar(updateTo)==0) {
+    updateTo = as.Date(Sys.Date()-2,"%Y-%m-%d")
+  } else if (is.character(updateTo)) {
+    updateTo = as.Date(updateTo,'%Y-%m-%d');
+  } else if (methods::is(updateTo,"Date")) {
+    updateTo = min(c(as.Date(Sys.Date()-1,"%Y-%m-%d"),updateTo));
   }
-
-  # Test the AWAP downloading
-  if (!is.na(urlTmin)) {
-    message('... Testing downloading of AWAP tmin grid')
-    destFile <- AWAPer::download.ASCII.file(urlTmin, 'tmin.', workingFolder, filedate_str)
-
-    # Get grid geometry if not available from precip
-    if (!haveGridGeometry) {
-      # Get the grid geometry of the non solar data
-      headerData <- AWAPer::get.ASCII.file.header('tmin.', workingFolder, filedate_str, remove.file=F)
-      nCols  <- headerData$nCols
-      nRows  <- headerData$nRows
-      SWLong <- headerData$SWLong
-      SWLat  <- headerData$SWLat
-      DPixel <- headerData$DPixel
-      nodata <- headerData$nodata
-      haveGridGeometry = TRUE;
-    }
-    file.remove(destFile$file.name)
-
-  }
-
-  # Test the AWAP downloading
-  if (!is.na(urlTmax)) {
-    message('... Testing downloading of AWAP tmax grid')
-    destFile <- AWAPer::download.ASCII.file(urlTmax, 'tmax.', workingFolder, filedate_str)
-
-    # Get grid geometry if not available from precip
-    if (!haveGridGeometry) {
-      # Get the grid geometry of the non solar data
-      headerData <- AWAPer::get.ASCII.file.header('tmax', workingFolder, filedate_str, remove.file=F)
-      nCols  <- headerData$nCols
-      nRows  <- headerData$nRows
-      SWLong <- headerData$SWLong
-      SWLat  <- headerData$SWLat
-      DPixel <- headerData$DPixel
-      nodata <- headerData$nodata
-      haveGridGeometry = TRUE;
-    }
-
-    file.remove(destFile$file.name)
-  }
-
-  # Test the AWAP downloading
-  if (!is.na(urlVprp)) {
-    message('... Testing downloading of AWAP vapour pressure grid')
-    destFile <- AWAPer::download.ASCII.file(urlVprp, 'vprp.', workingFolder, filedate_str)
-
-    # Get grid geometry if not available from precip
-    if (!haveGridGeometry) {
-      # Get the grid geometry of the non solar data
-      headerData <- AWAPer::get.ASCII.file.header('vprp', workingFolder, filedate_str, remove.file=F)
-      nCols  <- headerData$nCols
-      nRows  <- headerData$nRows
-      SWLong <- headerData$SWLong
-      SWLat  <- headerData$SWLat
-      DPixel <- headerData$DPixel
-      nodata <- headerData$nodata
-      haveGridGeometry = TRUE;
-    }
-    file.remove(destFile$file.name)
-  }
-
-  # Test the solar radiation downloading
-  if (!is.na(urlSolarrad)) {
-    message('... Testing downloading of AWAP solar grid')
-    destFile <- AWAPer::download.ASCII.file(urlSolarrad, 'solarrad.', workingFolder, filedate_str)
-
-    # Get the grid geometry of the non solar data
-    headerData <- AWAPer::get.ASCII.file.header('solarrad.', workingFolder, filedate_str, remove.file=T)
-    nCols_solar  <- headerData$nCols
-    nRows_solar  <- headerData$nRows
-    SWLong_solar <- headerData$SWLong
-    SWLat_solar  <- headerData$SWLat
-    DPixel_solar <- headerData$DPixel
-    nodata_solar <- headerData$nodata
-    haveGridGeometry_solar = TRUE;
-  }
-
-  # Create net CDF files
-  if (!doUpdate) {
-
-    message('... Building new netcdf data file.')
-
-    # Convert and check input time dates
-    if (is.na(updateFrom) || nchar(updateFrom)==0) {
-      updateFrom = as.Date("1900-01-01","%Y-%m-%d")
-    } else if (is.character(updateFrom))
-      updateFrom = as.Date(updateFrom,'%Y-%m-%d');
-    if (is.na(updateTo) || nchar(updateTo)==0) {
-      updateTo = as.Date(Sys.Date()-1,"%Y-%m-%d")
-    } else if (is.character(updateTo)) {
-      updateTo = as.Date(updateTo,'%Y-%m-%d');
-    } else if (methods::is(updateTo,"Date")) {
-        updateTo = min(c(as.Date(Sys.Date()-1,"%Y-%m-%d"),updateTo));
-    }
-    if (updateFrom >= updateTo)
-      stop('The update dates are invalid. updateFrom must be prior to updateTo')
-
-    # Set data time points
-    timepoints = seq( as.Date("1900-01-01","%Y-%m-%d"), by="day", to=updateTo)
-
-    # Define variables non-solar variables and grid
-    fillvalue <- NA
-    nvar = 0
-    var.list = list()
-    if (haveGridGeometry) {
-      # Get x and y vectors (dimensions)
-      Longvector = seq(SWLong, by=DPixel,length.out = nCols)
-      Latvector = seq(SWLat, by=DPixel,length.out = nRows)
-
-      # define dimensions
-      londim <- ncdf4::ncdim_def("nonsolar/Long","degrees",vals=Longvector)
-      latdim <- ncdf4::ncdim_def("nonsolar/Lat","degrees",vals=Latvector)
-      timedim <- ncdf4::ncdim_def("nonsolar/time",paste("days since 1900-01-01 00:00:00.0 -0:00. DATA FROM:",updateFrom,'. DATA TO:', updateTo),
-                                  unlim=T, vals=0:(length(timepoints)-1), calendar='standard')
-
-      nvar = nvar+1
-      dlname <- "min daily temperature"
-      var.list[[nvar]] <- ncdf4::ncvar_def("nonsolar/tmin","deg_C",list(londim,latdim,timedim),fillvalue,dlname,prec="single", compression=compressionLevel)
-
-      nvar = nvar+1
-      dlname <- "min daily temperature"
-      var.list[[nvar]] <- ncdf4::ncvar_def("nonsolar/tmax","deg_C",list(londim,latdim,timedim),fillvalue,dlname,prec="single", compression=compressionLevel)
-
-      nvar = nvar+1
-      dlname <- "vapour pressure"
-      var.list[[nvar]] <- ncdf4::ncvar_def("nonsolar/vprp","hPa",list(londim,latdim,timedim),fillvalue,dlname,prec="single", compression=compressionLevel)
-
-      nvar = nvar+1
-      dlname <- "precipitation"
-      var.list[[nvar]] <- ncdf4::ncvar_def("nonsolar/precip","mm",list(londim,latdim,timedim),fillvalue,dlname,prec="single", compression=compressionLevel)
-    }
-
-    # Define variables solar variables and grid
-    if (haveGridGeometry_solar) {
-      londim <- ncdf4::ncdim_def("solar/Long","degrees",vals=Longvector)
-      latdim <- ncdf4::ncdim_def("solar/Lat","degrees",vals=Latvector)
-      timedim <- ncdf4::ncdim_def("solar/time",paste("days since 1900-01-01 00:00:00.0 -0:00. DATA FROM:",updateFrom,'. DATA TO:', updateTo),
-                                  unlim=T, vals=0:(length(timepoints)-1), calendar='standard')
-
-      nvar = nvar+1
-      dlname <- "Solar radiation"
-      var.list[[nvar]] <- ncdf4::ncvar_def("solar/solarrad","MJ/m^2",list(londim,latdim,timedim),fillvalue,dlname,prec="single", compression=compressionLevel)
-    }
-
-    # Create netCDF file of required variabless
-    ncout <- ncdf4::nc_create(filename=ncdfFilename,vars=var.list, force_v4=T)
-
-    # Put additional attributes into dimension and data variables
-    if (haveGridGeometry) {
-      ncdf4::ncatt_put(ncout,"nonsolar/Long","axis","X")
-      ncdf4::ncatt_put(ncout,"nonsolar/Lat","axis","Y")
-      ncdf4::ncatt_put(ncout,"nonsolar/time","axis","T")
-      timePoints_netCDF <- ncdf4::ncvar_get(ncout, "nonsolar/time")
-    }
-    if (haveGridGeometry_solar) {
-      ncdf4::ncatt_put(ncout,"solar/Long","axis","X")
-      ncdf4::ncatt_put(ncout,"solar/Lat","axis","Y")
-      ncdf4::ncatt_put(ncout,"solar/time","axis","T")
-      timePoints_netCDF <- ncdf4::ncvar_get(ncout, "solar/time")
-    }
-
-    # add global attributes
-    ncdf4::ncatt_put(ncout,0,"title","BoM daily climate data")
-    ncdf4::ncatt_put(ncout,0,"institution","Data: BoM, R Code: Tim J. Peterson and Conrad Wasko")
-
-    # Convert netCDF time points to date
-    if (haveGridGeometry) {
-      tunits <- ncdf4::ncatt_get(ncout, "nonsolar/time", "units")
-    } else {
-      tunits <- ncdf4::ncatt_get(ncout, "solar/time", "units")
-    }
-    tustr <- strsplit(tunits$value, " ")
-    tdstr <- strsplit(unlist(tustr)[3], "-")
-    tmonth = as.integer(unlist(tdstr)[2])
-    tday = as.integer(unlist(tdstr)[3])
-    tyear = as.integer(unlist(tdstr)[1])
-    timePoints_R = chron::chron(timePoints_netCDF, origin = c(tmonth, tday, tyear));
-
-  } else {
-    # open netcdf file
-    ncout <- ncdf4::nc_open(ncdfFilename, write=T)
-
-    # Get the list of exising variables
-    allVariable.names = names(ncout$var)
-
-    # Check the netCDF file contains solar and nonsolar data.
-    if (!any(grep('nonsolar/',allVariable.names)) && !any(grep('solar/',allVariable.names)))
-      stop(paste('The netCDF file appears to have been created using an old version of the package.\n',
-                 'Please re-build the netCDF file.',sep=""))
-
-    # Check the variables to be updated are already in the netCDF file.
-    if (!is.na(urlPrecip) && !('nonsolar/precip' %in% allVariable.names))
-      stop(paste('The netCDF file to be updated with precip. data does not already contain precipitation.\n',
-                 'Please re-build the netCDF file to contain all required variablea and then updated',sep=""))
-    if (!is.na(urlTmin) && !('nonsolar/tmin' %in% allVariable.names))
-      stop(paste('The netCDF file to be updated with Tmin data does not already contain Tmin.\n',
-                 'Please re-build the netCDF file to contain all required variablea and then updated',sep=""))
-    if (!is.na(urlTmax) && !('nonsolar/tmax' %in% allVariable.names))
-      stop(paste('The netCDF file to be updated with Tmax data does not already contain Tmax.\n',
-                 'Please re-build the netCDF file to contain all required variablea and then updated',sep=""))
-    if (!is.na(urlVprp) && !('nonsolar/vprp' %in% allVariable.names))
-      stop(paste('The netCDF file to be updated with vapour pressure data does not already contain vapour pressure.\n',
-                 'Please re-build the netCDF file to contain all required variablea and then updated',sep=""))
-    if (!is.na(urlSolarrad) && !('solar/solarrad' %in% allVariable.names))
-      stop(paste('The netCDF file to be updated with solar radiation data does not already contain solar radiation\n',
-                 'Please re-build the netCDF file to contain all required variablea and then updated',sep=""))
-
-    # Get netcdf time points
-    timePoints_netCDF <- ncdf4::ncvar_get(ncout, "nonsolar/time")
-
-    # Convert netCDF time points to date
-    tunits <- ncdf4::ncatt_get(ncout, "nonsolar/time", "units")
-    tustr <- strsplit(tunits$value, " ")
-    tdstr <- strsplit(unlist(tustr)[3], "-")
-    tmonth = as.integer(unlist(tdstr)[2])
-    tday = as.integer(unlist(tdstr)[3])
-    tyear = as.integer(unlist(tdstr)[1])
-    timePoints_R = chron::chron(timePoints_netCDF, origin = c(tmonth, tday, tyear));
-
-    # Set updateFrom to the end of the netCDF file if updateFrom is NA or ''.
-    if (is.na(updateFrom)) {
-      updateFrom = max(as.Date(timePoints_R));
-    } else if (is.character(updateFrom)) {
-      if (nchar(updateFrom)>0) {
-        updateFrom = min(c(max(as.Date(timePoints_R)),as.Date(updateFrom,'%Y-%m-%d')));
-      } else {
-        updateFrom = max(as.Date(timePoints_R));
-      }
-    } else {
-      if (updateFrom == as.Date("1900-01-01","%Y-%m-%d")) {
-        doQuit <- readline(prompt="Warning: netCDF grids exist and are to be updated from 1/1/1900. Do you want to continue (Y/N)? : ")
-        if (doQuit=='N' | doQuit=='n') {
-          message('Now quitting. Note, to update the data form the last day in the netCDF files, set updateFrom=NA')
-          return()
-        }
-      }
-    }
-
-    # Set updateTo to the min of the input data and now.
-    if (is.na(updateTo)) {
-      updateTo = as.Date(Sys.Date()-1,"%Y-%m-%d")
-    } else if (is.character(updateTo)) {
-      if (nchar(updateTo)>0) {
-        updateTo = min(c(as.Date(Sys.Date()-1,"%Y-%m-%d"),as.Date(updateTo,'%Y-%m-%d')));
-      } else {
-        updateTo = as.Date(Sys.Date()-1,"%Y-%m-%d")
-      }
-    } else if ( methods::is(updateTo,"Date") ) {
-      updateTo = min(c(as.Date(Sys.Date()-1,"%Y-%m-%d"),updateTo));
-    }
-  }
-
-  # Check input dates
-  if (updateFrom >= updateTo)
+  if (!is.na(updateFrom) && updateFrom >= updateTo)
     stop('The update dates are invalid. updateFrom must be prior to updateTo')
 
+
+  # Increase maximum file download time from 60 sec to 300 sec.
+  # This is following the request from Em. Prof. Brian Ripley on 9/12/2020.
+  options(timeout = max(300, getOption("timeout")))
+
+  # Test downloading of required data and get grid geometry.
+  filedate_str = '20000101'
+  gridgeo = data.frame(nCols  = rep(NA,nvars), nRows = rep(NA,nvars),
+                       SWLong = rep(NA,nvars), SWLat = rep(NA,nvars),
+                       DPixel = rep(NA,nvars), nodata= rep(NA,nvars),
+                       has.geom = rep(F,nvars),
+                       row.names = vars)
+  message('... Testing downloading of each variable.')
+  for (ivar in vars.2modify) {
+    message(paste('    Testing',ivar,'grid data.'))
+    destFile <- AWAPer::download.ASCII.file(vars.all[ivar,]$data.URL, ivar, workingFolder, filedate_str)
+
+    # Get the grid geometry of the non solar data
+    headerData <- AWAPer::get.ASCII.file.header(ivar, workingFolder, filedate_str, remove.file=T)
+    gridgeo[ivar,]$nCols  <- headerData$nCols
+    gridgeo[ivar,]$nRows  <- headerData$nRows
+    gridgeo[ivar,]$SWLong <- headerData$SWLong
+    gridgeo[ivar,]$SWLat  <- headerData$SWLat
+    gridgeo[ivar,]$DPixel <- headerData$DPixel
+    gridgeo[ivar,]$nodata <- headerData$nodata
+    gridgeo[ivar,]$has.geom = TRUE;
+  }
+
+  # Identify the unique grid dimensions and assign grid
+  # to each variable name
+  #-------------
+  gridgeo.unique = unique.data.frame(gridgeo)
+  ngrids = nrow(gridgeo.unique)
+  vars.all = cbind(vars.all,ncdf.grid.name=NA)
+  gridgeo.unique.newnames = rep('',ngrids)
+  grid.max = 0
+  # First get the existing grids
+  for (ivar in vars.2update) {
+    for (i in 1:ngrids) {
+      if (all(gridgeo[ivar,] == gridgeo.unique[i,])
+          && any(vars.prior %in% ivar)) {
+
+          grd.tmp = vars.prior.wgrid[vars.prior %in% ivar]
+          grd.tmp = sub("/.*", "", grd.tmp)
+          vars.all[ivar,]$ncdf.grid.name = grd.tmp
+
+          gridgeo.unique.newnames[i] = grd.tmp
+          grid.max = max(grid.max,
+                         as.numeric(sub(".*d", "", grd.tmp)))
+      }
+    }
+  }
+  # Add new grids, but ensure that and new grid geometry has a
+  # different grid number and above that of the existing grids.
+  for (ivar in vars.2add) {
+    for (i in 1:ngrids) {
+      if (all(gridgeo[ivar,] == gridgeo.unique[i,])
+          && !any(vars.prior %in% ivar)) {
+
+          # If there is NOT an existing name for this grid geometry, then
+          # create a new name. Otherwise, add the existing name.
+          if (gridgeo.unique.newnames[i] == '') {
+            vars.all[ivar,]$ncdf.grid.name = paste('grid',i+grid.max,sep='')
+            gridgeo.unique.newnames[i] = paste('grid',i+grid.max,sep='')
+          } else {
+            vars.all[ivar,]$ncdf.grid.name = gridgeo.unique.newnames[i]
+          }
+      }
+    }
+  }
+  row.names(gridgeo.unique) = gridgeo.unique.newnames
+  #-------------
+
+  # Define each dimension for each unique grid
+  timepoints = seq( as.Date("1900-01-01","%Y-%m-%d"), by="day", to=updateTo)
+  grid.dims =vector('list',ngrids)
+  names(grid.dims) = row.names(gridgeo.unique)
+  for (i in 1:ngrids) {
+    Longvector = seq(gridgeo.unique[i,]$SWLong,
+                     by = gridgeo.unique[i,]$DPixel,
+                     length.out = gridgeo.unique[i,]$nCols)
+    Latvector = seq(gridgeo.unique[i,]$SWLat,
+                    by = gridgeo.unique[i,]$DPixel,
+                    length.out = gridgeo.unique[i,]$nRows)
+
+    # define dimensions
+    ncdf.grid.name = names(grid.dims)[i]
+    londim <- ncdf4::ncdim_def(paste(ncdf.grid.name, "/Long",sep=''),"degrees",vals=Longvector)
+    latdim <- ncdf4::ncdim_def(paste(ncdf.grid.name, "/Lat",sep='') ,"degrees",vals=Latvector)
+    timedim <- ncdf4::ncdim_def(paste(ncdf.grid.name,"/time",sep=''),
+                                paste("days since 1900-01-01 00:00:00.0 -0:00"),
+                                unlim=T, vals=0:(length(timepoints)-1), calendar='standard')
+    grid.dims[[i]] = list(londim, latdim, timedim)
+  }
+
+
+  # Add new variables to netCDF
+  if (nvars.2add>0) {
+    # Create netCDF variable definitions for each data type
+    fillvalue <- NA
+    vardef.list = list()
+    for (ivar in vars.2add) {
+
+      ncdf.grid.name = vars.all[ivar,]$ncdf.grid.name
+      ncdf.name = paste(ncdf.grid.name,'/',vars.all[ivar,]$ncdf.name, sep='')
+      vardef.list[[ivar]] <- ncdf4::ncvar_def(name = ncdf.name,
+                                              units = vars.all[ivar,]$units,
+                                              dim = grid.dims[[ vars.all[ivar,]$ncdf.grid.name ]],
+                                              missval = fillvalue,
+                                              longname = vars.all[ivar,]$label,
+                                              prec = "single",
+                                              compression = compressionLevel)
+    }
+
+    # open or create netCDF file
+    if (nvars.2update==0) {
+      # Create of no updates, just new variables.
+      ncout <- ncdf4::nc_create(filename=ncdfFilename,vars=vardef.list, force_v4=T)
+
+      # Add global attributes
+      ncdf4::ncatt_put(ncout,0,"title","BoM climate data")
+      ncdf4::ncatt_put(ncout,0,"institution","Data: BoM, R Code: Tim J. Peterson and Conrad Wasko")
+
+      # Add attributes for the start and end dates of each variable
+      for (ivar in vars.2add) {
+        ncdf.grid.name = vars.all[ivar,]$ncdf.grid.name
+        ncdf.name = paste(ncdf.grid.name,'/',vars.all[ivar,]$ncdf.name, sep='')
+
+        ncdf4::ncatt_put(ncout,
+                         varid = ncdf.name,
+                         attname = 'Start_date',
+                         attval = "0000-1-1")
+
+        ncdf4::ncatt_put(ncout,
+                         varid = ncdf.name,
+                         attname = 'End_date',
+                         attval = "9999-12-31")
+
+      }
+
+    } else {
+      # Open existing netCDF file.
+      ncout <- ncdf4::nc_open(ncdfFilename, write=T)
+
+      # Add each new variable and daa start and end dates.
+      for (ivar in vars.2add) {
+        ncout <- ncdf4::ncvar_add(ncout, vardef.list[[ivar]])
+
+        ncdf.grid.name = vars.all[ivar,]$ncdf.grid.name
+        ncdf.name = paste(ncdf.grid.name,'/',vars.all[ivar,]$ncdf.name, sep='')
+
+        ncdf4::ncatt_put(ncout,
+                         varid = ncdf.name,
+                         attname = 'Start_date',
+                         attval = "0000-1-1")
+
+        ncdf4::ncatt_put(ncout,
+                         varid = ncdf.name,
+                         attname = 'End_date',
+                         attval = "9999-12-31")
+      }
+
+      # Write to netCDF file and close
+      ncdf4::nc_sync(ncout)
+    }
+
+    # Set dimension axis
+    for (ivar in vars.2add) {
+      ivar.dim.name = vars.all[ivar,]$ncdf.grid.name
+      ncdf4::ncatt_put(ncout, paste(ivar.dim.name,"/Long",sep=''),"axis","X")
+      ncdf4::ncatt_put(ncout,paste(ivar.dim.name ,"/Lat",sep='') ,"axis","Y")
+      ncdf4::ncatt_put(ncout,paste(ivar.dim.name ,"/time",sep=''),"axis","T")
+    }
+    ncdf4::nc_close(ncout)
+  }
+
+  # Get the start and end dates for each variable to be updated
+  existing.dates <- AWAPer::summary(ncdfFilename)
+
+  # Set update from to the end of the current data
+  if (is.na(updateFrom))
+    updateFrom = min(existing.dates$to)
+
+  # If the earliest and latest dates from existing data differ, then
+  # change updateFrom and updateTo
+  if (diff(range(existing.dates$from))>0 &&
+      min(existing.dates$from) < updateFrom &&
+      min(existing.dates$from) > as.Date('0000-01-01', '%Y-%m-%d')) {
+
+      updateFrom = min(existing.dates$from)
+      message('... updateFrom reduced to ensure all variables have the same start date.')
+  }
+  if (diff(range(existing.dates$to))>0 &&
+      max(existing.dates$to) > updateTo &&
+      max(existing.dates$to) < as.Date('9999-12-31', '%Y-%m-%d')) {
+
+      updateTo = max(existing.dates$to)
+      message('... updateTo increased to ensure all variables have the same end date.')
+  }
+
+  # Filter vars.2update. If the input vars exists in the netCDF and the data range
+  # is wholly within the existing data range, then only update this variable.
+  # However, if the
+  ind = rep(TRUE, length(vars.2update))
+  names(ind) = vars.2update
+  for (ivar in vars.2update) {
+    if (existing.dates[ivar,]$from >= updateFrom &&
+        existing.dates[ivar,]$to <= updateTo)
+      ind[ivar] = F
+  }
+  vars.2update = vars.2update[ind]
+  nvars.2update = length(vars.2update)
+
+  # Update list of variables to modify in any way
+  vars.2modify = c(vars.2add, vars.2update)
+  nvars.2modify = length(vars.2modify)
+
+  # Set time points to update
   timepoints2Update = seq( as.Date(updateFrom,'%Y-%m-%d'), by="day", to=as.Date(updateTo,'%Y-%m-%d'))
+  ntimepoints2Update = length(timepoints2Update)
+  timepoints = seq( as.Date("1900-01-01","%Y-%m-%d"), by="day", to=updateTo)
 
   if (length(timepoints2Update)==0)
       stop('The dates to update produce a zero vector of dates of zero length. Check the inputs dates are as YYYY-MM-DD')
 
-  message(paste('    NetCDF data will be updated from ',format.Date(updateFrom,'%Y-%m-%d'),' to ', format.Date(updateTo,'%Y-%m-%d')));
-
-  # Update the netCDF file time units to give the new dates for data.
-  timepoints = seq( as.Date("1900-01-01","%Y-%m-%d"), by="day", to=updateTo)
-  ncdf4::nc_redef(ncout)
-  timedim <- ncdf4::ncdim_def("nonsolar/time",paste("days since 1900-01-01 00:00:00.0 -0:00. DATA FROM:",updateFrom,'. DATA TO:', updateTo),
-                              unlim=T, vals=0:(length(timepoints)-1), calendar='standard')
-  timedim.solar <- ncdf4::ncdim_def("solar/time",paste("days since 1900-01-01 00:00:00.0 -0:00. DATA FROM:",updateFrom,'. DATA TO:', updateTo),
-                              unlim=T, vals=0:(length(timepoints)-1), calendar='standard')
-
-  ntimepoints2Update = length(timepoints2Update)
-
-  ncdf4::nc_enddef(ncout)
-
-  # Setup progress bar
-  pbar <- progress::progress_bar$new(
-    format = "    :current of :total  [:bar] :percent in :elapsed",
-    total = ntimepoints2Update, clear = FALSE, width= 80)
-
-  # Start Filling the netCDF grid.
-  message('    Downloading non-solar data and importing to netcdf file:')
-  for (date in 1:ntimepoints2Update){
-
-    # Update progress bar
-    pbar$tick()
-
-    # Get datestring for input filenames
-    datestring<-format(timepoints2Update[date], "%Y%m%d")
-
-    # Find index to the date to update within the net CDF grid
-    ind = as.integer(difftime(timepoints2Update[date], as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))+1
-
-    # Update timePoints_netCDF time vector
-    timePoints_netCDF[ind] = ind-1;
-
-    # Download data
-    #----------------
-    didFail_precip=1
-    if (!is.na(urlPrecip)) {
-
-      destFile <- AWAPer::download.ASCII.file(urlPrecip, 'precip.', workingFolder, datestring)
-      destFile_precip <- destFile$file.name
-      didFail_precip <- destFile$didFail
-    }
-
-    didFail_tmin=1
-    if (!is.na(urlTmin)) {
-      destFile <- AWAPer::download.ASCII.file(urlTmin, 'tmin.', workingFolder, datestring)
-      destFile_tmin <- destFile$file.name
-      didFail_tmin <- destFile$didFail
-    }
-
-    didFail_tmax=1
-    if (!is.na(urlTmax)) {
-      destFile <- AWAPer::download.ASCII.file(urlTmax, 'tmax.', workingFolder, datestring)
-      destFile_tmax <- destFile$file.name
-      didFail_tmax <- destFile$didFail
-    }
-
-    didFail_vprp=1
-    if (!is.na(urlVprp)) {
-      destFile <- AWAPer::download.ASCII.file(urlVprp, 'vprp.', workingFolder, datestring)
-      destFile_vprp <- destFile$file.name
-      didFail_vprp <- destFile$didFail
-    }
-    #----------------
-
-    # Get precip grid and add to Net CDF grid
-    if (!is.na(urlPrecip) && file.exists(destFile_precip) && didFail_precip==0) {
-      # Re-extra header data in case the NODATA number changes with time (resolving https://github.com/peterson-tim-j/AWAPer/issues/19)
-      headerData.tmp <- AWAPer::get.ASCII.file.header('precip.', workingFolder, datestring, remove.file=F)
-
-      AWAPgrid <- AWAPer::readin.ASCII.file(destFile_precip, nRows, noData=headerData.tmp$nodata)
-      ncdf4::ncvar_put( ncout, "nonsolar/precip", AWAPgrid, start=c(1, 1, ind), count=c(nCols, nRows, 1), verbose=F )
-    }
-    if (!is.na(urlPrecip) && file.exists(destFile_precip) && !keepFiles)
-      file.remove(destFile_precip)
-
-    # Get tmin grid and add to Net CDF grid
-    if (!is.na(urlTmin) && file.exists(destFile_tmin) && didFail_tmin==0) {
-      # Re-extra header data in case the NODATA number changes with time (resolving https://github.com/peterson-tim-j/AWAPer/issues/19)
-      headerData.tmp <- AWAPer::get.ASCII.file.header('tmin.', workingFolder, datestring, remove.file=F)
-
-      AWAPgrid <- AWAPer::readin.ASCII.file(destFile_tmin, nRows, noData=headerData.tmp$nodata)
-      ncdf4::ncvar_put( ncout, "nonsolar/tmin", AWAPgrid, start=c(1, 1, ind), count=c(nCols, nRows, 1), verbose=F )
-    }
-    if (!is.na(urlTmin) && file.exists(destFile_tmin) && !keepFiles)
-      file.remove(destFile_tmin)
-
-    # Get tmax grid and add to Net CDF grid
-    if (!is.na(urlTmax) && file.exists(destFile_tmax) && didFail_tmax==0) {
-      # Re-extra header data in case the NODATA number changes with time (resolving https://github.com/peterson-tim-j/AWAPer/issues/19)
-      headerData.tmp <- AWAPer::get.ASCII.file.header('tmax.', workingFolder, datestring, remove.file=F)
-
-      AWAPgrid <- AWAPer::readin.ASCII.file(destFile_tmax, nRows, noData=headerData.tmp$nodata)
-      ncdf4::ncvar_put( ncout, "nonsolar/tmax", AWAPgrid, start=c(1, 1, ind), count=c(nCols, nRows, 1), verbose=F )
-    }
-    if (!is.na(urlTmax) && file.exists(destFile_tmax) && !keepFiles)
-      file.remove(destFile_tmax)
-
-    # Get vapour pr grid and add to Net CDF grid
-    if (!is.na(urlVprp) && file.exists(destFile_vprp) && didFail_vprp==0) {
-      # Re-extra header data in case the NODATA number changes with time (resolving https://github.com/peterson-tim-j/AWAPer/issues/19)
-      headerData.tmp <- AWAPer::get.ASCII.file.header('vprp.', workingFolder, datestring, remove.file=F)
-
-      AWAPgrid <- AWAPer::readin.ASCII.file(destFile_vprp, nRows, noData=headerData.tmp$nodata)
-      ncdf4::ncvar_put( ncout, "nonsolar/vprp", AWAPgrid, start=c(1, 1, ind), count=c(nCols, nRows, 1), verbose=F )
-    }
-    if (!is.na(urlVprp) && file.exists(destFile_vprp) && !keepFiles)
-      file.remove(destFile_vprp)
-
-    # Flush data to the netcdf file to avoid losses if code crashed.
-    if (date %% 365 == 0) {
-      message(paste('Syncing 365 days of data to netCDF file. The time point to be synched is:', format(timepoints2Update[date], "%Y-%m-%d")))
-      ncdf4::nc_sync(ncout)
-    }
+  # Give summary of data changes
+  message('... NetCDF file will be updated as follows:')
+  if (nvars.2add==0) {
+    message('       - New variables to add: (none)')
+  } else {
+    message(paste(c('       - New variables to add: ',paste(vars.2add, ' '))))
   }
+  if (nvars.2update==0) {
+    message('       - Existing variables to modify: (none)')
+  } else {
+    message(paste(c('       - Existing variables to modify: ',paste(vars.2update, ' '))))
+  }
+  message(paste('       - Data will be updated from ',
+                format.Date(updateFrom,'%Y-%m-%d'),' to ',
+                format.Date(updateTo,'%Y-%m-%d')));
 
-  # Updtate netCDF time variable
-  ncdf4::ncvar_put(ncout, "nonsolar/time",timePoints_netCDF)
+  message('... Downloading data for each variable and importing to netcdf file:')
+  ncout <- ncdf4::nc_open(ncdfFilename, write=T)
+  for (ivar in vars.2modify) {
 
-  # Flush data to the netcdf file to avoid losses if code crashed.
-  ncdf4::nc_sync(ncout)
+    ivar.tmp = paste(ivar,".",sep="")
+    ivar.grid.name = vars.all[ivar,]$ncdf.grid.name
+    ivar.ncdf.name =  paste(ivar.grid.name,'/',vars.all[ivar,]$ncdf.name, sep='')
+    ivar.url = vars.all[ivar,]$data.URL
+    ivar.doInfill = vars.all[ivar,]$infillGaps
 
-  # BUILD SOLAR DATA NETCDF
-  #----------------------------------------------
-  # Create net CDF files
-  if (haveGridGeometry_solar) {
-    message(paste('    NetCDF Solar data will be updated from ',format.Date(updateFrom,'%Y-%m-%d'),' to ', format.Date(updateTo,'%Y-%m-%d')));
+    ncdf.name = paste(ncdf.grid.name,'/',vars.all[ivar,]$ncdf.name, sep='')
 
     # Setup progress bar
     pbar <- progress::progress_bar$new(
-      format = "    :current of :total  [:bar] :percent in :elapsed",
+      format = paste("    ",ivar,": :current of :total  [:bar] :percent in :elapsed",sep=''),
       total = ntimepoints2Update, clear = FALSE, width= 80)
 
-    # Start Filling the netCDF grid.
-    message('    Downloading solar data and importing to netcdf file:')
-
-    # Start Filling the netCDF grid.
     for (date in 1:ntimepoints2Update){
 
       # Update progress bar
       pbar$tick()
 
-      # Get datestring for input filenames
+      # Get date string for input filenames
       datestring<-format(timepoints2Update[date], "%Y%m%d")
 
-      # Find index to the date to update within the net CDF grid
-      ind = as.integer(difftime(timepoints2Update[date], as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))+1
+      # Download data
+      var.failed = 1
+      destFile <- AWAPer::download.ASCII.file(ivar.url,
+                                              ivar.tmp,
+                                              workingFolder,
+                                              datestring)
 
-      # Update timePoints_netCDF time vector
-      timePoints_netCDF[ind] = ind-1;
+      # Read in grid and add to netCDF file
+      if (destFile$didFail == 0 && file.exists(destFile$file.name)) {
+        headerData.tmp <- AWAPer::get.ASCII.file.header(ivar.tmp,
+                                                        workingFolder,
+                                                        datestring,
+                                                        remove.file = F)
 
-      # Download the file
-      didFail=1
-      if (!is.na(urlSolarrad)) {
-        destFile <- AWAPer::download.ASCII.file(urlSolarrad, 'solarrad.', workingFolder, datestring)
-        destFile_solarrad <- destFile$file.name
-        didFail <- destFile$didFail
+        grid.tmp <- AWAPer::readin.ASCII.file(destFile$file.name,
+                                              gridgeo[ivar,]$nRows,
+                                              noData=gridgeo[ivar,]$nodata)
+
+        # Do infilling of NAs. Generally only included for gaos in solar radiation.
+        if (ivar.doInfill) {
+          # Infill NA values of grid by taking the local average and convert back to matrix.
+          grid.tmp <- raster::raster(grid.tmp)
+          grid.tmp <- raster::focal(grid.tmp, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
+          grid.tmp <- raster::focal(grid.tmp, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
+          grid.tmp <- raster::focal(grid.tmp, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
+          grid.tmp = raster::as.matrix(grid.tmp);
+        }
+
+        # Find index to the date to update within the net CDF grid
+        ind = as.integer(difftime(timepoints2Update[date], as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
+
+        # Put new grid in netCDF
+        ncdf4::ncvar_put( ncout, ivar.ncdf.name,
+                          grid.tmp, start=c(1, 1, ind),
+                          count = c(gridgeo[ivar,]$nCols, gridgeo[ivar,]$nRows, 1),
+                          verbose=F )
       }
 
-      # Get vapour pr grid and add to Net CDF grid
-      if (file.exists(destFile_solarrad) && didFail==0) {
-        # Re-extra header data in case the NODATA number chnages with time (resolving https://github.com/peterson-tim-j/AWAPer/issues/19)
-        headerData.tmp <- AWAPer::get.ASCII.file.header('solarrad.', workingFolder, datestring, remove.file=F)
-
-        # Import file
-        AWAPgrid <- AWAPer::readin.ASCII.file(destFile_solarrad, nRows_solar, noData=headerData.tmp$nodata)
-
-        # Infill NA values of grid by taking the local average and convert back to matrix.
-        AWAPgrid <- raster::raster(AWAPgrid)
-        AWAPgrid <- raster::focal(AWAPgrid, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
-        AWAPgrid <- raster::focal(AWAPgrid, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
-        AWAPgrid <- raster::focal(AWAPgrid, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
-        AWAPgrid = raster::as.matrix(AWAPgrid);
-
-        # Add to ncdf
-        ncdf4::ncvar_put( ncout, "solar/solarrad", AWAPgrid, start=c(1, 1, ind), count=c(nCols_solar, nRows_solar, 1), verbose=F )
-      }
-
-      if (file.exists(destFile_solarrad)  && !keepFiles)
-        file.remove(destFile_solarrad)
-
-      # Flush data to the netcdf file to avoid losses if code crashed.
-      if (date %% 365 == 0) {
-        message(paste('Syncing 365 days of data to netCDF file. The time point to be synched is:', format(timepoints2Update[date], "%Y-%m-%d")))
-        ncdf4::nc_sync(ncout)
-      }
-
+      # Delete downloaded file.
+      if (file.exists(destFile$file.name) && !keepFiles)
+        file.remove(destFile$file.name)
     }
 
-    # Updtate netCDF time variable
-    ncdf4::ncvar_put(ncout, "solar/time",timePoints_netCDF)
+    # Syncing variable data to netCDF file
+    ncdf4::nc_sync(ncout)
+
+    # Update start and end dates of the available data
+    ncdf4::ncatt_put(ncout,
+                     varid = ivar.ncdf.name,
+                     attname = 'Start_date',
+                     attval = format.Date(updateFrom,'%Y-%m-%d'))
+
+    ncdf4::ncatt_put(ncout,
+                     varid = ivar.ncdf.name,
+                     attname = 'End_date',
+                     attval = format.Date(updateTo,'%Y-%m-%d'))
   }
 
   # Close the file, writing data to disk
