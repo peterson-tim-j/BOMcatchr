@@ -33,7 +33,6 @@ get.ASCII.file.header <- function (data.type.label, workingFolder, datestring, r
   close(a)
   close(raw)
   if (remove.file) {
-    message(paste('... Deleting',des.file.name))
     didRemoveFile = tryCatch({file.remove(des.file.name)},finally=TRUE)
   }
 
