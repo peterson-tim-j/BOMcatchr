@@ -25,50 +25,64 @@ This example shows the steps required to build the netCDF data grid file.
 
 First, let's define the dates for the data grids. Here the data grids are created for data between the dates _updateTo_ and _updateTo_. If the latter two dates were not input then data would be downloaded from 1/1/1900 to yesterday.
 
+Note, in practice users often run _makeNetCDF_file_ once to build the netCDF data file that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDF grids for multiple projects, rather than re-building the netCDF grids for each project.
+
 ```{r}
-startDate = as.Date(Sys.Date()-15,"%Y-%m-%d")
-endDate = as.Date(Sys.Date()-5,"%Y-%m-%d")
+startDate <- as.Date(Sys.Date()-15,"%Y-%m-%d")
+endDate <- as.Date(Sys.Date()-5,"%Y-%m-%d")
 ```
 
 Next the file name for the netCDF grids need to be defined. Here we'll just use a temporary file. You should change this to a non-temporary file name and folder.
 ```{r}
-ncdfFilename = tempfile(fileext='.nc')
+ncdfFilename <- tempfile(fileext='.nc')
 ```
 
 Now we're ready to download and build the netCDF grids.
 
-The netCDF data file contains grids of daily rainfall, temperature, vapour pressure and solar radiation for all of Australia.
+The netCDF data file contains grids of daily rainfall, minimum and maximum temperature. Below, this will be updated to include vapour pressure and solar radiation for all of Australia.
 ```{r}
-ncdffile.name = makeNetCDF_file(ncdfFilename=ncdfFilename,
-                updateFrom=startDate, updateTo=endDate)
+ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdfFilename,
+                updateFrom=startDate, updateTo=endDate,
+                vars = c('precip','tmin','tmax'))
 ```
 
-## Update existing data grids
-
-Now that we've built the above file, the updating can be demonstrated. Here we'll updating the data grids to one day ago.
-
-Often users run _makeNetCDF_file_ once to build the netCDF data file that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDF grids for multiple projects, rather than re-building the netCDF grids for each project.
-
-Also, if _makeNetCDF_file_ is run with the the file name pointing to an existing file and _updateFrom=NA_ then the netCDF file will be updated to yesterday.
+Now let's get a summary of the netCDF file that we've created. Note that the output data.frame shows the expected variables over the expected date range.
 ```{r}
-ncdffile.name = makeNetCDF_file(ncdfFilename=ncdfFilename)
+summary.df <- AWAPer::summary(ncdffile.name)
+summary.df
 ```
 
-## Examine netCDF structures
-If you're curious, we can also examine the contents of out netCDF file.
+## Add a variable to an existing data grids
 
-First, let's open a read-only connection to the file.
+Now that we've built the above file, the updating can be demonstrated. Here we'll update the data grids to also include vapour pressure. Here the same date range will be used. Because the date range of the new variable equals the date range of the existing variables, only vapour pressure data is updated. This feature can be used to update the data of a single variable as required.
+
 ```{r}
-ncout <- ncdf4::nc_open(ncdffile.name, write=F)
+ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+                updateFrom=startDate, updateTo=endDate,
+                vars = c('vprp'))
 ```
 
-Now we can list the weather variables within the nerCDF file.
+Now let's check that the file includes both the original three variable plus vapour pressure.
 ```{r}
-names(ncout$var)
+summary.df <- AWAPer::summary(ncdffile.name)
+summary.df
+```
+## Add a variable to an existing data grids and update other variable
+
+Now lets add solar radiation. Here an earlier start date will be used. However, because the date range of all variables within the netCDF file must be equal, the date range of the other variables must also be updated.
+
+```{r}
+startDate <- startDate - 5
 ```
 
-For more detail, we can also print the contents of the netCDF file. Lastly, we close the connection to the file.
 ```{r}
-print(ncout)
-ncdf4::nc_close(ncout)
+ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+                updateFrom=startDate, updateTo=endDate,
+                vars = c('solarrad'))
+```
+
+Now let's check that the file includes both the prior four three variable plus solar radiation.
+```{r}
+summary.df <- AWAPer::summary(ncdffile.name)
+summary.df
 ```
