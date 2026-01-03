@@ -6,7 +6,9 @@
 #' returns a data.frame of variables, unit, stand and end dates of the data.
 #'
 #' @return
-#' data.frame of variables, units, time step an URLs to data.
+#' data.frame of variables, netcdf group for the variable
+#' (i.e. the grid geometry group) , time step, start and end date
+#' for the variable data .
 #'
 #' @examples
 #' vars = summary()
@@ -21,37 +23,59 @@ summary <- function(ncfile) {
     stop('ncdfFilename does not exists. It must first be built before a summary can be given.')
 
   # open netcdf file
-  ncout <- ncdf4::nc_open(ncdfFilename, write=F)
+  ncout <- RNetCDF::open.nc(ncdfFilename, write=F)
 
-  # Get the list of existing variables.
-  vars = names(ncout$var)
-  vars.trim = sub(".*?/", "", vars)
-  nvars = length(vars.trim)
+  # Get list of netCDF groups (one for each grid resolution)
+  grps = RNetCDF::grp.inq.nc(ncout)
+  ngrps = length(grps$grps)
 
   # Initialise outputs
-  summary.df = data.frame(from = rep(as.Date('0000-01-01', '%Y-%m-%d'), nvars),
-                              to = rep(as.Date('9999-12-31', '%Y-%m-%d'), nvars),
-                              units = rep('',nvars)
-                              )
-  row.names(summary.df) = vars
+  summary.df = data.frame(group = character(),
+                          var.string = character(),
+                          from = as.Date(character()),
+                          to = as.Date(character()),
+                          timestep = character(),
+                          units = character()  )
 
-  # Loop through each variable and get start and end dates, geometry
-  for (ivar in vars) {
+  # Get number of variables in all groups
+  for (igrp in grps$grps) {
+    nvars.tmp = RNetCDF::file.inq.nc(igrp)$nvars
 
-    summary.df[ivar,]$from = as.Date( ncdf4::ncatt_get(ncout, varid = ivar,
-                             attname = 'Start_date')$value,
-                            '%Y-%m-%d')
-    summary.df[ivar,]$to = as.Date( ncdf4::ncatt_get(ncout, varid = ivar,
-                             attname = 'End_date')$value,
-                            '%Y-%m-%d')
+    # Loop through each var of each group and get variable names
+    # ONLY of those with THREE dimensions. ie not those thatare just
+    # variables defining a dimension
+    for (i in 0:(nvars.tmp-1)) {
+      var.tmp = RNetCDF::var.inq.nc(igrp,i)
 
-    summary.df[ivar,]$units = ncdf4::ncatt_get(ncout, varid = ivar,
-                             attname = 'units')$value
+      if (var.tmp$ndims == 3) {
+        date.from =  RNetCDF::att.get.nc(igrp, i, 'Start_date')
+        date.to =  RNetCDF::att.get.nc(igrp, i, 'End_date')
+        timestep =  RNetCDF::att.get.nc(igrp, i, 'timestep')
+        units =  RNetCDF::att.get.nc(igrp, i, 'units')
+
+        date.from = as.Date(date.from, '%Y-%m-%d')
+        date.to = as.Date(date.to, '%Y-%m-%d')
+        grp.string = RNetCDF::grp.inq.nc(igrp)$name
+        var.string = paste(grp.string, '/', var.tmp$name, sep='' )
+
+        summary.df.new =  data.frame( group = grp.string,
+                                      var.string = var.string,
+                                      from = date.from,
+                                      to = date.to,
+                                      timestep = timestep,
+                                      units = units)
+
+        row.names(summary.df.new) = var.tmp$name
+
+        summary.df = rbind.data.frame(summary.df,
+                                      summary.df.new)
+      }
+
+    }
   }
-  row.names(summary.df) = vars.trim
 
   # close netcdf file
-  ncdf4::nc_close(ncout)
+  RNetCDF::close.nc(ncout)
 
   return(summary.df)
 }
