@@ -357,14 +357,17 @@ makeNetCDF_file <- function(
       RNetCDF::att.put.nc(grp,
                           'Long',
                           "axis",
+                          "NC_CHAR",
                           "X")
       RNetCDF::att.put.nc(grp,
                           'Lat',
                           "axis",
+                          "NC_CHAR",
                           "Y")
       RNetCDF::att.put.nc(grp,
                           'Time',
                           "axis",
+                          "NC_CHAR",
                           "T")
     }
     RNetCDF::close.nc(ncout)
