@@ -5,8 +5,8 @@
 #' makeNetCDF_file creates one netCDF file of daily climate data.
 #'
 #' @details
-#' One netCDF file is created than contains the contains precipitation, minimum
-#' daily temperature, maximum daily temperature and vapour pressure and the solar radiation data. It should span from 1/1/1900 to today
+#' One netCDF file is created than contains precipitation, minimum
+#' daily temperature, maximum daily temperature and vapour pressure and the solar radiation data. It should span from 1/1/1900 to yesterday
 #' and requires ~20GB of hard-drive space (using default compression). For the solar radiation, spatial gaps are infilled using a 3x3 moving average repeated 3 times. To minimise the runtime
 #' in extracting data, the netCDF file should be stored locally and not on a network drive. Also, building the file requires installation of 7zip.
 #'
@@ -21,11 +21,11 @@
 #'
 #' @param ncdfFilename is a file path (as string) and name to the netCDF file. The default file name and path is \code{file.path(getwd(),'AWAP.nc')}.
 #' @param updateFrom is a date string specifying the start date for the AWAP data. If
-#' \code{ncdfFilename} and \code{ncdfSolarFilename} are specified and exist, then the netCDF grids will be
+#' \code{ncdfFilename} is specified and exist, then the netCDF grids will be
 #'  updated with new data from \code{updateFrom}. To update the file from the end of the last day in the file
 #'  set \code{updateFrom=NA}. The default is \code{"1900-1-1"}.
 #' @param updateTo is a date string specifying the end date for the AWAP data. If
-#'  \code{ncdfFilename} and \code{ncdfSolarFilename} are specified and exist, then the netCDF grids will be
+#'  \code{ncdfFilename} is specified and exist, then the netCDF grids will be
 #'  updated with new data to \code{updateFrom}. The default is two days ago as YYYY-MM-DD.
 #' @param vars is a vector of variables names to build or update. The available variables are: daily precipitation,
 #' daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
@@ -66,7 +66,6 @@
 #' # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 #' # the same file names but \code{updateFrom=NA}.
 #' file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
-#'              ncdfSolarFilename=ncdfSolarFilename,
 #'              updateFrom=NA)
 #'
 #'  # Remove temp. file
@@ -75,7 +74,6 @@
 #' @export
 makeNetCDF_file <- function(
   ncdfFilename=file.path(getwd(),'AWAP.nc'),
-  ncdfSolarFilename=file.path(getwd(),'AWAP_solar.nc'),
   updateFrom = as.Date("1900-01-01","%Y-%m-%d"),
   updateTo  = as.Date(Sys.Date()-2,"%Y-%m-%d"),
   vars = rownames(get.variableSource()),
@@ -108,20 +106,12 @@ makeNetCDF_file <- function(
   nvars = length(vars)
 
   # Check that the ncdf files
-  ncdf.exists = F;
   vars.prior = c()
-  vars.prior.wgrid = vars.prior
   if (file.exists(ncdfFilename)) {
-    ncdf.exists = TRUE
-
-    # open netcdf file
-    ncout <- ncdf4::nc_open(ncdfFilename, write=F)
-
     # Get the list of existing variables.
-    vars.prior = names(ncout$var)
-    vars.prior.wgrid = vars.prior
-    vars.prior = sub(".*?/", "", vars.prior)
-    ncdf4::nc_close(ncout)
+    vars.prior.summary <- AWAPer::summary(ncdfFilename)
+    grid.prior = vars.prior.summary$group
+    vars.prior = row.names(vars.prior.summary)
 
     # Get new variables to add to netCDF file
     ind.vars2add = !(vars %in% vars.prior)
@@ -175,6 +165,10 @@ makeNetCDF_file <- function(
   # This is following the request from Em. Prof. Brian Ripley on 9/12/2020.
   options(timeout = max(300, getOption("timeout")))
 
+  # Test internet connection
+  if (!curl::has_internet())
+    stop('No internet connection appears available. Check connection.')
+
   # Test downloading of required data and get grid geometry.
   filedate_str = '20000101'
   gridgeo = data.frame(nCols  = rep(NA,nvars), nRows = rep(NA,nvars),
@@ -212,8 +206,8 @@ makeNetCDF_file <- function(
       if (all(gridgeo[ivar,] == gridgeo.unique[i,])
           && any(vars.prior %in% ivar)) {
 
-          grd.tmp = vars.prior.wgrid[vars.prior %in% ivar]
-          grd.tmp = sub("/.*", "", grd.tmp)
+          grd.tmp = vars.prior.summary[ivar,]$group
+          #grd.tmp = sub("/.*", "", grd.tmp)
           vars.all[ivar,]$ncdf.grid.name = grd.tmp
 
           gridgeo.unique.newnames[i] = grd.tmp
@@ -248,127 +242,220 @@ makeNetCDF_file <- function(
   grid.dims =vector('list',ngrids)
   names(grid.dims) = row.names(gridgeo.unique)
   for (i in 1:ngrids) {
-    Longvector = seq(gridgeo.unique[i,]$SWLong,
+    longVec = seq(gridgeo.unique[i,]$SWLong,
                      by = gridgeo.unique[i,]$DPixel,
                      length.out = gridgeo.unique[i,]$nCols)
-    Latvector = seq(gridgeo.unique[i,]$SWLat,
+    latVec = seq(gridgeo.unique[i,]$SWLat,
                     by = gridgeo.unique[i,]$DPixel,
                     length.out = gridgeo.unique[i,]$nRows)
 
-    # define dimensions
-    ncdf.grid.name = names(grid.dims)[i]
-    londim <- ncdf4::ncdim_def(paste(ncdf.grid.name, "/Long",sep=''),"degrees",vals=Longvector)
-    latdim <- ncdf4::ncdim_def(paste(ncdf.grid.name, "/Lat",sep='') ,"degrees",vals=Latvector)
-    timedim <- ncdf4::ncdim_def(paste(ncdf.grid.name,"/time",sep=''),
-                                paste("days since 1900-01-01 00:00:00.0 -0:00"),
-                                unlim=T, vals=0:(length(timepoints)-1), calendar='standard')
-    grid.dims[[i]] = list(londim, latdim, timedim)
+    timeVec = 0:(length(timepoints)-1)
+
+    grid.dims[[i]] = list(long = longVec, lat = latVec, t = timeVec)
   }
 
 
   # Add new variables to netCDF
   if (nvars.2add>0) {
+
+    # open or create netCDF file
+    if (nvars.2update==0) {
+
+      # Create of no updates, just new variables.
+      ncout <- RNetCDF::create.nc(filename=ncdfFilename,
+                                  format = 'netcdf4')
+
+      # Add global attributes
+      RNetCDF::att.put.nc(ncout,'NC_GLOBAL',
+                          "title",
+                          "NC_CHAR",
+                          "BoM climate data")
+      RNetCDF::att.put.nc(ncout,'NC_GLOBAL',
+                          "institution",
+                          "NC_CHAR",
+                          "Data: BoM, R Code: Tim J. Peterson and Conrad Wasko")
+      RNetCDF::att.put.nc(ncout,'NC_GLOBAL',
+                          "history",
+                          "NC_CHAR", paste("Created on", date()))
+
+      # Get existing grid groups
+      grid.prior = character()
+
+    } else {
+      ncout <- RNetCDF::open.nc(ncdfFilename, write=T)
+    }
+
+    # Add groups and dimensions for each grid geometry
+    ind = which(!(names(grid.dims) %in% grid.prior))
+    for (i in ind) {
+      # Add new group
+      grp = RNetCDF::grp.def.nc(ncout, names(grid.dims)[i])
+
+      # Add CRS attribute to group
+      RNetCDF::att.put.nc(grp,
+                          variable = 'NC_GLOBAL',
+                          name = "CRS",
+                          type = "NC_CHAR",
+                          value = '+proj=longlat +ellps=GRS80')
+
+      # Add time dimension to group. Variable for dim also added
+      # to allow attributes.
+      RNetCDF::dim.def.nc(grp,
+                          'Time',
+                          unlim=TRUE)
+      RNetCDF::var.def.nc(grp,
+                          varname = 'Time',
+                          vartype = 'NC_FLOAT',
+                          dimensions = 0,
+                          deflate = compressionLevel)
+      RNetCDF::att.put.nc(grp,'Time',
+                          "units",
+                          "NC_CHAR",
+                          paste("days since 1900-01-01 00:00:00.0 -0:00"))
+
+      # Define spatial dimensions
+      vals= grid.dims[[i]]$long
+      ndimvals = length(vals)
+      RNetCDF::dim.def.nc(grp, 'Long',
+                          dimlength = ndimvals,
+                          unlim=FALSE)
+      RNetCDF::var.def.nc(grp,
+                          varname = 'Long',
+                          vartype = 'NC_FLOAT',
+                          dimensions = 1,
+                          deflate = compressionLevel)
+      RNetCDF::att.put.nc(grp,'Long',
+                          "units",
+                          "NC_CHAR",
+                          "degrees")
+      RNetCDF::att.put.nc(grp,'Long',
+                          "vals",
+                          "NC_FLOAT",
+                          vals)
+
+      vals= grid.dims[[i]]$lat
+      ndimvals = length(vals)
+      RNetCDF::dim.def.nc(grp, 'Lat',
+                          dimlength = ndimvals,
+                          unlim=FALSE)
+      RNetCDF::var.def.nc(grp,
+                          varname = 'Lat',
+                          vartype = 'NC_FLOAT',
+                          dimensions = 2,
+                          deflate = compressionLevel)
+      RNetCDF::att.put.nc(grp,'Lat',
+                          "units",
+                          "NC_CHAR",
+                          "degrees")
+      RNetCDF::att.put.nc(grp,
+                          'Lat',
+                          "vals",
+                          "NC_FLOAT",
+                          vals)
+
+      # Add attributes axis labels (for raster extraction)
+      RNetCDF::att.put.nc(grp,
+                          'Long',
+                          "axis",
+                          "X")
+      RNetCDF::att.put.nc(grp,
+                          'Lat',
+                          "axis",
+                          "Y")
+      RNetCDF::att.put.nc(grp,
+                          'Time',
+                          "axis",
+                          "T")
+    }
+    RNetCDF::close.nc(ncout)
+
     # Create netCDF variable definitions for each data type
+    ncout <- RNetCDF::open.nc(ncdfFilename, write=T)
     fillvalue <- NA
     vardef.list = list()
     for (ivar in vars.2add) {
 
+      # Get existing group ID
       ncdf.grid.name = vars.all[ivar,]$ncdf.grid.name
-      ncdf.name = paste(ncdf.grid.name,'/',vars.all[ivar,]$ncdf.name, sep='')
-      vardef.list[[ivar]] <- ncdf4::ncvar_def(name = ncdf.name,
-                                              units = vars.all[ivar,]$units,
-                                              dim = grid.dims[[ vars.all[ivar,]$ncdf.grid.name ]],
-                                              missval = fillvalue,
-                                              longname = vars.all[ivar,]$label,
-                                              prec = "single",
-                                              compression = compressionLevel)
+      grp = RNetCDF::grp.inq.nc(ncout, ncdf.grid.name)$self
+
+      # Define variable in group
+      RNetCDF::var.def.nc(grp,
+                          ivar,
+                          'NC_FLOAT',
+                          c('Long', 'Lat', 'Time'),
+                          deflate = compressionLevel)
+
+      # Add variable attributes
+      RNetCDF::att.put.nc(grp,
+                          ivar,
+                          'Start_date',
+                          "NC_CHAR",
+                          "0000-1-1")
+      RNetCDF::att.put.nc(grp,
+                          ivar,
+                          'End_date',
+                          "NC_CHAR",
+                          "9999-12-31")
+      RNetCDF::att.put.nc(grp,
+                          ivar,
+                          'timestep',
+                          "NC_CHAR",
+                          vars.all[ivar,]$timestep)
+      RNetCDF::att.put.nc(grp,
+                          ivar,
+                          "units",
+                          "NC_CHAR",
+                          vars.all[ivar,]$units)
+      RNetCDF::att.put.nc(grp,
+                          ivar,
+                          "longname",
+                          "NC_CHAR",
+                          vars.all[ivar,]$label)
+
+      # Add attribute for missing value
+      RNetCDF::att.put.nc(grp,
+                          ivar,
+                          "_FillValue",
+                          "NC_FLOAT",
+                          gridgeo[ivar,]$nodata)
+
     }
-
-    # open or create netCDF file
-    if (nvars.2update==0) {
-      # Create of no updates, just new variables.
-      ncout <- ncdf4::nc_create(filename=ncdfFilename,vars=vardef.list, force_v4=T)
-
-      # Add global attributes
-      ncdf4::ncatt_put(ncout,0,"title","BoM climate data")
-      ncdf4::ncatt_put(ncout,0,"institution","Data: BoM, R Code: Tim J. Peterson and Conrad Wasko")
-
-      # Add attributes for the start and end dates of each variable
-      for (ivar in vars.2add) {
-        ncdf.grid.name = vars.all[ivar,]$ncdf.grid.name
-        ncdf.name = paste(ncdf.grid.name,'/',vars.all[ivar,]$ncdf.name, sep='')
-
-        ncdf4::ncatt_put(ncout,
-                         varid = ncdf.name,
-                         attname = 'Start_date',
-                         attval = "0000-1-1")
-
-        ncdf4::ncatt_put(ncout,
-                         varid = ncdf.name,
-                         attname = 'End_date',
-                         attval = "9999-12-31")
-
-      }
-
-    } else {
-      # Open existing netCDF file.
-      ncout <- ncdf4::nc_open(ncdfFilename, write=T)
-
-      # Add each new variable and daa start and end dates.
-      for (ivar in vars.2add) {
-        ncout <- ncdf4::ncvar_add(ncout, vardef.list[[ivar]])
-
-        ncdf.grid.name = vars.all[ivar,]$ncdf.grid.name
-        ncdf.name = paste(ncdf.grid.name,'/',vars.all[ivar,]$ncdf.name, sep='')
-
-        ncdf4::ncatt_put(ncout,
-                         varid = ncdf.name,
-                         attname = 'Start_date',
-                         attval = "0000-1-1")
-
-        ncdf4::ncatt_put(ncout,
-                         varid = ncdf.name,
-                         attname = 'End_date',
-                         attval = "9999-12-31")
-      }
-
-      # Write to netCDF file and close
-      ncdf4::nc_sync(ncout)
-    }
-
-    # Set dimension axis
-    for (ivar in vars.2add) {
-      ivar.dim.name = vars.all[ivar,]$ncdf.grid.name
-      ncdf4::ncatt_put(ncout, paste(ivar.dim.name,"/Long",sep=''),"axis","X")
-      ncdf4::ncatt_put(ncout,paste(ivar.dim.name ,"/Lat",sep='') ,"axis","Y")
-      ncdf4::ncatt_put(ncout,paste(ivar.dim.name ,"/time",sep=''),"axis","T")
-    }
-    ncdf4::nc_close(ncout)
+    RNetCDF::close.nc(ncout)
   }
 
   # Get the start and end dates for each variable to be updated
-  existing.dates <- AWAPer::summary(ncdfFilename)
+  vars.summary <- AWAPer::summary(ncdfFilename)
 
   # Set update from to the end of the current data
   if (is.na(updateFrom))
-    updateFrom = min(existing.dates$to)
+    updateFrom = min(vars.summary$to)
 
   # If the earliest and latest dates from existing data differ, then
   # change updateFrom and updateTo
-  if (diff(range(existing.dates$from))>0 &&
-      min(existing.dates$from) < updateFrom &&
-      min(existing.dates$from) > as.Date('0000-01-01', '%Y-%m-%d')) {
-
-      updateFrom = min(existing.dates$from)
-      message('... updateFrom reduced to ensure all variables have the same start date.')
+  if (any(updateFrom > vars.summary[vars.2update,]$from)) {
+    updateFrom = min(vars.summary[vars.2update,]$from)
+    message('... updateFrom reduced to ensure all variables have the same start date.')
   }
-  if (diff(range(existing.dates$to))>0 &&
-      max(existing.dates$to) > updateTo &&
-      max(existing.dates$to) < as.Date('9999-12-31', '%Y-%m-%d')) {
-
-      updateTo = max(existing.dates$to)
-      message('... updateTo increased to ensure all variables have the same end date.')
+  if (any(updateTo < vars.summary[vars.2update,]$to)) {
+    updateTo = max(vars.summary[vars.2update,]$to)
+    message('... updateTo increased to ensure all variables have the same end date.')
   }
+
+  # if (diff(range(vars.summary$from))>0 &&
+  #     min(vars.summary$from) < updateFrom &&
+  #     min(vars.summary$from) > as.Date('0000-01-01', '%Y-%m-%d')) {
+  #
+  #     updateFrom = min(vars.summary$from)
+  #     message('... updateFrom reduced to ensure all variables have the same start date.')
+  # }
+  # if (diff(range(vars.summary$to))>0 &&
+  #     max(vars.summary$to) > updateTo &&
+  #     max(vars.summary$to) < as.Date('9999-12-31', '%Y-%m-%d')) {
+  #
+  #     updateTo = max(vars.summary$to)
+  #     message('... updateTo increased to ensure all variables have the same end date.')
+  # }
 
   # Filter vars.2update. If the input vars exists in the netCDF and the data range
   # is wholly within the existing data range, then only update this variable.
@@ -376,8 +463,8 @@ makeNetCDF_file <- function(
   ind = rep(TRUE, length(vars.2update))
   names(ind) = vars.2update
   for (ivar in vars.2update) {
-    if (existing.dates[ivar,]$from >= updateFrom &&
-        existing.dates[ivar,]$to <= updateTo)
+    if (updateFrom >= vars.summary[ivar,]$from  &&
+        updateTo <= vars.summary[ivar,]$to)
       ind[ivar] = F
   }
   vars.2update = vars.2update[ind]
@@ -412,16 +499,14 @@ makeNetCDF_file <- function(
                 format.Date(updateTo,'%Y-%m-%d')));
 
   message('... Downloading data for each variable and importing to netcdf file:')
-  ncout <- ncdf4::nc_open(ncdfFilename, write=T)
+  ncout <- RNetCDF::open.nc(ncdfFilename, write=T)
   for (ivar in vars.2modify) {
 
-    ivar.tmp = paste(ivar,".",sep="")
-    ivar.grid.name = vars.all[ivar,]$ncdf.grid.name
-    ivar.ncdf.name =  paste(ivar.grid.name,'/',vars.all[ivar,]$ncdf.name, sep='')
+    # Get group for current var
+    ivar.grid = vars.summary[ivar,]$group
+    igrp = RNetCDF::grp.inq.nc(ncout, grpname = ivar.grid)$self
     ivar.url = vars.all[ivar,]$data.URL
     ivar.doInfill = vars.all[ivar,]$infillGaps
-
-    ncdf.name = paste(ncdf.grid.name,'/',vars.all[ivar,]$ncdf.name, sep='')
 
     # Setup progress bar
     pbar <- progress::progress_bar$new(
@@ -439,13 +524,13 @@ makeNetCDF_file <- function(
       # Download data
       var.failed = 1
       destFile <- AWAPer::download.ASCII.file(ivar.url,
-                                              ivar.tmp,
+                                              ivar,
                                               workingFolder,
                                               datestring)
 
       # Read in grid and add to netCDF file
       if (destFile$didFail == 0 && file.exists(destFile$file.name)) {
-        headerData.tmp <- AWAPer::get.ASCII.file.header(ivar.tmp,
+        headerData.tmp <- AWAPer::get.ASCII.file.header(ivar,
                                                         workingFolder,
                                                         datestring,
                                                         remove.file = F)
@@ -468,10 +553,12 @@ makeNetCDF_file <- function(
         ind = as.integer(difftime(timepoints2Update[date], as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
 
         # Put new grid in netCDF
-        ncdf4::ncvar_put( ncout, ivar.ncdf.name,
-                          grid.tmp, start=c(1, 1, ind),
-                          count = c(gridgeo[ivar,]$nCols, gridgeo[ivar,]$nRows, 1),
-                          verbose=F )
+        RNetCDF::var.put.nc(igrp,
+                            ivar,
+                            grid.tmp,
+                            start=c(1, 1, ind),
+                            count = c(gridgeo[ivar,]$nCols, gridgeo[ivar,]$nRows, 1),
+                            na.mode=1)
       }
 
       # Delete downloaded file.
@@ -480,22 +567,23 @@ makeNetCDF_file <- function(
     }
 
     # Syncing variable data to netCDF file
-    ncdf4::nc_sync(ncout)
+    RNetCDF::sync.nc(ncout)
 
     # Update start and end dates of the available data
-    ncdf4::ncatt_put(ncout,
-                     varid = ivar.ncdf.name,
-                     attname = 'Start_date',
-                     attval = format.Date(updateFrom,'%Y-%m-%d'))
-
-    ncdf4::ncatt_put(ncout,
-                     varid = ivar.ncdf.name,
-                     attname = 'End_date',
-                     attval = format.Date(updateTo,'%Y-%m-%d'))
+    RNetCDF::att.put.nc(igrp,
+                        ivar,
+                        'Start_date',
+                        "NC_CHAR",
+                        format.Date(updateFrom,'%Y-%m-%d'))
+    RNetCDF::att.put.nc(igrp,
+                        ivar,
+                        'End_date',
+                        "NC_CHAR",
+                        format.Date(updateTo,'%Y-%m-%d'))
   }
 
   # Close the file, writing data to disk
-  ncdf4::nc_close(ncout)
+  RNetCDF::close.nc(ncout)
 
   message('Data construction FINISHED.')
   duration <- difftime(Sys.time(), sys.start.time, units="secs")
