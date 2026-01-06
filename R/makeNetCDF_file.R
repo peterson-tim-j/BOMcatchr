@@ -109,7 +109,7 @@ makeNetCDF_file <- function(
   vars.prior = c()
   if (file.exists(ncdfFilename)) {
     # Get the list of existing variables.
-    vars.prior.summary <- AWAPer::summary(ncdfFilename)
+    vars.prior.summary <- AWAPer::file.summary(ncdfFilename)
     grid.prior = vars.prior.summary$group
     vars.prior = row.names(vars.prior.summary)
 
@@ -306,7 +306,7 @@ makeNetCDF_file <- function(
       RNetCDF::var.def.nc(grp,
                           varname = 'Time',
                           vartype = 'NC_FLOAT',
-                          dimensions = 0,
+                          dimensions = 'Time',
                           deflate = compressionLevel)
       RNetCDF::att.put.nc(grp,'Time',
                           "units",
@@ -321,16 +321,15 @@ makeNetCDF_file <- function(
                           unlim=FALSE)
       RNetCDF::var.def.nc(grp,
                           varname = 'Long',
-                          vartype = 'NC_FLOAT',
-                          dimensions = 1,
+                          vartype = 'NC_DOUBLE',
+                          dimensions = 'Long',
                           deflate = compressionLevel)
       RNetCDF::att.put.nc(grp,'Long',
                           "units",
                           "NC_CHAR",
                           "degrees")
-      RNetCDF::att.put.nc(grp,'Long',
-                          "vals",
-                          "NC_FLOAT",
+      RNetCDF::var.put.nc(grp,
+                          'Long',
                           vals)
 
       vals= grid.dims[[i]]$lat
@@ -340,17 +339,15 @@ makeNetCDF_file <- function(
                           unlim=FALSE)
       RNetCDF::var.def.nc(grp,
                           varname = 'Lat',
-                          vartype = 'NC_FLOAT',
-                          dimensions = 2,
+                          vartype = 'NC_DOUBLE',
+                          dimensions = 'Lat',
                           deflate = compressionLevel)
       RNetCDF::att.put.nc(grp,'Lat',
                           "units",
                           "NC_CHAR",
                           "degrees")
-      RNetCDF::att.put.nc(grp,
+      RNetCDF::var.put.nc(grp,
                           'Lat',
-                          "vals",
-                          "NC_FLOAT",
                           vals)
 
       # Add attributes axis labels (for raster extraction)
@@ -428,7 +425,7 @@ makeNetCDF_file <- function(
   }
 
   # Get the start and end dates for each variable to be updated
-  vars.summary <- AWAPer::summary(ncdfFilename)
+  vars.summary <- AWAPer::file.summary(ncdfFilename)
 
   # Set update from to the end of the current data
   if (is.na(updateFrom))
