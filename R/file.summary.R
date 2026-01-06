@@ -1,6 +1,6 @@
 #' Get a summary of an existing netCDF data file.
 #'
-#' \code{summary} sumarises the netCDF variables, units and date ranges.
+#' \code{file.summary} sumarises the netCDF variables, units and date ranges.
 #'
 #' This function opens an existing netCDF file built using the package and
 #' returns a data.frame of variables, unit, stand and end dates of the data.
@@ -11,19 +11,19 @@
 #' for the variable data .
 #'
 #' @examples
-#' vars = summary()
+#' vars = file.summary()
 #'
 #' @export
-summary <- function(ncfile) {
+file.summary <- function(ncfile) {
 
-  if (!is.character(ncdfFilename))
+  if (!is.character(ncfile))
     stop('ncdfFilename is invalid. It must be a character string for the file name.')
 
-  if (!file.exists(ncdfFilename))
+  if (!file.exists(ncfile))
     stop('ncdfFilename does not exists. It must first be built before a summary can be given.')
 
   # open netcdf file
-  ncout <- RNetCDF::open.nc(ncdfFilename, write=F)
+  ncout <- RNetCDF::open.nc(ncfile, write=F)
 
   # Get list of netCDF groups (one for each grid resolution)
   grps = RNetCDF::grp.inq.nc(ncout)
