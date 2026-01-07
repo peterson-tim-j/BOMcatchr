@@ -35,7 +35,9 @@ file.summary <- function(ncfile) {
                           from = as.Date(character()),
                           to = as.Date(character()),
                           timestep = character(),
-                          units = character()  )
+                          units = character(),
+                          ellipsoid.crs = character()
+                          )
 
   # Get number of variables in all groups
   for (igrp in grps$grps) {
@@ -58,12 +60,15 @@ file.summary <- function(ncfile) {
         grp.string = RNetCDF::grp.inq.nc(igrp)$name
         var.string = paste(grp.string, '/', var.tmp$name, sep='' )
 
+        ellipsoid.crs = RNetCDF::att.get.nc(igrp, 'NC_GLOBAL', 'CRS')
+
         summary.df.new =  data.frame( group = grp.string,
                                       var.string = var.string,
                                       from = date.from,
                                       to = date.to,
                                       timestep = timestep,
-                                      units = units)
+                                      units = units,
+                                      ellipsoid.crs = ellipsoid.crs)
 
         row.names(summary.df.new) = var.tmp$name
 

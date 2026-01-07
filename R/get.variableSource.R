@@ -20,6 +20,7 @@ get.variableSource <- function() {
                         timestep = rep('', nvars),
                         data.URL = rep('', nvars),
                         ncdf.name = rep('', nvars),
+                        ellipsoid.crs = rep('', nvars),
                         infillGaps = rep(F, nvars),
                         row.names = vars)
   var.data['precip',] <- c('Total daily precipitation',
@@ -27,6 +28,7 @@ get.variableSource <- function() {
                            'daily',
                            'https://www.bom.gov.au/web03/ncc/www/awap/rainfall/totals/daily/grid/0.05/history/nat/',
                            'precip',
+                           '+proj=longlat +ellps=GRS80',
                            F)
 
   var.data['tmin',] <- c(  'Min daily temperature',
@@ -34,6 +36,7 @@ get.variableSource <- function() {
                            'daily',
                            'https://www.bom.gov.au/web03/ncc/www/awap/temperature/minave/daily/grid/0.05/history/nat/',
                            'tmin',
+                           '+proj=longlat +ellps=GRS80',
                            F)
 
   var.data['tmax',] <- c(  'Max daily temperature',
@@ -41,6 +44,7 @@ get.variableSource <- function() {
                            'daily',
                            'https://www.bom.gov.au/web03/ncc/www/awap/temperature/maxave/daily/grid/0.05/history/nat/',
                            'tmax',
+                           '+proj=longlat +ellps=GRS80',
                            F)
 
   var.data['vprp',] <- c(  '3pm daily vapour pressure',
@@ -48,6 +52,7 @@ get.variableSource <- function() {
                            'daily',
                            'https://www.bom.gov.au/web03/ncc/www/awap/vprp/vprph15/daily/grid/0.05/history/nat/',
                            'vprp',
+                           '+proj=longlat +ellps=GRS80',
                            F)
 
   var.data['solarrad',] <- c(  'Total daily solar radiation',
@@ -55,6 +60,7 @@ get.variableSource <- function() {
                            'daily',
                            'https://www.bom.gov.au/web03/ncc/www/awap/solar/solarave/daily/grid/0.05/history/nat/',
                            'solarrad',
+                           '+proj=longlat +ellps=GRS80',
                            T)
 
   return(var.data)
