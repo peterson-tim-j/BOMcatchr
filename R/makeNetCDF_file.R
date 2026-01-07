@@ -29,8 +29,9 @@
 #'  updated with new data to \code{updateFrom}. The default is two days ago as YYYY-MM-DD.
 #' @param vars is a vector of variables names to build or update. The available variables are: daily precipitation,
 #' daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
-#' Any or all of the defaults are available. The default is \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad')} and
-#' provided by \code{rownames(get.variableSource())}.
+#' Any or all of the defaults are available. If \code{vars=''} and the netCDF does not exist, then the default is
+#' \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad')} and provided by \code{rownames(get.variableSource())}.
+#' However, if \code{vars=''} and the netCDF file does exist, then default is to use the variable names in the file.
 #' @param workingFolder is the file path (as string) in which to download the AWAP grid files. The default is \code{getwd()}.
 #' @param keepFiles is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.
 #' @param compressionLevel is the netCDF compression level between 1 (low) and 9 (high), and \code{NA} for no compression.
@@ -76,7 +77,7 @@ makeNetCDF_file <- function(
   ncdfFilename=file.path(getwd(),'AWAP.nc'),
   updateFrom = as.Date("1900-01-01","%Y-%m-%d"),
   updateTo  = as.Date(Sys.Date()-2,"%Y-%m-%d"),
-  vars = rownames(get.variableSource()),
+  vars = '',
   workingFolder=getwd(),
   keepFiles=FALSE,
   compressionLevel = 5,
@@ -93,6 +94,17 @@ makeNetCDF_file <- function(
 
   if (!is.character(ncdfFilename))
     stop('ncdfFilename is invalid. It must be a character string for the file name.')
+
+  if (!is.character(vars))
+    stop('vars must be a character vector of variables names.')
+
+  # If vars is empty, then set the defaults.
+  if (length(vars)==1 && vars=='') {
+    if (file.exists(ncdfFilename))
+      vars = rownames(AWAPer::file.summary(ncdfFilename))
+    else
+      vars = rownames(get.variableSource())
+  }
 
   # Check the input variables
   vars.all = get.variableSource()
@@ -175,6 +187,7 @@ makeNetCDF_file <- function(
                        SWLong = rep(NA,nvars), SWLat = rep(NA,nvars),
                        DPixel = rep(NA,nvars), nodata= rep(NA,nvars),
                        has.geom = rep(F,nvars),
+                       ellipsoid.crs = rep(NA,nvars),
                        row.names = vars)
   message('... Testing downloading of each variable.')
   for (ivar in vars.2modify) {
@@ -190,6 +203,9 @@ makeNetCDF_file <- function(
     gridgeo[ivar,]$DPixel <- headerData$DPixel
     gridgeo[ivar,]$nodata <- headerData$nodata
     gridgeo[ivar,]$has.geom = TRUE;
+
+    # Add ellipsoid CRS from get.variableSource()
+    gridgeo[ivar,]$ellipsoid.crs = vars.all[ivar,]$ellipsoid.crs
   }
 
   # Identify the unique grid dimensions and assign grid
@@ -251,7 +267,10 @@ makeNetCDF_file <- function(
 
     timeVec = 0:(length(timepoints)-1)
 
-    grid.dims[[i]] = list(long = longVec, lat = latVec, t = timeVec)
+    grid.dims[[i]] = list(long = longVec,
+                          lat = latVec,
+                          t = timeVec,
+                          crs = gridgeo.unique[i,]$ellipsoid.crs)
   }
 
 
@@ -291,12 +310,12 @@ makeNetCDF_file <- function(
       # Add new group
       grp = RNetCDF::grp.def.nc(ncout, names(grid.dims)[i])
 
-      # Add CRS attribute to group
+      # Add ellipoid CRS to the grid
       RNetCDF::att.put.nc(grp,
                           variable = 'NC_GLOBAL',
                           name = "CRS",
                           type = "NC_CHAR",
-                          value = '+proj=longlat +ellps=GRS80')
+                          value = grid.dims[[i]]$crs)
 
       # Add time dimension to group. Variable for dim also added
       # to allow attributes.
@@ -464,7 +483,8 @@ makeNetCDF_file <- function(
   names(ind) = vars.2update
   for (ivar in vars.2update) {
     if (updateFrom >= vars.summary[ivar,]$from  &&
-        updateTo <= vars.summary[ivar,]$to)
+        updateTo <= vars.summary[ivar,]$to &&
+        !(any(ivar %in% vars)))
       ind[ivar] = F
   }
   vars.2update = vars.2update[ind]
