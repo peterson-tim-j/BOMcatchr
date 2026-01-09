@@ -47,7 +47,9 @@ Next, let's make the data grids over this period.
 ```{r}
 fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
-                         updateTo = date.to)
+                         updateTo = date.to,
+                         vars = c('precip','tmin', 'tmax',
+                         'vprp', 'solarrad'))
 ```
 
 ## Load a catchment boundary
@@ -66,13 +68,13 @@ The estimation of ET uses the _evapotranspiration_ package. It requires a set of
 data(constants,package='Evapotranspiration')
 ```
 
-The area weighted daily meteorological variables and PET can then be calculated as follows. Note, because only two months are being extracted and \code{getET=TRUE}, the default method to handle missing data and anomalies (e.g. Tmin > Tmax) during ET calculations is automatically changed from the default of \code{"DoY average"} to \code{"neighbouring average"}.
+The area weighted daily meteorological variables and PET can then be calculated as follows, given \code{vars} includes \code{et}. Note, because only two months are being extracted, the default method to handle missing data and anomalies (e.g. Tmin > Tmax) during ET calculations is automatically changed from the default of \code{"DoY average"} to \code{"neighbouring average"}.
 ```{r}
 climateData.daily = extractCatchmentData(ncdfFilename=ncdfFilename,
                       extractFrom=date.from, extractTo=date.to,
+                      vars = c('precip','tmin', 'tmax','vprp', 'solarrad', 'et'),
                       locations=catchments, temporal.timestep = 'daily',
                       temporal.function.name='sum',spatial.function.name='var',
-                      getTmin=T, getTmax=T, getVprp=T, getSolarrad=T, getET=T,
                       ET.function='ET.MortonCRAE', ET.timestep = 'monthly',
                       ET.Mortons.est='wet areal ET', ET.constants= constants)
 ```
@@ -147,10 +149,10 @@ First let's extract only precipitation _getPrecip_ is set to _TRUE and _getTmin_
 
 ```{r}
 PrecipData.monthly = extractCatchmentData(ncdfFilename=ncdfFilename,
-                     extractFrom=date.from, extractTo=date.to,
+                     extractFrom=date.from,
+                     extractTo=date.to,
+                     vars = c('precip'),
                      locations=catchments,
-                     getTmin = F, getTmax = F, getVprp = F,
-                     getSolarrad = F, getET = F,
                      spatial.function.name = '',
                      temporal.timestep = 'monthly',
                      temporal.function.name = 'sum')
@@ -169,14 +171,17 @@ Next let's extract all variables and calculate the PET and then map.
 
 ```{r}
 metData.monthly = extractCatchmentData(ncdfFilename=ncdfFilename,
-                     extractFrom=date.from, extractTo=date.to,
+                     extractFrom=date.from,
+                     extractTo=date.to,
+                     vars = c('precip','tmin', 'tmax','vprp', 'solarrad', 'et'),
                      locations=catchments,
                      spatial.function.name = '',
                      temporal.timestep = 'monthly',
                      temporal.function.name = 'sum',
-                     getTmin=T, getTmax=T, getVprp=T, getSolarrad=T, getET=T,
-                     ET.function='ET.MortonCRAE', ET.timestep = 'monthly',
-                     ET.Mortons.est='wet areal ET', ET.constants= constants)
+                     ET.function = 'ET.MortonCRAE',
+                     ET.timestep = 'monthly',
+                     ET.Mortons.est='wet areal ET',
+                     ET.constants= constants)
 ```
 The monthly total PET can then be mapped to show the spatial variability. The map below shows considerable spatial variability. Much of this variability would not emerges if only point PET at the catchment centroid was used.
 ```{r}
@@ -238,23 +243,29 @@ sp::proj4string(coordinates.data) = '+proj=longlat +ellps=GRS80 +no_defs'
 Next, the meteorological data and PET are derived using both the area weighted approach and centroids.
 ```{r}
 metData.monthly.weighted = extractCatchmentData(ncdfFilename=ncdfFilename,
-                     extractFrom=date.from, extractTo=date.to,
+                     extractFrom=date.from,
+                     extractTo=date.to,
+                     vars = c('precip','tmin', 'tmax','vprp', 'solarrad', 'et'),
                      locations=catchments,
                      spatial.function.name = 'sum',
                      temporal.timestep = 'monthly',
                      temporal.function.name = 'sum',
-                     getTmin=T, getTmax=T, getVprp=T, getSolarrad=T, getET=T,
-                     ET.function='ET.MortonCRAE', ET.timestep = 'monthly',
-                     ET.Mortons.est='wet areal ET', ET.constants= constants)
+                     ET.function='ET.MortonCRAE',
+                     ET.timestep = 'monthly',
+                     ET.Mortons.est='wet areal ET',
+                     ET.constants= constants)
 
 metData.monthly.centroid = extractCatchmentData(ncdfFilename=ncdfFilename,
-                     extractFrom=date.from, extractTo=date.to,
+                     extractFrom=date.from,
+                     extractTo=date.to,
+                     vars = c('precip','tmin', 'tmax','vprp', 'solarrad', 'et'),
                      locations=coordinates.data,
                      temporal.timestep = 'monthly',
                      temporal.function.name = 'sum',
-                     getTmin=T, getTmax=T, getVprp=T, getSolarrad=T, getET=T,
-                     ET.function='ET.MortonCRAE', ET.timestep = 'monthly',
-                     ET.Mortons.est='wet areal ET', ET.constants= constants)
+                     ET.function='ET.MortonCRAE',
+                     ET.timestep = 'monthly',
+                     ET.Mortons.est='wet areal ET',
+                     ET.constants= constants)
 ```
 
 Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the the rainfall deficit. It shows that using centroid estimate introduces errors of upto 6 mm/month error.
