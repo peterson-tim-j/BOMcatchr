@@ -2,7 +2,8 @@
 
 export(download.ASCII.file)
 export(extractCatchmentData)
+export(file.summary)
 export(get.ASCII.file.header)
-export(getURLs)
+export(get.variableSource)
 export(makeNetCDF_file)
 export(readin.ASCII.file)
