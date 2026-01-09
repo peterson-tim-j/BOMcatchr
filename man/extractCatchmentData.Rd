@@ -6,23 +6,17 @@
 \usage{
 extractCatchmentData(
   ncdfFilename = file.path(getwd(), "AWAP.nc"),
-  ncdfSolarFilename = file.path(getwd(), "AWAP_solar.nc"),
   extractFrom = as.Date("1900-01-01", "\%Y-\%m-\%d"),
   extractTo = as.Date(Sys.Date(), "\%Y-\%m-\%d"),
-  getPrecip = TRUE,
-  getTmin = TRUE,
-  getTmax = TRUE,
-  getVprp = TRUE,
-  getSolarrad = TRUE,
-  getET = TRUE,
-  DEM.res = 10,
+  vars = "",
   locations = NULL,
   temporal.timestep = "daily",
   temporal.function.name = "mean",
   spatial.function.name = "var",
   interpMethod = "",
   ET.function = "ET.MortonCRAE",
-  ET.Mortons.est = "potential ET",
+  ET.DEM.res = 10,
+  ET.Mortons.est = "wet areal ET",
   ET.Turc.humid = F,
   ET.timestep = "monthly",
   ET.missing_method = "DoY average",
@@ -33,26 +27,17 @@ extractCatchmentData(
 \arguments{
 \item{ncdfFilename}{is a full file name (as string) to the netCDF file.}
 
-\item{ncdfSolarFilename}{is the full file name (as string) to the netCDF file.}
-
 \item{extractFrom}{is a date string specifying the start date for data extraction. The default is \code{"1900-1-1"}.}
 
 \item{extractTo}{is a date string specifying the end date for the data extraction. The default is today's date as YYYY-MM-DD.}
 
-\item{getPrecip}{logical variable for extracting precipitation. Default is \code{TRUE}.}
-
-\item{getTmin}{logical variable for extracting Tmin. Default is \code{TRUE}.}
-
-\item{getTmax}{logical variable for extracting Tmax. Default is \code{TRUE}.}
-
-\item{getVprp}{logical variable for extracting vapour pressure. Default is \code{TRUE}.}
-
-\item{getSolarrad}{logical variable for extracting solar radiation. Default is \code{TRUE}.}
-
-\item{getET}{logical variable for calculating Morton's potential ET. Note, to calculate set \code{getTmin=T}, \code{getTmax=T},
-\code{getVprp=T} and \code{getSolarrad=T}. Default is \code{TRUE}.}
-
-\item{DEM.res}{is the zoom resolution for the land surface elevation. \code{elevatr} package is used to extract elevation (metres) from AWS Open Data Terrain Tiles. This input controls the zoom resolution. Higher values increase accuracy, but are significantly slower. See details. Default is 10.}
+\item{vars}{is a vector of variables names to extract. The available variables are: daily precipitation,
+daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation and evapotranspiration.
+The input vector for these options are \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad', 'et')}. Importantly, the input \code{et} is
+calculated from the available gridded data (see \code{ET.} inputs below). To calculate the ET, all of the required inputs for the calculation
+ET must also be extracted (i.e. the input for such would generally be \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad', 'et')}.
+Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
+provided by \code{rownames(AWAPer::file.summary(ncdfFilename))}.}
 
 \item{locations}{is either the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
 already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS 80, and the first column must be a unique ID.}
@@ -71,10 +56,14 @@ is \code{''}. This will set the interpolation to \code{'simple'} when \code{loca
 
 \item{ET.function}{character string for the evapotranspiration function to be used. The methods that can be derived from the AWAP data are are \code{\link[Evapotranspiration]{ET.Abtew}},
 \code{\link[Evapotranspiration]{ET.HargreavesSamani}}, \code{\link[Evapotranspiration]{ET.JensenHaise}}, \code{\link[Evapotranspiration]{ET.Makkink}}, \code{\link[Evapotranspiration]{ET.McGuinnessBordne}}, \code{\link[Evapotranspiration]{ET.MortonCRAE}} ,
-\code{\link[Evapotranspiration]{ET.MortonCRWE}}, \code{\link[Evapotranspiration]{ET.Turc}}. Default is \code{\link[Evapotranspiration]{ET.MortonCRAE}}.}
+\code{\link[Evapotranspiration]{ET.MortonCRWE}}, \code{\link[Evapotranspiration]{ET.Turc}}. Default is \code{\link[Evapotranspiration]{ET.MortonCRAE}} i.e. the  complementary relationship for areal evapotranspiration .}
+
+\item{ET.DEM.res}{is the zoom resolution for the land surface elevation and is required to calculate the ET. \code{elevatr} package is used to extract elevation (metres) from
+AWS Open Data Terrain Tiles. This input controls the zoom resolution. Higher values increase accuracy, but are significantly slower. See details. Default is 10.}
 
 \item{ET.Mortons.est}{character string for the type of Morton's ET estimate. For \code{ET.MortonCRAE}, the options are \code{potential ET},\code{wet areal ET} or \code{actual areal ET}.
-For \code{ET.MortonCRWE}, the options are \code{potential ET} or \code{shallow lake ET}. The default is \code{potential ET}.}
+For \code{ET.MortonCRWE}, the options are \code{potential ET} or \code{shallow lake ET}. The default is \code{wet areal ET}, which when \code{ET.function = 'ET.MortonCRAE'} it provides
+an estimate of the wet areal potential evapotranspiration.}
 
 \item{ET.Turc.humid}{logical variable for the Turc function using the humid adjustment.See \code{\link[Evapotranspiration]{ET.Turc}}. For now this is fixed at \code{F}.}
 
@@ -125,7 +114,7 @@ are dependent upon the end date extracted. Re-running the estimation of ET with 
 prior to 1990.
 
 Some measures of ET require land surface elevation. Here, elevation at the centre of each 0.05 degree grid cell is obtained using the \code{elevatr} package, which here uses data from the
-Amazon Web Service AWS Open Data Terrain Tiles. The data sources change with the user set \code{DEM.res} zoom. The options are
+Amazon Web Service AWS Open Data Terrain Tiles. The data sources change with the user set \code{ET.DEM.res} zoom. The options are
 1 to 15. The default of 10 is reasonably computationally efficient and has a resolution of about 108 m, with is acceptable
 given the 0.05 degree resolution of the BOM source data grids equates to about 5 km x 5 km.
 For details see \url{https://github.com/tilezen/joerd/blob/master/docs/data-sources.md}
@@ -146,16 +135,14 @@ library(sp)
 startDate = as.Date("2000-01-01","\%Y-\%m-\%d")
 endDate = as.Date("2000-01-14","\%Y-\%m-\%d")
 
-# Set names for netCDF files.
+# Set names for netCDF file.
 ncdfFilename = tempfile(fileext='.nc')
-ncdfSolarFilename = tempfile(fileext='.nc')
 
 # Build netCDF grids and over a defined time period.
 # Only precip data is to be added to the netCDF files.
 # This is because the URLs for the other variables are set to zero.
 \donttest{
-file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
-             ncdfSolarFilename=ncdfSolarFilename,
+file.name = makeNetCDF_file(ncdfFilename=ncdfFilename,
              updateFrom=startDate, updateTo=endDate,
              urlTmin=NA, urlTmax=NA, urlVprp=NA, urlSolarrad=NA)
 
@@ -166,11 +153,9 @@ catchments = catchments[1,]
 
 # Extract daily precip. data (not Tmin, Tmax, VPD, ET).
 # Note, the input "locations" can also be a file to a ESRI shape file.
-climateData = extractCatchmentData(ncdfFilename=file.names$ncdfFilename,
-              ncdfSolarFilename=file.names$ncdfSolarFilename,
+climateData = extractCatchmentData(ncdfFilename=file.name,
               extractFrom=startDate, extractTo=endDate,
-              getTmin = FALSE, getTmax = FALSE, getVprp = FALSE,
-              getSolarrad = FALSE, getET = FALSE,
+              vars = c('precip'),
               locations=catchments,
               temporal.timestep = 'daily')
 

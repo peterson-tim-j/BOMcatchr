@@ -2,70 +2,60 @@
 % Please edit documentation in R/makeNetCDF_file.R
 \name{makeNetCDF_file}
 \alias{makeNetCDF_file}
-\title{Build netCDF files of the Bureau of Meteorology (Australia) national gridded climate data.}
+\title{Build a netCDF file of the Bureau of Meteorology (Australia) national gridded climate data.}
 \usage{
 makeNetCDF_file(
   ncdfFilename = file.path(getwd(), "AWAP.nc"),
-  ncdfSolarFilename = file.path(getwd(), "AWAP_solar.nc"),
   updateFrom = as.Date("1900-01-01", "\%Y-\%m-\%d"),
   updateTo = as.Date(Sys.Date() - 2, "\%Y-\%m-\%d"),
+  vars = rownames(get.variableSource()),
   workingFolder = getwd(),
   keepFiles = FALSE,
   compressionLevel = 5,
-  urlPrecip = getURLs()$precip,
-  urlTmin = getURLs()$Tmin,
-  urlTmax = getURLs()$Tmax,
-  urlVprp = getURLs()$vprp,
-  urlSolarrad = getURLs()$solarrad
+  vars.sourceData = get.variableSource()
 )
 }
 \arguments{
 \item{ncdfFilename}{is a file path (as string) and name to the netCDF file. The default file name and path is \code{file.path(getwd(),'AWAP.nc')}.}
 
-\item{ncdfSolarFilename}{is the file path (as string) and name to the netCDF file. The default namefile and path \code{file.path(getwd(),'AWAP_solar.nc')}.}
-
 \item{updateFrom}{is a date string specifying the start date for the AWAP data. If
-\code{ncdfFilename} and \code{ncdfSolarFilename} are specified and exist, then the netCDF grids will be
- updated with new data from \code{updateFrom}. To update the files from the end of the last day in the file
+\code{ncdfFilename} is specified and exist, then the netCDF grids will be
+ updated with new data from \code{updateFrom}. To update the file from the end of the last day in the file
  set \code{updateFrom=NA}. The default is \code{"1900-1-1"}.}
 
 \item{updateTo}{is a date string specifying the end date for the AWAP data. If
-\code{ncdfFilename} and \code{ncdfSolarFilename} are specified and exist, then the netCDF grids will be
+\code{ncdfFilename} is specified and exist, then the netCDF grids will be
 updated with new data to \code{updateFrom}. The default is two days ago as YYYY-MM-DD.}
+
+\item{vars}{is a vector of variables names to build or update. The available variables are: daily precipitation,
+daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
+Any or all of the defaults are available. The default is \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad')} and
+provided by \code{rownames(get.variableSource())}.}
 
 \item{workingFolder}{is the file path (as string) in which to download the AWAP grid files. The default is \code{getwd()}.}
 
 \item{keepFiles}{is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.}
 
 \item{compressionLevel}{is the netCDF compression level between 1 (low) and 9 (high), and \code{NA} for no compression.
-Note, data extracion runtime may slightly increase with the level of compression. The default is \code{5}.}
+Note, data extraction runtime may slightly increase with the level of compression. The default is \code{5}.}
 
-\item{urlPrecip}{URL to the folder containing the AWAP daily precipittaion grids. The default is from \code{getURLs()$precip}.}
-
-\item{urlTmin}{URL to the folder containing the AWAP daily minimum temperature grids. The default is from \code{getURLs()$Tmin}.}
-
-\item{urlTmax}{URL to the folder containing the AWAP daily maximum temperature grids. The default is from \code{getURLs()$Tmax}.}
-
-\item{urlVprp}{URL to the folder containing the AWAP daily vapour pressure grids. The default is from \code{getURLs()$vprp}.}
-
-\item{urlSolarrad}{URL to the folder containing the AWAP daily solar radiation grids. The default is from \code{getURLs()$solarrad}.}
+\item{vars.sourceData}{is a data.frame of variable unit, time step and source URLs. This input is provided in-case the default URLs need to be changed.
+The default is \code{get.variableSource())}}
 }
 \value{
-A list variable containing the full file name to the AWAP data and the AWAP solar data.
+A string containing the full file name to the netCDF file.
 }
 \description{
-\code{makeNetCDF_file} builds two netCDF files containing Australian climate data.
+\code{makeNetCDF_file} builds one netCDF file containing Australian climate data.
 }
 \details{
-makeNetCDF_file creates two netCDF files of daily climate data.
+makeNetCDF_file creates one netCDF file of daily climate data.
 
 
-One of the netCDF files contains precipitation, minimum
-daily temperature, maximum daily temperature and vappour pressure. It should span from 1/1/1900 to today
-and requires ~20GB of hard-drive space (using default compression). The second netCDF file contains the solar radiation and started from 1/1/1990 and be ~24GB and
-spatial gaps are infilled using a 3x3 moving average repeated 3 times. To minimise the runtime
-in extracting data, both files should be stored locally and not on a network drive. Also, building
-the files requires installation of 7zip.
+One netCDF file is created than contains precipitation, minimum
+daily temperature, maximum daily temperature and vapour pressure and the solar radiation data. It should span from 1/1/1900 to yesterday
+and requires ~20GB of hard-drive space (using default compression). For the solar radiation, spatial gaps are infilled using a 3x3 moving average repeated 3 times. To minimise the runtime
+in extracting data, the netCDF file should be stored locally and not on a network drive. Also, building the file requires installation of 7zip.
 
 The climate data is sourced from the  Bureau of Meteorology Australian Water Availability Project
 (\url{http://www.bom.gov.au/jsp/awap/}.  For details see Jones et al. (2009).
@@ -73,7 +63,7 @@ The climate data is sourced from the  Bureau of Meteorology Australian Water Ava
 The output from this function is required for all data extraction functions within this package and must
 be ran prior.
 
-The function can be used to build netCDF files from stratch or to update existng netCDF files previously
+The function can be used to a build netCDF file from scratch or to update an existing netCDF file previously
 derived from this function. To not build or update a variable, set its respective URL to \code{NA}.
 }
 \examples{
@@ -85,25 +75,21 @@ derived from this function. To not build or update a variable, set its respectiv
 startDate = as.Date(Sys.Date()-15,"\%Y-\%m-\%d")
 endDate = as.Date(Sys.Date()-5,"\%Y-\%m-\%d")
 
-# Set names for netCDF files (in the system temp. directory).
+# Set names for the netCDF file (in the system temp. directory).
 ncdfFilename = tempfile(fileext='.nc')
-ncdfSolarFilename = tempfile(fileext='.nc')
 
 \donttest{
 # Build netCDF grids for all data but only over the defined time period.
-file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
-             ncdfSolarFilename=ncdfSolarFilename,
+file.names = makeNetCDF_file(ncdfFilename=ncdfFilename
              updateFrom=startDate, updateTo=endDate)
 
 # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 # the same file names but \code{updateFrom=NA}.
 file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
-             ncdfSolarFilename=ncdfSolarFilename,
              updateFrom=NA)
 
- # Remove temp. files
+ # Remove temp. file
  unlink(ncdfFilename)
- unlink(ncdfSolarFilename)
 }
 }
 \references{
