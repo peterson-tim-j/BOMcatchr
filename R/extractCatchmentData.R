@@ -30,7 +30,7 @@
 #' prior to 1990.
 #'
 #' Some measures of ET require land surface elevation. Here, elevation at the centre of each 0.05 degree grid cell is obtained using the \code{elevatr} package, which here uses data from the
-#' Amazon Web Service AWS Open Data Terrain Tiles. The data sources change with the user set \code{DEM.res} zoom. The options are
+#' Amazon Web Service AWS Open Data Terrain Tiles. The data sources change with the user set \code{ET.DEM.res} zoom. The options are
 #' 1 to 15. The default of 10 is reasonably computationally efficient and has a resolution of about 108 m, with is acceptable
 #' given the 0.05 degree resolution of the BOM source data grids equates to about 5 km x 5 km.
 #' For details see \url{https://github.com/tilezen/joerd/blob/master/docs/data-sources.md}
@@ -43,14 +43,13 @@
 #' @param ncdfFilename is a full file name (as string) to the netCDF file.
 #' @param extractFrom is a date string specifying the start date for data extraction. The default is \code{"1900-1-1"}.
 #' @param extractTo is a date string specifying the end date for the data extraction. The default is today's date as YYYY-MM-DD.
-#' @param getPrecip logical variable for extracting precipitation. Default is \code{TRUE}.
-#' @param getTmin logical variable for extracting Tmin. Default is \code{TRUE}.
-#' @param getTmax logical variable for extracting Tmax. Default is \code{TRUE}.
-#' @param getVprp logical variable for extracting vapour pressure. Default is \code{TRUE}.
-#' @param getSolarrad logical variable for extracting solar radiation. Default is \code{TRUE}.
-#' @param getET logical variable for calculating Morton's potential ET. Note, to calculate set \code{getTmin=T}, \code{getTmax=T},
-#' \code{getVprp=T} and \code{getSolarrad=T}. Default is \code{TRUE}.
-#' @param DEM.res is the zoom resolution for the land surface elevation. \code{elevatr} package is used to extract elevation (metres) from AWS Open Data Terrain Tiles. This input controls the zoom resolution. Higher values increase accuracy, but are significantly slower. See details. Default is 10.
+#' @param vars is a vector of variables names to extract. The available variables are: daily precipitation,
+#' daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation and evapotranspiration.
+#' The input vector for these options are \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad', 'et')}. Importantly, the input \code{et} is
+#' calculated from the available gridded data (see \code{ET.} inputs below). To calculate the ET, all of the required inputs for the calculation
+#' ET must also be extracted (i.e. the input for such would generally be \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad', 'et')}.
+#' Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
+#' provided by \code{rownames(AWAPer::file.summary(ncdfFilename))}.
 #' @param locations is either the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
 #' already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS 80, and the first column must be a unique ID.
 #' @param temporal.timestep character string for the time step of the output data. The options are \code{daily}, \code{weekly}, \code{monthly}, \code{quarterly},
@@ -63,9 +62,12 @@
 #' is \code{''}. This will set the interpolation to \code{'simple'} when \code{locations} is a polygon(s) and to \code{'bilinear'} when \code{locations} are points.
 #' @param ET.function character string for the evapotranspiration function to be used. The methods that can be derived from the AWAP data are are \code{\link[Evapotranspiration]{ET.Abtew}},
 #' \code{\link[Evapotranspiration]{ET.HargreavesSamani}}, \code{\link[Evapotranspiration]{ET.JensenHaise}}, \code{\link[Evapotranspiration]{ET.Makkink}}, \code{\link[Evapotranspiration]{ET.McGuinnessBordne}}, \code{\link[Evapotranspiration]{ET.MortonCRAE}} ,
-#' \code{\link[Evapotranspiration]{ET.MortonCRWE}}, \code{\link[Evapotranspiration]{ET.Turc}}. Default is \code{\link[Evapotranspiration]{ET.MortonCRAE}}.
+#' \code{\link[Evapotranspiration]{ET.MortonCRWE}}, \code{\link[Evapotranspiration]{ET.Turc}}. Default is \code{\link[Evapotranspiration]{ET.MortonCRAE}} i.e. the  complementary relationship for areal evapotranspiration .
+#' @param ET.DEM.res is the zoom resolution for the land surface elevation and is required to calculate the ET. \code{elevatr} package is used to extract elevation (metres) from
+#' AWS Open Data Terrain Tiles. This input controls the zoom resolution. Higher values increase accuracy, but are significantly slower. See details. Default is 10.
 #' @param ET.Mortons.est character string for the type of Morton's ET estimate. For \code{ET.MortonCRAE}, the options are \code{potential ET},\code{wet areal ET} or \code{actual areal ET}.
-#'  For \code{ET.MortonCRWE}, the options are \code{potential ET} or \code{shallow lake ET}. The default is \code{potential ET}.
+#' For \code{ET.MortonCRWE}, the options are \code{potential ET} or \code{shallow lake ET}. The default is \code{wet areal ET}, which when \code{ET.function = 'ET.MortonCRAE'} it provides
+#' an estimate of the wet areal potential evapotranspiration.
 #' @param ET.Turc.humid logical variable for the Turc function using the humid adjustment.See \code{\link[Evapotranspiration]{ET.Turc}}. For now this is fixed at \code{F}.
 #' @param ET.timestep character string for the evapotranpiration time step. Options are \code{daily},  \code{monthly}, \code{annual} but the options are dependent upon the chosen \code{ET.function}. The default is \code{'monthly'}.
 #' @param ET.missing_method character string for interpolation method for missing variables required for ET calculation. The options are \code{'monthly average'}, \code{'seasonal average'}, \code{'DoY average'} and \code{'neighbouring average'}. Default is \code{'DoY average'} but when the extraction duration is less than two years, the default is \code{'neighbouring average'}. See \code{\link[Evapotranspiration]{ReadInputs}}
@@ -116,8 +118,7 @@
 #' # Note, the input "locations" can also be a file to a ESRI shape file.
 #' climateData = extractCatchmentData(ncdfFilename=file.name,
 #'               extractFrom=startDate, extractTo=endDate,
-#'               getTmin = FALSE, getTmax = FALSE, getVprp = FALSE,
-#'               getSolarrad = FALSE, getET = FALSE,
+#'               vars = c('precip'),
 #'               locations=catchments,
 #'               temporal.timestep = 'daily')
 #'
@@ -136,20 +137,15 @@ extractCatchmentData <- function(
     ncdfFilename=file.path(getwd(),'AWAP.nc'),
     extractFrom = as.Date("1900-01-01","%Y-%m-%d"),
     extractTo  = as.Date(Sys.Date(),"%Y-%m-%d"),
-    getPrecip = TRUE,
-    getTmin = TRUE,
-    getTmax = TRUE,
-    getVprp = TRUE,
-    getSolarrad = TRUE,
-    getET = TRUE,
-    DEM.res=10,
+    vars = '',
     locations=NULL,
     temporal.timestep = 'daily',
     temporal.function.name = 'mean',
     spatial.function.name = 'var',
     interpMethod = '',
     ET.function = 'ET.MortonCRAE',
-    ET.Mortons.est = 'potential ET',
+    ET.DEM.res = 10,
+    ET.Mortons.est = 'wet areal ET',
     ET.Turc.humid=F,
     ET.timestep = 'monthly',
     ET.missing_method="DoY average",
@@ -163,19 +159,44 @@ extractCatchmentData <- function(
   if (!file.exists(ncdfFilename))
     stop(paste("The following ncdfFilename input data file could not be found:",ncdfFilename))
 
-  # Open NetCDF grids
-  ncout <- ncdf4::nc_open(ncdfFilename)
+  if (!is.character(vars))
+    stop('vars must be a character vector of variables names.')
+
+  # If vars is empty, then extract all variables in the file.
+  if (length(vars)==1 && vars=='') {
+    vars = rownames(AWAPer::file.summary(ncdfFilename))
+  }
+  # Check if vars include ET. If so remove and set getET=T
+  getET = F
+  if (any(vars %in% 'et')) {
+    ind = which(vars %in% 'et')
+    vars = vars[-ind]
+    getET = T
+  }
 
   # Check if the required variable is within the netcdf file.
-  netCDF.variables = names(ncout$var)
-  if (getTmin & !any(netCDF.variables=='nonsolar/tmin'))
-    stop('getTmin is true but the netCDF file was not built with tmin data. Rebuild the netCDF file.')
-  if (getTmax & !any(netCDF.variables=='nonsolar/tmax'))
-    stop('getTmax is true but the netCDF file was not built with tmax data. Rebuild the netCDF file.')
-  if (getVprp & !any(netCDF.variables=='nonsolar/vprp'))
-    stop('getVprp is true but the netCDF file was not built with vprp data. Rebuild the netCDF file.')
-  if (getPrecip & !any(netCDF.variables=='nonsolar/precip'))
-    stop('getPrecip is true but the netCDF file was not built with precip data. Rebuild the netCDF file.')
+  vars.prior.summary <- AWAPer::file.summary(ncdfFilename)
+  vars.prior = row.names(vars.prior.summary)
+  if (any(!(vars %in% vars.prior))) {
+    stop('The netCDF file does not contain data for the requested variables. Update the netCDF grid and try again.')
+  }
+  nvars = length(vars)
+
+  # Filter netCDF df summary to the variables to be extracted.
+  filt = vars.prior %in% vars
+  vars.extract.summary = vars.prior.summary[filt,]
+  grids.extract = unique(vars.extract.summary$group)
+
+
+  # netCDF.variables = names(ncout$var)
+  # if (getTmin & !any(netCDF.variables=='nonsolar/tmin'))
+  #   stop('getTmin is true but the netCDF file was not built with tmin data. Rebuild the netCDF file.')
+  # if (getTmax & !any(netCDF.variables=='nonsolar/tmax'))
+  #   stop('getTmax is true but the netCDF file was not built with tmax data. Rebuild the netCDF file.')
+  # if (getVprp & !any(netCDF.variables=='nonsolar/vprp'))
+  #   stop('getVprp is true but the netCDF file was not built with vprp data. Rebuild the netCDF file.')
+  # if (getPrecip & !any(netCDF.variables=='nonsolar/precip'))
+  #   stop('getPrecip is true but the netCDF file was not built with precip data. Rebuild the netCDF file.')
 
   # Build time points to update
   if (is.character(extractFrom))
@@ -192,6 +213,7 @@ extractCatchmentData <- function(
 
   # Check time step
   temporal.timestep.options = c('daily','weekly','monthly','quarterly','annual', 'period')
+  temporal.timestep.index = numeric()
   if (!is.character(temporal.timestep)) {
     if (!is.integer(temporal.timestep))
       stop('temporal.timestep must be a character string or an integer vector.')
@@ -210,14 +232,14 @@ extractCatchmentData <- function(
   # Check temporal analysis funcion is valid.
   data.junk = t(as.matrix(stats::runif(100, 0.0, 1.0)*100))
   result = tryCatch({
-    apply(data.junk, 1,FUN=temporal.function.name)
-  }, warning = function(w) {
-    message(paste("Warning temporal.function.name produced the following",w))
-  }, error = function(e) {
-    stop(paste('temporal.function.name produced an error when applied using test data:',e))
-  }, finally = {
-    rm(data.junk)
-  }
+      apply(data.junk, 1,FUN=temporal.function.name)
+    }, warning = function(w) {
+      message(paste("Warning temporal.function.name produced the following",w))
+    }, error = function(e) {
+      stop(paste('temporal.function.name produced an error when applied using test data:',e))
+    }, finally = {
+      rm(data.junk)
+    }
   )
 
   # Check ET inputs
@@ -275,22 +297,21 @@ extractCatchmentData <- function(
     ET.var.names = colnames(ET.inputdata.filt)[2:6]
 
     # If all required inputs are to be extracted for Mortions PET
-    if (ET.inputdata.filt$Tmin[1] && !getTmin)
+    if (ET.inputdata.filt$Tmin[1] && !('tmin' %in% vars))
       stop('Calculation of ET for the given function requires extractions of tmin (i.e. set getTmin=T)')
-    if (ET.inputdata.filt$Tmax[1] && !getTmax)
+    if (ET.inputdata.filt$Tmax[1] && !('tmax' %in% vars))
       stop('Calculation of ET for the given function requires extractions of tmax (i.e. set getTmax=T)')
-    if (ET.inputdata.filt$va[1] && !getVprp)
+    if (ET.inputdata.filt$va[1] && !('vprp' %in% vars))
       stop('Calculation of ET for the given function requires extractions of tmax (i.e. set getVprp=T)')
-    if (ET.inputdata.filt$Precip[1] && !getPrecip)
+    if (ET.inputdata.filt$Precip[1] && !('precip' %in% vars))
       stop('Calculation of ET for the given function requires extractions of precip (i.e. set getPrecip=T)')
-    if (ET.inputdata.filt$Rs[1] && !getSolarrad)
-      stop('Calculation of ET for the given function requires extractions of solar radiation (i.e. set getSolarrad=T)')
+    if (ET.inputdata.filt$Rs[1] && !('solarrad' %in% vars))
+        stop('Calculation of ET for the given function requires extractions of solar radiation (i.e. set getSolarrad=T)')
+    if (!is.numeric(ET.DEM.res))
+      stop('ET.DEM.res must be a numeric value between 1 anf 15.')
 
-    if (!is.numeric(DEM.res))
-      stop('DEM.res must be a numeric value between 1 anf 15.')
-
-    if (DEM.res < 1 || DEM.res>15)
-      stop('DEM.res must be a numeric value between 1 anf 15.')
+    if (ET.DEM.res < 1 || ET.DEM.res>15)
+      stop('ET.DEM.res must be a numeric value between 1 anf 15.')
   }
 
   # Open file with polygons
@@ -346,9 +367,11 @@ extractCatchmentData <- function(
   }
 
   # Check if the spatial data should be returned or analysed.
-  do.spatial.analysis=T
-  if (islocationsPolygon && is.na(spatial.function.name) || (is.character(spatial.function.name) && spatial.function.name=='')) {
-    do.spatial.analysis=F
+  do.spatial.analysis=F
+  if (islocationsPolygon) {
+    do.spatial.analysis=T
+    if (is.na(spatial.function.name) || (is.character(spatial.function.name) && spatial.function.name==''))
+        do.spatial.analysis = F
   }
 
   if (do.spatial.analysis) {
@@ -366,99 +389,30 @@ extractCatchmentData <- function(
     )
   }
 
-  # # Open solar rad netCDF file
-  # if (getSolarrad)
-  #   ncout_solar <- ncdf4::nc_open(ncdfSolarFilename)
-
   # Get netCDF geometry
-  timePoints <- ncdf4::ncvar_get(ncout, "nonsolar/time")
-  tunits <- ncdf4::ncatt_get(ncout, "nonsolar/time", "units")
-  nTimePoints = length(timePoints);
-  Long <- ncdf4::ncvar_get(ncout, "nonsolar/Long")
-  Lat <- ncdf4::ncvar_get(ncout, "nonsolar/Lat")
-  if (getSolarrad) {
-    timePoints_solar <- ncdf4::ncvar_get(ncout, "solar/time")
-    tunits <- ncdf4::ncatt_get(ncout, "solar/time", "units")
-    nTimePoints_solar = length(timePoints_solar);
-    Long_solar <- ncdf4::ncvar_get(ncout, "solar/Long")
-    Lat_solar <- ncdf4::ncvar_get(ncout, "solar/Lat")
-  }
-
-  # Convert the ncdf time to R time.
-  # This is achieved by spliting the time units string into fields.
-  # Adapted form http://geog.uoregon.edu/bartlein/courses/geog607/Rmd/netCDF_01.htm.
-  tustr <- strsplit(tunits$value, " ")
-  tdstr <- strsplit(unlist(tustr)[3], "-")
-  tmonth = as.integer(unlist(tdstr)[2])
-  tday = as.integer(unlist(tdstr)[3])
-  tyear = as.integer(unlist(tdstr)[1])
-  timePoints_R = as.Date(chron::chron(timePoints, origin = c(month=tmonth, day=tday, year=tyear),format=c(dates = "y-m-d")));
-
-  # Get start and end date of netCDF data
-  doDataExtendCheck = F
-  if (length(tustr[[1]])==12) {
-    ncdf.dataFrom = as.Date(tustr[[1]][8], '%Y-%m-%d')
-    ncdf.dataTo = as.Date(tustr[[1]][12], '%Y-%m-%d')
-    doDataExtendCheck = T
-  }
-
-  if (getSolarrad) {
-    tustr <- strsplit(tunits$value, " ")
-    tdstr <- strsplit(unlist(tustr)[3], "-")
-    tmonth = as.integer(unlist(tdstr)[2])
-    tday = as.integer(unlist(tdstr)[3])
-    tyear = as.integer(unlist(tdstr)[1])
-    timePoints_solar_R = as.Date(chron::chron(timePoints_solar, origin = c(tmonth, tday, tyear),format=c(dates = "y-m-d")));
-
-    # Get start and end datea of netCDF data
-    if (length(tustr[[1]]==12)) {
-      ncdf_solar.dataFrom = as.Date(tustr[[1]][8], '%Y-%m-%d')
-      ncdf_solar.dataTo = as.Date(tustr[[1]][12], '%Y-%m-%d')
-    }
-  }
+  ncdf.dataFrom = max(vars.extract.summary$from)
+  ncdf.dataTo = min(vars.extract.summary$to)
+  timePoints = seq.Date(ncdf.dataFrom, ncdf.dataTo, by='day')
 
   # Build and provide summary of extraction dates and data extent.
   message('Extraction data summary:')
-  if (doDataExtendCheck) {
+  # Write summary of Net CDF data.
+  message(paste('    NetCDF climate data exists from', ncdf.dataFrom,'to', ncdf.dataTo));
 
-    # Write summary of Net CDF data.
-    message(paste('    NetCDF non-solar radiation climate data exists from', ncdf.dataFrom,'to', ncdf.dataTo));
-    if (getSolarrad)
-      message(paste('    NetCDF solar radiation data exists from', ncdf_solar.dataFrom,'to', ncdf_solar.dataTo));
-
-    # Warn user is the requested extraction dates are outside of the data record length.
-    if (getSolarrad) {
-      if (extractFrom < max(ncdf.dataFrom,ncdf_solar.dataFrom)) {
-        message('    WARNING: The extraction start date is prior to the existing data start date.');
-        message('             Dates are adjusted accordingly.');
-        message('             Consider extending the existing date range using makeNetCDF_file()');
-      }
-      if (extractTo > min(ncdf.dataTo, ncdf_solar.dataTo)) {
-        message('    WARNING: The extraction end date is after to the existing data end date.');
-        message('             Dates are adjusted accordingly.');
-        message('             Consider extending the existing date range using makeNetCDF_file()');
-      }
-    } else {
-      if (extractFrom < ncdf.dataFrom) {
-        message('    WARNING: The extraction start date is prior to the existing data start date.');
-        message('             Dates are adjusted accordingly.');
-        message('             Consider extending the existing date range using makeNetCDF_file()');
-      }
-      if (extractTo > ncdf.dataTo) {
-        message('    WARNING: The extraction end date is after to the existing data end date.');
-        message('             Dates are adjusted accordingly.');
-        message('             Consider extending the existing date range using makeNetCDF_file()');
-      }
-    }
-
-    # Limit the extraction time points to the data range
-    extractFrom = max(c(extractFrom, ncdf.dataFrom))
-    extractto = min(c(extractTo, ncdf.dataTo))
-    if (getSolarrad) {
-      extractFrom = min(c(extractFrom,ncdf_solar.dataFrom));
-      extractTo = min(c(extractTo,ncdf_solar.dataTo));
-    }
+  if (extractFrom < ncdf.dataFrom) {
+    message('    WARNING: The extraction start date is prior to the existing data start date.');
+    message('             Dates are adjusted accordingly.');
+    message('             Consider extending the existing date range using makeNetCDF_file()');
   }
+  if (extractTo > ncdf.dataTo) {
+    message('    WARNING: The extraction end date is after to the existing data end date.');
+    message('             Dates are adjusted accordingly.');
+    message('             Consider extending the existing date range using makeNetCDF_file()');
+  }
+
+  # Limit the extraction time points to the data range
+  extractFrom = max(c(extractFrom, ncdf.dataFrom))
+  extractTo = min(c(extractTo, ncdf.dataTo))
 
   if (extractTo < extractFrom) {
     stop('extractTo date is less than the extractFrom date.')
@@ -484,107 +438,136 @@ extractCatchmentData <- function(
   # Recalculate the time points to extract.
   timepoints2Extract = seq( as.Date(extractFrom,'%Y-%m-%d'), by="day", to=as.Date(extractTo,'%Y-%m-%d'))
 
-  # Get one netCDF layer.
-  precipGrd = raster::raster(ncdfFilename, band=nTimePoints, varname='nonsolar/precip',lvar=3)
-  if (getSolarrad) {
-    solarGrd = raster::raster(ncdfFilename, band=nTimePoints_solar, varname='solar/solarrad',lvar=3)
+  # Build a matrix of catchment weights, lat longs, and a look up table for each catchment.
+  message('... Building catchment weights for each grid.')
+
+  ngrids = length(grids.extract)
+  w.grid = vector('list',ngrids)
+  longLat.grid = vector('list',ngrids)
+  location.lookup.grid = vector('list',ngrids)
+  crs.grid = vector('list',ngrids)
+
+  names(w.grid) = grids.extract
+  names(longLat.grid) = grids.extract
+  names(location.lookup.grid) = grids.extract
+
+  # Set crs
+  for (igrid in grids.extract) {
+    ind = vars.extract.summary$group == igrid
+    crs.grid[[igrid]] = vars.extract.summary[ind,]$ellipsoid.crs[1]
   }
 
-  # Build a matrix of catchment weights, lat longs, and a lookup table for each catchment.
-  message('... Building catchment weights');
+  # Handle polygon to extract, then points.
   if (islocationsPolygon) {
+    time.end = as.integer(difftime(max(timepoints2Extract), as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
+    for (igrid in grids.extract) {
+      # initialise for grid geometry i
+      longLat.grid[[igrid]] = matrix(NA,0,2)
+      location.lookup.grid[[igrid]] = matrix(NA,length(locations),2)
 
-    w.all = c();
-    longLat.all = matrix(NA,0,2)
-    location.lookup = matrix(NA,length(locations),2);
+      # Get one netCDF layer for current grid geometry.
+      ind = vars.extract.summary$group == igrid
+      var.group.string = vars.extract.summary[ind,]$var.string[1]
+      grid.tmp = raster::raster(ncdfFilename,
+                                band=time.end,
+                                varname=var.group.string,
+                                lvar=3,
+                                crs=crs.grid[[igrid]])
 
-    for (i in 1:length(locations)) {
-      if (i%%10 ==0 ) {
-        message(paste('   ... Building weights for catchment ', i,' of ',length(locations)));
-        raster::removeTmpFiles(h=0)
-      }
+      for (i in 1:length(locations)) {
+          if (i%%10 ==0 ) {
+            message(paste('   ... Building weights for catchment ', i,' of ',length(locations)));
+            raster::removeTmpFiles(h=0)
+          }
 
-      # Extract the weights for grid cells within the locations polygon.
-      # Note, the AWAP raster grid is cropped to the extent of the catchment polygon.
-      # This was undertaken to improve the run time performance but more importantly to overcome an error
-      # thrown by raster::rasterize when the raster is large (see https://github.com/rspatial/raster/issues/192).
-      # This solution should work when the locations polygon is not very large (e.g. not a reasonable fraction of the
-      # Australian land mass)
-      w = raster::rasterize(x=locations[i,], y=raster::crop(precipGrd, locations[i,], snap='out'), fun='last',getCover=T)
+          # Extract the weights for grid cells within the locations polygon.
+          # Note, the AWAP raster grid is cropped to the extent of the catchment polygon.
+          # This was undertaken to improve the run time performance but more importantly to overcome an error
+          # thrown by raster::rasterize when the raster is large (see https://github.com/rspatial/raster/issues/192).
+          # This solution should work when the locations polygon is not very large (e.g. not a reasonable fraction of the
+          # Australian land mass)
+          w = raster::rasterize(x=locations[i,],
+                                y=raster::crop(grid.tmp, locations[i,], snap='out'),
+                                fun='last',
+                                getCover=T)
 
-      # Extract the mask values (i.e. fraction of each grid cell within the polygon.
-      w2 = raster::getValues(w);
-      filt = w2>0
-      wLongLat = sp::coordinates(w)[filt,]
-      w=w[filt]
+          # Extract the mask values (i.e. fraction of each grid cell within the polygon.
+          w2 = raster::getValues(w);
+          filt = w2>0
+          wLongLat = sp::coordinates(w)[filt,]
+          w=w[filt]
 
-      # Normalise the weights
-      w = w/sum(w);
+          # Normalise the weights
+          w = w/sum(w);
 
-      # Add to data set of all locations
-      if (length(w.all)==0) {
-        location.lookup[i,] = c(1,length(w));
-        w.all = w;
-        longLat.all = wLongLat;
-      } else {
-        location.lookup[i,] = c(length(w.all)+1,length(w.all)+length(w));
-        w.all = c(w.all, w)
-        longLat.all = rbind(longLat.all, wLongLat);
+          # Add to data set of all locations
+          if (length(w.grid)==0) {
+            location.lookup.grid[i,] = c(1,length(w));
+            w.grid[[igrid]] = w;
+            longLat.grid[[igrid]] = wLongLat;
+          } else {
+            location.lookup.grid[[igrid]][i,] = c(length(w.grid[[igrid]]) + 1,
+                                           length(w.grid[[igrid]]) + length(w));
+            w.grid[[igrid]] = c(w.grid[[igrid]], w)
+            longLat.grid[[igrid]] = rbind(longLat.grid[[igrid]], wLongLat);
+          }
       }
     }
   } else {
-
-    # For point data, set weights to 1 and coordinates from point locations
-    w.all = rep(1,length(locations))
-    longLat.all = cbind(as.numeric(sp::coordinates(locations)[,1]),as.numeric(sp::coordinates(locations)[,2]))
-    location.lookup = cbind(seq(1,length(locations),by=1),seq(1,length(locations),by=1));
+    # Set points to extract to each grid geometry
+    for (igrid in grids.extract) {
+      # For point data, set weights to 1 and coordinates from point locations
+      w.grid[[igrid]] = rep(1,length(locations))
+      longLat.grid[[igrid]] = cbind(as.numeric(sp::coordinates(locations)[,1]),
+                                 as.numeric(sp::coordinates(locations)[,2]))
+      location.lookup.grid[[igrid]] = cbind(seq(1,length(locations),by=1),
+                                     seq(1,length(locations),by=1))
+    }
   }
-
   raster::removeTmpFiles(h=0)
 
-  # Close netCDF connection
-  ncdf4::nc_close(ncout)
+  # Get string of group and variable names to extract
+  var.group.string = vars.extract.summary$var.string
+  var.string = row.names(vars.extract.summary)
 
-  if (getSolarrad && getET) {
-    message('... Extracted DEM elevations from AWS.')
-    longLat.all.df = data.frame(x=longLat.all[,1], y=longLat.all[,2])
+  # Expand weightrs and grids for each coordinate to each variable to be extracted.
+  w.vars = vector('list',nvars)
+  longLat.vars = vector('list',nvars)
+  location.lookup.vars = vector('list',nvars)
+  crs.vars = vector('list',nvars)
+  names(w.vars) = var.group.string
+  names(longLat.vars) = var.group.string
+  names(location.lookup.vars) = var.group.string
+  names(crs.vars) = var.group.string
+
+  for (ivar in vars) {
+    igrid = vars.extract.summary[ivar, ]$group
+    igrid.var = vars.extract.summary[ivar, ]$var.string
+    w.vars[[igrid.var]] = w.grid[[igrid]]
+    longLat.vars[[igrid.var]] = longLat.grid[[igrid]]
+    location.lookup.vars[[igrid.var]] = location.lookup.grid[[igrid]]
+    crs.vars[[igrid.var]] = crs.grid[[igrid]]
+  }
+
+  if (getET) {
+    message('... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).')
     crsAUS = sp::CRS("+proj=longlat +ellps=GRS80")
-    DEMpoints = elevatr::get_elev_point(locations=data.frame(x=longLat.all[,1], y=longLat.all[,2]),
+    ind = which(sub(".*/", "", var.group.string) == 'tmax')
+    DEMpoints = elevatr::get_elev_point(locations=data.frame(x=longLat.vars[[ind]][,1],
+                                                             y=longLat.vars[[ind]][,2]),
                                         prj = crsAUS,
-                                        src='aws',ncpu=8, z=DEM.res)
+                                        src='aws',ncpu=8, z=ET.DEM.res)
     DEMpoints = DEMpoints$elevation
     if (any(is.na(DEMpoints))) {
       warning('NA DEM values were derived. Trying increasing the resolution zoom.')
     }
   }
 
-  # Create list of all variables to extract.
-  varnames = c()
-  nvars = 0
-  if (getPrecip) {
-    nvars = nvars + 1
-    varnames[nvars] = 'nonsolar/precip'
-  }
-  if (getTmin) {
-    nvars = nvars + 1
-    varnames[nvars] = 'nonsolar/tmin'
-  }
-  if (getTmax) {
-    nvars = nvars + 1
-    varnames[nvars] = 'nonsolar/tmax'
-  }
-  if (getVprp) {
-    nvars = nvars + 1
-    varnames[nvars] = 'nonsolar/vprp'
-  }
-  if (getSolarrad) {
-    nvars = nvars + 1
-    varnames[nvars] = 'solar/solarrad'
-  }
-
   # Define function to extract netCDF data.
-  get.nc.data = function( varname, band) {
-    return(raster::extract(raster::raster(ncdfFilename, band=band, varname=varname, lvar=3), longLat.all, method=interpMethod))
+  get.nc.data = function( varname, longLat, crs.string, fname, band, interpMethod) {
+    return(raster::extract(
+      raster::raster(fname, band=band, varname=varname, lvar=3, crs=crs.string),
+      longLat, method=interpMethod))
   }
 
   # Set extraction date terms
@@ -602,10 +585,10 @@ extractCatchmentData <- function(
 
   # Initialise output list variable of extracted data
   data.brick = vector('list', nvars)
-  names(data.brick) = varnames
+  names(data.brick) = vars
 
-  # Set netCDF time indexes for required tiem points to extract.
-  ind = as.integer(difftime(timepoints2Extract, as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))+1
+  # Set netCDF time indexes for required time points to extract.
+  ind = as.integer(difftime(timepoints2Extract, as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
 
   # Loop through each time point and get data
   for (j in ind){
@@ -613,37 +596,50 @@ extractCatchmentData <- function(
     pbar$tick()
 
     # Extract data for each variable
-    data.brick.tmp = lapply(varnames, get.nc.data, band=j)
-    names(data.brick.tmp) = varnames
+    #data.brick.tmp = lapply(var.group.string, get.nc.data, band=j, longLat = longLat.vars)
+    data.brick.tmp = mapply(get.nc.data,
+                            as.list(var.group.string),
+                            longLat.vars,
+                            crs.vars,
+                            MoreArgs=list(fname=ncdfFilename, band=j, interpMethod=interpMethod),
+                            SIMPLIFY=F)
+    names(data.brick.tmp) = var.string
 
     # Append new extracted data
     data.brick =  mapply(rbind, data.brick, data.brick.tmp, SIMPLIFY = F)
   }
 
   # Handle spatial and temporal (<1990) gaps in solar radiation data
-  if (getSolarrad) {
-    # Set non-sensible values to NA
-    data.brick$`solar/solarrad`[data.brick$`solar/solarrad` <0] = NA;
-    solarrad_interp = data.brick$`solar/solarrad`;
+  if (any(var.string %in% 'solarrad')) {
+    # Get variable names
+    ind = var.string %in% 'solarrad'
+    var.string.solar = var.string[ind]
+    var.grid.string.solar = vars.extract.summary[var.string.solar,]$var.string
 
-    # Calculate the average dailysolar radiation for each day of the year.
+    # Set non-sensible values to NA
+    data.brick[[var.string.solar]][data.brick[[var.string.solar]] <0] = NA;
+    solarrad_interp = data.brick[[var.string.solar]];
+
+    # Get numerb of grid cells to est
+    ngrid.solar = length(w.vars[[var.grid.string.solar]])
+
+    # Calculate the average daily solar radiation for each day of the year.
     message('... Calculating mean daily solar radiation <1990-1-1')
     monthdayUnique = sort(unique(extractMonth*100+extractDay));
     day = as.integer(format(timepoints2Extract, "%d"));
     month = as.integer(format(timepoints2Extract, "%m"));
     monthdayAll = month*100+day;
-    solarrad_avg = matrix(NA, length(monthdayUnique), length(w.all));
+    solarrad_avg = matrix(NA, length(monthdayUnique), ngrid.solar);
     for (j in 1:length(monthdayUnique)) {
       ind = monthdayAll==monthdayUnique[j];
       if (sum(ind)==1) {
-        solarrad_avg[j,] = data.brick$`solar/solarrad`[ind,];
+        solarrad_avg[j,] = data.brick[[var.string.solar]][ind,];
       } else {
         if (ncol(solarrad)==1) {
-          solarrad_avg[j,] = mean(data.brick$`solar/solarrad`[ind,],na.rm=T)
+          solarrad_avg[j,] = mean(data.brick[[var.string.solar]][ind,],na.rm=T)
         } else {
-          solarrad_avg[j,] = apply(stats::na.omit(data.brick$`solar/solarrad`[ind,]),2,mean)
+          solarrad_avg[j,] = apply(stats::na.omit(data.brick[[var.string.solar]][ind,]),2,mean)
         }
-
       }
     }
 
@@ -658,7 +654,7 @@ extractCatchmentData <- function(
 
     # Linearly interpolate time points without a solar radiation value.
     message('... Linearly interpolating gaps in daily solar.')
-    for (j in 1:length(w.all)) {
+    for (j in 1:ngrid.solar) {
       filt = is.na(solarrad_interp[,j])
       x = 1:length(timepoints2Extract);
       xpred = x[filt];
@@ -676,37 +672,7 @@ extractCatchmentData <- function(
       }
     }
 
-    nvars = nvars + 1
-    varnames[nvars] = 'solarrad.interp'
-    data.brick$`solar/solarrad.interp` = solarrad_interp
-  }
-
-  # Define time aggregation function.
-  do.TemporalAggregation = function( data, cell.index,
-                                     temporal.timestep.options, temporal.timestep,
-                                     temporal.function.name, temporal.timestep.index) {
-    data.xts = xts::as.xts(data[,cell.index], order.by=extractDate)
-    data.xts <-
-      switch(
-        which(temporal.timestep.options == temporal.timestep),
-        data.xts, # daily timestep - do nothing
-        xts::apply.weekly(data.xts, apply, 2, temporal.function.name),  # weekly timestep
-        xts::apply.monthly(data.xts, apply, 2, temporal.function.name), # monthly timestep
-        xts::apply.quarterly(data.xts, apply, 2, temporal.function.name), # quarterly timestep
-        xts::apply.yearly(data.xts, apply, 2, temporal.function.name), # annual timestep
-        xts::period.apply(data.xts, INDEX=temporal.timestep.index, apply, 2, temporal.function.name), # user defined period
-      )
-    return(data.xts)
-  }
-
-  # Define spatial averaging function
-  do.SpatialAggregation = function( data, cell.weights) {
-    return(apply(t(t(data) * cell.weights),1,sum,na.rm=TRUE))
-  }
-
-  # Define spatial averaging function
-  do.SpatialStatistic = function( data, spatial.function.name) {
-    catchmentVarTmp$precip_mm = apply(data,1,spatial.function.name,na.rm=TRUE);
+    data.brick[[var.string.solar]] = solarrad_interp
   }
 
   # Calculate ET at each grid cell and time point.
@@ -714,23 +680,23 @@ extractCatchmentData <- function(
   nlocations = length(locations)
   if (getET) {
 
-    # Add ET variable to data brick
-    nvars = nvars + 1
-    varnames[nvars] = 'evap'
+    # Get strings to each netcdf group and variable
+    precip.str = vars.extract.summary['precip',]$var.string
+    tmax.str = vars.extract.summary['tmax',]$var.string
 
     # Setup progress bar
     message('... Calculate daily ET at each grid cell.')
-    pbar <- progress::progress_bar$new(
-      format = "    :current grid cells of :total  [:bar] :percent in :elapsed",
-      total = length(w.all), clear = FALSE, width= 80)
-
     for (i in 1:nlocations) {
 
         # Get indexes to grid cells of current location, i
-        ind = location.lookup[i,1]:location.lookup[i,2]
+        ind = location.lookup.vars[[tmax.str]][i,1]:location.lookup.vars[[tmax.str]][i,2]
 
         # Initialise outputa
         ET.est = matrix(NA,length(timepoints2Extract),length(ind))
+
+        pbar <- progress::progress_bar$new(
+          format = paste("    Location",i,": :current grid cells of :total  [:bar] :percent in :elapsed"),
+          total = length(ind), clear = FALSE, width= 80)
 
         # Loop through each grid cell
         k=0;
@@ -743,13 +709,13 @@ extractCatchmentData <- function(
           k=k+1
 
           # Check lat, Elev and precip are finite scalers.
-          if (any(!is.finite(data.brick$`nonsolar/precip`[,j])) || !is.finite(DEMpoints[j]) || !is.finite(longLat.all[j,2])) {
+          if (any(!is.finite(data.brick[[precip.str]][,j])) || !is.finite(DEMpoints[j])) {
             message(paste('WARNING: Non-finite input values detected for catchment',i,' at grid cell',j))
-            message(paste('   Elevation value:' ,DEMpoints[j]))
-            message(paste('   Latitude value:' ,longLat.all[j,2]))
-            ind.nonfinite = which(!is.finite(data.brick$`nonsolar/precip`[,j]))
-            if (length(ind.nonfinite)>0)
-              message(paste('   Precipiation nonfinite value (first):' ,precip[ind.nonfinite[1],j]))
+            # message(paste('   Elevation value:' ,DEMpoints[j]))
+            # message(paste('   Latitude value:' ,longLat.all[j,2]))
+            # ind.nonfinite = which(!is.finite(data.brick$`nonsolar/precip`[,j]))
+            # if (length(ind.nonfinite)>0)
+            #   message(paste('   Precipiation nonfinite value (first):' ,precip[ind.nonfinite[1],j]))
             ET.est[,k] = NA;
             next
           }
@@ -758,11 +724,11 @@ extractCatchmentData <- function(
           dataRAW = data.frame(Year =  as.integer(format.Date(timepoints2Extract,"%Y")),
                                Month= as.integer(format.Date(timepoints2Extract,"%m")),
                                Day= as.integer(format.Date(timepoints2Extract,"%d")),
-                               Tmin = data.brick$`nonsolar/tmin`[,j],
-                               Tmax = data.brick$`nonsolar/tmax`[,j],
-                               Rs = data.brick$`solar/solarrad.interp`[,j],
-                               va = data.brick$`nonsolar/vprp`[,j]/10.0,
-                               Precip = data.brick$`nonsolar/precip`[,j])
+                               Tmin = data.brick[['tmin']][,j],
+                               Tmax = data.brick[['tmax']][,j],
+                               Rs = data.brick[['solarrad']][,j],
+                               va = data.brick[['vprp']][,j]/10.0,
+                               Precip = data.brick[['precip']][,j])
 
           # Convert to required format for ET package.
           # Note, missing_method changed from NULL to "DoY average" because individual grid cells can be NA. eg
@@ -772,8 +738,8 @@ extractCatchmentData <- function(
 
           # Update constants for the site
           ET.constants$Elev = DEMpoints[j]
-          ET.constants$lat = longLat.all[j,2]
-          ET.constants$lat_rad = longLat.all[j,2]/180.0*pi
+          ET.constants$lat = longLat.vars[[tmax.str]][j,2]
+          ET.constants$lat_rad = ET.constants$lat / 180.0*pi
 
           # Call  ET package
           if (ET.function=='ET.Abtew') {
@@ -828,73 +794,167 @@ extractCatchmentData <- function(
           }
         }
         if (i==1) {
-          data.brick$evap = ET.est
+          data.brick[['et']] = ET.est
         } else {
-          data.brick$evap = cbind(data.brick$evap, ET.est)
+          data.brick[['et']] = cbind(data.brick[['et']], ET.est)
         }
 
     }
   }
 
-  # Loop though each catchment and calculate the catchment average and variance.
+  # Define functions for spatial and temporal aggregation
+  #--------------------
+  # Define time aggregation function.
+  do.TemporalAggregation = function( data,
+                                     location.lookup,
+                                     dates,
+                                     location.ID,
+                                     timestep.options,
+                                     timestep,
+                                     fn,
+                                     ind) {
+    cell.index = location.lookup[location.ID,1]:location.lookup[location.ID,2]
+    data.xts = xts::as.xts(data[, cell.index], order.by=dates)
+    data.xts <-
+      switch(
+        which(timestep.options == timestep),
+        data.xts, # daily timestep - do nothing
+        xts::apply.weekly(data.xts, apply, 2, fn),  # weekly timestep
+        xts::apply.monthly(data.xts, apply, 2, fn), # monthly timestep
+        xts::apply.quarterly(data.xts, apply, 2, fn), # quarterly timestep
+        xts::apply.yearly(data.xts, apply, 2, fn), # annual timestep
+        xts::period.apply(data.xts, INDEX=ind, apply, 2, fn), # user defined period
+      )
+    return(data.xts)
+  }
+
+  # Define spatial averaging function
+  do.SpatialAggregation = function(data,
+                                   w,
+                                   location.lookup,
+                                   location.ID) {
+
+    cell.index = location.lookup[location.ID,1]:location.lookup[location.ID,2]
+    w = w[cell.index]
+    return(apply(t(t(data) * w),1,sum,na.rm=TRUE) )
+  }
+
+  # Define spatial averaging function
+  do.SpatialStatistic = function( data, fn) {
+      return( apply(data, 1, fn, na.rm=TRUE) )
+  }
+  #--------------------
+
+  # Get unique location IDs
+  locations.ID = unique(locations@data[,1])
+
+  # Create ISO dates of daily time step extraction dates
+  extractDate = ISOdate(year=extractYear,month=extractMonth,day=extractDay)
+
+  # Get the number of days in each time step. This is reported to allow the user to
+  # easily see when a timestep is, say, shorter than other time steps (eg ends before the week).
+  nDayPerTimestep = mapply(do.TemporalAggregation,
+                           list(matrix(rep(1, ntimepoints2Extract ), ncol=1)),
+                           list(matrix(c(1,1), ncol=2)),
+                           MoreArgs = list(
+                             dates = extractDate,
+                             location.ID = 1,
+                             timestep.options = temporal.timestep.options,
+                             timestep = temporal.timestep,
+                             fn = 'sum',
+                             ind = temporal.timestep.index),
+                           SIMPLIFY = F)
+
+  nDayPerTimestep = nDayPerTimestep[[1]]
+
+  # Get the number of time steps (for creation of the outputs)
+  timesteps = zoo::index(zoo::as.zoo(nDayPerTimestep))
+  nTimeSteps = length(timesteps)
+
+  # Do the aggregation by looping though each catchment and
+  # calculate the catchment average and variance.
+  #--------------------
   message('... Calculating area weighted results at required time-step.')
   for (i in 1:nlocations) {
 
-    # Get the weights for the catchment
-    ind = location.lookup[i,1]:location.lookup[i,2]
-    w = w.all[ind]
-
-    extractDate = ISOdate(year=extractYear,month=extractMonth,day=extractDay)
-
     # Do the temporal aggregation
-    #-----------------------------
     data.brick.timaAgg = vector('list', nvars)
-    names(data.brick.timaAgg) = varnames
+    names(data.brick.timaAgg) = vars
 
-    data.brick.timaAgg = lapply(data.brick, do.TemporalAggregation,
-                                cell.index = ind,
-                                temporal.timestep.options, temporal.timestep,
-                                temporal.function.name, temporal.timestep.index)
+    data.brick.timaAgg = mapply(do.TemporalAggregation,
+                                data.brick,
+                                location.lookup.vars,
+                                MoreArgs = list(
+                                  dates = extractDate,
+                                  location.ID = i,
+                                  timestep.options = temporal.timestep.options,
+                                  timestep = temporal.timestep,
+                                  fn = temporal.function.name,
+                                  ind = temporal.timestep.index),
+                                SIMPLIFY = F)
 
-    names(data.brick.timaAgg) = varnames
-    #-----------------------------
-
-    # Determine the number of time steps (for creation of the output)
-    timesteps=zoo::index(zoo::as.zoo(data.brick.timaAgg[[1]]))
-    nTimeSteps = length(timesteps)
+    names(data.brick.timaAgg) = vars
 
     # Do spatial aggregation if a spatial function is provided. If spatial aggregation
     # is not required, then build up a data.frame (each time step and data type as one column)
     # for latter conversion to a spatial object.
-    #-----------------------------
+    #--------------------
     if (do.spatial.analysis) {
+
       # Create data frame for final results
-      catchmentAvgTmp = data.frame(CatchmentID=locations[i,1],year=as.integer(format(timesteps,"%Y")) ,month=as.integer(format(timesteps,"%m")),day=as.integer(format(timesteps,"%d")),row.names = NULL);
+      catchmentAvgTmp = data.frame(Location.ID=locations.ID[i],
+                                   year=as.integer(format(timesteps,"%Y")),
+                                   month=as.integer(format(timesteps,"%m")),
+                                   day=as.integer(format(timesteps,"%d")),
+                                   days.per.timestep = nDayPerTimestep,
+                                   row.names = NULL);
       catchmentVarTmp = catchmentAvgTmp
 
-      # Check if there are enough grid cells to calculate the variance.
-      calcVariance =  F;
-      if (length(ind)>1)
-        calcVariance =  T;
+      # Call the spatial averaging function
+      catchmentAvgTmp = cbind(catchmentAvgTmp,
+                              mapply(do.SpatialAggregation,
+                                     data.brick.timaAgg,
+                                     w.vars,
+                                     location.lookup.vars,
+                                     MoreArgs = list(location.ID = i),
+                                     SIMPLIFY = T)
+                                     )
 
-      # Do spatial aggregation using grid cell weights
-      #-----------------------------
-      # Define spatial averaging function
-      catchmentAvgTmp = cbind(catchmentAvgTmp, sapply(data.brick.timaAgg, do.SpatialAggregation, w))
-      if (calcVariance) {
-        catchmentVarTmp = cbind(catchmentVarTmp, sapply(data.brick.timaAgg, do.SpatialStatistic, spatial.function.name))
-      }
+      # Call spatial variability function (e.g. spatial variance)
+      catchmentVarTmp = cbind(catchmentVarTmp,
+                                sapply(data.brick.timaAgg,
+                                       do.SpatialStatistic,
+                                       fn = spatial.function.name)
+                                )
+    } else if (islocationsPolygon) {
+      # Do not undertake spatial aggregation.
+      # Collate results for each grid cell.
+      # Below, catchmentAvg is converted to a spatial object.
+      nGridCells = 1
+      if (islocationsPolygon)
+        nGridCells = location.lookup[i,2] - location.lookup[i,1] +1
 
-    } else {
-      # Do not undertake spatial aggregation. Instead collate
-      # results for each grid cell.
-
-      nGridCells = location.lookup[i,2] - location.lookup[i,1] +1
-      catchmentAvgTmp = data.frame(CatchmentID=rep(locations@data[i,1],nGridCells))
+      catchmentAvgTmp = data.frame(Location.ID=rep(locations.ID[i],nGridCells))
       catchmentVar = NA
       for (k in 1:nvars) {
-        newDataCol = as.data.frame(t(data.brick.timaAgg[[ varnames[k] ]]))
-        colnames(newDataCol) = paste(varnames[k],format.Date(colnames(newDataCol),'%Y_%m_%d'),sep='_')
+        newDataCol = as.data.frame(t(data.brick.timaAgg[[ vars[k] ]]))
+        colnames(newDataCol) = paste(vars[k],format.Date(colnames(newDataCol),'%Y_%m_%d'),sep='_')
+        catchmentAvgTmp = cbind.data.frame(catchmentAvgTmp, newDataCol)
+      }
+    } else {
+      # Locations are point values. Reformat into a data.frame.
+
+      catchmentAvgTmp = data.frame(Location.ID=locations.ID[i],
+                                   year=as.integer(format(timesteps,"%Y")) ,
+                                   month=as.integer(format(timesteps,"%m")),
+                                   day=as.integer(format(timesteps,"%d")),
+                                   days.per.timestep = nDayPerTimestep,
+                                   row.names = NULL);
+      catchmentVarTmp = NA
+      for (k in 1:nvars) {
+        newDataCol = as.data.frame(data.brick.timaAgg[[ vars[k] ]],
+                                   row.names = NULL)
+        colnames(newDataCol) = vars[k]
         catchmentAvgTmp = cbind.data.frame(catchmentAvgTmp, newDataCol)
       }
     }
@@ -912,7 +972,14 @@ extractCatchmentData <- function(
     }
   }
   # end for-loop
+  #--------------------
 
+  # Remove row names
+  rownames(catchmentAvg) = NULL
+  if (do.spatial.analysis)
+    rownames(catchmentVar) = NULL
+
+  # Handle spatially averaged vs gridded values within catchment polygon.
   if (islocationsPolygon) {
     if (do.spatial.analysis) {
       catchmentAvg = list(catchmentAvg, catchmentVar)
