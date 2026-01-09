@@ -35,7 +35,9 @@ Next, let's make the data grids over this period.
 ```{r}
 makeNetCDF_file(ncdfFilename = ncdfFilename,
                    updateFrom = date.from,
-                   updateTo = date.to)
+                   updateTo = date.to,
+                   vars = c('precip','tmin', 'tmax',
+                   'vprp', 'solarrad'))
 ```
 
 ## Load a catchment boundary
