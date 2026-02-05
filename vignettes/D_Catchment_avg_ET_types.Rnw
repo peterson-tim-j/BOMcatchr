@@ -165,75 +165,75 @@ Next each estimate is plotted over time.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 10
-filt = climateData.ET.HargreavesSamani$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.HargreavesSamani$catchmentTemporal.mean$year,
-            climateData.ET.HargreavesSamani$catchmentTemporal.mean$month,
-            climateData.ET.HargreavesSamani$catchmentTemporal.mean$day)
-plot(d[filt], climateData.ET.HargreavesSamani$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.HargreavesSamani$temporal.mean$CatchID==407214
+d = ISOdate(climateData.ET.HargreavesSamani$temporal.mean$year,
+            climateData.ET.HargreavesSamani$temporal.mean$month,
+            climateData.ET.HargreavesSamani$temporal.mean$day)
+plot(d[filt], climateData.ET.HargreavesSamani$temporal.mean$ET_mm[filt],
             col='black',lty=1, xlim = c(ISOdate(2010,1,1), ISOdate(2010,12,1)),
             ylim=c(0, 30),type='l', ylab='ET [mm/d]',xlab='Date')
 
-filt = climateData.ET.JensenHaise$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.JensenHaise$catchmentTemporal.mean$year,
-            climateData.ET.JensenHaise$catchmentTemporal.mean$month,
-            climateData.ET.JensenHaise$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.JensenHaise$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.JensenHaise$temporal.mean$CatchID==407214
+d = ISOdate(climateData.ET.JensenHaise$temporal.mean$year,
+            climateData.ET.JensenHaise$temporal.mean$month,
+            climateData.ET.JensenHaise$temporal.mean$day)
+lines(d[filt], climateData.ET.JensenHaise$temporal.mean$ET_mm[filt],
             col='red',lty=1)
 
-filt = climateData.ET.Makkink$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.Makkink$catchmentTemporal.mean$year,
-            climateData.ET.Makkink$catchmentTemporal.mean$month,
-            climateData.ET.Makkink$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.Makkink$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.Makkink$temporal.mean$CatchID==407214
+d = ISOdate(climateData.ET.Makkink$temporal.mean$year,
+            climateData.ET.Makkink$temporal.mean$month,
+            climateData.ET.Makkink$temporal.mean$day)
+lines(d[filt], climateData.ET.Makkink$temporal.mean$ET_mm[filt],
             col='green',lty=1)
 
-filt = climateData.ET.McGuinnessBordne$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.McGuinnessBordne$catchmentTemporal.mean$year,
-            climateData.ET.McGuinnessBordne$catchmentTemporal.mean$month,
-            climateData.ET.McGuinnessBordne$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.McGuinnessBordne$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.McGuinnessBordne$temporal.mean$CatchID==407214
+d = ISOdate(climateData.ET.McGuinnessBordne$temporal.mean$year,
+            climateData.ET.McGuinnessBordne$temporal.mean$month,
+            climateData.ET.McGuinnessBordne$temporal.mean$day)
+lines(d[filt], climateData.ET.McGuinnessBordne$temporal.mean$ET_mm[filt],
             col='blue',lty=1)
 
-filt = climateData.ET.MortonCRAE.potentialET$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.MortonCRAE.potentialET$catchmentTemporal.mean$year,
-            climateData.ET.MortonCRAE.potentialET$catchmentTemporal.mean$month,
-            climateData.ET.MortonCRAE.potentialET$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.MortonCRAE.potentialET$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.MortonCRAE.potentialET$temporal.mean$CatchID==407214
+d = ISOdate(climateData.ET.MortonCRAE.potentialET$temporal.mean$year,
+            climateData.ET.MortonCRAE.potentialET$temporal.mean$month,
+            climateData.ET.MortonCRAE.potentialET$temporal.mean$day)
+lines(d[filt], climateData.ET.MortonCRAE.potentialET$temporal.mean$ET_mm[filt],
             col='black',lty=2)
 
-filt = climateData.ET.MortonCRAE.wetarealET$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.MortonCRAE.wetarealET$catchmentTemporal.mean$year,
-            climateData.ET.MortonCRAE.wetarealET$catchmentTemporal.mean$month,
-            climateData.ET.MortonCRAE.wetarealET$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.MortonCRAE.wetarealET$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.MortonCRAE.wetarealET$temporal.mean$CatchID==407214
+d = ISOdate(climateData.ET.MortonCRAE.wetarealET$temporal.mean$year,
+            climateData.ET.MortonCRAE.wetarealET$temporal.mean$month,
+            climateData.ET.MortonCRAE.wetarealET$temporal.mean$day)
+lines(d[filt], climateData.ET.MortonCRAE.wetarealET$temporal.mean$ET_mm[filt],
             col='red',lty=2)
 
-filt = climateData.ET.MortonCRAE.actualarealET$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.MortonCRAE.actualarealET$catchmentTemporal.mean$year,
-            climateData.ET.MortonCRAE.actualarealET$catchmentTemporal.mean$month,
-            climateData.ET.MortonCRAE.actualarealET$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.MortonCRAE.actualarealET$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.MortonCRAE.actualarealET$temporal.mean$CatchID==407214
+d = ISOdate(climateData.ET.MortonCRAE.actualarealET$temporal.mean$year,
+            climateData.ET.MortonCRAE.actualarealET$temporal.mean$month,
+            climateData.ET.MortonCRAE.actualarealET$temporal.mean$day)
+lines(d[filt], climateData.ET.MortonCRAE.actualarealET$temporal.mean$ET_mm[filt],
             col='green',lty=2)
 
-filt = climateData.ET.MortonCRWE$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.MortonCRWE$catchmentTemporal.mean$year,
-            climateData.ET.MortonCRWE$catchmentTemporal.mean$month,
-            climateData.ET.MortonCRWE$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.MortonCRWE$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.MortonCRWE$temporal.mean$CatchID==407214
+d = ISOdate(climateData.ET.MortonCRWE$temporal.mean$year,
+            climateData.ET.MortonCRWE$temporal.mean$month,
+            climateData.ET.MortonCRWE$temporal.mean$day)
+lines(d[filt], climateData.ET.MortonCRWE$temporal.mean$ET_mm[filt],
             col='blue',lty=2)
 
-filt = climateData.ET.MortonCRWE.shallowLake$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.MortonCRWE.shallowLake$catchmentTemporal.mean$year,
-            climateData.ET.MortonCRWE.shallowLake$catchmentTemporal.mean$month,
-            climateData.ET.MortonCRWE.shallowLake$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.MortonCRWE.shallowLake$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.MortonCRWE.shallowLake$temporal.mean$CatchID==407214
+d = ISOdate(climateData.ET.MortonCRWE.shallowLake$temporal.mean$year,
+            climateData.ET.MortonCRWE.shallowLake$temporal.mean$month,
+            climateData.ET.MortonCRWE.shallowLake$temporal.mean$day)
+lines(d[filt], climateData.ET.MortonCRWE.shallowLake$temporal.mean$ET_mm[filt],
             col='black',lty=3)
 
-filt = climateData.ET.Turc$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.Turc$catchmentTemporal.mean$year,
-            climateData.ET.Turc$catchmentTemporal.mean$month,
-            climateData.ET.Turc$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.Turc$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.Turc$temporal.mean$CatchID==407214
+d = ISOdate(climateData.ET.Turc$temporal.mean$year,
+            climateData.ET.Turc$temporal.mean$month,
+            climateData.ET.Turc$temporal.mean$day)
+lines(d[filt], climateData.ET.Turc$temporal.mean$ET_mm[filt],
             col='red',lty=3)
 
 legend(x='topright', legend=c(
