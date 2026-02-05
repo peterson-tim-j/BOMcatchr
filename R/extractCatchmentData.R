@@ -45,9 +45,9 @@
 #' @param extractTo is a date string specifying the end date for the data extraction. The default is today's date as YYYY-MM-DD.
 #' @param vars is a vector of variables names to extract. The available variables are: daily precipitation,
 #' daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation and evapotranspiration.
-#' The input vector for these options are \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad', 'et')}. Importantly, the input \code{et} is
+#' The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')}. Importantly, the input \code{et} is
 #' calculated from the available gridded data (see \code{ET.} inputs below). To calculate the ET, all of the required inputs for the calculation
-#' ET must also be extracted (i.e. the input for such would generally be \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad', 'et')}.
+#' ET must also be extracted (i.e. the input for such would generally be \code{c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')}.
 #' Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
 #' provided by \code{rownames(AWAPer::file.summary(ncdfFilename))}.
 #' @param locations is either the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
@@ -58,8 +58,19 @@
 #' Note, NA values are not removed from the aggregation calculation. If this is required then consider writing your own function. The default is \code{mean}.
 #' @param spatial.function.name character string for the function name applied to estimate the daily spatial spread in each variable. If \code{NA} or \code{""} and \code{locations} is a polygon, then
 #' the spatial data is returned. The default is \code{var}.
-#' @param interpMethod character string defining the method for interpolating the gridded data (see \code{raster::extract}). The options are: \code{'simple'}, \code{'bilinear'} and \code{''}. The default
+#' @param interp.method character string defining the method for interpolating the gridded data (see \code{raster::extract}). The options are: \code{'simple'}, \code{'bilinear'} and \code{''}. The default
 #' is \code{''}. This will set the interpolation to \code{'simple'} when \code{locations} is a polygon(s) and to \code{'bilinear'} when \code{locations} are points.
+#' @param missing.method three character vector for the settings to fill gaps in the source data. The three inputs control the following.
+#' # 1) the infilling of small holes in the source grids using focal(), which takes the mean of the non-NA surrounding grid cells. The user input controls the maximum hole size filled, in
+#' units of number of grid cells. Where the hole is greater than the input, a gap within the hole will remain. The default maximum hole size infilled is 5x5 grid cells.
+#' 2) Gaps that remain after the hole infilling, or time steps with no observations, are interpolated over time. Only gaps with observations prior to the gap are interpolated.
+#' The interpolation method is user-defined and includes \code('constant'), \code('linear'), \code('fmm'), \code('periodic'), \code('natural'), \code('monoH.FC') and \code('hyman').
+#' The default is \code('linear'). See \code{\link[stats]{approx}} and \code{\link[stats]{splinefun}} for details. 3) Gaps that remain (often due to the extraction date being prior to the
+#' start of the observation record of a variable) are estimated from, say, the mean for each day of the year. Specifically, the extracted observed data is
+#' allocated to each calender day. If, say, there are ten years of daily data then each day of the year will have ten observations. All gaps of the same corresponding calender day
+#' will then be assigned a value from a user-defined function from these observations (NB: when only one observed value exists for the day, then the observed value is returned).
+#' The default function is \code{mean}. Other standard functions (e.g. \code{median}) or user defined functions can be used.
+#' The default for this input is \code{c('5', 'linear', 'mean')}. All gap filling method can be turned off with the input \code{c('0', '', '')}, which is useful to identify the interpolated data points.
 #' @param ET.function character string for the evapotranspiration function to be used. The methods that can be derived from the AWAP data are are \code{\link[Evapotranspiration]{ET.Abtew}},
 #' \code{\link[Evapotranspiration]{ET.HargreavesSamani}}, \code{\link[Evapotranspiration]{ET.JensenHaise}}, \code{\link[Evapotranspiration]{ET.Makkink}}, \code{\link[Evapotranspiration]{ET.McGuinnessBordne}}, \code{\link[Evapotranspiration]{ET.MortonCRAE}} ,
 #' \code{\link[Evapotranspiration]{ET.MortonCRWE}}, \code{\link[Evapotranspiration]{ET.Turc}}. Default is \code{\link[Evapotranspiration]{ET.MortonCRAE}} i.e. the  complementary relationship for areal evapotranspiration .
@@ -142,7 +153,8 @@ extractCatchmentData <- function(
     temporal.timestep = 'daily',
     temporal.function.name = 'mean',
     spatial.function.name = 'var',
-    interpMethod = '',
+    interp.method = '',
+    missing.method = c('5', 'linear', 'mean'),
     ET.function = 'ET.MortonCRAE',
     ET.DEM.res = 10,
     ET.Mortons.est = 'wet areal ET',
@@ -174,6 +186,9 @@ extractCatchmentData <- function(
     getET = T
   }
 
+  # first variable defines the raster geometry used.
+  base.var.name = vars[1]
+
   # Check if the required variable is within the netcdf file.
   vars.prior.summary <- AWAPer::file.summary(ncdfFilename)
   vars.prior = row.names(vars.prior.summary)
@@ -186,17 +201,6 @@ extractCatchmentData <- function(
   filt = vars.prior %in% vars
   vars.extract.summary = vars.prior.summary[filt,]
   grids.extract = unique(vars.extract.summary$group)
-
-
-  # netCDF.variables = names(ncout$var)
-  # if (getTmin & !any(netCDF.variables=='nonsolar/tmin'))
-  #   stop('getTmin is true but the netCDF file was not built with tmin data. Rebuild the netCDF file.')
-  # if (getTmax & !any(netCDF.variables=='nonsolar/tmax'))
-  #   stop('getTmax is true but the netCDF file was not built with tmax data. Rebuild the netCDF file.')
-  # if (getVprp & !any(netCDF.variables=='nonsolar/vprp'))
-  #   stop('getVprp is true but the netCDF file was not built with vprp data. Rebuild the netCDF file.')
-  # if (getPrecip & !any(netCDF.variables=='nonsolar/precip'))
-  #   stop('getPrecip is true but the netCDF file was not built with precip data. Rebuild the netCDF file.')
 
   # Build time points to update
   if (is.character(extractFrom))
@@ -354,17 +358,44 @@ extractCatchmentData <- function(
     islocationsPolygon=FALSE;
   }
 
-  # Check the interpolation method.
-  if (interpMethod!='' && interpMethod!='simple' && interpMethod!='bilinear') {
-    stop('The input for "interpMethod" must either "simple" or "bilinear".')
+  # Check the interpolation method user inputs.
+  if (interp.method!='' && interp.method!='simple' && interp.method!='bilinear') {
+    stop('The input for "interp.method" must either "simple" or "bilinear" or "".')
   }
-  if (interpMethod=='') {
+  if (interp.method=='') {
     if (islocationsPolygon) {
-      interpMethod='simple';
+      interp.method='simple';
     } else {
-      interpMethod='bilinear';
+      interp.method='bilinear';
     }
   }
+  interp.method.vars = rep(interp.method, nvars)
+  names(interp.method.vars) = vars
+
+  # Check infilling user inputs.
+  missing.method.interpOptions = c('', 'constant','linear', 'fmm', 'periodic', 'natural', 'monoH.FC', 'hyman')
+  if (!is.character(missing.method) || length(missing.method)!=3)
+    stop('missing.method must be a string vector of length 3')
+  if (is.na(missing.method[1]) || as.numeric(missing.method[1])<0)
+    stop('missing.method element 1 must be a number (as a string) >=0.')
+  if (!any(missing.method.interpOptions == missing.method[2]))
+    stop('missing.method element 2 must be one of the specified interpolation options or "".')
+  if (is.na(missing.method[3]) || !is.character(missing.method[3]))
+    stop('missing.method element 3 must be a function name as a string.')
+  if (missing.method[3] != '') {
+    gapsfunction <- get(missing.method[3])
+    gapsfunction.data <- runif(10,-10,10)
+    simpleError('Gap infill function failed test using input of runif(10,-10,10). Check the missing.method element 3 function.',
+                gapsfunction(gapsfunction.data))
+    if (!is.numeric(gapsfunction(gapsfunction.data)) && length(gapsfunction(gapsfunction.data))!=1)
+      stop('Gap infill function failed test using input of runif(10,-10,10). Check that the missing.method element 3 function returns a scaler number.')
+    rm('gapsfunction')
+    rm('gapsfunction.data')
+  }
+
+  # If gap filling it turned off, then ET cannot be calculated.
+  if ( missing.method[2] == '' && getET)
+    stop('ET cannot be calculated when gap interpolation is off. Change missing.method[2] to an accepted method other than "".')
 
   # Check if the spatial data should be returned or analysed.
   do.spatial.analysis=F
@@ -441,133 +472,111 @@ extractCatchmentData <- function(
   # Build a matrix of catchment weights, lat longs, and a look up table for each catchment.
   message('... Building catchment weights for each grid.')
 
+  # Set crs for each grid, then copy to eaxh variable.
   ngrids = length(grids.extract)
-  w.grid = vector('list',ngrids)
-  longLat.grid = vector('list',ngrids)
-  location.lookup.grid = vector('list',ngrids)
   crs.grid = vector('list',ngrids)
-
-  names(w.grid) = grids.extract
-  names(longLat.grid) = grids.extract
-  names(location.lookup.grid) = grids.extract
-
-  # Set crs
   for (igrid in grids.extract) {
     ind = vars.extract.summary$group == igrid
     crs.grid[[igrid]] = vars.extract.summary[ind,]$ellipsoid.crs[1]
   }
+  crs.vars = vector('list',nvars)
+  names(crs.vars) = vars
+  for (ivar in vars) {
+    igrid = vars.extract.summary[ivar, ]$group
+    igrid.var = vars.extract.summary[ivar, ]$var.string
+    crs.vars[[ivar]] = crs.grid[[igrid]]
+  }
+  rm('crs.grid')
+
+  # Initialise the grid geometry variables
+  point.weights = list(w=numeric(),
+                       coords = matrix(NA,0,2),
+                       lookup = matrix(NA,length(locations),2))
 
   # Handle polygon to extract, then points.
   if (islocationsPolygon) {
     time.end = as.integer(difftime(max(timepoints2Extract), as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
-    for (igrid in grids.extract) {
-      # initialise for grid geometry i
-      longLat.grid[[igrid]] = matrix(NA,0,2)
-      location.lookup.grid[[igrid]] = matrix(NA,length(locations),2)
 
-      # Get one netCDF layer for current grid geometry.
-      ind = vars.extract.summary$group == igrid
-      var.group.string = vars.extract.summary[ind,]$var.string[1]
-      grid.tmp = raster::raster(ncdfFilename,
-                                band=time.end,
-                                varname=var.group.string,
-                                lvar=3,
-                                crs=crs.grid[[igrid]])
+    # Find details of the variable defining the grid geometry.
+    ind = rownames(vars.extract.summary) == base.var.name
+    var.group.string = vars.extract.summary[ind,]$var.string[1]
+    base.var.grid = vars.extract.summary[ind,]$group
 
-      for (i in 1:length(locations)) {
-          if (i%%10 ==0 ) {
-            message(paste('   ... Building weights for catchment ', i,' of ',length(locations)));
-            raster::removeTmpFiles(h=0)
-          }
+    # For variables not on the same grid geometry as the base.variable,
+    # the extraction location is converted from the input option ('simple'
+    # for polygons), to 'bilinear'. This is required because the grid cells
+    # of the non-base grid differ and simply taking the cell value would
+    # introduce a spatial bias.
+    for (ivar in vars) {
+      if (vars.extract.summary[ivar,]$group != base.var.grid)
+        interp.method.vars[ivar] = 'bilinear'
+    }
 
-          # Extract the weights for grid cells within the locations polygon.
-          # Note, the AWAP raster grid is cropped to the extent of the catchment polygon.
-          # This was undertaken to improve the run time performance but more importantly to overcome an error
-          # thrown by raster::rasterize when the raster is large (see https://github.com/rspatial/raster/issues/192).
-          # This solution should work when the locations polygon is not very large (e.g. not a reasonable fraction of the
-          # Australian land mass)
-          w = raster::rasterize(x=locations[i,],
-                                y=raster::crop(grid.tmp, locations[i,], snap='out'),
-                                fun='last',
-                                getCover=T)
+    # Get the netCDF layer for the base grid geometry.
+    grid.tmp = raster::raster(ncdfFilename,
+                              band=time.end,
+                              varname=var.group.string,
+                              lvar=3,
+                              crs=crs.vars[[base.var.name]])
 
-          # Extract the mask values (i.e. fraction of each grid cell within the polygon.
-          w2 = raster::getValues(w);
-          filt = w2>0
-          wLongLat = sp::coordinates(w)[filt,]
-          w=w[filt]
+    for (i in 1:length(locations)) {
+        if (i%%10 ==0 ) {
+          message(paste('   ... Building weights for catchment ', i,' of ',length(locations)));
+          raster::removeTmpFiles(h=0)
+        }
 
-          # Normalise the weights
-          w = w/sum(w);
+        # Extract the weights for grid cells within the locations polygon.
+        # Note, the AWAP raster grid is cropped to the extent of the catchment polygon.
+        # This was undertaken to improve the run time performance but more importantly to overcome an error
+        # thrown by raster::rasterize when the raster is large (see https://github.com/rspatial/raster/issues/192).
+        # This solution should work when the locations polygon is not very large (e.g. not a reasonable fraction of the
+        # Australian land mass)
+        w = raster::rasterize(x=locations[i,],
+                              y=raster::crop(grid.tmp, locations[i,], snap='out'),
+                              fun='last',
+                              getCover=T)
 
-          # Add to data set of all locations
-          if (length(w.grid)==0) {
-            location.lookup.grid[i,] = c(1,length(w));
-            w.grid[[igrid]] = w;
-            longLat.grid[[igrid]] = wLongLat;
-          } else {
-            location.lookup.grid[[igrid]][i,] = c(length(w.grid[[igrid]]) + 1,
-                                           length(w.grid[[igrid]]) + length(w));
-            w.grid[[igrid]] = c(w.grid[[igrid]], w)
-            longLat.grid[[igrid]] = rbind(longLat.grid[[igrid]], wLongLat);
-          }
-      }
+        # Extract the mask values (i.e. fraction of each grid cell within the polygon.
+        w2 = raster::getValues(w);
+        filt = w2>0
+        wLongLat = sp::coordinates(w)[filt,]
+        w=w[filt]
+
+        # Normalise the weights
+        w = w/sum(w);
+
+        # Add to data set of all locations
+        point.weights$w = c(point.weights$w, w)
+        point.weights$lookup[i,] = c(1,length(w))
+        point.weights$coords = rbind(point.weights$coords, wLongLat)
     }
   } else {
     # Set points to extract to each grid geometry
-    for (igrid in grids.extract) {
-      # For point data, set weights to 1 and coordinates from point locations
-      w.grid[[igrid]] = rep(1,length(locations))
-      longLat.grid[[igrid]] = cbind(as.numeric(sp::coordinates(locations)[,1]),
+    # For point data, set weights to 1 and coordinates from point locations
+    point.weights$w = rep(1,length(locations))
+    point.weights$lookup = cbind(as.matrix( seq(1,length(locations),by=1) ),
+                                     as.matrix( seq(1,length(locations),by=1) ))
+    point.weights$coords = cbind(as.numeric(sp::coordinates(locations)[,1]),
                                  as.numeric(sp::coordinates(locations)[,2]))
-      location.lookup.grid[[igrid]] = cbind(seq(1,length(locations),by=1),
-                                     seq(1,length(locations),by=1))
-    }
   }
   raster::removeTmpFiles(h=0)
 
-  # Get string of group and variable names to extract
-  var.group.string = vars.extract.summary$var.string
-  var.string = row.names(vars.extract.summary)
-
-  # Expand weightrs and grids for each coordinate to each variable to be extracted.
-  w.vars = vector('list',nvars)
-  longLat.vars = vector('list',nvars)
-  location.lookup.vars = vector('list',nvars)
-  crs.vars = vector('list',nvars)
-  names(w.vars) = var.group.string
-  names(longLat.vars) = var.group.string
-  names(location.lookup.vars) = var.group.string
-  names(crs.vars) = var.group.string
-
-  for (ivar in vars) {
-    igrid = vars.extract.summary[ivar, ]$group
-    igrid.var = vars.extract.summary[ivar, ]$var.string
-    w.vars[[igrid.var]] = w.grid[[igrid]]
-    longLat.vars[[igrid.var]] = longLat.grid[[igrid]]
-    location.lookup.vars[[igrid.var]] = location.lookup.grid[[igrid]]
-    crs.vars[[igrid.var]] = crs.grid[[igrid]]
-  }
-
   if (getET) {
     message('... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).')
+
+    # Test internet connection
+    if (!curl::has_internet())
+      stop('No internet connection appears available to get elevation data. Check connection.')
+
     crsAUS = sp::CRS("+proj=longlat +ellps=GRS80")
-    ind = which(sub(".*/", "", var.group.string) == 'tmax')
-    DEMpoints = elevatr::get_elev_point(locations=data.frame(x=longLat.vars[[ind]][,1],
-                                                             y=longLat.vars[[ind]][,2]),
+    DEMpoints = elevatr::get_elev_point(locations=data.frame(x=point.weights$coords[,1],
+                                                             y=point.weights$coords[,2]),
                                         prj = crsAUS,
                                         src='aws',ncpu=8, z=ET.DEM.res)
     DEMpoints = DEMpoints$elevation
     if (any(is.na(DEMpoints))) {
       warning('NA DEM values were derived. Trying increasing the resolution zoom.')
     }
-  }
-
-  # Define function to extract netCDF data.
-  get.nc.data = function( varname, longLat, crs.string, fname, band, interpMethod) {
-    return(raster::extract(
-      raster::raster(fname, band=band, varname=varname, lvar=3, crs=crs.string),
-      longLat, method=interpMethod))
   }
 
   # Set extraction date terms
@@ -590,89 +599,60 @@ extractCatchmentData <- function(
   # Set netCDF time indexes for required time points to extract.
   ind = as.integer(difftime(timepoints2Extract, as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
 
+  # Get string of group and variable names to extract
+  var.group.string = vars.extract.summary$var.string
+  var.string = row.names(vars.extract.summary)
+
   # Loop through each time point and get data
   for (j in ind){
     # Update progress bar
     pbar$tick()
 
     # Extract data for each variable
-    #data.brick.tmp = lapply(var.group.string, get.nc.data, band=j, longLat = longLat.vars)
     data.brick.tmp = mapply(get.nc.data,
                             as.list(var.group.string),
-                            longLat.vars,
                             crs.vars,
-                            MoreArgs=list(fname=ncdfFilename, band=j, interpMethod=interpMethod),
+                            as.list(interp.method.vars),
+                            MoreArgs = list(fname=ncdfFilename,
+                                           band=j,
+                                           point.weights$coords,
+                                           do.infill =T,
+                                           ext = raster::extent(locations),
+                                           interpMax = missing.method[1]),
                             SIMPLIFY=F)
+
     names(data.brick.tmp) = var.string
 
     # Append new extracted data
     data.brick =  mapply(rbind, data.brick, data.brick.tmp, SIMPLIFY = F)
   }
 
-  # Handle spatial and temporal (<1990) gaps in solar radiation data
-  if (any(var.string %in% 'solarrad')) {
-    # Get variable names
-    ind = var.string %in% 'solarrad'
-    var.string.solar = var.string[ind]
-    var.grid.string.solar = vars.extract.summary[var.string.solar,]$var.string
+  # The source data can have the following types of gaps:
+  # 1, Missing a few clustered grid cells
+  # 2. Entire day of observations missing, often nationally
+  # 3. Date of gap is prior to the given observation type starting (eg solar radiation starts from 1/1/1990)
+  #
+  # Below outlines how each type of gap is handled.
+  # 1. A few grid cells: infill using raster:focal moving average. These are handled within get.nc.data().
+  # 2. Entire day missing: linear interpolation over time when only a 1-2 days are missing.
+  # 3. Prior to first obs: Apply the average for each day from the observational record within the dates extracted.
 
-    # Set non-sensible values to NA
-    data.brick[[var.string.solar]][data.brick[[var.string.solar]] <0] = NA;
-    solarrad_interp = data.brick[[var.string.solar]];
+  if (missing.method[2] != '') {
+    message('... Linearly interpolating gaps')
+    data.brick = mapply(do.interpolation,
+                        data.brick,
+                        MoreArgs = list( time.points=timepoints2Extract, method=missing.method[2]),
+                        SIMPLIFY = F
+    )
+  }
 
-    # Get numerb of grid cells to est
-    ngrid.solar = length(w.vars[[var.grid.string.solar]])
-
-    # Calculate the average daily solar radiation for each day of the year.
-    message('... Calculating mean daily solar radiation <1990-1-1')
-    monthdayUnique = sort(unique(extractMonth*100+extractDay));
-    day = as.integer(format(timepoints2Extract, "%d"));
-    month = as.integer(format(timepoints2Extract, "%m"));
-    monthdayAll = month*100+day;
-    solarrad_avg = matrix(NA, length(monthdayUnique), ngrid.solar);
-    for (j in 1:length(monthdayUnique)) {
-      ind = monthdayAll==monthdayUnique[j];
-      if (sum(ind)==1) {
-        solarrad_avg[j,] = data.brick[[var.string.solar]][ind,];
-      } else {
-        if (ncol(solarrad)==1) {
-          solarrad_avg[j,] = mean(data.brick[[var.string.solar]][ind,],na.rm=T)
-        } else {
-          solarrad_avg[j,] = apply(stats::na.omit(data.brick[[var.string.solar]][ind,]),2,mean)
-        }
-      }
-    }
-
-    # Assign the daily average solar radiation to each day prior to 1 Jan 1990
-    for (j in 1:length(timepoints2Extract)) {
-      if (timepoints2Extract[j]<as.Date('1990-1-1','%Y-%m-%d')) {
-        ind = which(monthdayUnique==monthdayAll[j])
-        if (length(ind)==1)
-          solarrad_interp[j,] = solarrad_avg[ind,]
-      }
-    }
-
-    # Linearly interpolate time points without a solar radiation value.
-    message('... Linearly interpolating gaps in daily solar.')
-    for (j in 1:ngrid.solar) {
-      filt = is.na(solarrad_interp[,j])
-      x = 1:length(timepoints2Extract);
-      xpred = x[filt];
-
-      # Interpolate if any NAs
-      if (length(xpred)>0) {
-        x = x[!filt]
-        y = solarrad_interp[!filt,j]
-
-        # Interpolate if at least 2 non-NA obs.
-        if (length(y)>1) {
-          ypred=stats::approx(x,y,xpred,method='linear', rule=2)
-          solarrad_interp[filt,j] = ypred$y
-        }
-      }
-    }
-
-    data.brick[[var.string.solar]] = solarrad_interp
+  if (missing.method[3] != '') {
+    message('... Backfilling dates prior to the start of observations')
+    data.brick = mapply(do.backfilling,
+                        data.brick,
+                        MoreArgs = list( time.points=timepoints2Extract, fn=missing.method[3]),
+                        SIMPLIFY = F
+    )
   }
 
   # Calculate ET at each grid cell and time point.
@@ -689,7 +669,7 @@ extractCatchmentData <- function(
     for (i in 1:nlocations) {
 
         # Get indexes to grid cells of current location, i
-        ind = location.lookup.vars[[tmax.str]][i,1]:location.lookup.vars[[tmax.str]][i,2]
+        ind = point.weights$lookup[i,1]:point.weights$lookup[i,2]
 
         # Initialise outputa
         ET.est = matrix(NA,length(timepoints2Extract),length(ind))
@@ -709,13 +689,9 @@ extractCatchmentData <- function(
           k=k+1
 
           # Check lat, Elev and precip are finite scalers.
-          if (any(!is.finite(data.brick[[precip.str]][,j])) || !is.finite(DEMpoints[j])) {
-            message(paste('WARNING: Non-finite input values detected for catchment',i,' at grid cell',j))
-            # message(paste('   Elevation value:' ,DEMpoints[j]))
-            # message(paste('   Latitude value:' ,longLat.all[j,2]))
-            # ind.nonfinite = which(!is.finite(data.brick$`nonsolar/precip`[,j]))
-            # if (length(ind.nonfinite)>0)
-            #   message(paste('   Precipiation nonfinite value (first):' ,precip[ind.nonfinite[1],j]))
+          if (any(!is.finite(DEMpoints[j]))) {
+            message(paste('WARNING: ET set to NA for location',i,'at grid cell',j, 'because of a non-finite elevation value.'))
+            message(paste('   Elevation value:' ,DEMpoints[j]))
             ET.est[,k] = NA;
             next
           }
@@ -738,7 +714,7 @@ extractCatchmentData <- function(
 
           # Update constants for the site
           ET.constants$Elev = DEMpoints[j]
-          ET.constants$lat = longLat.vars[[tmax.str]][j,2]
+          ET.constants$lat = point.weights$coords[j,2]
           ET.constants$lat_rad = ET.constants$lat / 180.0*pi
 
           # Call  ET package
@@ -784,8 +760,10 @@ extractCatchmentData <- function(
 
             # Spline interpolate Monthly average ET
             timepoints2Extract.as.zoo = zoo::zoo(NA,timepoints2Extract);
-            ET.est.tmp = zoo::na.approx(merge(monthly.ET.as.daily, dates=timepoints2Extract.as.zoo)[, 1], rule=2)
-            filt = stats::time(ET.est.tmp)>=stats::start(timepoints2Extract.as.zoo) & stats::time(ET.est.tmp)<=stats::end(timepoints2Extract.as.zoo)
+            ET.est.tmp = zoo::na.approx(merge(monthly.ET.as.daily, dates=timepoints2Extract.as.zoo)[, 1],
+                                        rule=2)
+            filt = stats::time(ET.est.tmp)>=stats::start(timepoints2Extract.as.zoo) &
+                   stats::time(ET.est.tmp)<=stats::end(timepoints2Extract.as.zoo)
             ET.est.tmp = pmax(0.0, as.numeric( ET.est.tmp));
             ET.est.tmp = ET.est.tmp[filt]
             ET.est[,k] = ET.est.tmp;
@@ -798,52 +776,12 @@ extractCatchmentData <- function(
         } else {
           data.brick[['et']] = cbind(data.brick[['et']], ET.est)
         }
-
     }
-  }
 
-  # Define functions for spatial and temporal aggregation
-  #--------------------
-  # Define time aggregation function.
-  do.TemporalAggregation = function( data,
-                                     location.lookup,
-                                     dates,
-                                     location.ID,
-                                     timestep.options,
-                                     timestep,
-                                     fn,
-                                     ind) {
-    cell.index = location.lookup[location.ID,1]:location.lookup[location.ID,2]
-    data.xts = xts::as.xts(data[, cell.index], order.by=dates)
-    data.xts <-
-      switch(
-        which(timestep.options == timestep),
-        data.xts, # daily timestep - do nothing
-        xts::apply.weekly(data.xts, apply, 2, fn),  # weekly timestep
-        xts::apply.monthly(data.xts, apply, 2, fn), # monthly timestep
-        xts::apply.quarterly(data.xts, apply, 2, fn), # quarterly timestep
-        xts::apply.yearly(data.xts, apply, 2, fn), # annual timestep
-        xts::period.apply(data.xts, INDEX=ind, apply, 2, fn), # user defined period
-      )
-    return(data.xts)
+    # Add ET variable back into vars
+    vars = c(vars,'et')
+    nvars = length(vars)
   }
-
-  # Define spatial averaging function
-  do.SpatialAggregation = function(data,
-                                   w,
-                                   location.lookup,
-                                   location.ID) {
-
-    cell.index = location.lookup[location.ID,1]:location.lookup[location.ID,2]
-    w = w[cell.index]
-    return(apply(t(t(data) * w),1,sum,na.rm=TRUE) )
-  }
-
-  # Define spatial averaging function
-  do.SpatialStatistic = function( data, fn) {
-      return( apply(data, 1, fn, na.rm=TRUE) )
-  }
-  #--------------------
 
   # Get unique location IDs
   locations.ID = unique(locations@data[,1])
@@ -883,8 +821,8 @@ extractCatchmentData <- function(
 
     data.brick.timaAgg = mapply(do.TemporalAggregation,
                                 data.brick,
-                                location.lookup.vars,
                                 MoreArgs = list(
+                                  point.weights$lookup,
                                   dates = extractDate,
                                   location.ID = i,
                                   timestep.options = temporal.timestep.options,
@@ -914,9 +852,10 @@ extractCatchmentData <- function(
       catchmentAvgTmp = cbind(catchmentAvgTmp,
                               mapply(do.SpatialAggregation,
                                      data.brick.timaAgg,
-                                     w.vars,
-                                     location.lookup.vars,
-                                     MoreArgs = list(location.ID = i),
+                                     MoreArgs =
+                                       list(point.weights$lookup,
+                                            point.weights$w,
+                                            location.ID = i),
                                      SIMPLIFY = T)
                                      )
 
@@ -932,7 +871,7 @@ extractCatchmentData <- function(
       # Below, catchmentAvg is converted to a spatial object.
       nGridCells = 1
       if (islocationsPolygon)
-        nGridCells = location.lookup[i,2] - location.lookup[i,1] +1
+        nGridCells = point.weights$lookup[i,2] - point.weights$lookup[i,1] +1
 
       catchmentAvgTmp = data.frame(Location.ID=rep(locations.ID[i],nGridCells))
       catchmentVar = NA
@@ -983,11 +922,11 @@ extractCatchmentData <- function(
   if (islocationsPolygon) {
     if (do.spatial.analysis) {
       catchmentAvg = list(catchmentAvg, catchmentVar)
-      names(catchmentAvg) = c(paste('catchmentTemporal.',temporal.function.name,sep=''), paste('catchmentSpatial.',spatial.function.name,sep=''))
+      names(catchmentAvg) = c(paste('temporal.',temporal.function.name,sep=''), paste('spatial.',spatial.function.name,sep=''))
     } else {
       # Convert data to  a spatial grid (SpatialPixelsDataFrame)
-      gridCoords = data.frame(Long=longLat.all[,1], Lat=longLat.all[,2])
-      catchmentAvg = cbind.data.frame(gridCoords, catchmentAvg)
+      gridCoords = data.frame(Long=point.weights$coords[,1], Lat=point.weights$coords[,2])
+      catchmentAvg = cbind.data.frame(gridCoords,  catchmentAvg)
       sp::coordinates(catchmentAvg) <- ~Long+Lat
       sp::gridded(catchmentAvg) <- T
     }
@@ -1002,3 +941,142 @@ extractCatchmentData <- function(
 
   return(catchmentAvg)
 }
+
+# Internal functions for apply() calls above
+#--------------------------------------------
+
+# Define function to extract netCDF data.
+get.nc.data = function( varname, crs.string, interp.method, fname, band, coords, do.infill, ext, interpMax) {
+
+  # Get raster fromncdf file
+  r <- raster::raster(fname, band=band, varname=varname, lvar=3, crs=crs.string)
+
+  # Do infilling of NAs. Generally only included for gaos in solar radiation.
+  if (do.infill) {
+    # crop to extent
+    r <- raster::crop(r, ext, snap='out')
+
+    # Infill NA values of grid by taking the local average. Only do so
+    # if there are some finite values. The maximum area of NAs that is
+    # infilled is defined by interpMax. That is a value of 3 infills a
+    # 3x3 cell area.
+    if (any(is.finite(values(r)))) {
+      i = 0
+      while (any(is.na(values(r))) && i<=interpMax) {
+        r <- raster::focal(r, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
+        i = i +1
+      }
+    }
+  }
+
+  return(raster::extract(r, coords, method=interp.method))
+}
+
+# Define time aggregation function.
+do.TemporalAggregation = function( data,
+                                   location.lookup,
+                                   dates,
+                                   location.ID,
+                                   timestep.options,
+                                   timestep,
+                                   fn,
+                                   ind) {
+  cell.index = location.lookup[location.ID,1]:location.lookup[location.ID,2]
+  data.xts = xts::as.xts(data[, cell.index], order.by=dates)
+  data.xts <-
+    switch(
+      which(timestep.options == timestep),
+      data.xts, # daily timestep - do nothing
+      xts::apply.weekly(data.xts, apply, 2, fn),  # weekly timestep
+      xts::apply.monthly(data.xts, apply, 2, fn), # monthly timestep
+      xts::apply.quarterly(data.xts, apply, 2, fn), # quarterly timestep
+      xts::apply.yearly(data.xts, apply, 2, fn), # annual timestep
+      xts::period.apply(data.xts, INDEX=ind, apply, 2, fn), # user defined period
+    )
+  return(data.xts)
+}
+
+# Define spatial averaging function
+do.SpatialAggregation = function(data,
+                                 location.lookup,
+                                 w,
+                                 location.ID) {
+
+  cell.index = location.lookup[location.ID,1]:location.lookup[location.ID,2]
+  w = w[cell.index]
+  return(apply(t(t(data) * w),1,sum,na.rm=TRUE) )
+}
+
+# Define spatial averaging function
+do.SpatialStatistic = function( data, fn) {
+  return( apply(data, 1, fn, na.rm=TRUE) )
+}
+
+# Interpolate gaps in observed period of data
+do.interpolation = function(data, time.points, method) {
+  for (j in 1:ncol(data)) {
+    filt = is.na(data[,j])
+    x = 1:length(time.points)
+    xpred = x[filt]
+
+    # Interpolate if any NAs
+    if (length(xpred)>0) {
+      x = x[!filt]
+      y = data[!filt,j]
+
+      # Interpolate if at least 2 non-NA obs.
+      if (length(y)>1) {
+        if (any( method==c('constant','linear'))) {
+          ypred=stats::approx(x, y, xpred, method=method, rule=1:2)
+        } else
+          ypred=stats::spline(x, y, method=method, xout=xpred)
+
+        data[filt,j] = ypred$y
+      }
+    }
+  }
+
+  return(data)
+}
+
+# beck fill dates prior to the start of the record
+do.backfilling <- function(data, time.points, fn) {
+
+    # Get number of grid cells to est
+    npoints = ncol(data)
+
+    extractYear = as.numeric(format(time.points,"%Y"))
+    extractMonth = as.numeric(format(time.points,"%m"))
+    extractDay = as.numeric(format(time.points,"%d"))
+
+    # Calculate the average daily solar radiation for each day of the year.
+    monthdayUnique = sort(unique(extractMonth*100+extractDay));
+    day = as.integer(format(time.points, "%d"));
+    month = as.integer(format(time.points, "%m"));
+    monthdayAll = month*100+day;
+    data_avg = matrix(NA, length(monthdayUnique), npoints);
+    for (j in 1:length(monthdayUnique)) {
+      ind = monthdayAll==monthdayUnique[j];
+      if (sum(ind)==1) {
+        data_avg[j,] = data[ind,];
+      } else {
+        if (npoints==1) {
+          data_avg[j,] = mean(data[ind,],na.rm=T)
+        } else {
+          data_avg[j,] = apply(stats::na.omit(data[ind,]),2,fn)
+        }
+      }
+    }
+
+    # Assign the daily average solar radiation to each day where all obs are NA
+    for (j in 1:length(time.points)) {
+      if (all(is.na(data[j, ]))) {
+        ind = which(monthdayUnique==monthdayAll[j])
+        if (length(ind)==1)
+          data_avg[j,] = data_avg[ind,]
+      }
+    }
+
+    return(data_avg)
+}
+#--------------------
