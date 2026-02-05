@@ -200,6 +200,12 @@ extractCatchmentData <- function(
   # Filter netCDF df summary to the variables to be extracted.
   filt = vars.prior %in% vars
   vars.extract.summary = vars.prior.summary[filt,]
+  rm('vars.prior')
+
+  # Make vars.extract.summary row names the same as vars
+  vars.extract.summary = vars.extract.summary[vars, ]
+
+  # Get list of unique grids
   grids.extract = unique(vars.extract.summary$group)
 
   # Build time points to update
@@ -584,7 +590,7 @@ extractCatchmentData <- function(
   extractMonth = as.numeric(format(timepoints2Extract,"%m"))
   extractDay = as.numeric(format(timepoints2Extract,"%d"))
 
-  message('... Starting to extract data at all time points and all locations:')
+  message('... Starting to extract data across all locations:')
 
   # Setup progress bar
   ntimepoints2Extract = length(timepoints2Extract)
