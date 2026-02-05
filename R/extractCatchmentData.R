@@ -584,7 +584,7 @@ extractCatchmentData <- function(
   extractMonth = as.numeric(format(timepoints2Extract,"%m"))
   extractDay = as.numeric(format(timepoints2Extract,"%d"))
 
-  message('... Starting to extract data across all locations:')
+  message('... Starting to extract data at all time points and all locations:')
 
   # Setup progress bar
   ntimepoints2Extract = length(timepoints2Extract)
