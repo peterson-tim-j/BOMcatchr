@@ -13,7 +13,7 @@
 #' @export
 get.variableSource <- function() {
 
-  vars = c('precip', 'tmin', 'tmax', 'vprp', 'solarrad')
+  vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad')
   nvars = length(vars)
   var.data = data.frame(label = rep('', nvars),
                         units  = rep('', nvars),
@@ -23,11 +23,12 @@ get.variableSource <- function() {
                         ellipsoid.crs = rep('', nvars),
                         infillGaps = rep(F, nvars),
                         row.names = vars)
-  var.data['precip',] <- c('Total daily precipitation',
-                           'mm/day',
+
+  var.data['tmax',] <- c(  'Max daily temperature',
+                           'deg_C',
                            'daily',
-                           'https://www.bom.gov.au/web03/ncc/www/awap/rainfall/totals/daily/grid/0.05/history/nat/',
-                           'precip',
+                           'https://www.bom.gov.au/web03/ncc/www/awap/temperature/maxave/daily/grid/0.05/history/nat/',
+                           'tmax',
                            '+proj=longlat +ellps=GRS80',
                            F)
 
@@ -39,11 +40,11 @@ get.variableSource <- function() {
                            '+proj=longlat +ellps=GRS80',
                            F)
 
-  var.data['tmax',] <- c(  'Max daily temperature',
-                           'deg_C',
+  var.data['precip',] <- c('Total daily precipitation',
+                           'mm/day',
                            'daily',
-                           'https://www.bom.gov.au/web03/ncc/www/awap/temperature/maxave/daily/grid/0.05/history/nat/',
-                           'tmax',
+                           'https://www.bom.gov.au/web03/ncc/www/awap/rainfall/totals/daily/grid/0.05/history/nat/',
+                           'precip',
                            '+proj=longlat +ellps=GRS80',
                            F)
 
