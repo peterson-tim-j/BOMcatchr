@@ -559,16 +559,6 @@ makeNetCDF_file <- function(
                                               gridgeo[ivar,]$nRows,
                                               noData=gridgeo[ivar,]$nodata)
 
-        # Do infilling of NAs. Generally only included for gaos in solar radiation.
-        if (ivar.doInfill) {
-          # Infill NA values of grid by taking the local average and convert back to matrix.
-          grid.tmp <- raster::raster(grid.tmp)
-          grid.tmp <- raster::focal(grid.tmp, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
-          grid.tmp <- raster::focal(grid.tmp, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
-          grid.tmp <- raster::focal(grid.tmp, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
-          grid.tmp = raster::as.matrix(grid.tmp);
-        }
-
         # Find index to the date to update within the net CDF grid
         ind = as.integer(difftime(timepoints2Update[date], as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
 
