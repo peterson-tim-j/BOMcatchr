@@ -2,7 +2,7 @@
 title: "Extract daily area weighted potential PET and precipitation and map"
 description: >
   This vignette shows how to build the netCDF data file and then
-  extract the area weighted PET and precipitation data for a catchment over a user defined period. The errors introduced from not using area weighted methods (e.g centrod) are then demonstrated.
+  extract the area weighted PET and precipitation data for a catchment over a user defined period. The errors introduced from not using area weighted methods (e.g centroid) are then demonstrated.
   output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Extract daily area weighted PET and precipitation}
