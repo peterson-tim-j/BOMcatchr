@@ -19,7 +19,8 @@
 #' The function can be used to a build netCDF file from scratch or to update an existing netCDF file previously
 #' derived from this function. To not build or update a variable, set its respective URL to \code{NA}.
 #'
-#' @param ncdfFilename is a file path (as string) and name to the netCDF file. The default file name and path is \code{file.path(getwd(),'AWAP.nc')}.
+#' @param ncdfFilename is a file path (as string) and name to the netCDF file.
+#' If only a file name is given, then the file is assumed to exist / be created in \code{getwd()}. The default file name and path is \code{file.path(getwd(),'AWAP.nc')}.
 #' @param updateFrom is a date string specifying the start date for the AWAP data. If
 #' \code{ncdfFilename} is specified and exist, then the netCDF grids will be
 #'  updated with new data from \code{updateFrom}. To update the file from the end of the last day in the file
@@ -32,7 +33,6 @@
 #' Any or all of the defaults are available. If \code{vars=''} and the netCDF does not exist, then the default is
 #' \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad')} and provided by \code{rownames(get.variableSource())}.
 #' However, if \code{vars=''} and the netCDF file does exist, then default is to use the variable names in the file.
-#' @param workingFolder is the file path (as string) in which to download the AWAP grid files. The default is \code{getwd()}.
 #' @param keepFiles is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.
 #' @param compressionLevel is the netCDF compression level between 1 (low) and 9 (high), and \code{NA} for no compression.
 #' Note, data extraction runtime may slightly increase with the level of compression. The default is \code{5}.
@@ -78,7 +78,6 @@ makeNetCDF_file <- function(
   updateFrom = as.Date("1900-01-01","%Y-%m-%d"),
   updateTo  = as.Date(Sys.Date()-2,"%Y-%m-%d"),
   vars = '',
-  workingFolder=getwd(),
   keepFiles=FALSE,
   compressionLevel = 5,
   vars.sourceData = get.variableSource() )  {
@@ -92,9 +91,33 @@ makeNetCDF_file <- function(
   # Get system time to estimate run time at the end.
   sys.start.time = Sys.time()
 
+  # Check file name is a string
   if (!is.character(ncdfFilename))
     stop('ncdfFilename is invalid. It must be a character string for the file name.')
 
+  # Get workingFolder
+  workingFolder = dirname(ncdfFilename)
+  if (workingFolder == '.')
+    workingFolder = getwd()
+
+  # Check file and folder names and that they're writable
+  if (file.exists(ncdfFilename)) {
+    # check write access to existing netcdf file
+    if (file.access(ncdfFilename, mode = 2) != 0)
+      stop('ncdfFilename cannot be written to. Check folder.')
+  } else {
+    # Get path for new netcdF file
+    if (dirname(ncdfFilename) == '.') {
+      if (file.access(workingFolder, mode=2) != 0)
+        stop('ncdfFilename cannot be written to the working directory. Check the working directory.')
+    } else {
+      if (file.access(dirname(ncdfFilename), mode=2) != 0)
+        stop('ncdfFilename cannot be written to the file directory. Check the fle name and path.')
+    }
+  }
+
+  # Check the input vars list
+  #----------------
   if (!is.character(vars))
     stop('vars must be a character vector of variables names.')
 
