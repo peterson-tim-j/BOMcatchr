@@ -966,9 +966,9 @@ get.nc.data = function( varname, crs.string, interp.method, fname, band, coords,
     # if there are some finite values. The maximum area of NAs that is
     # infilled is defined by interpMax. That is a value of 3 infills a
     # 3x3 cell area.
-    if (any(is.finite(values(r)))) {
+    if (any(is.finite(raster::values(r)))) {
       i = 0
-      while (any(is.na(values(r))) && i<=interpMax) {
+      while (any(is.na(raster::values(r))) && i<=interpMax) {
         r <- raster::focal(r, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
         i = i +1
       }
