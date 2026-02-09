@@ -484,21 +484,6 @@ makeNetCDF_file <- function(
     message('... updateTo increased to ensure all variables have the same end date.')
   }
 
-  # if (diff(range(vars.summary$from))>0 &&
-  #     min(vars.summary$from) < updateFrom &&
-  #     min(vars.summary$from) > as.Date('0000-01-01', '%Y-%m-%d')) {
-  #
-  #     updateFrom = min(vars.summary$from)
-  #     message('... updateFrom reduced to ensure all variables have the same start date.')
-  # }
-  # if (diff(range(vars.summary$to))>0 &&
-  #     max(vars.summary$to) > updateTo &&
-  #     max(vars.summary$to) < as.Date('9999-12-31', '%Y-%m-%d')) {
-  #
-  #     updateTo = max(vars.summary$to)
-  #     message('... updateTo increased to ensure all variables have the same end date.')
-  # }
-
   # Filter vars.2update. If the input vars exists in the netCDF and the data range
   # is wholly within the existing data range, then only update this variable.
   # However, if the
