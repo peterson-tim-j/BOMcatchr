@@ -9,10 +9,6 @@ test_that("netCDF grid can be created",
           startDate = Sys.Date()-9
           endDate = Sys.Date()-2
 
-          # define temp direcory for netCDF files
-          fdir = tempdir()
-          setwd(fdir)
-
           # Set names for netCDF files (in the system temp. directory).
           ncdfFilename = tempfile(fileext = '.nc')
 
