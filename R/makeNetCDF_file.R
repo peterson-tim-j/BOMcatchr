@@ -528,6 +528,11 @@ makeNetCDF_file <- function(
 
   message('... Downloading data for each variable and importing to netcdf file:')
   ncout <- RNetCDF::open.nc(ncdfFilename, write=T)
+
+  buildSummary.df = data.frame(Imported=rep(0, length(vars.2modify)),
+                           Errors=rep(0, length(vars.2modify)),
+                           row.names = vars.2modify)
+
   for (ivar in vars.2modify) {
 
     # Get group for current var
@@ -577,6 +582,9 @@ makeNetCDF_file <- function(
                             start=c(1, 1, ind),
                             count = c(gridgeo[ivar,]$nCols, gridgeo[ivar,]$nRows, 1),
                             na.mode=1)
+        buildSummary.df[ivar,]$Imported = buildSummary.df[ivar,]$Imported + 1
+      } else {
+        buildSummary.df[ivar,]$Errors = Errors[ivar,]$Success + 1
       }
 
       # Delete downloaded file.
@@ -604,6 +612,10 @@ makeNetCDF_file <- function(
   RNetCDF::close.nc(ncout)
 
   message('Data construction FINISHED.')
+
+  message('Summary of time points successfully imported (and errors).')
+  print(buildSummary.df)
+
   duration <- difftime(Sys.time(), sys.start.time, units="secs")
   x <- abs(as.numeric(duration))
   message(sprintf("Total run time (DD:HH:MM:SS): %02d:%02d:%02d:%02d",
