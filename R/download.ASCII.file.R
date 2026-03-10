@@ -8,7 +8,7 @@
 #' @keywords internal
 #'
 #' @export
-download.ASCII.file <- function (url.string, data.type.label,  workingFolder, datestring) {
+download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.timestep, data.type.label,  workingFolder, datestring) {
 
   if (!is.character(url.string))
     stop(paste('The input URL for',data.type.label,'must be a URL string.'))
@@ -16,23 +16,50 @@ download.ASCII.file <- function (url.string, data.type.label,  workingFolder, da
   if (!startsWith(url.string,'https://'))
     stop(paste('The input URL string for',data.type.label,'must start "with https://" '))
 
-  didFail = 1
-  url = paste(url.string,datestring, datestring,'.grid.Z',sep='')
+  if (ivar.timestep == 'days') {
+    sdate = datestring
+    edate = datestring
+  } else if (ivar.timestep == 'months') {
+    sdate = format( as.Date(datestring,'%Y%m%d'),"%Y%m01")
+    edate = format(as.Date(format(as.Date(datestring,'%Y%m%d') + 33,"%Y%m01"),'%Y%m%d')-1,'%Y%m%d')
+  } else if (ivar.timestep == 'years') {
+    sdate = format( as.Date(datestring,'%Y%m%d'),"%Y0101")
+    edate = format(as.Date(datestring,'%Y%m%d') ,"%Y1231")
+  } else {
+    stop(paste('Unknown source data time step:',ivar.timestep))
+  }
 
+  # Build URL
+  url = paste0(url.string,
+               sdate,
+               edate ,
+               '.',
+               ivar.url.ext)
+
+  # Build source file destination name
+  des.file.name = file.path(workingFolder, paste(data.type.label, datestring,'.', ivar.url.ext, sep=''))
+
+  # Get list of existing files
+  fnames.pre = list.files(path = workingFolder)
+
+  # Download the zip file
+  didFail = 1
+  didFail = tryCatch({
+    bin.data = RCurl::getBinaryURL(url)
+    fid <- file(des.file.name, "wb")
+    writeBin(bin.data, fid)
+    close(fid)
+  },error = function(cond) {return(TRUE)})
+
+  # Unzip file
   OS <- Sys.info()
   OS <- OS[1]
   if (OS=='Windows') {
-    des.file.name = file.path(workingFolder,paste(data.type.label,datestring,'.grid.Z',sep=''))
+      if (file.exists(des.file.name) && didFail==0) {
 
-    didFail = tryCatch({
-      bin.data = RCurl::getBinaryURL(url)
-      fid <- file(des.file.name, "wb")
-      writeBin(bin.data, fid)
-      close(fid)
-      },error = function(cond) {return(TRUE)})
-    if (file.exists(des.file.name) && didFail==0) {
+      # Unzip downloaded file and record the files pre and prior
       exitMessage = system(paste0('7z e -aoa -bso0 "',des.file.name, '"', ' -o', workingFolder),intern = T)
-      file.remove(des.file.name)
+
       if (!is.null(attr(exitMessage,'status')) && attr(exitMessage,'status')!=2) {
         message('------------------------------------------------------------------------------------')
         message('The program "7z" is either not installed or cannot be found. If not installed then')
@@ -48,25 +75,33 @@ download.ASCII.file <- function (url.string, data.type.label,  workingFolder, da
         message('------------------------------------------------------------------------------------')
         stop()
       }
-
-      des.file.name = gsub('.Z', '', des.file.name)
     }
   } else {
 
-    des.file.name = file.path(workingFolder,paste(data.type.label,datestring,'.grid.Z',sep=''))
-
-    didFail = tryCatch({
-      bin.data = RCurl::getBinaryURL(url)
-      fid <- file(des.file.name, "wb")
-      writeBin(bin.data, fid)
-      close(fid)
-      },error = function(cond) {return(TRUE)})
-
     if (file.exists(des.file.name) && didFail==0) {
       system(paste('znew -f ',des.file.name));
-      des.file.name = gsub('.Z', '.gz', des.file.name)
+      #des.file.name = gsub('.Z', '.gz', des.file.name)
     }
   }
+
+  # Remove zip file
+  file.remove(des.file.name)
+
+  # get updated list of files.
+  fnames.post = list.files(path = workingFolder)
+
+  # Get names of new unzipped file(s)
+  fnames.new = fnames.post[ !(fnames.post %in% fnames.pre) ]
+
+  # Find new file of the required format and delete the other file
+  ind = grepl(paste0(ivar.file.ext,'$'), fnames.new)
+  if (!any(ind))
+    stop(paste('The following file format was not found within the zip file:',ivar.url.ext))
+  des.file.name = fnames.new[ind]
+  des.file.name = file.path(workingFolder, des.file.name)
+
+  # Delete the file not set as required
+  file.remove( file.path(workingFolder, fnames.new[!ind]) )
 
   return(list(file.name=des.file.name,didFail=didFail))
 }
