@@ -29,9 +29,9 @@
 #'  \code{ncdfFilename} is specified and exist, then the netCDF grids will be
 #'  updated with new data to \code{updateFrom}. The default is two days ago as YYYY-MM-DD.
 #' @param vars is a vector of variables names to build or update. The available variables are: daily precipitation,
-#' daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
+#' monthly precipitation, daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
 #' Any or all of the defaults are available. If \code{vars=''} and the netCDF does not exist, then the default is
-#' \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad')} and provided by \code{rownames(get.variableSource())}.
+#' \code{c('precip', 'precip.monthly','tmin', 'tmax', 'vprp', 'solarrad')} and provided by \code{rownames(get.variableSource())}.
 #' However, if \code{vars=''} and the netCDF file does exist, then default is to use the variable names in the file.
 #' @param keepFiles is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.
 #' @param compressionLevel is the netCDF compression level between 1 (low) and 9 (high), and \code{NA} for no compression.
@@ -211,14 +211,24 @@ makeNetCDF_file <- function(
                        DPixel = rep(NA,nvars), nodata= rep(NA,nvars),
                        has.geom = rep(F,nvars),
                        ellipsoid.crs = rep(NA,nvars),
+                       time.step = rep(NA,nvars),
+                       time.datum = rep(NA,nvars),
                        row.names = vars)
   message('... Testing downloading of each variable.')
   for (ivar in vars.2modify) {
     message(paste('    Testing',ivar,'grid data.'))
-    destFile <- AWAPer::download.ASCII.file(vars.all[ivar,]$data.URL, ivar, workingFolder, filedate_str)
+    destFile <- AWAPer::download.ASCII.file(vars.all[ivar,]$data.URL,
+                                            vars.all[ivar,]$data.file.extension,
+                                            vars.all[ivar,]$data.file.format,
+                                            vars.all[ivar,]$time.step,
+                                            ivar,
+                                            workingFolder,
+                                            filedate_str)
 
     # Get the grid geometry of the non solar data
-    headerData <- AWAPer::get.ASCII.file.header(ivar, workingFolder, filedate_str, remove.file=T)
+    headerData <- AWAPer::get.ASCII.file.header(destFile$file.name,
+                                                workingFolder,
+                                                remove.file=T)
     gridgeo[ivar,]$nCols  <- headerData$nCols
     gridgeo[ivar,]$nRows  <- headerData$nRows
     gridgeo[ivar,]$SWLong <- headerData$SWLong
@@ -229,6 +239,12 @@ makeNetCDF_file <- function(
 
     # Add ellipsoid CRS from get.variableSource()
     gridgeo[ivar,]$ellipsoid.crs = vars.all[ivar,]$ellipsoid.crs
+
+    # Add time step for variable
+    gridgeo[ivar,]$time.step = vars.all[ivar,]$time.step
+
+    # Add string for time origin
+    gridgeo[ivar,]$time.datum = paste( gridgeo[ivar,]$time.step, "since 1900-01-01 00:00:00.0 -0:00")
   }
 
   # Identify the unique grid dimensions and assign grid
@@ -288,11 +304,9 @@ makeNetCDF_file <- function(
                     by = gridgeo.unique[i,]$DPixel,
                     length.out = gridgeo.unique[i,]$nRows)
 
-    timeVec = 0:(length(timepoints)-1)
-
     grid.dims[[i]] = list(long = longVec,
                           lat = latVec,
-                          t = timeVec,
+                          time.datum = paste(gridgeo.unique$time.step[i], "since 1900-01-01 00:00:00.0 -0:00"),
                           crs = gridgeo.unique[i,]$ellipsoid.crs)
   }
 
@@ -353,7 +367,7 @@ makeNetCDF_file <- function(
       RNetCDF::att.put.nc(grp,'Time',
                           "units",
                           "NC_CHAR",
-                          paste("days since 1900-01-01 00:00:00.0 -0:00"))
+                          grid.dims[[i]]$time.datum )
 
       # Define spatial dimensions
       vals= grid.dims[[i]]$long
@@ -441,9 +455,9 @@ makeNetCDF_file <- function(
                           "9999-12-31")
       RNetCDF::att.put.nc(grp,
                           ivar,
-                          'timestep',
+                          'time.step',
                           "NC_CHAR",
-                          vars.all[ivar,]$timestep)
+                          vars.all[ivar,]$time.step)
       RNetCDF::att.put.nc(grp,
                           ivar,
                           "units",
@@ -472,6 +486,10 @@ makeNetCDF_file <- function(
   # Set update from to the end of the current data
   if (is.na(updateFrom))
     updateFrom = min(vars.summary$to)
+
+  # Limit update dates to plausible range
+  updateFrom = max(as.Date('1900-01-01','%Y-%m-%d'), updateFrom)
+  updateTo = min(as.Date(Sys.Date(),'%Y-%m-%d'), updateTo)
 
   # If the earliest and latest dates from existing data differ, then
   # change updateFrom and updateTo
@@ -502,13 +520,8 @@ makeNetCDF_file <- function(
   vars.2modify = c(vars.2add, vars.2update)
   nvars.2modify = length(vars.2modify)
 
-  # Set time points to update
-  timepoints2Update = seq( as.Date(updateFrom,'%Y-%m-%d'), by="day", to=as.Date(updateTo,'%Y-%m-%d'))
-  ntimepoints2Update = length(timepoints2Update)
-  timepoints = seq( as.Date("1900-01-01","%Y-%m-%d"), by="day", to=updateTo)
-
-  if (length(timepoints2Update)==0)
-      stop('The dates to update produce a zero vector of dates of zero length. Check the inputs dates are as YYYY-MM-DD')
+  if (difftime(updateTo, updateFrom, units="days") <1)
+      stop('The update dates are less than 1 day. Check the inputs dates are as YYYY-MM-DD')
 
   # Give summary of data changes
   message('... NetCDF file will be updated as follows:')
@@ -539,41 +552,52 @@ makeNetCDF_file <- function(
     ivar.grid = vars.summary[ivar,]$group
     igrp = RNetCDF::grp.inq.nc(ncout, grpname = ivar.grid)$self
     ivar.url = vars.all[ivar,]$data.URL
-    ivar.doInfill = vars.all[ivar,]$infillGaps
+    ivar.url.ext = vars.all[ivar,]$data.file.extension
+    ivar.file.ext = vars.all[ivar,]$data.file.format
+    ivar.timetep = vars.all[ivar,]$time.step
+
+    # Set time points to update for the time step of this variable
+    timepoints2Update = switch(gridgeo[ivar,]$time.step,
+                        days = seq( from=updateFrom, by="days", to=updateTo),
+                        weeks =  seq( from=updateFrom, by="weeks", to=updateTo),
+                        months = seq( from=as.Date(updateFrom,'%Y%m01'), by="months", to=as.Date(updateTo,'%Y%m01')),
+                        years =  seq( from=as.Date(updateFrom,'%Y0101'), by="years", to=as.Date(updateTo,'%Y0101')))
+    ntimepoints2Update = length(timepoints2Update)
 
     # Setup progress bar
     pbar <- progress::progress_bar$new(
       format = paste("    ",ivar,": :current of :total  [:bar] :percent in :elapsed",sep=''),
       total = ntimepoints2Update, clear = FALSE, width= 80)
 
-    for (date in 1:ntimepoints2Update){
+    for (i in 1:ntimepoints2Update){
 
       # Update progress bar
       pbar$tick()
 
       # Get date string for input filenames
-      datestring<-format(timepoints2Update[date], "%Y%m%d")
+      datestring<-format(timepoints2Update[i], "%Y%m%d")
 
       # Download data
       var.failed = 1
       destFile <- AWAPer::download.ASCII.file(ivar.url,
+                                              ivar.url.ext,
+                                              ivar.file.ext,
+                                              ivar.timetep,
                                               ivar,
                                               workingFolder,
                                               datestring)
 
       # Read in grid and add to netCDF file
       if (destFile$didFail == 0 && file.exists(destFile$file.name)) {
-        headerData.tmp <- AWAPer::get.ASCII.file.header(ivar,
-                                                        workingFolder,
-                                                        datestring,
-                                                        remove.file = F)
 
         grid.tmp <- AWAPer::readin.ASCII.file(destFile$file.name,
                                               gridgeo[ivar,]$nRows,
                                               noData=gridgeo[ivar,]$nodata)
 
         # Find index to the date to update within the net CDF grid
-        ind = as.integer(difftime(timepoints2Update[date], as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
+        ind = ceiling(RNetCDF::utinvcal.nc(gridgeo[ivar,]$time.datum,
+                                           format(timepoints2Update[i], '%Y-%m-%d 01:59:59')))
+        #ind = as.integer(difftime(timepoints2Update[date], as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
 
         # Put new grid in netCDF
         RNetCDF::var.put.nc(igrp,
@@ -584,7 +608,7 @@ makeNetCDF_file <- function(
                             na.mode=1)
         buildSummary.df[ivar,]$Imported = buildSummary.df[ivar,]$Imported + 1
       } else {
-        buildSummary.df[ivar,]$Errors = Errors[ivar,]$Success + 1
+        buildSummary.df[ivar,]$Errors = buildSummary.df[ivar,]$Errors + 1
       }
 
       # Delete downloaded file.
