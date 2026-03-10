@@ -8,20 +8,19 @@
 #' @keywords internal
 #'
 #' @export
-get.ASCII.file.header <- function (data.type.label, workingFolder, datestring, remove.file=T) {
+get.ASCII.file.header <- function (des.file.name, workingFolder, remove.file=T) {
 
+  # Get data geometry for eachfile type
   OS <- Sys.info()
   OS <- OS[1]
   if (OS=='Windows') {
-    #system(paste('7z e -aoa -bso0 ',des.file.name))
-    des.file.name = file.path(workingFolder,paste(data.type.label,datestring,'.grid',sep=''))
     raw<-textConnection(readLines(a<-file(des.file.name)))
   } else {
-    #system(paste('znew -f ',des.file.name))
-    des.file.name = file.path(workingFolder,paste(data.type.label,datestring,'.grid.gz',sep=''))
+    des.file.name = file.path(workingFolder,paste(ivar.label,'.grid.gz',sep=''))
     raw<-textConnection(readLines(a<-gzfile(des.file.name)))
   }
 
+  # Get file header data
   headerData = readLines(raw,n=6)
   nCols =as.integer(sub('ncols', '', headerData[1]))
   nRows = as.integer(sub('nrows', '', headerData[2]));
@@ -29,6 +28,7 @@ get.ASCII.file.header <- function (data.type.label, workingFolder, datestring, r
   SWLat = as.numeric(sub('yllcenter', '', headerData[4]));
   DPixel = as.numeric(sub('cellsize', '', headerData[5]));
   nodata = as.numeric(sub('nodata_value', '', headerData[6]));
+
 
   close(a)
   close(raw)
