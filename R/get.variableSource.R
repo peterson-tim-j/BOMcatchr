@@ -17,52 +17,67 @@ get.variableSource <- function() {
   nvars = length(vars)
   var.data = data.frame(label = rep('', nvars),
                         units  = rep('', nvars),
-                        timestep = rep('', nvars),
+                        time.step = rep('', nvars),
                         data.URL = rep('', nvars),
+                        data.file.extension = rep('', nvars),
+                        data.file.format = rep('', nvars),
                         ncdf.name = rep('', nvars),
                         ellipsoid.crs = rep('', nvars),
-                        infillGaps = rep(F, nvars),
                         row.names = vars)
 
   var.data['tmax',] <- c(  'Max daily temperature',
                            'deg_C',
-                           'daily',
+                           'days',
                            'https://www.bom.gov.au/web03/ncc/www/awap/temperature/maxave/daily/grid/0.05/history/nat/',
+                           'grid.Z',
+                           'grid',
                            'tmax',
-                           '+proj=longlat +ellps=GRS80',
-                           F)
+                           '+proj=longlat +ellps=GRS80')
 
   var.data['tmin',] <- c(  'Min daily temperature',
                            'deg_C',
-                           'daily',
+                           'days',
                            'https://www.bom.gov.au/web03/ncc/www/awap/temperature/minave/daily/grid/0.05/history/nat/',
+                           'grid.Z',
+                           'grid',
                            'tmin',
-                           '+proj=longlat +ellps=GRS80',
-                           F)
+                           '+proj=longlat +ellps=GRS80')
 
   var.data['precip',] <- c('Total daily precipitation',
                            'mm/day',
-                           'daily',
+                           'days',
                            'https://www.bom.gov.au/web03/ncc/www/awap/rainfall/totals/daily/grid/0.05/history/nat/',
+                           'grid.Z',
+                           'grid',
                            'precip',
-                           '+proj=longlat +ellps=GRS80',
-                           F)
+                           '+proj=longlat +ellps=GRS80')
+
+  var.data['precip.monthly',] <- c('Total monthly precipitation',
+                           'mm/month',
+                           'months',
+                           'https://www.bom.gov.au/web03/ncc/www/agcd/rainfall/totals/month/grid/0.05/history/nat/',
+                           'grid.zip',
+                           'txt',
+                           'precip.monthly',
+                           '+proj=longlat +ellps=GRS80')
 
   var.data['vprp',] <- c(  '3pm daily vapour pressure',
                            'hpa',
-                           'daily',
+                           'days',
                            'https://www.bom.gov.au/web03/ncc/www/awap/vprp/vprph15/daily/grid/0.05/history/nat/',
+                           'grid.Z',
+                           'grid',
                            'vprp',
-                           '+proj=longlat +ellps=GRS80',
-                           F)
+                           '+proj=longlat +ellps=GRS80')
 
   var.data['solarrad',] <- c(  'Total daily solar radiation',
                            'MJ/m^2',
-                           'daily',
+                           'days',
                            'https://www.bom.gov.au/web03/ncc/www/awap/solar/solarave/daily/grid/0.05/history/nat/',
+                           'grid.Z',
+                           'grid',
                            'solarrad',
-                           '+proj=longlat +ellps=GRS80',
-                           T)
+                           '+proj=longlat +ellps=GRS80')
 
   return(var.data)
 
