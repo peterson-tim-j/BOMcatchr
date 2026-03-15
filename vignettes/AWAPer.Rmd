@@ -1,10 +1,11 @@
 ---
-title: "Gettings started with AWAPer"
+title: "Getting started"
 description: >
   This vignette outlines the key steps of building the netCDF data and then extracting data.
-output: rmarkdown::html_vignette
+output: >
+  rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Make source data grids}
+  %\VignetteIndexEntry{Getting started}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
