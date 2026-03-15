@@ -3,6 +3,7 @@
 
 # Build PDF. If AWAPer.pdf already exists, then delete before running.
 path <- find.package("AWAPer")
+file.remove('AWAPer.pdf')
 system(paste(shQuote(file.path(R.home("bin"), "R")),"CMD", "Rd2pdf", shQuote(path)))
 
 library(knitr)
