@@ -45,7 +45,7 @@
 #' @param extractTo is a date string specifying the end date for the data extraction. The default is today's date as YYYY-MM-DD.
 #' @param vars is a vector of variables names to extract. The available variables are: daily precipitation,
 #' daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation and evapotranspiration.
-#' The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')}. Importantly, the input \code{et} is
+#' The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')}. Importantly, the input \code{et} is
 #' calculated from the available gridded data (see \code{ET.} inputs below). To calculate the ET, all of the required inputs for the calculation
 #' ET must also be extracted (i.e. the input for such would generally be \code{c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')}.
 #' Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
@@ -64,8 +64,8 @@
 #' # 1) the infilling of small holes in the source grids using focal(), which takes the mean of the non-NA surrounding grid cells. The user input controls the maximum hole size filled, in
 #' units of number of grid cells. Where the hole is greater than the input, a gap within the hole will remain. The default maximum hole size infilled is 5x5 grid cells.
 #' 2) Gaps that remain after the hole infilling, or time steps with no observations, are interpolated over time. Only gaps with observations prior to the gap are interpolated.
-#' The interpolation method is user-defined and includes \code('constant'), \code('linear'), \code('fmm'), \code('periodic'), \code('natural'), \code('monoH.FC') and \code('hyman').
-#' The default is \code('linear'). See \code{\link[stats]{approx}} and \code{\link[stats]{splinefun}} for details. 3) Gaps that remain (often due to the extraction date being prior to the
+#' The interpolation method is user-defined and includes \code{'constant'}, \code{'linear'}, \code{'fmm'}, \code{'periodic'}, \code{'natural'}, \code{'monoH.FC'} and \code{'hyman'}.
+#' The default is \code{'linear'}. See \code{\link[stats]{approx}} and \code{\link[stats]{splinefun}} for details. 3) Gaps that remain (often due to the extraction date being prior to the
 #' start of the observation record of a variable) are estimated from, say, the mean for each day of the year. Specifically, the extracted observed data is
 #' allocated to each calender day. If, say, there are ten years of daily data then each day of the year will have ten observations. All gaps of the same corresponding calender day
 #' will then be assigned a value from a user-defined function from these observations (NB: when only one observed value exists for the day, then the observed value is returned).
@@ -239,7 +239,12 @@ extractCatchmentData <- function(
     stop('temporal.timestep must be daily, weekly, monthly, quarterly or annual or an integer vector.')
   }
 
-  # Check temporal analysis funcion is valid.
+  # Check time step is appropriate for monthly source data - if to be extracted
+  if  (any(which(temporal.timestep == c('daily','weekly') )) &
+       any(vars.extract.summary$time.step == 'months'))
+    stop('When data to be extracted is of a monthly timestep, the temporal.timestep can only be monthly, quarterly or annual or an integer vector.')
+
+  # Check temporal analysis function is valid.
   data.junk = t(as.matrix(stats::runif(100, 0.0, 1.0)*100))
   result = tryCatch({
       apply(data.junk, 1,FUN=temporal.function.name)
@@ -300,11 +305,14 @@ extractCatchmentData <- function(
     ET.inputdata.req[6,2:6] =  c(T,T,T,T,T)       #ET.MortonCRAE
     ET.inputdata.req[7,2:6] =  c(T,T,T,T,T)       #ET.MortonCRWE
     ET.inputdata.req[8,2:6] =  c(T,T,F,T,F)       #ET.Turc
-    ind = which(ET.function == ET.function.all)
-    ET.inputdata.filt = ET.inputdata.req[ind,]
+    ET.var.names = colnames(ET.inputdata.req)
 
     # Get list of required ET variable names
-    ET.var.names = colnames(ET.inputdata.filt)[2:6]
+    ind = which(ET.function == ET.function.all)
+    ET.inputdata.filt = ET.inputdata.req[ind,]
+    ind = unlist(ET.inputdata.req[ind,2:6])
+    ind = c(F, ind)
+    ET.var.names = ET.var.names[ind]
 
     # If all required inputs are to be extracted for Mortions PET
     if (ET.inputdata.filt$Tmin[1] && !('tmin' %in% vars))
@@ -429,7 +437,7 @@ extractCatchmentData <- function(
   # Get netCDF geometry
   ncdf.dataFrom = max(vars.extract.summary$from)
   ncdf.dataTo = min(vars.extract.summary$to)
-  timePoints = seq.Date(ncdf.dataFrom, ncdf.dataTo, by='day')
+  #timePoints = seq.Date(ncdf.dataFrom, ncdf.dataTo, by='day')
 
   # Build and provide summary of extraction dates and data extent.
   message('Extraction data summary:')
@@ -472,9 +480,6 @@ extractCatchmentData <- function(
 
   message('Starting data extraction:')
 
-  # Recalculate the time points to extract.
-  timepoints2Extract = seq( as.Date(extractFrom,'%Y-%m-%d'), by="day", to=as.Date(extractTo,'%Y-%m-%d'))
-
   # Build a matrix of catchment weights, lat longs, and a look up table for each catchment.
   message('... Building catchment weights for each grid.')
 
@@ -501,12 +506,15 @@ extractCatchmentData <- function(
 
   # Handle polygon to extract, then points.
   if (islocationsPolygon) {
-    time.end = as.integer(difftime(max(timepoints2Extract), as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
 
     # Find details of the variable defining the grid geometry.
     ind = rownames(vars.extract.summary) == base.var.name
     var.group.string = vars.extract.summary[ind,]$var.string[1]
     base.var.grid = vars.extract.summary[ind,]$group
+
+    # Get index to required netCDF layers
+    ind = ceiling(RNetCDF::utinvcal.nc(vars.extract.summary[ind,]$time.datum,
+                                       format(extractTo, '%Y-%m-%d 01:59:59')))
 
     # For variables not on the same grid geometry as the base.variable,
     # the extraction location is converted from the input option ('simple'
@@ -520,10 +528,10 @@ extractCatchmentData <- function(
 
     # Get the netCDF layer for the base grid geometry.
     grid.tmp = raster::raster(ncdfFilename,
-                              band=time.end,
-                              varname=var.group.string,
-                              lvar=3,
-                              crs=crs.vars[[base.var.name]])
+                              band = ind,
+                              varname = var.group.string,
+                              lvar = 3,
+                              crs = crs.vars[[base.var.name]])
 
     for (i in 1:length(locations)) {
         if (i%%10 ==0 ) {
@@ -585,52 +593,55 @@ extractCatchmentData <- function(
     }
   }
 
-  # Set extraction date terms
-  extractYear = as.numeric(format(timepoints2Extract,"%Y"))
-  extractMonth = as.numeric(format(timepoints2Extract,"%m"))
-  extractDay = as.numeric(format(timepoints2Extract,"%d"))
-
-  message('... Starting to extract data across all locations:')
-
-  # Setup progress bar
-  ntimepoints2Extract = length(timepoints2Extract)
-  pbar <- progress::progress_bar$new(
-    format = "    :current of :total  [:bar] :percent in :elapsed",
-    total = ntimepoints2Extract, clear = FALSE, width= 80)
+  message('... Starting to extract data across all variable and locations:')
 
   # Initialise output list variable of extracted data
   data.brick = vector('list', nvars)
   names(data.brick) = vars
 
-  # Set netCDF time indexes for required time points to extract.
-  ind = as.integer(difftime(timepoints2Extract, as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
-
   # Get string of group and variable names to extract
-  var.group.string = vars.extract.summary$var.string
+  var.group.string = as.list(vars.extract.summary$var.string)
+  names(var.group.string) = vars
   var.string = row.names(vars.extract.summary)
 
-  # Loop through each time point and get data
-  for (j in ind){
-    # Update progress bar
-    pbar$tick()
+  # look though each variable and rime step to get the required data
+  for (ivar in vars) {
 
-    # Extract data for each variable
-    data.brick.tmp = mapply(get.nc.data,
-                            as.list(var.group.string),
-                            crs.vars,
-                            as.list(interp.method.vars),
-                            MoreArgs = list(fname=ncdfFilename,
-                                           band=j,
-                                           point.weights$coords,
-                                           do.infill =T,
-                                           ext = raster::extent(locations),
-                                           interpMax = missing.method[1]),
-                            SIMPLIFY=F)
+    # Recalculate the time points to extract.
+    timepoints2Extract = seq( from = as.Date(extractFrom,'%Y-%m-%d'),
+                              by = vars.extract.summary[ivar,]$time.step,
+                              to = as.Date(extractTo,'%Y-%m-%d'))
 
-    names(data.brick.tmp) = var.string
+    # Get index to required netCDF layers
+    ind = ceiling(RNetCDF::utinvcal.nc(vars.extract.summary[ivar,]$time.datum,
+                               format(timepoints2Extract, '%Y-%m-%d 01:59:59')))
+    # Setup progress bar
+    ntimepoints2Extract = length(ind)
+    pbar <- progress::progress_bar$new(
+      format = paste("    ",ivar,": :current of :total  [:bar] :percent in :elapsed",sep=''),
+      total = ntimepoints2Extract, clear = FALSE, width= 80)
 
-    # Append new extracted data
-    data.brick =  mapply(rbind, data.brick, data.brick.tmp, SIMPLIFY = F)
+
+    # Initialise matrix foe extracted data
+    data.brick[[ivar]] = matrix(NA, nrow = ntimepoints2Extract, ncol = nrow(point.weights$coords))
+
+    # Loop through each ind time point of variable and get data
+    for (j in 1:ntimepoints2Extract){
+
+      # Extract data for each variable
+      data.brick[[ivar]][j,] = get.nc.data( varname = var.group.string[[ivar]],
+                                    crs.string = crs.vars[[ivar]],
+                                    interp.method = interp.method.vars[[ivar]],
+                                    fname = ncdfFilename,
+                                    band = ind[j],
+                                    coords = point.weights$coords,
+                                    do.infill =T,
+                                    ext = raster::extent(locations),
+                                    interpMax = missing.method[1])
+
+      # Update progress bar
+      pbar$tick()
+    }
   }
 
   # The source data can have the following types of gaps:
@@ -670,6 +681,12 @@ extractCatchmentData <- function(
     precip.str = vars.extract.summary['precip',]$var.string
     tmax.str = vars.extract.summary['tmax',]$var.string
 
+    #Build vector of daily time steps
+    timepoints2Extract = seq( from = as.Date(extractFrom,'%Y-%m-%d'),
+                              by = 'days',
+                              to = as.Date(extractTo,'%Y-%m-%d'))
+    ntimepoints2Extract = length(timepoints2Extract)
+
     # Setup progress bar
     message('... Calculate daily ET at each grid cell.')
     for (i in 1:nlocations) {
@@ -678,7 +695,7 @@ extractCatchmentData <- function(
         ind = point.weights$lookup[i,1]:point.weights$lookup[i,2]
 
         # Initialise outputa
-        ET.est = matrix(NA,length(timepoints2Extract),length(ind))
+        ET.est = matrix(NA,ntimepoints2Extract ,length(ind))
 
         pbar <- progress::progress_bar$new(
           format = paste("    Location",i,": :current grid cells of :total  [:bar] :percent in :elapsed"),
@@ -706,11 +723,24 @@ extractCatchmentData <- function(
           dataRAW = data.frame(Year =  as.integer(format.Date(timepoints2Extract,"%Y")),
                                Month= as.integer(format.Date(timepoints2Extract,"%m")),
                                Day= as.integer(format.Date(timepoints2Extract,"%d")),
-                               Tmin = data.brick[['tmin']][,j],
-                               Tmax = data.brick[['tmax']][,j],
-                               Rs = data.brick[['solarrad']][,j],
-                               va = data.brick[['vprp']][,j]/10.0,
-                               Precip = data.brick[['precip']][,j])
+                               Tmin   = if ('tmin' %in% vars) data.brick[['tmin']][,j]     else rep(NA,ntimepoints2Extract),
+                               Tmax   = if ('tmax' %in% vars) data.brick[['tmax']][,j]     else rep(NA,ntimepoints2Extract),
+                               Rs     = if ('solarrad' %in% vars) data.brick[['solarrad']][,j] else rep(NA,ntimepoints2Extract),
+                               va     = if ('vprp' %in% vars) data.brick[['vprp']][,j]/10  else rep(NA,ntimepoints2Extract),
+                               Precip = if ('precip' %in% vars) data.brick[['precip']][,j]   else rep(NA,ntimepoints2Extract)
+                               )
+
+          # Remove columns without extracted data
+          if (!('tmin' %in% vars))
+            dataRAW$Tmin <- NULL
+          if (!('tmax' %in% vars))
+            dataRAW$Tmax <- NULL
+          if (!('solarrad' %in% vars))
+            dataRAW$Rs <- NULL
+          if (!('vprp' %in% vars))
+            dataRAW$va <- NULL
+          if (!('precip' %in% vars))
+            dataRAW$Precip <- NULL
 
           # Convert to required format for ET package.
           # Note, missing_method changed from NULL to "DoY average" because individual grid cells can be NA. eg
@@ -792,19 +822,17 @@ extractCatchmentData <- function(
   # Get unique location IDs
   locations.ID = unique(locations@data[,1])
 
-  # Create ISO dates of daily time step extraction dates
-  extractDate = ISOdate(year=extractYear,month=extractMonth,day=extractDay)
-
   # Get the number of days in each time step. This is reported to allow the user to
   # easily see when a timestep is, say, shorter than other time steps (eg ends before the week).
   nDayPerTimestep = mapply(do.TemporalAggregation,
-                           list(matrix(rep(1, ntimepoints2Extract ), ncol=1)),
-                           list(matrix(c(1,1), ncol=2)),
+                           data = list(matrix(rep(1, ntimepoints2Extract ), ncol=1)),
+                           time.step.in = as.list(vars.extract.summary[base.var.name,]$time.step),
                            MoreArgs = list(
-                             dates = extractDate,
                              location.ID = 1,
-                             timestep.options = temporal.timestep.options,
-                             timestep = temporal.timestep,
+                             location.lookup = matrix(c(1,1), ncol=2),
+                             time.from = extractFrom,
+                             time.to = extractTo,
+                             time.step.out = temporal.timestep,
                              fn = 'sum',
                              ind = temporal.timestep.index),
                            SIMPLIFY = F)
@@ -814,6 +842,11 @@ extractCatchmentData <- function(
   # Get the number of time steps (for creation of the outputs)
   timesteps = zoo::index(zoo::as.zoo(nDayPerTimestep))
   nTimeSteps = length(timesteps)
+
+  # Set time steps for each variable.
+  vars.timesteps = as.list(vars.extract.summary$time.step)
+  if ('et' %in% vars)
+    vars.timesteps = as.list(rep('days',nvars))
 
   # Do the aggregation by looping though each catchment and
   # calculate the catchment average and variance.
@@ -826,13 +859,14 @@ extractCatchmentData <- function(
     names(data.brick.timaAgg) = vars
 
     data.brick.timaAgg = mapply(do.TemporalAggregation,
-                                data.brick,
+                                data = data.brick,
+                                time.step.in = vars.timesteps,
                                 MoreArgs = list(
-                                  point.weights$lookup,
-                                  dates = extractDate,
                                   location.ID = i,
-                                  timestep.options = temporal.timestep.options,
-                                  timestep = temporal.timestep,
+                                  location.lookup = point.weights$lookup,
+                                  time.from = extractFrom,
+                                  time.to = extractTo,
+                                  time.step.out = temporal.timestep,
                                   fn = temporal.function.name,
                                   ind = temporal.timestep.index),
                                 SIMPLIFY = F)
@@ -980,24 +1014,35 @@ get.nc.data = function( varname, crs.string, interp.method, fname, band, coords,
 
 # Define time aggregation function.
 do.TemporalAggregation = function( data,
-                                   location.lookup,
-                                   dates,
                                    location.ID,
-                                   timestep.options,
-                                   timestep,
+                                   location.lookup,
+                                   time.from,
+                                   time.to,
+                                   time.step.in,
+                                   time.step.out,
                                    fn,
                                    ind) {
+
+  # Build dates vector here because variables can have a daily
+  # or monthly time step.
+  dates <-
+    switch(time.step.in,
+      days =  seq( time.from, by='day', to=time.to),
+      months =  seq( time.from, by='month', to=time.to),
+      years =  seq( time.from, by='year', to=time.to)
+    )
+
+  # Aggregate using user defined time step and function
   cell.index = location.lookup[location.ID,1]:location.lookup[location.ID,2]
   data.xts = xts::as.xts(data[, cell.index], order.by=dates)
   data.xts <-
-    switch(
-      which(timestep.options == timestep),
-      data.xts, # daily timestep - do nothing
-      xts::apply.weekly(data.xts, apply, 2, fn),  # weekly timestep
-      xts::apply.monthly(data.xts, apply, 2, fn), # monthly timestep
-      xts::apply.quarterly(data.xts, apply, 2, fn), # quarterly timestep
-      xts::apply.yearly(data.xts, apply, 2, fn), # annual timestep
-      xts::period.apply(data.xts, INDEX=ind, apply, 2, fn), # user defined period
+    switch(time.step.out,
+      daily = data.xts,
+      weekly = xts::apply.weekly(data.xts, apply, 2, fn),
+      monthly = xts::apply.monthly(data.xts, apply, 2, fn),
+      quarterly = xts::apply.quarterly(data.xts, apply, 2, fn),
+      annual = xts::apply.yearly(data.xts, apply, 2, fn),
+      period = xts::period.apply(data.xts, INDEX=ind, apply, 2, fn),
     )
   return(data.xts)
 }
