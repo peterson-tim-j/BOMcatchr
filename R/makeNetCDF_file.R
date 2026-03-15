@@ -61,8 +61,9 @@
 #'
 #' \donttest{
 #' # Build netCDF grids for all data but only over the defined time period.
-#' file.names = makeNetCDF_file(ncdfFilename=ncdfFilename
-#'              updateFrom=startDate, updateTo=endDate)
+#' file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
+#'              updateFrom=startDate,
+#'              updateTo=endDate)
 #'
 #' # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 #' # the same file names but \code{updateFrom=NA}.
