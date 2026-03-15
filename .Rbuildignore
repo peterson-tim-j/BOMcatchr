@@ -9,3 +9,5 @@ build_commands.R
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^doc$
+^Meta$
