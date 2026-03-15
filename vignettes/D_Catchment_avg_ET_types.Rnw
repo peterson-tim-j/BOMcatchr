@@ -59,105 +59,117 @@ Next, all 11 ET measures are derived. For each measure, only the following comma
 climateData.ET.HargreavesSamani = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
+                                vars = c('tmax', 'tmin', 'et'),
                                 locations=catchments,
                                 spatial.function.name='IQR',
                                 ET.function='ET.HargreavesSamani',
                                 ET.timestep = 'daily',
-                                ET.constants= constants);
+                                ET.constants= constants)
 
 climateData.ET.JensenHaise = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
+                                vars = c('tmax', 'tmin', 'solarrad', 'et'),
                                 locations=catchments,
                                 spatial.function.name='IQR',
                                 ET.function='ET.JensenHaise',
                                 ET.timestep = 'daily',
-                                ET.constants= constants);
+                                ET.constants= constants)
 
 climateData.ET.Makkink = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
+                                vars = c('tmax', 'tmin','solarrad', 'et'),
                                 locations=catchments,
                                 spatial.function.name='IQR',
                                 ET.function='ET.Makkink',
                                 ET.timestep = 'daily',
-                                ET.constants= constants);
+                                ET.constants= constants)
 
 climateData.ET.McGuinnessBordne = extractCatchmentData(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
+                               vars = c('tmax', 'tmin', 'et'),
                                locations=catchments,
                                spatial.function.name='IQR',
                                ET.function='ET.McGuinnessBordne',
                                ET.timestep = 'daily',
-                               ET.constants= constants);
+                               ET.constants= constants)
 
 climateData.ET.MortonCRAE = extractCatchmentData(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
+                               vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                locations=catchments,
                                spatial.function.name='IQR',
                                ET.function='ET.MortonCRAE',
                                ET.timestep = 'monthly',
-                               ET.constants= constants);
+                               ET.constants= constants)
 
 climateData.ET.MortonCRAE.potentialET = extractCatchmentData(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
+                               vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                locations=catchments,
                                spatial.function.name='IQR',
                                ET.function='ET.MortonCRAE',
                                ET.timestep = 'monthly',
                                ET.Mortons.est='potential ET',
-                               ET.constants= constants);
+                               ET.constants= constants)
 
 climateData.ET.MortonCRAE.wetarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
+                                vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                 locations=catchments,
                                 spatial.function.name='IQR',
                                 ET.function='ET.MortonCRAE',
                                 ET.timestep = 'monthly',
                                 ET.Mortons.est='wet areal ET',
-                                ET.constants= constants);
+                                ET.constants= constants)
 
 climateData.ET.MortonCRAE.actualarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
+                                 vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                  locations=catchments,
                                  spatial.function.name='IQR',
                                  ET.function='ET.MortonCRAE',
                                  ET.timestep = 'monthly',
                                  ET.Mortons.est='actual areal ET',
-                                 ET.constants= constants);
+                                 ET.constants= constants)
 
 climateData.ET.MortonCRWE = extractCatchmentData(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
+                                 vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                  locations=catchments,
                                  spatial.function.name='IQR',
                                  ET.function='ET.MortonCRWE',
                                  ET.timestep = 'monthly',
-                                 ET.constants= constants);
+                                 ET.Mortons.est = 'potential ET',
+                                 ET.constants= constants)
 
 climateData.ET.MortonCRWE.shallowLake = extractCatchmentData(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
+                                 vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                  locations=catchments,
                                  spatial.function.name='IQR',
                                  ET.function='ET.MortonCRWE',
                                  ET.timestep = 'monthly',
                                  ET.Mortons.est = 'shallow lake ET',
-                                 ET.constants= constants);
+                                 ET.constants= constants)
 
 climateData.ET.Turc = extractCatchmentData(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
+                                 vars = c('tmax', 'tmin', 'solarrad', 'et'),
                                  locations=catchments,
                                  spatial.function.name='IQR',
                                  ET.function='ET.Turc',
                                  ET.timestep = 'daily',
-                                 ET.constants= constants);
+                                 ET.constants= constants)
 ```
 
 Next each estimate is plotted over time.
@@ -165,7 +177,7 @@ Next each estimate is plotted over time.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 10
-filt = climateData.ET.HargreavesSamani$temporal.mean$CatchID==407214
+filt = climateData.ET.HargreavesSamani$temporal.mean$Location.ID==407214
 d = ISOdate(climateData.ET.HargreavesSamani$temporal.mean$year,
             climateData.ET.HargreavesSamani$temporal.mean$month,
             climateData.ET.HargreavesSamani$temporal.mean$day)
@@ -173,63 +185,63 @@ plot(d[filt], climateData.ET.HargreavesSamani$temporal.mean$ET_mm[filt],
             col='black',lty=1, xlim = c(ISOdate(2010,1,1), ISOdate(2010,12,1)),
             ylim=c(0, 30),type='l', ylab='ET [mm/d]',xlab='Date')
 
-filt = climateData.ET.JensenHaise$temporal.mean$CatchID==407214
+filt = climateData.ET.JensenHaise$temporal.mean$Location.ID==407214
 d = ISOdate(climateData.ET.JensenHaise$temporal.mean$year,
             climateData.ET.JensenHaise$temporal.mean$month,
             climateData.ET.JensenHaise$temporal.mean$day)
 lines(d[filt], climateData.ET.JensenHaise$temporal.mean$ET_mm[filt],
             col='red',lty=1)
 
-filt = climateData.ET.Makkink$temporal.mean$CatchID==407214
+filt = climateData.ET.Makkink$temporal.mean$Location.ID==407214
 d = ISOdate(climateData.ET.Makkink$temporal.mean$year,
             climateData.ET.Makkink$temporal.mean$month,
             climateData.ET.Makkink$temporal.mean$day)
 lines(d[filt], climateData.ET.Makkink$temporal.mean$ET_mm[filt],
             col='green',lty=1)
 
-filt = climateData.ET.McGuinnessBordne$temporal.mean$CatchID==407214
+filt = climateData.ET.McGuinnessBordne$temporal.mean$Location.ID==407214
 d = ISOdate(climateData.ET.McGuinnessBordne$temporal.mean$year,
             climateData.ET.McGuinnessBordne$temporal.mean$month,
             climateData.ET.McGuinnessBordne$temporal.mean$day)
 lines(d[filt], climateData.ET.McGuinnessBordne$temporal.mean$ET_mm[filt],
             col='blue',lty=1)
 
-filt = climateData.ET.MortonCRAE.potentialET$temporal.mean$CatchID==407214
+filt = climateData.ET.MortonCRAE.potentialET$temporal.mean$Location.ID==407214
 d = ISOdate(climateData.ET.MortonCRAE.potentialET$temporal.mean$year,
             climateData.ET.MortonCRAE.potentialET$temporal.mean$month,
             climateData.ET.MortonCRAE.potentialET$temporal.mean$day)
 lines(d[filt], climateData.ET.MortonCRAE.potentialET$temporal.mean$ET_mm[filt],
             col='black',lty=2)
 
-filt = climateData.ET.MortonCRAE.wetarealET$temporal.mean$CatchID==407214
+filt = climateData.ET.MortonCRAE.wetarealET$temporal.mean$Location.ID==407214
 d = ISOdate(climateData.ET.MortonCRAE.wetarealET$temporal.mean$year,
             climateData.ET.MortonCRAE.wetarealET$temporal.mean$month,
             climateData.ET.MortonCRAE.wetarealET$temporal.mean$day)
 lines(d[filt], climateData.ET.MortonCRAE.wetarealET$temporal.mean$ET_mm[filt],
             col='red',lty=2)
 
-filt = climateData.ET.MortonCRAE.actualarealET$temporal.mean$CatchID==407214
+filt = climateData.ET.MortonCRAE.actualarealET$temporal.mean$Location.ID==407214
 d = ISOdate(climateData.ET.MortonCRAE.actualarealET$temporal.mean$year,
             climateData.ET.MortonCRAE.actualarealET$temporal.mean$month,
             climateData.ET.MortonCRAE.actualarealET$temporal.mean$day)
 lines(d[filt], climateData.ET.MortonCRAE.actualarealET$temporal.mean$ET_mm[filt],
             col='green',lty=2)
 
-filt = climateData.ET.MortonCRWE$temporal.mean$CatchID==407214
+filt = climateData.ET.MortonCRWE$temporal.mean$Location.ID==407214
 d = ISOdate(climateData.ET.MortonCRWE$temporal.mean$year,
             climateData.ET.MortonCRWE$temporal.mean$month,
             climateData.ET.MortonCRWE$temporal.mean$day)
 lines(d[filt], climateData.ET.MortonCRWE$temporal.mean$ET_mm[filt],
             col='blue',lty=2)
 
-filt = climateData.ET.MortonCRWE.shallowLake$temporal.mean$CatchID==407214
+filt = climateData.ET.MortonCRWE.shallowLake$temporal.mean$Location.ID==407214
 d = ISOdate(climateData.ET.MortonCRWE.shallowLake$temporal.mean$year,
             climateData.ET.MortonCRWE.shallowLake$temporal.mean$month,
             climateData.ET.MortonCRWE.shallowLake$temporal.mean$day)
 lines(d[filt], climateData.ET.MortonCRWE.shallowLake$temporal.mean$ET_mm[filt],
             col='black',lty=3)
 
-filt = climateData.ET.Turc$temporal.mean$CatchID==407214
+filt = climateData.ET.Turc$temporal.mean$Location.ID==407214
 d = ISOdate(climateData.ET.Turc$temporal.mean$year,
             climateData.ET.Turc$temporal.mean$month,
             climateData.ET.Turc$temporal.mean$day)
