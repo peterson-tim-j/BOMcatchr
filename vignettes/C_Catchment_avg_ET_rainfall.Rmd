@@ -1,9 +1,9 @@
 ---
-title: "Extract daily area weighted potential PET and precipitation and map"
+title: "Extract daily area weighted PET and precipitation"
 description: >
   This vignette shows how to build the netCDF data file and then
   extract the area weighted PET and precipitation data for a catchment over a user defined period. The errors introduced from not using area weighted methods (e.g centroid) are then demonstrated.
-  output: rmarkdown::html_vignette
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Extract daily area weighted PET and precipitation}
   %\VignetteEngine{knitr::rmarkdown}
@@ -213,7 +213,7 @@ for (i in 1:length(colInd.P)) {
 
 colInd = which(startsWith(colnames(metData.monthly@data), "Deficit_mm_"))
 sp::spplot(metData.monthly,colInd, sp.layout = list(v),
-  colorkey = list(title = "Rainfall deficit (mm/month)"))
+  colorkey = list(title = "Rainfall deficit, P - PET (mm/month)"))
 ```
 
 ## Point versus area weighted rainfall deficit
@@ -288,52 +288,77 @@ for (i in 1:length(catchments$CatchID)) {
        metData.monthly.weighted$temporal.sum$day[filt]))
 
   # Precipitation
-  plot(metData.date,
-       metData.monthly.weighted$temporal.sum$precip[filt],
-       type = "l", col = "#e31a1c", lwd = 1.2, mgp = c(2, 0.5, 0),
-       ylim = c(0, 200), ylab = "Precip. [mm/month]",
-       xlab = "2010", xaxs = "i",
-       bty = "l", yaxs = "i")
+  plot(x = metData.date,
+       y = metData.monthly.weighted$temporal.sum$precip[filt],
+       type = "l",
+       col = "#e31a1c",
+       lwd = 1.2,
+       mgp = c(2, 0.5, 0),
+       ylim = c(0, 200),
+       ylab = "Precip. [mm/month]",
+       xlab = "2010",
+       xaxs = "i",
+       bty = "l",
+       yaxs = "i")
 
-  lines(metData.date, metData.monthly.centroid$precip[filt],
-      col = "#bc80bd", lwd = 1.2)
+  lines(x = metData.date,
+        y = metData.monthly.centroid$precip[filt],
+        col = "#bc80bd",
+        lwd = 1.2)
 
-  legend("bottomleft", cex = 0.8, lwd = 2, bty = "n", inset = c(0.01, -0.01),
-       lty = c(1, 1), pch = c(NA, NA),
-       col = c("#e31a1c",  "#bc80bd"),
-       legend = c("Areal weighted", "Centroid"), xpd = NA)
+  legend("bottomleft",
+         lwd = 2,
+         bty = "n",
+         inset = c(0.01, -0.01),
+         lty = c(1, 1), pch = c(NA, NA),
+         col = c("#e31a1c",  "#bc80bd"),
+         legend = c("Areal weighted", "Centroid"),
+         xpd = NA)
 
   # PET
-  plot(metData.date,
-       metData.monthly.weighted$temporal.sum$et[filt],
-       type = "l", col = "#e31a1c", lwd = 1.2, mgp = c(2, 0.5, 0),
+  plot(x = metData.date,
+       y = metData.monthly.weighted$temporal.sum$et[filt],
+       type = "l",
+       col = "#e31a1c",
+       lwd = 1.2,
+       mgp = c(2, 0.5, 0),
        main=paste('Catchment ID',catchments$CatchID[i]),
-       ylim = c(0, 120), ylab = "PET [mm/month]",
+       ylim = c(0, 120),
+       ylab = "PET [mm/month]",
        xlab = "2010", xaxs = "i",
-       bty = "l", yaxs = "i")
+       bty = "l",
+       yaxs = "i")
 
   lines(metData.date, metData.monthly.centroid$et[filt],
         col = "#bc80bd", lwd = 1.2)
 
   # Deficit
   precip.deficit.weighted =  metData.monthly.weighted$temporal.sum$precip[filt] -
-                    metData.monthly.weighted$temporal.sum$et[filt]
+                             metData.monthly.weighted$temporal.sum$et[filt]
 
-  plot(metData.date, precip.deficit.weighted,
-       type = "l", col = "#e31a1c", lwd = 1.2, mgp = c(2, 0.5, 0),
-       ylim = c(-25, 125), ylab = "P - PET [mm/month]",
-       xlab = "2010", xaxs = "i",
-       bty = "l", yaxs = "i")
+  plot(x = metData.date,
+       y = precip.deficit.weighted,
+       type = "l",
+       col = "#e31a1c",
+       lwd = 1.2,
+       mgp = c(2, 0.5, 0),
+       ylim = c(0, 140),
+       ylab = "P - PET [mm/month]",
+       xlab = "2010",
+       xaxs = "i",
+       bty = "l",
+       yaxs = "i")
 
   precip.deficit.centroid =  metData.monthly.centroid$precip[filt] -
-                    metData.monthly.centroid$et[filt]
+                             metData.monthly.centroid$et[filt]
 
   lines(metData.date, precip.deficit.centroid, col = "#bc80bd", lwd = 1.2)
 
-  text(x = par("usr")[1]+5, y = par("usr")[3]+10,
-     labels = paste('Mean diff. =',round(mean(precip.deficit.weighted -
+  text(x = par("usr")[1]+5,
+       y = par("usr")[3]+10,
+       labels = paste('Mean diff. =',round(mean(precip.deficit.weighted -
               precip.deficit.centroid),1),'mm/month'),
-     adj = c(0, 0), cex=0.75)
+       adj = c(0, 0))
 }
 ```
 
