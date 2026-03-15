@@ -62,7 +62,7 @@ ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate)
 ```
 
-## Add a variable to an existing data grids
+## Add a variable to existing data grids
 
 Here we'll update the data grids to also include vapour pressure. Here the same date range will be used. Because the date range of the new variable equals the date range of the existing variables, only vapour pressure data is updated. This feature can be used to update the data of a single variable as required.
 
@@ -77,7 +77,7 @@ Now let's check that the file includes both the original three variable plus vap
 summary.df <- AWAPer::file.summary(ncdffile.name)
 summary.df
 ```
-## Add a variable to an existing data grids and update other variables
+## Add a variable to existing data grids and update other variables
 
 Now lets add solar radiation. Here an earlier start date will be used. However, because the date range of all variables within the netCDF file must be equal, the date range of the other variables must also be updated.
 
