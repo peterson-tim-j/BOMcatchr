@@ -4,7 +4,15 @@
 \alias{download.ASCII.file}
 \title{\code{download.ASCII.file} downloads grid data.}
 \usage{
-download.ASCII.file(url.string, data.type.label, workingFolder, datestring)
+download.ASCII.file(
+  url.string,
+  ivar.url.ext,
+  ivar.file.ext,
+  ivar.timestep,
+  data.type.label,
+  workingFolder,
+  datestring
+)
 }
 \value{
 A list variable of the file name and succes/failure flag.

@@ -8,15 +8,15 @@ makeNetCDF_file(
   ncdfFilename = file.path(getwd(), "AWAP.nc"),
   updateFrom = as.Date("1900-01-01", "\%Y-\%m-\%d"),
   updateTo = as.Date(Sys.Date() - 2, "\%Y-\%m-\%d"),
-  vars = rownames(get.variableSource()),
-  workingFolder = getwd(),
+  vars = "",
   keepFiles = FALSE,
   compressionLevel = 5,
   vars.sourceData = get.variableSource()
 )
 }
 \arguments{
-\item{ncdfFilename}{is a file path (as string) and name to the netCDF file. The default file name and path is \code{file.path(getwd(),'AWAP.nc')}.}
+\item{ncdfFilename}{is a file path (as string) and name to the netCDF file.
+If only a file name is given, then the file is assumed to exist / be created in \code{getwd()}. The default file name and path is \code{file.path(getwd(),'AWAP.nc')}.}
 
 \item{updateFrom}{is a date string specifying the start date for the AWAP data. If
 \code{ncdfFilename} is specified and exist, then the netCDF grids will be
@@ -28,11 +28,10 @@ makeNetCDF_file(
 updated with new data to \code{updateFrom}. The default is two days ago as YYYY-MM-DD.}
 
 \item{vars}{is a vector of variables names to build or update. The available variables are: daily precipitation,
-daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
-Any or all of the defaults are available. The default is \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad')} and
-provided by \code{rownames(get.variableSource())}.}
-
-\item{workingFolder}{is the file path (as string) in which to download the AWAP grid files. The default is \code{getwd()}.}
+monthly precipitation, daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
+Any or all of the defaults are available. If \code{vars=''} and the netCDF does not exist, then the default is
+\code{c('precip', 'precip.monthly','tmin', 'tmax', 'vprp', 'solarrad')} and provided by \code{rownames(get.variableSource())}.
+However, if \code{vars=''} and the netCDF file does exist, then default is to use the variable names in the file.}
 
 \item{keepFiles}{is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.}
 

@@ -13,7 +13,8 @@ extractCatchmentData(
   temporal.timestep = "daily",
   temporal.function.name = "mean",
   spatial.function.name = "var",
-  interpMethod = "",
+  interp.method = "",
+  missing.method = c("5", "linear", "mean"),
   ET.function = "ET.MortonCRAE",
   ET.DEM.res = 10,
   ET.Mortons.est = "wet areal ET",
@@ -33,9 +34,9 @@ extractCatchmentData(
 
 \item{vars}{is a vector of variables names to extract. The available variables are: daily precipitation,
 daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation and evapotranspiration.
-The input vector for these options are \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad', 'et')}. Importantly, the input \code{et} is
+The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')}. Importantly, the input \code{et} is
 calculated from the available gridded data (see \code{ET.} inputs below). To calculate the ET, all of the required inputs for the calculation
-ET must also be extracted (i.e. the input for such would generally be \code{c('precip', 'tmin', 'tmax', 'vprp', 'solarrad', 'et')}.
+ET must also be extracted (i.e. the input for such would generally be \code{c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')}.
 Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
 provided by \code{rownames(AWAPer::file.summary(ncdfFilename))}.}
 
@@ -51,8 +52,20 @@ Note, NA values are not removed from the aggregation calculation. If this is req
 \item{spatial.function.name}{character string for the function name applied to estimate the daily spatial spread in each variable. If \code{NA} or \code{""} and \code{locations} is a polygon, then
 the spatial data is returned. The default is \code{var}.}
 
-\item{interpMethod}{character string defining the method for interpolating the gridded data (see \code{raster::extract}). The options are: \code{'simple'}, \code{'bilinear'} and \code{''}. The default
+\item{interp.method}{character string defining the method for interpolating the gridded data (see \code{raster::extract}). The options are: \code{'simple'}, \code{'bilinear'} and \code{''}. The default
 is \code{''}. This will set the interpolation to \code{'simple'} when \code{locations} is a polygon(s) and to \code{'bilinear'} when \code{locations} are points.}
+
+\item{missing.method}{three character vector for the settings to fill gaps in the source data. The three inputs control the following.
+# 1) the infilling of small holes in the source grids using focal(), which takes the mean of the non-NA surrounding grid cells. The user input controls the maximum hole size filled, in
+units of number of grid cells. Where the hole is greater than the input, a gap within the hole will remain. The default maximum hole size infilled is 5x5 grid cells.
+2) Gaps that remain after the hole infilling, or time steps with no observations, are interpolated over time. Only gaps with observations prior to the gap are interpolated.
+The interpolation method is user-defined and includes \code{'constant'}, \code{'linear'}, \code{'fmm'}, \code{'periodic'}, \code{'natural'}, \code{'monoH.FC'} and \code{'hyman'}.
+The default is \code{'linear'}. See \code{\link[stats]{approx}} and \code{\link[stats]{splinefun}} for details. 3) Gaps that remain (often due to the extraction date being prior to the
+start of the observation record of a variable) are estimated from, say, the mean for each day of the year. Specifically, the extracted observed data is
+allocated to each calender day. If, say, there are ten years of daily data then each day of the year will have ten observations. All gaps of the same corresponding calender day
+will then be assigned a value from a user-defined function from these observations (NB: when only one observed value exists for the day, then the observed value is returned).
+The default function is \code{mean}. Other standard functions (e.g. \code{median}) or user defined functions can be used.
+The default for this input is \code{c('5', 'linear', 'mean')}. All gap filling method can be turned off with the input \code{c('0', '', '')}, which is useful to identify the interpolated data points.}
 
 \item{ET.function}{character string for the evapotranspiration function to be used. The methods that can be derived from the AWAP data are are \code{\link[Evapotranspiration]{ET.Abtew}},
 \code{\link[Evapotranspiration]{ET.HargreavesSamani}}, \code{\link[Evapotranspiration]{ET.JensenHaise}}, \code{\link[Evapotranspiration]{ET.Makkink}}, \code{\link[Evapotranspiration]{ET.McGuinnessBordne}}, \code{\link[Evapotranspiration]{ET.MortonCRAE}} ,
