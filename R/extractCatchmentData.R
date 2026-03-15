@@ -322,17 +322,17 @@ extractCatchmentData <- function(
     ind = c(F, ind)
     ET.var.names = ET.var.names[ind]
 
-    # If all required inputs are to be extracted for Mortions PET
+    # Check if all required inputs are to be extracted for type of ET
     if (ET.inputdata.filt$Tmin[1] && !('tmin' %in% vars))
-      stop('Calculation of ET for the given function requires extractions of tmin (i.e. set getTmin=T)')
+      stop('Calculation of ET for the given function requires the following variable to be extracted: tmin')
     if (ET.inputdata.filt$Tmax[1] && !('tmax' %in% vars))
-      stop('Calculation of ET for the given function requires extractions of tmax (i.e. set getTmax=T)')
+      stop('Calculation of ET for the given function requires the following variable to be extracted: tmax')
     if (ET.inputdata.filt$va[1] && !('vprp' %in% vars))
-      stop('Calculation of ET for the given function requires extractions of tmax (i.e. set getVprp=T)')
+      stop('Calculation of ET for the given function requires the following variable to be extracted: vprp')
     if (ET.inputdata.filt$Precip[1] && !('precip' %in% vars))
-      stop('Calculation of ET for the given function requires extractions of precip (i.e. set getPrecip=T)')
+      stop('Calculation of ET for the given function requires the following variable to be extracted: precip')
     if (ET.inputdata.filt$Rs[1] && !('solarrad' %in% vars))
-        stop('Calculation of ET for the given function requires extractions of solar radiation (i.e. set getSolarrad=T)')
+        stop('Calculation of ET for the given function requires the following variable to be extracted: solarrad')
     if (!is.numeric(ET.DEM.res))
       stop('ET.DEM.res must be a numeric value between 1 anf 15.')
 
