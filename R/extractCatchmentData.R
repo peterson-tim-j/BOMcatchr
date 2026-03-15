@@ -295,6 +295,14 @@ extractCatchmentData <- function(
       stop('The ET.timstep must be monthly or annual when using ET.MortonCRAE or ET.MortonCRWE')
     }
 
+    # Check the appropriate Mortons type is specified.
+    if ( ET.function == 'ET.MortonCRAE' && !(ET.Mortons.est %in% c('potential ET', 'wet areal ET', 'actual areal ET'))) {
+      stop('The ET.Mortons.est for Mortons CREA must be: potential ET, wet areal ET or actual areal ET.')
+    }
+    if ( ET.function == 'ET.MortonCRWE' && !(ET.Mortons.est %in% c('potential ET', 'shallow lake ET'))) {
+      stop('The ET.Mortons.est for Mortons CRWE must be: potential ET or shallow lake ET.')
+    }
+
     # Build a data from of the inputs required for each ET function.
     ET.inputdata.req = data.frame(ET.function=ET.function.all, Tmin=rep(F,length(ET.function.all)), Tmax=rep(F,length(ET.function.all)), va=rep(F,length(ET.function.all)), Rs=rep(F,length(ET.function.all)), Precip=rep(F,length(ET.function.all)) )
     ET.inputdata.req[1,2:6] =  c(T,T,F,T,F)       #ET.Abtew
