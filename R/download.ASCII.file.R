@@ -39,9 +39,6 @@ download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.t
   # Build source file destination name
   des.file.name = file.path(workingFolder, paste(data.type.label, datestring,'.', ivar.url.ext, sep=''))
 
-  # Get list of existing files
-  fnames.pre = list.files(path = workingFolder)
-
   # Download the zip file
   didFail = 1
   didFail = tryCatch({
@@ -57,10 +54,30 @@ download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.t
   if (OS=='Windows') {
       if (file.exists(des.file.name) && didFail==0) {
 
-      # Unzip downloaded file and record the files pre and prior
-      exitMessage = system(paste0('7z e -aoa -bso0 "',des.file.name, '"', ' -o', workingFolder),intern = T)
+        # Get list of files in the downloaded zip file
+        # From: https://stackoverflow.com/questions/55355466/7z-list-only-filenames
+        hasError = F
+        tryCatch( exp = {
+            zip.fnames = system(paste0('7z l -ba "',des.file.name),intern = T)
+            zip.fnames = grep("D....", zip.fnames, invert = TRUE, fixed = TRUE, value = TRUE)
+            zip.fnames = sub("^.{53}", "", zip.fnames)
+          },
+          error = function(e) {
+            hasError = T
+            }
+        )
 
-      if (!is.null(attr(exitMessage,'status')) && attr(exitMessage,'status')!=2) {
+        # Unzip downloaded file
+        tryCatch( exp = {
+          exitMessage = system(paste0('7z e -aoa -bso0 "',des.file.name, '"', ' -o', workingFolder),
+                               intern = T)
+        },
+        error = function(e) {
+          hasError = T
+          }
+        )
+
+      if (hasError) {
         message('------------------------------------------------------------------------------------')
         message('The program "7z" is either not installed or cannot be found. If not installed then')
         message('install it from https://www.7-zip.org/download.html .')
@@ -77,31 +94,27 @@ download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.t
       }
     }
   } else {
-
     if (file.exists(des.file.name) && didFail==0) {
+      # Get list of files in the downloaded zip file
+      zip.fnames = system(paste('znew -v ',des.file.name));
+
+      # Unzip downloaded file
       system(paste('znew -f ',des.file.name));
-      #des.file.name = gsub('.Z', '.gz', des.file.name)
     }
   }
 
   # Remove zip file
   file.remove(des.file.name)
 
-  # get updated list of files.
-  fnames.post = list.files(path = workingFolder)
-
-  # Get names of new unzipped file(s)
-  fnames.new = fnames.post[ !(fnames.post %in% fnames.pre) ]
-
   # Find new file of the required format and delete the other file
-  ind = grepl(paste0(ivar.file.ext,'$'), fnames.new)
+  ind = grepl(paste0(ivar.file.ext,'$'), zip.fnames)
   if (!any(ind))
     stop(paste('The following file format was not found within the zip file:',ivar.url.ext))
-  des.file.name = fnames.new[ind]
+  des.file.name = zip.fnames[ind]
   des.file.name = file.path(workingFolder, des.file.name)
 
   # Delete the file not set as required
-  file.remove( file.path(workingFolder, fnames.new[!ind]) )
+  file.remove( file.path(workingFolder, zip.fnames[!ind]) )
 
-  return(list(file.name=des.file.name,didFail=didFail))
+  return(list(file.name=des.file.name, didFail=didFail))
 }
