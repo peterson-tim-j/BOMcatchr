@@ -209,10 +209,17 @@ extractCatchmentData <- function(
   grids.extract = unique(vars.extract.summary$group)
 
   # Build time points to update
-  if (is.character(extractFrom))
-    extractFrom = as.Date(extractFrom,'%Y-%m-%d');
-  if (is.character(extractTo))
-    extractTo = as.Date(extractTo,'%Y-%m-%d');
+  if (is.character(extractFrom)) {
+    extractFrom = as.Date(extractFrom,'%Y-%m-%d')
+    if (is.na(extractFrom))
+      stop('The input extractFrom appears to be an implausible date. Please check.')
+  }
+  if (is.character(extractTo)) {
+    extractTo = as.Date(extractTo,'%Y-%m-%d')
+    if (is.na(extractTo))
+      stop('The input extractTo appears to be an implausible date. Please check.')
+  }
+
   if (extractFrom >= extractTo)
     stop('The extract dates are invalid. extractFrom must be prior to extractTo.')
   if (extractTo > as.Date(Sys.Date()-1,"%Y-%m-%d"))
