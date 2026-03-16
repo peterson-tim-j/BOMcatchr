@@ -182,19 +182,26 @@ makeNetCDF_file <- function(
   }
 
   # Check input dates and convert and check input time dates
+  #----------------
   if (is.na(updateFrom) || nchar(updateFrom)==0) {
     updateFrom = NA
-  } else if (is.character(updateFrom))
-    updateFrom = as.Date(updateFrom,'%Y-%m-%d');
+  } else if (is.character(updateFrom)) {
+    updateFrom = as.Date(updateFrom,'%Y-%m-%d')
+    if (is.na(updateFrom))
+      stop('The input updateFrom appears to be an implausible date. Please check.')
+  }
   if (is.na(updateTo) || nchar(updateTo)==0) {
     updateTo = as.Date(Sys.Date()-2,"%Y-%m-%d")
   } else if (is.character(updateTo)) {
-    updateTo = as.Date(updateTo,'%Y-%m-%d');
+    updateTo = as.Date(updateTo,'%Y-%m-%d')
+    if (is.na(updateTo))
+      stop('The input updateTo appears to be an implausible date. Please check.')
   } else if (methods::is(updateTo,"Date")) {
     updateTo = min(c(as.Date(Sys.Date()-1,"%Y-%m-%d"),updateTo));
   }
   if (!is.na(updateFrom) && updateFrom >= updateTo)
     stop('The update dates are invalid. updateFrom must be prior to updateTo')
+  #----------------
 
 
   # Increase maximum file download time from 60 sec to 300 sec.
