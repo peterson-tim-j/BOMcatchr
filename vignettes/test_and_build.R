@@ -25,6 +25,13 @@ devtools::build_vignettes()
 devtools::load_all()
 browseVignettes("AWAPer")
 
+# Move vignettes to inst/doc so that they're prebuilt.
+file.rename(from = 'doc/', to = 'inst/doc')
+
+# Update github.io page using pkgdown()
+usethis::use_pkgdown_github_pages()
+pkgdown::build_site()
+
 # devtools checks added
 devtools::check('C:/Users/tpet0008/Documents/AWAPer',args=c("--no-examples"))
 
