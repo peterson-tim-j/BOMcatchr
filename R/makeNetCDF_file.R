@@ -201,6 +201,19 @@ makeNetCDF_file <- function(
   }
   if (!is.na(updateFrom) && updateFrom >= updateTo)
     stop('The update dates are invalid. updateFrom must be prior to updateTo')
+
+  if ( any(vars.all[vars.2modify,]$time.step == 'months')) {
+    # Check sufficient number of months for monthly data
+    if (as.numeric(format(updateFrom, "%Y")) == as.numeric(format(updateTo, "%Y")) &&
+        as.numeric(format(updateFrom, "%m")) == as.numeric(format(updateTo, "%m")) )
+      stop('The inputs updateFrom and updateTo must span more than one month when monthly time step date is being handled.')
+
+    # Check if updateTo is past the last complete month
+    if (updateTo > (as.Date(format( Sys.Date(),"%Y-%m-01"),'%Y-%m-%d')-1) )
+      stop('The input updateTo must be the final day in a month when when monthly time step date is being handled.')
+
+
+  }
   #----------------
 
 
@@ -505,9 +518,17 @@ makeNetCDF_file <- function(
     updateFrom = min(vars.summary[vars.2update,]$from)
     message('... updateFrom reduced to ensure all variables have the same start date.')
   }
-  if (any(updateTo < vars.summary[vars.2update,]$to)) {
+  if (any(updateTo < vars.summary[vars.2update,]$from)) {
+    updateTo = min(vars.summary[vars.2update,]$from)
+    message('... updateTo increased to ensure no time gaps for any variables.')
+  }
+  if (any(updateTo > vars.summary[vars.2update,]$to)) {
     updateTo = max(vars.summary[vars.2update,]$to)
     message('... updateTo increased to ensure all variables have the same end date.')
+  }
+  if (any(updateFrom > vars.summary[vars.2update,]$to)) {
+    updateFrom = min(vars.summary[vars.2update,]$to)
+    message('... updateFrom reduced to ensure no time gaps for any variables.')
   }
 
   # Filter vars.2update. If the input vars exists in the netCDF and the data range
