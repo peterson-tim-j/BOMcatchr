@@ -5,9 +5,9 @@ test_that("netCDF grid can be created",
       Sys.setenv(R_TESTS="")
       expect_no_error(
         {
-          # Set dates for building netCDFs and extracting data from yesterday to one week ago.
-          startDate = Sys.Date()-9
-          endDate = Sys.Date()-2
+          # Set dates for building netCDFs and extracting data for two months
+          startDate = as.Date(format( Sys.Date()-62,"%Y-%m-01"),'%Y-%m-%d')
+          endDate = as.Date(format( Sys.Date(),"%Y-%m-01"),'%Y-%m-%d')-1
 
           # Set names for netCDF files (in the system temp. directory).
           ncdfFilename = tempfile(fileext = '.nc')
@@ -37,13 +37,13 @@ test_that("netCDF grid can be created",
 
       # Test the summary.df is a data frame and dimensions
       expect_true(is.data.frame(summary.df))
-      expect_shape(summary.df, dim = c(5, 7))
+      expect_shape(summary.df, dim = c(6, 8))
 
       # Update netcDF grids and expect no errors
       expect_no_error(
         {
           endDate = startDate
-          startDate = Sys.Date()-11
+          startDate = as.Date(format( Sys.Date()-93,"%Y-%m-01"),'%Y-%m-%d')
           ncdfFilename = makeNetCDF_file(ncdfFilename=ncdfFilename,
                           updateFrom=startDate, updateTo=endDate)
         },
@@ -60,6 +60,6 @@ test_that("netCDF grid can be created",
 
       # Test the summary.df is a data frame and dimensions
       expect_true(is.data.frame(summary.df))
-      expect_shape(summary.df, dim = c(5, 7))
+      expect_shape(summary.df, dim = c(6, 8))
     }
 )
