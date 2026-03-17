@@ -4,12 +4,11 @@
 #'
 #' This function opens an existing netCDF file built using the package and
 #' returns a data.frame of variables, unit, stand and end dates of the data.
-#' @usage vars.df = file.summary(ncfile file)
 #' @param ncfile file name of the netCDF data file built by this package.
 #' @return
 #' data.frame of variables, netcdf group for the variable
 #' (i.e. the grid geometry group) , time step, start and end date
-#' for the variable data.
+#' for the variable data .
 #'
 #' @export
 file.summary <- function(ncfile) {
