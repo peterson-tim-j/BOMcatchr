@@ -78,9 +78,11 @@ endDate = as.Date(Sys.Date()-5,"\%Y-\%m-\%d")
 ncdfFilename = tempfile(fileext='.nc')
 
 \donttest{
-# Build netCDF grids for all data but only over the defined time period.
-file.names = makeNetCDF_file(ncdfFilename=ncdfFilename
-             updateFrom=startDate, updateTo=endDate)
+# Build netCDF grids for daily precipitation and only over the defined time period.
+file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
+             updateFrom=startDate,
+             updateTo=endDate,
+             vars = c('precip'))
 
 # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 # the same file names but \code{updateFrom=NA}.

@@ -139,7 +139,6 @@ Lastly, data is extracted for all time points and no temporal infilling is under
 }
 \examples{
 # The example shows how to extract and save data.
-# For an additional example see \url{https://github.com/peterson-tim-j/AWAPer/blob/master/README.md}
 #---------------------------------------
 library(sp)
 
@@ -156,8 +155,9 @@ ncdfFilename = tempfile(fileext='.nc')
 # This is because the URLs for the other variables are set to zero.
 \donttest{
 file.name = makeNetCDF_file(ncdfFilename=ncdfFilename,
-             updateFrom=startDate, updateTo=endDate,
-             urlTmin=NA, urlTmax=NA, urlVprp=NA, urlSolarrad=NA)
+             updateFrom=startDate,
+             updateTo=endDate,
+             vars = c('precip'))
 
 # Load example catchment boundaries and remove all but the first.
 # Note, this is done only to speed up the example runtime.
@@ -167,7 +167,8 @@ catchments = catchments[1,]
 # Extract daily precip. data (not Tmin, Tmax, VPD, ET).
 # Note, the input "locations" can also be a file to a ESRI shape file.
 climateData = extractCatchmentData(ncdfFilename=file.name,
-              extractFrom=startDate, extractTo=endDate,
+              extractFrom=startDate,
+              extractTo=endDate,
               vars = c('precip'),
               locations=catchments,
               temporal.timestep = 'daily')
@@ -180,7 +181,6 @@ climateDataVar = climateData$catchmentSpatial.var
 
 # Remove temp. files
 unlink(ncdfFilename)
-unlink(ncdfSolarFilename)
 }
 }
 \seealso{

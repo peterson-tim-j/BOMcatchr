@@ -6,6 +6,9 @@
 \usage{
 file.summary(ncfile)
 }
+\arguments{
+\item{ncfile}{file name of the netCDF data file built by this package.}
+}
 \value{
 data.frame of variables, netcdf group for the variable
 (i.e. the grid geometry group) , time step, start and end date
@@ -17,8 +20,4 @@ for the variable data .
 \details{
 This function opens an existing netCDF file built using the package and
 returns a data.frame of variables, unit, stand and end dates of the data.
-}
-\examples{
-vars = file.summary()
-
 }
