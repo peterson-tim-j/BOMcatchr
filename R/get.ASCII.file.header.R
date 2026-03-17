@@ -14,7 +14,6 @@ get.ASCII.file.header <- function (des.file.name, workingFolder, remove.file=T) 
   if (OS=='Windows') {
     raw<-textConnection(readLines(a<-file(des.file.name)))
   } else {
-    des.file.name = file.path(workingFolder,paste(ivar.label,'.grid.gz',sep=''))
     raw<-textConnection(readLines(a<-gzfile(des.file.name)))
   }
 
