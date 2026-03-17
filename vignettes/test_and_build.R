@@ -1,13 +1,20 @@
 # This R scrpt details the step required to build the CRAN .tar.gz file for submission to CRAN and how to build the manual PDF.
 #------------------------------------------------
 
-# Run unit tests
-testthat::test_dir("tests/testthat")
+# Build docs
+library(roxygen2)
+devtools::document()
 
 # Build PDF. If AWAPer.pdf already exists, then delete before running.
 path <- find.package("AWAPer")
 file.remove('AWAPer.pdf')
 system(paste(shQuote(file.path(R.home("bin"), "R")),"CMD", "Rd2pdf", shQuote(path)))
+
+# Run unit tests
+testthat::test_dir("tests/testthat")
+
+# devtools checks added
+devtools::check('C:/Users/tpet0008/Documents/AWAPer', vignettes=F)
 
 # Convert vignette *.Rnw source diles to a Knitr *.Rms
 library(knitr)
@@ -31,9 +38,6 @@ file.rename(from = 'doc/', to = 'inst/doc')
 # Update github.io page using pkgdown()
 usethis::use_pkgdown_github_pages()
 pkgdown::build_site()
-
-# devtools checks added
-devtools::check('C:/Users/tpet0008/Documents/AWAPer')
 
 # Build the pavkage for CRAN
 devtools::build(".")
