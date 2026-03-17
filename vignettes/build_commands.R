@@ -2,7 +2,7 @@
 #------------------------------------------------
 
 # Run unit tests
-testthat::test_package('AWAPer')
+testthat::test_dir("tests/testthat")
 
 # Build PDF. If AWAPer.pdf already exists, then delete before running.
 path <- find.package("AWAPer")
