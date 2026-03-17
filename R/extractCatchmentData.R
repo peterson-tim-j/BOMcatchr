@@ -101,6 +101,7 @@
 #' @examples
 #' # The example shows how to extract and save data.
 #' #---------------------------------------
+#' library(sp)
 #'
 #' # Set dates for building netCDFs and extracting data.
 #' # Note, to reduce runtime this is done only a fortnight (14 days).
