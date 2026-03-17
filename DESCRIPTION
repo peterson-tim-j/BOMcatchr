@@ -11,6 +11,7 @@ Depends: R (>= 4.0)
 Imports: 
     Evapotranspiration (>= 1.14), 
     RNetCDF, 
+    ncdf4,
     utils, 
     raster, 
     sf, 
