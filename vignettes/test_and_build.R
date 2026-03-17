@@ -33,7 +33,7 @@ usethis::use_pkgdown_github_pages()
 pkgdown::build_site()
 
 # devtools checks added
-devtools::check('C:/Users/tpet0008/Documents/AWAPer',args=c("--no-examples"))
+devtools::check('C:/Users/tpet0008/Documents/AWAPer')
 
 # Build the pavkage for CRAN
 devtools::build(".")
