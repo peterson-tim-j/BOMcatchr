@@ -117,8 +117,9 @@
 #' # This is because the URLs for the other variables are set to zero.
 #' \donttest{
 #' file.name = makeNetCDF_file(ncdfFilename=ncdfFilename,
-#'              updateFrom=startDate, updateTo=endDate,
-#'              urlTmin=NA, urlTmax=NA, urlVprp=NA, urlSolarrad=NA)
+#'              updateFrom=startDate,
+#'              updateTo=endDate,
+#'              vars = c('precip'))
 #'
 #' # Load example catchment boundaries and remove all but the first.
 #' # Note, this is done only to speed up the example runtime.
@@ -128,7 +129,8 @@
 #' # Extract daily precip. data (not Tmin, Tmax, VPD, ET).
 #' # Note, the input "locations" can also be a file to a ESRI shape file.
 #' climateData = extractCatchmentData(ncdfFilename=file.name,
-#'               extractFrom=startDate, extractTo=endDate,
+#'               extractFrom=startDate,
+#'               extractTo=endDate,
 #'               vars = c('precip'),
 #'               locations=catchments,
 #'               temporal.timestep = 'daily')
@@ -176,7 +178,7 @@ extractCatchmentData <- function(
 
   # If vars is empty, then extract all variables in the file.
   if (length(vars)==1 && vars=='') {
-    vars = rownames(AWAPer::file.summary(ncdfFilename))
+    vars = rownames(file.summary(ncdfFilename))
   }
   # Check if vars include ET. If so remove and set getET=T
   getET = F
@@ -190,7 +192,7 @@ extractCatchmentData <- function(
   base.var.name = vars[1]
 
   # Check if the required variable is within the netcdf file.
-  vars.prior.summary <- AWAPer::file.summary(ncdfFilename)
+  vars.prior.summary <- file.summary(ncdfFilename)
   vars.prior = row.names(vars.prior.summary)
   if (any(!(vars %in% vars.prior))) {
     stop('The netCDF file does not contain data for the requested variables. Update the netCDF grid and try again.')
@@ -413,7 +415,7 @@ extractCatchmentData <- function(
     stop('missing.method element 3 must be a function name as a string.')
   if (missing.method[3] != '') {
     gapsfunction <- get(missing.method[3])
-    gapsfunction.data <- runif(10,-10,10)
+    gapsfunction.data <- stats::runif(10,-10,10)
     simpleError('Gap infill function failed test using input of runif(10,-10,10). Check the missing.method element 3 function.',
                 gapsfunction(gapsfunction.data))
     if (!is.numeric(gapsfunction(gapsfunction.data)) && length(gapsfunction(gapsfunction.data))!=1)

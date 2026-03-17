@@ -126,7 +126,7 @@ makeNetCDF_file <- function(
   # If vars is empty, then set the defaults.
   if (length(vars)==1 && vars=='') {
     if (file.exists(ncdfFilename))
-      vars = rownames(AWAPer::file.summary(ncdfFilename))
+      vars = rownames(file.summary(ncdfFilename))
     else
       vars = rownames(get.variableSource())
   }
@@ -146,7 +146,7 @@ makeNetCDF_file <- function(
   vars.prior = c()
   if (file.exists(ncdfFilename)) {
     # Get the list of existing variables.
-    vars.prior.summary <- AWAPer::file.summary(ncdfFilename)
+    vars.prior.summary <- file.summary(ncdfFilename)
     grid.prior = vars.prior.summary$group
     vars.prior = row.names(vars.prior.summary)
 
@@ -239,18 +239,18 @@ makeNetCDF_file <- function(
   message('... Testing downloading of each variable.')
   for (ivar in vars.2modify) {
     message(paste('    Testing',ivar,'grid data.'))
-    destFile <- AWAPer::download.ASCII.file(vars.all[ivar,]$data.URL,
-                                            vars.all[ivar,]$data.file.extension,
-                                            vars.all[ivar,]$data.file.format,
-                                            vars.all[ivar,]$time.step,
-                                            ivar,
-                                            workingFolder,
-                                            filedate_str)
+    destFile <- download.ASCII.file(vars.all[ivar,]$data.URL,
+                                    vars.all[ivar,]$data.file.extension,
+                                    vars.all[ivar,]$data.file.format,
+                                    vars.all[ivar,]$time.step,
+                                    ivar,
+                                    workingFolder,
+                                    filedate_str)
 
     # Get the grid geometry of the non solar data
-    headerData <- AWAPer::get.ASCII.file.header(destFile$file.name,
-                                                workingFolder,
-                                                remove.file=T)
+    headerData <- get.ASCII.file.header(destFile$file.name,
+                                        workingFolder,
+                                        remove.file=T)
     gridgeo[ivar,]$nCols  <- headerData$nCols
     gridgeo[ivar,]$nRows  <- headerData$nRows
     gridgeo[ivar,]$SWLong <- headerData$SWLong
@@ -503,7 +503,7 @@ makeNetCDF_file <- function(
   }
 
   # Get the start and end dates for each variable to be updated
-  vars.summary <- AWAPer::file.summary(ncdfFilename)
+  vars.summary <- file.summary(ncdfFilename)
 
   # Set update from to the end of the current data
   if (is.na(updateFrom))
@@ -609,7 +609,7 @@ makeNetCDF_file <- function(
 
       # Download data
       var.failed = 1
-      destFile <- AWAPer::download.ASCII.file(ivar.url,
+      destFile <- download.ASCII.file(ivar.url,
                                               ivar.url.ext,
                                               ivar.file.ext,
                                               ivar.timetep,
@@ -620,7 +620,7 @@ makeNetCDF_file <- function(
       # Read in grid and add to netCDF file
       if (destFile$didFail == 0 && file.exists(destFile$file.name)) {
 
-        grid.tmp <- AWAPer::readin.ASCII.file(destFile$file.name,
+        grid.tmp <- readin.ASCII.file(destFile$file.name,
                                               gridgeo[ivar,]$nRows,
                                               noData=gridgeo[ivar,]$nodata)
 
