@@ -23,7 +23,8 @@ Imports:
     stats, 
     RCurl, 
     elevatr,
-    progress
+    progress,
+    stats
 Suggests: 
     knitr,
     rmarkdown,
