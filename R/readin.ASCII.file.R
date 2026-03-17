@@ -7,7 +7,6 @@
 #'
 #' @keywords internal
 #'
-#' @export
 readin.ASCII.file <- function(file.name, nRows, noData) {
   OS <- Sys.info()
   OS <- OS[1]

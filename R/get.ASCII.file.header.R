@@ -6,8 +6,6 @@
 #' A list variable of header information.
 #'
 #' @keywords internal
-#'
-#' @export
 get.ASCII.file.header <- function (des.file.name, workingFolder, remove.file=T) {
 
   # Get data geometry for eachfile type

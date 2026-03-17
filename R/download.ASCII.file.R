@@ -6,8 +6,6 @@
 #' A list variable of the file name and succes/failure flag.
 #'
 #' @keywords internal
-#'
-#' @export
 download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.timestep, data.type.label,  workingFolder, datestring) {
 
   if (!is.character(url.string))
@@ -59,7 +57,7 @@ download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.t
         # Get list of files in the downloaded zip file
         # From: https://stackoverflow.com/questions/55355466/7z-list-only-filenames
         didFail = 1
-        didFail = tryCatch( exp = {
+        didFail = tryCatch({
           zip.fnames = system(paste0('7z l -ba "',des.file.name),intern = T)
           zip.fnames = grep("D....", zip.fnames, invert = TRUE, fixed = TRUE, value = TRUE)
           zip.fnames = sub("^.{53}", "", zip.fnames)
@@ -72,7 +70,7 @@ download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.t
 
         # Unzip downloaded file
         if (didFail==0) {
-          hasError = tryCatch( exp = {
+          hasError = tryCatch({
             exitMessage = system(paste0('7z e -aoa -bso0 "',des.file.name, '"', ' -o', workingFolder),
                                  intern = T)
           },
