@@ -100,9 +100,7 @@
 #'
 #' @examples
 #' # The example shows how to extract and save data.
-#' # For an additional example see \url{https://github.com/peterson-tim-j/AWAPer/blob/master/README.md}
 #' #---------------------------------------
-#' library(sp)
 #'
 #' # Set dates for building netCDFs and extracting data.
 #' # Note, to reduce runtime this is done only a fortnight (14 days).
@@ -143,7 +141,6 @@
 #'
 #' # Remove temp. files
 #' unlink(ncdfFilename)
-#' unlink(ncdfSolarFilename)
 #' }
 #' @export
 extractCatchmentData <- function(
