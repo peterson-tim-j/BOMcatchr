@@ -6,7 +6,7 @@
 #' A list variable of header information.
 #'
 #' @keywords internal
-get.ASCII.file.header <- function (des.file.name, workingFolder, remove.file=T) {
+get.ASCII.file.header <- function (des.file.name, ivar.file.ext, workingFolder, remove.file=T) {
 
   # Get data geometry for eachfile type
   OS <- Sys.info()
@@ -14,7 +14,10 @@ get.ASCII.file.header <- function (des.file.name, workingFolder, remove.file=T) 
   if (OS=='Windows') {
     raw<-textConnection(readLines(a<-file(des.file.name)))
   } else {
-    raw<-textConnection(readLines(a<-gzfile(des.file.name)))
+    if (ivar.file.ext=='grid')
+      raw<-textConnection(readLines(a<-gzfile(des.file.name)))
+    else
+      raw<-textConnection(readLines(a<-file(des.file.name)))
   }
 
   # Get file header data

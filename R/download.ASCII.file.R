@@ -80,7 +80,6 @@ download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.t
           )
         }
 
-
         if (didFail==1) {
           message('------------------------------------------------------------------------------------')
           message('The program "7z" is either not installed or cannot be found. If not installed then')
@@ -99,11 +98,28 @@ download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.t
       }
     } else {
       if (file.exists(des.file.name) && didFail==0) {
-        # Get list of files in the downloaded zip file
-        zip.fnames = system(paste('znew -v ',des.file.name));
+        if (ivar.url.ext == 'grid.Z') {
+          system(paste('uncompress -f ',des.file.name))
+          zip.fnames = gsub('.Z', '', des.file.name)
 
-        # Unzip downloaded file
-        system(paste('znew -f ',des.file.name));
+          # Remove path
+          zip.fnames = basename(zip.fnames)
+
+        } else if (ivar.url.ext == 'grid.zip') {
+          # Get list of files in zip
+          zip.fnames = system(paste0('unzip -l ',des.file.name), intern = T)
+          zip.fnames = zip.fnames[-(1:3)]
+          zip.fnames = zip.fnames[-length(zip.fnames)]
+          zip.fnames = zip.fnames[-length(zip.fnames)]
+          zip.fnames = unlist(strsplit(zip.fnames,'   '))
+          zip.fnames = zip.fnames[ seq(2, length(zip.fnames), by=2)]
+
+          # uncompress
+          system(paste0('unzip -q ',des.file.name, ' -d ', workingFolder))
+
+        } else {
+          stop(paste('Unrecognised downloaded file compression extension:',ivar.url.ext))
+        }
       }
     }
   }
@@ -112,7 +128,8 @@ download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.t
     return(list(file.name='', didFail=1))
 
   # Remove zip file
-  file.remove(des.file.name)
+  if (file.exists(des.file.name))
+    file.remove(des.file.name)
 
   # Find new file of the required format and delete the other file
   ind = grepl(paste0(ivar.file.ext,'$'), zip.fnames)
