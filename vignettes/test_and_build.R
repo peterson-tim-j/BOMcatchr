@@ -14,7 +14,7 @@ system(paste(shQuote(file.path(R.home("bin"), "R")),"CMD", "Rd2pdf", shQuote(pat
 testthat::test_dir("tests/testthat")
 
 # devtools checks added
-devtools::check('C:/Users/tpet0008/Documents/AWAPer', vignettes=F)
+devtools::check('AWAPer', vignettes=F)
 
 # Convert vignette *.Rnw source diles to a Knitr *.Rms
 library(knitr)
