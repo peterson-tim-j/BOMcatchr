@@ -1146,3 +1146,8 @@ do.backfilling <- function(data, time.points, fn) {
     return(data_avg)
 }
 #--------------------
+
+# Helper function to import ncdf4. Required by raster() package
+ignore_unused_imports <- function(fname) {
+  ncdf4::nc_version()
+}
