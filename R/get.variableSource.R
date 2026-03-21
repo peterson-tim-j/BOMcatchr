@@ -52,6 +52,15 @@ get.variableSource <- function() {
                            'precip',
                            '+proj=longlat +ellps=GRS80')
 
+  var.data['precip.RMSE',] <- c('Root mean square error of daily precipitation estimate',
+                           'mm/day',
+                           'days',
+                           'https://www.bom.gov.au/web03/ncc/www/awap/rainfall/rmse/daily/grid/0.05/history/nat/',
+                           'grid.Z',
+                           'grid',
+                           'precip.rmse',
+                           '+proj=longlat +ellps=GRS80')
+
   var.data['precip.monthly',] <- c('Total monthly precipitation',
                            'mm/month',
                            'months',
