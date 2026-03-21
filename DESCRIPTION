@@ -24,7 +24,6 @@ Imports:
     RCurl, 
     elevatr,
     progress,
-    stats
 Suggests: 
     knitr,
     rmarkdown,
