@@ -249,6 +249,7 @@ makeNetCDF_file <- function(
 
     # Get the grid geometry of the non solar data
     headerData <- get.ASCII.file.header(destFile$file.name,
+                                        vars.all[ivar,]$data.file.format,
                                         workingFolder,
                                         remove.file=T)
     gridgeo[ivar,]$nCols  <- headerData$nCols
