@@ -13,7 +13,7 @@
 #' @export
 get.variableSource <- function() {
 
-  vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad')
+  vars = c('tmax', 'tmin', 'precip', 'precip.RMSE', 'precip.monthly', 'vprp', 'solarrad')
   nvars = length(vars)
   var.data = data.frame(label = rep('', nvars),
                         units  = rep('', nvars),
