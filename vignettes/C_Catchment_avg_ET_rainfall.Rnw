@@ -28,11 +28,11 @@ library(sp)
 ```
 
 ## Make netCDF files
-The first step is to create the netCDF files. Here two netCDF files are created (one for precip. temperature, vapour pressure deficit and a second for solar radiation, which has a different grid geometry) and only between the dates _update.from_ and _update.to_. Importantly, these two files (and those downloaded) are created in the working directory.
+The first step is to create the netCDF file of the gridded data. Here grids are created for daily precipitation, daily minimum temperature, daily maximum temperature, daily vapour pressure deficit, daily solar radiation and only between the dates _update.from_ and _update.to_. Importantly, the file (and those downloaded) are created in the working directory.
 
-If the latter two dates were not input then data would be downloaded from 1/1/1900 to two days ago. The netCDF files contain grids of the daily data for all of Australia and is used below to extract data within the catchment boundaries of interest.
+If the latter two dates were not input then data would be downloaded from 1/1/1900 to two days ago. The netCDF file contains grids of the daily data for all of Australia and is used below to extract data within the catchment boundaries of interest.
 
-Often users run _makeNetCDF_file_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _makeNetCDF_file_ is run with the the netCDF file names pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to two days ago.
+Often users run _makeNetCDF_file_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _makeNetCDF_file_ is run with the the netCDF file name pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to two days ago.
 
 First, let's define the start and end dates for data grids and the file names.
 
@@ -57,7 +57,7 @@ data("catchments")
 ```
 
 ## Extract daily precipitation and PET data
-Here the daily area weighted average precipitation and PET is extracted across the two catchments. The data is extracted from the netCDF files _ncdfFilename_ and _ncdfSolarFilename_, between the dates _extract.from_ and _extract.to_. The other _AWAPer_ variables *are* extracted because they are need for the calculation of Morton's PET. Note the netCDF files must be in the working directory or the full file path must be given.
+Here the daily area weighted average precipitation and PET is extracted across the two catchments. The data is extracted from the netCDF file _ncdfFilename_ between the dates _extract.from_ and _extract.to_. The other _AWAPer_ variables *are* extracted because they are need for the calculation of Morton's PET. Note the netCDF files must be in the working directory or the full file path must be given.
 
 Here Morton's wet-environment areal evapotranspiration was estimated (other options are available). The use of Morton's CREA formulation is defined by setting the _ET.function_ variable to _'ET.MortonCRAE'_. The calculation of the areal wet environment PET is defined by setting Morton's specific variable _ET.Mortons.est_ to _'wet areal ET'_ (note, other options exist within _AWAPer_ for both variables). Lastly, following [McMahon et al, (2013)](https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf), Morton's PET is calculated at a monthly time step (not daily) to improve its reliability. The monthly estimate is then interpolated to daily.
 
