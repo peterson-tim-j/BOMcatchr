@@ -24,6 +24,7 @@ knitr::knit("vignettes/A_Make_data_grids.Rnw", output = "vignettes/A_Make_data_g
 knitr::knit("vignettes/B_Point_rainfall.Rnw", output = "vignettes/B_Point_rainfall.Rmd")
 knitr::knit("vignettes/C_Catchment_avg_ET_rainfall.Rnw", output = "vignettes/C_Catchment_avg_ET_rainfall.Rmd")
 knitr::knit("vignettes/D_Catchment_avg_ET_types.Rnw", output = "vignettes/D_Catchment_avg_ET_types.Rmd")
+knitr::knit("vignettes/E_Water_year_catchment_rainfall.Rnw", output = "vignettes/E_Water_year_catchment_rainfall.Rmd")
 
 # Pre-build the vignette *.Rmd files
 devtools::build_vignettes()
