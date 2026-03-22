@@ -235,7 +235,7 @@ extractCatchmentData <- function(
     if (!is.integer(temporal.timestep))
       stop('temporal.timestep must be a character string or an integer vector.')
 
-    if (any(temporal.timestep<0 || temporal.timestep > length(timepoints2Extract)))
+    if (any(temporal.timestep<0) || any(temporal.timestep > length(timepoints2Extract)))
       stop(paste('temporal.timestep must be a character string or an integer vector with values >0 and <= the maximum days of data extracted (ie',
                  length(timepoints2Extract),')'))
 
