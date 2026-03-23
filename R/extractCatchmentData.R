@@ -1139,11 +1139,11 @@ do.backfilling <- function(data, time.points, fn) {
       if (all(is.na(data[j, ]))) {
         ind = which(monthdayUnique==monthdayAll[j])
         if (length(ind)==1)
-          data_avg[j,] = data_avg[ind,]
+          data[j,] = data_avg[ind,]
       }
     }
 
-    return(data_avg)
+    return(data)
 }
 #--------------------
 
