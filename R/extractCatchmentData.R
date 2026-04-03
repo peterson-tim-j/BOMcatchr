@@ -523,7 +523,7 @@ extractCatchmentData <- function(
   if (islocationsPolygon) {
 
     # Find details of the variable defining the grid geometry.
-    ind = rownames(vars.extract.summary) == base.var.name
+    ind = which(rownames(vars.extract.summary) == base.var.name)
     var.group.string = vars.extract.summary[ind,]$var.string[1]
     base.var.grid = vars.extract.summary[ind,]$group
 
@@ -976,6 +976,11 @@ extractCatchmentData <- function(
   # Handle spatially averaged vs gridded values within catchment polygon.
   if (islocationsPolygon) {
     if (do.spatial.analysis) {
+      # Get function name as a char
+      if (is.function(temporal.function.name))
+        temporal.function.name = as.character(substitute(temporal.function.name))
+
+      # Build output list
       catchmentAvg = list(catchmentAvg, catchmentVar)
       names(catchmentAvg) = c(paste('temporal.',temporal.function.name,sep=''), paste('spatial.',spatial.function.name,sep=''))
     } else {
