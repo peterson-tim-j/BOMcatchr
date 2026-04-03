@@ -138,7 +138,7 @@ makeNetCDF_file <- function(
     stop('The input data variable names,  vars, must be input.')
   if ( !all(unique(vars) %in% vars.all.names))
     stop(paste('The input vars contain unhandled variable names. The available inputs vars are:',
-               paste(row.names(vars.all),collapse = ', ')))
+               paste(vars.all.names, collapse = ', ')))
 
   # Set number of variables
   nvars = length(vars)
