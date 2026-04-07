@@ -19,7 +19,7 @@ download.ASCII.file <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.t
     edate = datestring
   } else if (ivar.timestep == 'months') {
     sdate = format( as.Date(datestring,'%Y%m%d'),"%Y%m01")
-    edate = format(as.Date(format(as.Date(datestring,'%Y%m%d') + 33,"%Y%m01"),'%Y%m%d')-1,'%Y%m%d')
+    edate = format(as.Date(format(as.Date(sdate,'%Y%m%d') + 31,"%Y%m01"),'%Y%m%d')-1,'%Y%m%d')
   } else if (ivar.timestep == 'years') {
     sdate = format( as.Date(datestring,'%Y%m%d'),"%Y0101")
     edate = format(as.Date(datestring,'%Y%m%d') ,"%Y1231")
