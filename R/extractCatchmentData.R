@@ -528,8 +528,10 @@ extractCatchmentData <- function(
     base.var.grid = vars.extract.summary[ind,]$group
 
     # Get index to required netCDF layers
-    ind = ceiling(RNetCDF::utinvcal.nc(vars.extract.summary[ind,]$time.datum,
-                                       format(extractTo, '%Y-%m-%d 01:59:59')))
+    ind = get.ncdf.date.index(vars.extract.summary[ind,]$time.datum,
+                              extractTo,
+                              vars.extract.summary[ind,]$from,
+                              vars.extract.summary[ind,]$to)
 
     # For variables not on the same grid geometry as the base.variable,
     # the extraction location is converted from the input option ('simple'
@@ -623,13 +625,14 @@ extractCatchmentData <- function(
   for (ivar in vars) {
 
     # Recalculate the time points to extract.
-    timepoints2Extract = seq( from = as.Date(extractFrom,'%Y-%m-%d'),
-                              by = vars.extract.summary[ivar,]$time.step,
-                              to = as.Date(extractTo,'%Y-%m-%d'))
+    timepoints2Extract = get.ncdf.dates(extractFrom, extractTo, vars.extract.summary[ivar,]$time.step)
 
     # Get index to required netCDF layers
-    ind = ceiling(RNetCDF::utinvcal.nc(vars.extract.summary[ivar,]$time.datum,
-                               format(timepoints2Extract, '%Y-%m-%d 01:59:59')))
+    ind = get.ncdf.date.index(vars.extract.summary[ivar,]$time.datum,
+                         timepoints2Extract,
+                         vars.extract.summary[ivar,]$from,
+                         vars.extract.summary[ivar,]$to)
+
     # Setup progress bar
     ntimepoints2Extract = length(ind)
     pbar <- progress::progress_bar$new(
@@ -1151,6 +1154,52 @@ do.backfilling <- function(data, time.points, fn) {
     return(data)
 }
 #--------------------
+
+# Get time index from netCDF grid
+get.ncdf.date.index <- function(date.datum, date.target, ncdf.start=NA, ncdf.end=NA) {
+
+  date.target = format(date.target, '%Y-%m-%d 00:00:00')
+  ind = floor(RNetCDF::utinvcal.nc(date.datum, date.target))+1
+
+  if (!is.na(ncdf.start) && !is.na(ncdf.end)) {
+    ncdf.start = format(ncdf.start, '%Y-%m-%d 00:00:00')
+    ncdf.end = format(ncdf.end, '%Y-%m-%d 00:00:00')
+
+    ind.start = floor(RNetCDF::utinvcal.nc(date.datum, ncdf.start))+1
+    ind.end = floor(RNetCDF::utinvcal.nc(date.datum, ncdf.end))+1
+
+    filt= ind >= ind.start & ind <= ind.end
+
+    return(ind[filt])
+  } else
+    return(ind)
+
+}
+
+get.ncdf.dates <- function(date.from, date.to, date.time.step) {
+
+  # Convert date.from and date.to to the last day of the time step.
+  date.from = switch(date.time.step,
+                   days = date.from,
+                   months = as.Date(format( as.Date(date.from,'%Y-%m-%d'),"%Y-%m-01"), "%Y-%m-%d") )
+
+  date.to = switch(date.time.step,
+                   days = date.to,
+                   months = as.Date(format( as.Date(date.to,'%Y-%m-%d'),"%Y-%m-01"), "%Y-%m-%d"))
+
+  # Build sequence of dates as required tiem step
+  date.target = switch(date.time.step,
+                       days   = seq( from=date.from, to=date.to, by="day"),
+                       months = seq( from=date.from, to=date.to, by="month"))
+
+  # Shift dates to the end of the month.
+  if (date.time.step == 'months')
+    date.target = as.Date(format(date.target + 31,"%Y-%m-01") ) - 1
+
+  # Filter to be less than yesterday
+  filt = date.target <= (Sys.Date() - 2)
+  return(date.target[filt])
+}
 
 # Helper function to import ncdf4. Required by raster() package
 ignore_unused_imports <- function(fname) {
