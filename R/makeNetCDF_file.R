@@ -589,11 +589,12 @@ makeNetCDF_file <- function(
     ivar.timetep = vars.all[ivar,]$time.step
 
     # Set time points to update for the time step of this variable
-    timepoints2Update = switch(gridgeo[ivar,]$time.step,
-                        days = seq( from=updateFrom, by="days", to=updateTo),
-                        weeks =  seq( from=updateFrom, by="weeks", to=updateTo),
-                        months = seq( from=as.Date(updateFrom,'%Y%m01'), by="months", to=as.Date(updateTo,'%Y%m01')),
-                        years =  seq( from=as.Date(updateFrom,'%Y0101'), by="years", to=as.Date(updateTo,'%Y0101')))
+    timepoints2Update = get.ncdf.dates(updateFrom, updateTo, gridgeo[ivar,]$time.step)
+    # timepoints2Update = switch(gridgeo[ivar,]$time.step,
+    #                     days = seq( from=updateFrom, by="days", to=updateTo),
+    #                     weeks =  seq( from=updateFrom, by="weeks", to=updateTo),
+    #                     months = seq( from=as.Date(updateFrom,'%Y%m01'), by="months", to=as.Date(updateTo,'%Y%m01')),
+    #                     years =  seq( from=as.Date(updateFrom,'%Y0101'), by="years", to=as.Date(updateTo,'%Y0101')))
     ntimepoints2Update = length(timepoints2Update)
 
     # Setup progress bar
@@ -627,9 +628,9 @@ makeNetCDF_file <- function(
                                               noData=gridgeo[ivar,]$nodata)
 
         # Find index to the date to update within the net CDF grid
-        ind = ceiling(RNetCDF::utinvcal.nc(gridgeo[ivar,]$time.datum,
-                                           format(timepoints2Update[i], '%Y-%m-%d 01:59:59')))
-        #ind = as.integer(difftime(timepoints2Update[date], as.Date("1900-1-1",'%Y-%m-%d'),units = "days" ))
+        # Get index to required netCDF layers
+        ind = get.ncdf.date.index(gridgeo[ivar,]$time.datum,
+                                  timepoints2Update[i])
 
         # Put new grid in netCDF
         RNetCDF::var.put.nc(igrp,
@@ -651,17 +652,26 @@ makeNetCDF_file <- function(
     # Syncing variable data to netCDF file
     RNetCDF::sync.nc(ncout)
 
+    # Get existing netCDF start and end dates
+    ncdf.start_date =  RNetCDF::att.get.nc(igrp, ivar, 'Start_date')
+    ncdf.end_date =  RNetCDF::att.get.nc(igrp, ivar, 'End_date')
+    ncdf.start_date = as.Date(ncdf.start_date, '%Y-%m-%d')
+    ncdf.end_date = as.Date(ncdf.end_date, '%Y-%m-%d')
+
     # Update start and end dates of the available data
-    RNetCDF::att.put.nc(igrp,
-                        ivar,
-                        'Start_date',
-                        "NC_CHAR",
-                        format.Date(updateFrom,'%Y-%m-%d'))
-    RNetCDF::att.put.nc(igrp,
-                        ivar,
-                        'End_date',
-                        "NC_CHAR",
-                        format.Date(updateTo,'%Y-%m-%d'))
+    if ( ncdf.start_date == as.Date("0000-1-1",'%Y-%m-%d') || timepoints2Update[1] < ncdf.start_date)
+      RNetCDF::att.put.nc(igrp,
+                          ivar,
+                          'Start_date',
+                          "NC_CHAR",
+                          format.Date(timepoints2Update[1],'%Y-%m-%d') )
+
+    if ( ncdf.end_date == as.Date("9999-12-31",'%Y-%m-%d') || timepoints2Update[ntimepoints2Update] > ncdf.end_date)
+      RNetCDF::att.put.nc(igrp,
+                          ivar,
+                          'End_date',
+                          "NC_CHAR",
+                          format.Date(timepoints2Update[ntimepoints2Update],'%Y-%m-%d'))
   }
 
   # Close the file, writing data to disk
