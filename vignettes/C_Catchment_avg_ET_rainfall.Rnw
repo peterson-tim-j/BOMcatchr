@@ -271,7 +271,7 @@ metData.monthly.centroid = extractCatchmentData(ncdfFilename=ncdfFilename,
                      ET.constants= constants)
 ```
 
-Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the the rainfall deficit. It shows that using centroid estimate introduces errors of upto 6 mm/month error.
+Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduces errors of up to 6 mm/month error.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 6
