@@ -621,17 +621,21 @@ extractCatchmentData <- function(
   names(var.group.string) = vars
   var.string = row.names(vars.extract.summary)
 
+  # Create list var for the time steps of each variable. This allows multiple
+  # timestep source data to be jointly extracted.
+  timepoints2Extract = list()
+
   # look though each variable and rime step to get the required data
   for (ivar in vars) {
 
     # Recalculate the time points to extract.
-    timepoints2Extract = get.ncdf.dates(extractFrom, extractTo, vars.extract.summary[ivar,]$time.step)
+    timepoints2Extract[[ivar]] = get.ncdf.dates(extractFrom, extractTo, vars.extract.summary[ivar,]$time.step)
 
     # Get index to required netCDF layers
     ind = get.ncdf.date.index(vars.extract.summary[ivar,]$time.datum,
-                         timepoints2Extract,
-                         vars.extract.summary[ivar,]$from,
-                         vars.extract.summary[ivar,]$to)
+                              timepoints2Extract[[ivar]],
+                              vars.extract.summary[ivar,]$from,
+                              vars.extract.summary[ivar,]$to)
 
     # Setup progress bar
     ntimepoints2Extract = length(ind)
@@ -676,7 +680,8 @@ extractCatchmentData <- function(
     message('... Linearly interpolating gaps')
     data.brick = mapply(do.interpolation,
                         data.brick,
-                        MoreArgs = list( time.points=timepoints2Extract, method=missing.method[2]),
+                        time.points = timepoints2Extract,
+                        MoreArgs = list(method=missing.method[2]),
                         SIMPLIFY = F
     )
   }
@@ -685,7 +690,8 @@ extractCatchmentData <- function(
     message('... Backfilling dates prior to the start of observations')
     data.brick = mapply(do.backfilling,
                         data.brick,
-                        MoreArgs = list( time.points=timepoints2Extract, fn=missing.method[3]),
+                        time.points=timepoints2Extract,
+                        MoreArgs = list(fn=missing.method[3]),
                         SIMPLIFY = F
     )
   }
@@ -700,9 +706,7 @@ extractCatchmentData <- function(
     tmax.str = vars.extract.summary['tmax',]$var.string
 
     #Build vector of daily time steps
-    timepoints2Extract = seq( from = as.Date(extractFrom,'%Y-%m-%d'),
-                              by = 'days',
-                              to = as.Date(extractTo,'%Y-%m-%d'))
+    timepoints2Extract = timepoints2Extract[[1]]
     ntimepoints2Extract = length(timepoints2Extract)
 
     # Setup progress bar
@@ -837,17 +841,17 @@ extractCatchmentData <- function(
     nvars = length(vars)
   }
 
-  # Get unique location IDs
-  locations.ID = unique(locations@data[,1])
+  # Set time steps for each variable.
+  vars.timesteps = as.list(vars.extract.summary$time.step)
+  if ('et' %in% vars)
+    vars.timesteps = as.list(rep('days',nvars))
 
-  # Get the number of days in each time step. This is reported to allow the user to
+  # Get the number of time steps for each variable. This is reported to allow the user to
   # easily see when a timestep is, say, shorter than other time steps (eg ends before the week).
-  nDayPerTimestep = mapply(do.TemporalAggregation,
-                           data = list(matrix(rep(1, ntimepoints2Extract ), ncol=1)),
-                           time.step.in = as.list(vars.extract.summary[base.var.name,]$time.step),
+  nTimestepsPerOutputStep = mapply(do.TemporalAggregation,
+                           data = NA,
+                           time.step.in = unique(vars.timesteps),
                            MoreArgs = list(
-                             location.ID = 1,
-                             location.lookup = matrix(c(1,1), ncol=2),
                              time.from = extractFrom,
                              time.to = extractTo,
                              time.step.out = temporal.timestep,
@@ -855,16 +859,19 @@ extractCatchmentData <- function(
                              ind = temporal.timestep.index),
                            SIMPLIFY = F)
 
-  nDayPerTimestep = nDayPerTimestep[[1]]
+  # Get the output dates (from the zoo obj) before converting to a DF
+  timesteps = zoo::index(zoo::as.zoo(nTimestepsPerOutputStep[[1]]))
+
+  # Build and label DF of number of time steps for each variable
+  names(nTimestepsPerOutputStep) <- paste0(unique(vars.extract.summary$time.step),'.per.timestep')
+  nTimestepsPerOutputStep = list2DF(nTimestepsPerOutputStep)
 
   # Get the number of time steps (for creation of the outputs)
-  timesteps = zoo::index(zoo::as.zoo(nDayPerTimestep))
   nTimeSteps = length(timesteps)
 
-  # Set time steps for each variable.
-  vars.timesteps = as.list(vars.extract.summary$time.step)
-  if ('et' %in% vars)
-    vars.timesteps = as.list(rep('days',nvars))
+  # Get unique location IDs
+  locations.ID = unique(locations@data[,1])
+
 
   # Do the aggregation by looping though each catchment and
   # calculate the catchment average and variance.
@@ -902,7 +909,7 @@ extractCatchmentData <- function(
                                    year=as.integer(format(timesteps,"%Y")),
                                    month=as.integer(format(timesteps,"%m")),
                                    day=as.integer(format(timesteps,"%d")),
-                                   days.per.timestep = nDayPerTimestep,
+                                   nTimestepsPerOutputStep,
                                    row.names = NULL);
       catchmentVarTmp = catchmentAvgTmp
 
@@ -945,7 +952,7 @@ extractCatchmentData <- function(
                                    year=as.integer(format(timesteps,"%Y")) ,
                                    month=as.integer(format(timesteps,"%m")),
                                    day=as.integer(format(timesteps,"%d")),
-                                   days.per.timestep = nDayPerTimestep,
+                                   nTimestepsPerOutputStep,
                                    row.names = NULL);
       catchmentVarTmp = NA
       for (k in 1:nvars) {
@@ -1036,7 +1043,7 @@ get.nc.data = function( varname, crs.string, interp.method, fname, band, coords,
 }
 
 # Define time aggregation function.
-do.TemporalAggregation = function( data,
+do.TemporalAggregation = function( data=NA,
                                    location.ID,
                                    location.lookup,
                                    time.from,
@@ -1055,9 +1062,18 @@ do.TemporalAggregation = function( data,
       years =  seq( time.from, by='year', to=time.to)
     )
 
+  # If data is NA then build a vector of ones for length of dates.
+  # This is done to allow return of the number of time steps within
+  # time aggregated period. Else, real data is handled.
+  if (length(data)==1 && is.na(data)) {
+    data = matrix(rep(1, length(dates)), ncol=1)
+    data.xts = xts::as.xts(data, order.by=dates)
+  } else {
+    cell.index = location.lookup[location.ID,1]:location.lookup[location.ID,2]
+    data.xts = xts::as.xts(data[, cell.index], order.by=dates)
+  }
+
   # Aggregate using user defined time step and function
-  cell.index = location.lookup[location.ID,1]:location.lookup[location.ID,2]
-  data.xts = xts::as.xts(data[, cell.index], order.by=dates)
   data.xts <-
     switch(time.step.out,
       daily = data.xts,
