@@ -590,11 +590,6 @@ makeNetCDF_file <- function(
 
     # Set time points to update for the time step of this variable
     timepoints2Update = get.ncdf.dates(updateFrom, updateTo, gridgeo[ivar,]$time.step)
-    # timepoints2Update = switch(gridgeo[ivar,]$time.step,
-    #                     days = seq( from=updateFrom, by="days", to=updateTo),
-    #                     weeks =  seq( from=updateFrom, by="weeks", to=updateTo),
-    #                     months = seq( from=as.Date(updateFrom,'%Y%m01'), by="months", to=as.Date(updateTo,'%Y%m01')),
-    #                     years =  seq( from=as.Date(updateFrom,'%Y0101'), by="years", to=as.Date(updateTo,'%Y0101')))
     ntimepoints2Update = length(timepoints2Update)
 
     # Setup progress bar
@@ -659,12 +654,19 @@ makeNetCDF_file <- function(
     ncdf.end_date = as.Date(ncdf.end_date, '%Y-%m-%d')
 
     # Update start and end dates of the available data
-    if ( ncdf.start_date == as.Date("0000-1-1",'%Y-%m-%d') || timepoints2Update[1] < ncdf.start_date)
+    if ( ncdf.start_date == as.Date("0000-1-1",'%Y-%m-%d') ||
+         timepoints2Update[1] < ncdf.start_date) {
+
+      # If monthly, shift to the start of the month
+      if (ivar.timetep == 'months')
+        timepoints2Update[1] = as.Date(format( as.Date(timepoints2Update[1],'%Y-%m-%d'),"%Y-%m-01"))
+
       RNetCDF::att.put.nc(igrp,
                           ivar,
                           'Start_date',
                           "NC_CHAR",
                           format.Date(timepoints2Update[1],'%Y-%m-%d') )
+    }
 
     if ( ncdf.end_date == as.Date("9999-12-31",'%Y-%m-%d') || timepoints2Update[ntimepoints2Update] > ncdf.end_date)
       RNetCDF::att.put.nc(igrp,
