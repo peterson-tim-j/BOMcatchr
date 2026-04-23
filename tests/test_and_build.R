@@ -33,8 +33,7 @@ knitr::knit("vignettes/E_Water_year_catchment_rainfall.Rnw", output = "vignettes
 
 # Remove vignettes from .Rbuildignore. This is done to ensure vignettes are built
 lines <- readLines(".Rbuildignore")
-cleaned_lines <- lines[!grepl("^vignettes$", lines)]
-cleaned_lines <- cleaned_lines[!grepl("^vignettes/.*", cleaned_lines)]
+cleaned_lines <- lines[!grepl("vignettes", lines)]
 writeLines(cleaned_lines, ".Rbuildignore")
 
 # Pre-build the vignette *.Rmd files
