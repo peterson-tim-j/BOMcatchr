@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Extract various measures of evapotranspiration</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Extract various measures of
+evapotranspiration</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(AWAPer, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>This example calculates and plot various estimates of
+evaportranspiration. Ten different estimates of area weighted
+evapotranspiration over one year at catchment 407214 (Victoria,
+Australia) are derived. ## Make netCDF files Like the other vignettes,
+the netCDF data grids need to be built.</p>
+<p>First, let’s define the start and end dates for data grids and the
+file names.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>date.from <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="st">&quot;2010-01-01&quot;</span>,<span class="st">&quot;%Y-%m-%d&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>date.to <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="st">&quot;2010-12-31&quot;</span>,<span class="st">&quot;%Y-%m-%d&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>ncdfFilename <span class="ot">=</span> <span class="fu">tempfile</span>(<span class="at">fileext=</span><span class="st">&#39;.nc&#39;</span>)</span></code></pre></div>
+<p>Next, let’s make the data grids over this period.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">makeNetCDF_file</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                   <span class="at">updateFrom =</span> date.from,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                   <span class="at">updateTo =</span> date.to,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                   <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip&#39;</span>,<span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;tmax&#39;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                   <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>))</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;     Testing tmin grid data.</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt;     Testing tmax grid data.</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;     Testing vprp grid data.</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt;     Testing solarrad grid data.</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;        - New variables to add: precip  tmin  tmax  vprp  solarrad</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2010-01-01  to  2010-12-31</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; Data construction FINISHED.</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;          Imported Errors</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; precip        365      0</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; tmin          365      0</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; tmax          365      0</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; vprp          365      0</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; solarrad      365      0</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:10:44:39</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; [1] &quot;C:\\Users\\tpet0008\\AppData\\Local\\Temp\\RtmpusmHqe\\file159812cc475.nc&quot;</span></span></code></pre></div>
+<div id="load-a-catchment-boundary" class="section level2">
+<h2>Load a catchment boundary</h2>
+<p>Now that we have the meteorological data we can begin extracting data
+for the catchment. Here the catchment boundaries built into the package
+are used.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;catchments&quot;</span>)</span></code></pre></div>
+</div>
+<div id="extract-daily-precipitation-and-pet-data" class="section level2">
+<h2>Extract daily precipitation and PET data</h2>
+<p>Next, the 11 different measures of evapotranspiration that can be
+derived from the available gridded data are calculated for 12
+months.</p>
+<p>The estimation of ET uses the <em>evapotranspiration</em> package. It
+requires a set of constants, which are loaded as follows.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">data</span>(constants,<span class="at">package=</span><span class="st">&#39;Evapotranspiration&#39;</span>)</span></code></pre></div>
+<p>Next, all 11 ET measures are derived. For each measure, only the
+following commands change: <em>ET.function</em> , <em>ET.timestep</em>
+and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>climateData.ET.HargreavesSamani <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                                <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                                <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>                                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                                <span class="at">locations=</span>catchments,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                                <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>                                <span class="at">ET.function=</span><span class="st">&#39;ET.HargreavesSamani&#39;</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                                <span class="at">ET.timestep =</span> <span class="st">&#39;daily&#39;</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>                                <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:28</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>climateData.ET.JensenHaise <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>                                <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a>                                <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a>                                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>                                <span class="at">locations=</span>catchments,</span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>                                <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>                                <span class="at">ET.function=</span><span class="st">&#39;ET.JensenHaise&#39;</span>,</span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>                                <span class="at">ET.timestep =</span> <span class="st">&#39;daily&#39;</span>,</span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>                                <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:51</span></span>
+<span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a></span>
+<span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a>climateData.ET.Makkink <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-56"><a href="#cb6-56" tabindex="-1"></a>                                <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-57"><a href="#cb6-57" tabindex="-1"></a>                                <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-58"><a href="#cb6-58" tabindex="-1"></a>                                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>,<span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-59"><a href="#cb6-59" tabindex="-1"></a>                                <span class="at">locations=</span>catchments,</span>
+<span id="cb6-60"><a href="#cb6-60" tabindex="-1"></a>                                <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-61"><a href="#cb6-61" tabindex="-1"></a>                                <span class="at">ET.function=</span><span class="st">&#39;ET.Makkink&#39;</span>,</span>
+<span id="cb6-62"><a href="#cb6-62" tabindex="-1"></a>                                <span class="at">ET.timestep =</span> <span class="st">&#39;daily&#39;</span>,</span>
+<span id="cb6-63"><a href="#cb6-63" tabindex="-1"></a>                                <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-64"><a href="#cb6-64" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-65"><a href="#cb6-65" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-66"><a href="#cb6-66" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-67"><a href="#cb6-67" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-68"><a href="#cb6-68" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-69"><a href="#cb6-69" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-70"><a href="#cb6-70" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-71"><a href="#cb6-71" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-72"><a href="#cb6-72" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-73"><a href="#cb6-73" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-74"><a href="#cb6-74" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-75"><a href="#cb6-75" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-76"><a href="#cb6-76" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-77"><a href="#cb6-77" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-78"><a href="#cb6-78" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-79"><a href="#cb6-79" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-80"><a href="#cb6-80" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:51</span></span>
+<span id="cb6-81"><a href="#cb6-81" tabindex="-1"></a></span>
+<span id="cb6-82"><a href="#cb6-82" tabindex="-1"></a>climateData.ET.McGuinnessBordne <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-83"><a href="#cb6-83" tabindex="-1"></a>                               <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-84"><a href="#cb6-84" tabindex="-1"></a>                               <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-85"><a href="#cb6-85" tabindex="-1"></a>                               <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-86"><a href="#cb6-86" tabindex="-1"></a>                               <span class="at">locations=</span>catchments,</span>
+<span id="cb6-87"><a href="#cb6-87" tabindex="-1"></a>                               <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-88"><a href="#cb6-88" tabindex="-1"></a>                               <span class="at">ET.function=</span><span class="st">&#39;ET.McGuinnessBordne&#39;</span>,</span>
+<span id="cb6-89"><a href="#cb6-89" tabindex="-1"></a>                               <span class="at">ET.timestep =</span> <span class="st">&#39;daily&#39;</span>,</span>
+<span id="cb6-90"><a href="#cb6-90" tabindex="-1"></a>                               <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-91"><a href="#cb6-91" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-92"><a href="#cb6-92" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-93"><a href="#cb6-93" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-94"><a href="#cb6-94" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-95"><a href="#cb6-95" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-96"><a href="#cb6-96" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-97"><a href="#cb6-97" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-98"><a href="#cb6-98" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-99"><a href="#cb6-99" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-100"><a href="#cb6-100" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-101"><a href="#cb6-101" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-102"><a href="#cb6-102" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-103"><a href="#cb6-103" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-104"><a href="#cb6-104" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-105"><a href="#cb6-105" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-106"><a href="#cb6-106" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-107"><a href="#cb6-107" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:27</span></span>
+<span id="cb6-108"><a href="#cb6-108" tabindex="-1"></a></span>
+<span id="cb6-109"><a href="#cb6-109" tabindex="-1"></a>climateData.ET.MortonCRAE <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-110"><a href="#cb6-110" tabindex="-1"></a>                               <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-111"><a href="#cb6-111" tabindex="-1"></a>                               <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-112"><a href="#cb6-112" tabindex="-1"></a>                               <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-113"><a href="#cb6-113" tabindex="-1"></a>                               <span class="at">locations=</span>catchments,</span>
+<span id="cb6-114"><a href="#cb6-114" tabindex="-1"></a>                               <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-115"><a href="#cb6-115" tabindex="-1"></a>                               <span class="at">ET.function=</span><span class="st">&#39;ET.MortonCRAE&#39;</span>,</span>
+<span id="cb6-116"><a href="#cb6-116" tabindex="-1"></a>                               <span class="at">ET.timestep =</span> <span class="st">&#39;monthly&#39;</span>,</span>
+<span id="cb6-117"><a href="#cb6-117" tabindex="-1"></a>                               <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-118"><a href="#cb6-118" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-119"><a href="#cb6-119" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-120"><a href="#cb6-120" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-121"><a href="#cb6-121" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-122"><a href="#cb6-122" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-123"><a href="#cb6-123" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-124"><a href="#cb6-124" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-125"><a href="#cb6-125" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-126"><a href="#cb6-126" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-127"><a href="#cb6-127" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-128"><a href="#cb6-128" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-129"><a href="#cb6-129" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-130"><a href="#cb6-130" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-131"><a href="#cb6-131" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-132"><a href="#cb6-132" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-133"><a href="#cb6-133" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-134"><a href="#cb6-134" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:14</span></span>
+<span id="cb6-135"><a href="#cb6-135" tabindex="-1"></a></span>
+<span id="cb6-136"><a href="#cb6-136" tabindex="-1"></a>climateData.ET.MortonCRAE.potentialET <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-137"><a href="#cb6-137" tabindex="-1"></a>                               <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-138"><a href="#cb6-138" tabindex="-1"></a>                               <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-139"><a href="#cb6-139" tabindex="-1"></a>                               <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-140"><a href="#cb6-140" tabindex="-1"></a>                               <span class="at">locations=</span>catchments,</span>
+<span id="cb6-141"><a href="#cb6-141" tabindex="-1"></a>                               <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-142"><a href="#cb6-142" tabindex="-1"></a>                               <span class="at">ET.function=</span><span class="st">&#39;ET.MortonCRAE&#39;</span>,</span>
+<span id="cb6-143"><a href="#cb6-143" tabindex="-1"></a>                               <span class="at">ET.timestep =</span> <span class="st">&#39;monthly&#39;</span>,</span>
+<span id="cb6-144"><a href="#cb6-144" tabindex="-1"></a>                               <span class="at">ET.Mortons.est=</span><span class="st">&#39;potential ET&#39;</span>,</span>
+<span id="cb6-145"><a href="#cb6-145" tabindex="-1"></a>                               <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-146"><a href="#cb6-146" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-147"><a href="#cb6-147" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-148"><a href="#cb6-148" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-149"><a href="#cb6-149" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-150"><a href="#cb6-150" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-151"><a href="#cb6-151" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-152"><a href="#cb6-152" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-153"><a href="#cb6-153" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-154"><a href="#cb6-154" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-155"><a href="#cb6-155" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-156"><a href="#cb6-156" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-157"><a href="#cb6-157" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-158"><a href="#cb6-158" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-159"><a href="#cb6-159" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-160"><a href="#cb6-160" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-161"><a href="#cb6-161" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-162"><a href="#cb6-162" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:15</span></span>
+<span id="cb6-163"><a href="#cb6-163" tabindex="-1"></a></span>
+<span id="cb6-164"><a href="#cb6-164" tabindex="-1"></a>climateData.ET.MortonCRAE.wetarealET <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-165"><a href="#cb6-165" tabindex="-1"></a>                                <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-166"><a href="#cb6-166" tabindex="-1"></a>                                <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-167"><a href="#cb6-167" tabindex="-1"></a>                                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-168"><a href="#cb6-168" tabindex="-1"></a>                                <span class="at">locations=</span>catchments,</span>
+<span id="cb6-169"><a href="#cb6-169" tabindex="-1"></a>                                <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-170"><a href="#cb6-170" tabindex="-1"></a>                                <span class="at">ET.function=</span><span class="st">&#39;ET.MortonCRAE&#39;</span>,</span>
+<span id="cb6-171"><a href="#cb6-171" tabindex="-1"></a>                                <span class="at">ET.timestep =</span> <span class="st">&#39;monthly&#39;</span>,</span>
+<span id="cb6-172"><a href="#cb6-172" tabindex="-1"></a>                                <span class="at">ET.Mortons.est=</span><span class="st">&#39;wet areal ET&#39;</span>,</span>
+<span id="cb6-173"><a href="#cb6-173" tabindex="-1"></a>                                <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-174"><a href="#cb6-174" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-175"><a href="#cb6-175" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-176"><a href="#cb6-176" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-177"><a href="#cb6-177" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-178"><a href="#cb6-178" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-179"><a href="#cb6-179" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-180"><a href="#cb6-180" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-181"><a href="#cb6-181" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-182"><a href="#cb6-182" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-183"><a href="#cb6-183" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-184"><a href="#cb6-184" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-185"><a href="#cb6-185" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-186"><a href="#cb6-186" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-187"><a href="#cb6-187" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-188"><a href="#cb6-188" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-189"><a href="#cb6-189" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-190"><a href="#cb6-190" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:15</span></span>
+<span id="cb6-191"><a href="#cb6-191" tabindex="-1"></a></span>
+<span id="cb6-192"><a href="#cb6-192" tabindex="-1"></a>climateData.ET.MortonCRAE.actualarealET <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-193"><a href="#cb6-193" tabindex="-1"></a>                                 <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-194"><a href="#cb6-194" tabindex="-1"></a>                                 <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-195"><a href="#cb6-195" tabindex="-1"></a>                                 <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-196"><a href="#cb6-196" tabindex="-1"></a>                                 <span class="at">locations=</span>catchments,</span>
+<span id="cb6-197"><a href="#cb6-197" tabindex="-1"></a>                                 <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-198"><a href="#cb6-198" tabindex="-1"></a>                                 <span class="at">ET.function=</span><span class="st">&#39;ET.MortonCRAE&#39;</span>,</span>
+<span id="cb6-199"><a href="#cb6-199" tabindex="-1"></a>                                 <span class="at">ET.timestep =</span> <span class="st">&#39;monthly&#39;</span>,</span>
+<span id="cb6-200"><a href="#cb6-200" tabindex="-1"></a>                                 <span class="at">ET.Mortons.est=</span><span class="st">&#39;actual areal ET&#39;</span>,</span>
+<span id="cb6-201"><a href="#cb6-201" tabindex="-1"></a>                                 <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-202"><a href="#cb6-202" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-203"><a href="#cb6-203" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-204"><a href="#cb6-204" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-205"><a href="#cb6-205" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-206"><a href="#cb6-206" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-207"><a href="#cb6-207" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-208"><a href="#cb6-208" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-209"><a href="#cb6-209" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-210"><a href="#cb6-210" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-211"><a href="#cb6-211" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-212"><a href="#cb6-212" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-213"><a href="#cb6-213" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-214"><a href="#cb6-214" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-215"><a href="#cb6-215" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-216"><a href="#cb6-216" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-217"><a href="#cb6-217" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-218"><a href="#cb6-218" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:17</span></span>
+<span id="cb6-219"><a href="#cb6-219" tabindex="-1"></a></span>
+<span id="cb6-220"><a href="#cb6-220" tabindex="-1"></a>climateData.ET.MortonCRWE <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-221"><a href="#cb6-221" tabindex="-1"></a>                                 <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-222"><a href="#cb6-222" tabindex="-1"></a>                                 <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-223"><a href="#cb6-223" tabindex="-1"></a>                                 <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-224"><a href="#cb6-224" tabindex="-1"></a>                                 <span class="at">locations=</span>catchments,</span>
+<span id="cb6-225"><a href="#cb6-225" tabindex="-1"></a>                                 <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-226"><a href="#cb6-226" tabindex="-1"></a>                                 <span class="at">ET.function=</span><span class="st">&#39;ET.MortonCRWE&#39;</span>,</span>
+<span id="cb6-227"><a href="#cb6-227" tabindex="-1"></a>                                 <span class="at">ET.timestep =</span> <span class="st">&#39;monthly&#39;</span>,</span>
+<span id="cb6-228"><a href="#cb6-228" tabindex="-1"></a>                                 <span class="at">ET.Mortons.est =</span> <span class="st">&#39;potential ET&#39;</span>,</span>
+<span id="cb6-229"><a href="#cb6-229" tabindex="-1"></a>                                 <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-230"><a href="#cb6-230" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-231"><a href="#cb6-231" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-232"><a href="#cb6-232" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-233"><a href="#cb6-233" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-234"><a href="#cb6-234" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-235"><a href="#cb6-235" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-236"><a href="#cb6-236" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-237"><a href="#cb6-237" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-238"><a href="#cb6-238" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-239"><a href="#cb6-239" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-240"><a href="#cb6-240" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-241"><a href="#cb6-241" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-242"><a href="#cb6-242" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-243"><a href="#cb6-243" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-244"><a href="#cb6-244" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-245"><a href="#cb6-245" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-246"><a href="#cb6-246" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:15</span></span>
+<span id="cb6-247"><a href="#cb6-247" tabindex="-1"></a></span>
+<span id="cb6-248"><a href="#cb6-248" tabindex="-1"></a>climateData.ET.MortonCRWE.shallowLake <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-249"><a href="#cb6-249" tabindex="-1"></a>                                 <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-250"><a href="#cb6-250" tabindex="-1"></a>                                 <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-251"><a href="#cb6-251" tabindex="-1"></a>                                 <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-252"><a href="#cb6-252" tabindex="-1"></a>                                 <span class="at">locations=</span>catchments,</span>
+<span id="cb6-253"><a href="#cb6-253" tabindex="-1"></a>                                 <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-254"><a href="#cb6-254" tabindex="-1"></a>                                 <span class="at">ET.function=</span><span class="st">&#39;ET.MortonCRWE&#39;</span>,</span>
+<span id="cb6-255"><a href="#cb6-255" tabindex="-1"></a>                                 <span class="at">ET.timestep =</span> <span class="st">&#39;monthly&#39;</span>,</span>
+<span id="cb6-256"><a href="#cb6-256" tabindex="-1"></a>                                 <span class="at">ET.Mortons.est =</span> <span class="st">&#39;shallow lake ET&#39;</span>,</span>
+<span id="cb6-257"><a href="#cb6-257" tabindex="-1"></a>                                 <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-258"><a href="#cb6-258" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-259"><a href="#cb6-259" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-260"><a href="#cb6-260" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-261"><a href="#cb6-261" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-262"><a href="#cb6-262" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-263"><a href="#cb6-263" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-264"><a href="#cb6-264" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-265"><a href="#cb6-265" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-266"><a href="#cb6-266" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-267"><a href="#cb6-267" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-268"><a href="#cb6-268" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-269"><a href="#cb6-269" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-270"><a href="#cb6-270" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-271"><a href="#cb6-271" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-272"><a href="#cb6-272" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-273"><a href="#cb6-273" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-274"><a href="#cb6-274" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:19</span></span>
+<span id="cb6-275"><a href="#cb6-275" tabindex="-1"></a></span>
+<span id="cb6-276"><a href="#cb6-276" tabindex="-1"></a>climateData.ET.Turc <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-277"><a href="#cb6-277" tabindex="-1"></a>                                 <span class="at">extractFrom=</span> date.from,</span>
+<span id="cb6-278"><a href="#cb6-278" tabindex="-1"></a>                                 <span class="at">extractTo=</span> date.to,</span>
+<span id="cb6-279"><a href="#cb6-279" tabindex="-1"></a>                                 <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
+<span id="cb6-280"><a href="#cb6-280" tabindex="-1"></a>                                 <span class="at">locations=</span>catchments,</span>
+<span id="cb6-281"><a href="#cb6-281" tabindex="-1"></a>                                 <span class="at">spatial.function.name=</span><span class="st">&#39;IQR&#39;</span>,</span>
+<span id="cb6-282"><a href="#cb6-282" tabindex="-1"></a>                                 <span class="at">ET.function=</span><span class="st">&#39;ET.Turc&#39;</span>,</span>
+<span id="cb6-283"><a href="#cb6-283" tabindex="-1"></a>                                 <span class="at">ET.timestep =</span> <span class="st">&#39;daily&#39;</span>,</span>
+<span id="cb6-284"><a href="#cb6-284" tabindex="-1"></a>                                 <span class="at">ET.constants=</span> constants)</span>
+<span id="cb6-285"><a href="#cb6-285" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-286"><a href="#cb6-286" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
+<span id="cb6-287"><a href="#cb6-287" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
+<span id="cb6-288"><a href="#cb6-288" tabindex="-1"></a><span class="co">#&gt;     </span><span class="al">WARNING</span><span class="co">: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
+<span id="cb6-289"><a href="#cb6-289" tabindex="-1"></a><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to &quot;neighbouring average&quot;.</span></span>
+<span id="cb6-290"><a href="#cb6-290" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-291"><a href="#cb6-291" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-292"><a href="#cb6-292" tabindex="-1"></a><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
+<span id="cb6-293"><a href="#cb6-293" tabindex="-1"></a><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
+<span id="cb6-294"><a href="#cb6-294" tabindex="-1"></a><span class="co">#&gt; Note: Elevation units are in meters</span></span>
+<span id="cb6-295"><a href="#cb6-295" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-296"><a href="#cb6-296" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-297"><a href="#cb6-297" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-298"><a href="#cb6-298" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span id="cb6-299"><a href="#cb6-299" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-300"><a href="#cb6-300" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-301"><a href="#cb6-301" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:54</span></span></code></pre></div>
+<p>Next each estimate is plotted over time.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.HargreavesSamani<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.HargreavesSamani<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>            climateData.ET.HargreavesSamani<span class="sc">$</span>temporal.mean<span class="sc">$</span>month,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>            climateData.ET.HargreavesSamani<span class="sc">$</span>temporal.mean<span class="sc">$</span>day)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="fu">plot</span>(d[filt], climateData.ET.HargreavesSamani<span class="sc">$</span>temporal.mean<span class="sc">$</span>et[filt],</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>            <span class="at">col=</span><span class="st">&#39;black&#39;</span>,<span class="at">lty=</span><span class="dv">1</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="fu">ISOdate</span>(<span class="dv">2010</span>,<span class="dv">1</span>,<span class="dv">1</span>), <span class="fu">ISOdate</span>(<span class="dv">2010</span>,<span class="dv">12</span>,<span class="dv">1</span>)),</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>            <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">30</span>),<span class="at">type=</span><span class="st">&#39;l&#39;</span>, <span class="at">ylab=</span><span class="st">&#39;ET [mm/d]&#39;</span>,<span class="at">xlab=</span><span class="st">&#39;Date&#39;</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.JensenHaise<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.JensenHaise<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>            climateData.ET.JensenHaise<span class="sc">$</span>temporal.mean<span class="sc">$</span>month,</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>            climateData.ET.JensenHaise<span class="sc">$</span>temporal.mean<span class="sc">$</span>day)</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="fu">lines</span>(d[filt], climateData.ET.JensenHaise<span class="sc">$</span>temporal.mean<span class="sc">$</span>et[filt],</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>            <span class="at">col=</span><span class="st">&#39;red&#39;</span>,<span class="at">lty=</span><span class="dv">1</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.Makkink<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.Makkink<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>            climateData.ET.Makkink<span class="sc">$</span>temporal.mean<span class="sc">$</span>month,</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>            climateData.ET.Makkink<span class="sc">$</span>temporal.mean<span class="sc">$</span>day)</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="fu">lines</span>(d[filt], climateData.ET.Makkink<span class="sc">$</span>temporal.mean<span class="sc">$</span>et[filt],</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>            <span class="at">col=</span><span class="st">&#39;green&#39;</span>,<span class="at">lty=</span><span class="dv">1</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.McGuinnessBordne<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.McGuinnessBordne<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>            climateData.ET.McGuinnessBordne<span class="sc">$</span>temporal.mean<span class="sc">$</span>month,</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a>            climateData.ET.McGuinnessBordne<span class="sc">$</span>temporal.mean<span class="sc">$</span>day)</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="fu">lines</span>(d[filt], climateData.ET.McGuinnessBordne<span class="sc">$</span>temporal.mean<span class="sc">$</span>et[filt],</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a>            <span class="at">col=</span><span class="st">&#39;blue&#39;</span>,<span class="at">lty=</span><span class="dv">1</span>)</span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.MortonCRAE.potentialET<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.MortonCRAE.potentialET<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a>            climateData.ET.MortonCRAE.potentialET<span class="sc">$</span>temporal.mean<span class="sc">$</span>month,</span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a>            climateData.ET.MortonCRAE.potentialET<span class="sc">$</span>temporal.mean<span class="sc">$</span>day)</span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="fu">lines</span>(d[filt], climateData.ET.MortonCRAE.potentialET<span class="sc">$</span>temporal.mean<span class="sc">$</span>et[filt],</span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a>            <span class="at">col=</span><span class="st">&#39;black&#39;</span>,<span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.MortonCRAE.wetarealET<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.MortonCRAE.wetarealET<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a>            climateData.ET.MortonCRAE.wetarealET<span class="sc">$</span>temporal.mean<span class="sc">$</span>month,</span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a>            climateData.ET.MortonCRAE.wetarealET<span class="sc">$</span>temporal.mean<span class="sc">$</span>day)</span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="fu">lines</span>(d[filt], climateData.ET.MortonCRAE.wetarealET<span class="sc">$</span>temporal.mean<span class="sc">$</span>et[filt],</span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a>            <span class="at">col=</span><span class="st">&#39;red&#39;</span>,<span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.MortonCRAE.actualarealET<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.MortonCRAE.actualarealET<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a>            climateData.ET.MortonCRAE.actualarealET<span class="sc">$</span>temporal.mean<span class="sc">$</span>month,</span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a>            climateData.ET.MortonCRAE.actualarealET<span class="sc">$</span>temporal.mean<span class="sc">$</span>day)</span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a><span class="fu">lines</span>(d[filt], climateData.ET.MortonCRAE.actualarealET<span class="sc">$</span>temporal.mean<span class="sc">$</span>et[filt],</span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a>            <span class="at">col=</span><span class="st">&#39;green&#39;</span>,<span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a></span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.MortonCRWE<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.MortonCRWE<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a>            climateData.ET.MortonCRWE<span class="sc">$</span>temporal.mean<span class="sc">$</span>month,</span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a>            climateData.ET.MortonCRWE<span class="sc">$</span>temporal.mean<span class="sc">$</span>day)</span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a><span class="fu">lines</span>(d[filt], climateData.ET.MortonCRWE<span class="sc">$</span>temporal.mean<span class="sc">$</span>et[filt],</span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a>            <span class="at">col=</span><span class="st">&#39;blue&#39;</span>,<span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a></span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.MortonCRWE.shallowLake<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
+<span id="cb7-59"><a href="#cb7-59" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.MortonCRWE.shallowLake<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>
+<span id="cb7-60"><a href="#cb7-60" tabindex="-1"></a>            climateData.ET.MortonCRWE.shallowLake<span class="sc">$</span>temporal.mean<span class="sc">$</span>month,</span>
+<span id="cb7-61"><a href="#cb7-61" tabindex="-1"></a>            climateData.ET.MortonCRWE.shallowLake<span class="sc">$</span>temporal.mean<span class="sc">$</span>day)</span>
+<span id="cb7-62"><a href="#cb7-62" tabindex="-1"></a><span class="fu">lines</span>(d[filt], climateData.ET.MortonCRWE.shallowLake<span class="sc">$</span>temporal.mean<span class="sc">$</span>et[filt],</span>
+<span id="cb7-63"><a href="#cb7-63" tabindex="-1"></a>            <span class="at">col=</span><span class="st">&#39;black&#39;</span>,<span class="at">lty=</span><span class="dv">3</span>)</span>
+<span id="cb7-64"><a href="#cb7-64" tabindex="-1"></a></span>
+<span id="cb7-65"><a href="#cb7-65" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.Turc<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
+<span id="cb7-66"><a href="#cb7-66" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.Turc<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>
+<span id="cb7-67"><a href="#cb7-67" tabindex="-1"></a>            climateData.ET.Turc<span class="sc">$</span>temporal.mean<span class="sc">$</span>month,</span>
+<span id="cb7-68"><a href="#cb7-68" tabindex="-1"></a>            climateData.ET.Turc<span class="sc">$</span>temporal.mean<span class="sc">$</span>day)</span>
+<span id="cb7-69"><a href="#cb7-69" tabindex="-1"></a><span class="fu">lines</span>(d[filt], climateData.ET.Turc<span class="sc">$</span>temporal.mean<span class="sc">$</span>et[filt],</span>
+<span id="cb7-70"><a href="#cb7-70" tabindex="-1"></a>            <span class="at">col=</span><span class="st">&#39;red&#39;</span>,<span class="at">lty=</span><span class="dv">3</span>)</span>
+<span id="cb7-71"><a href="#cb7-71" tabindex="-1"></a></span>
+<span id="cb7-72"><a href="#cb7-72" tabindex="-1"></a><span class="fu">legend</span>(<span class="at">x=</span><span class="st">&#39;topright&#39;</span>, <span class="at">legend=</span><span class="fu">c</span>(</span>
+<span id="cb7-73"><a href="#cb7-73" tabindex="-1"></a>  <span class="st">&#39;Hargreaves Samani (ref. crop)&#39;</span>,</span>
+<span id="cb7-74"><a href="#cb7-74" tabindex="-1"></a>  <span class="st">&#39;Jensen Haise (PET)&#39;</span>,</span>
+<span id="cb7-75"><a href="#cb7-75" tabindex="-1"></a>  <span class="st">&#39;Makkink (ref. crop)&#39;</span>,</span>
+<span id="cb7-76"><a href="#cb7-76" tabindex="-1"></a>  <span class="st">&#39;McGuinness Bordne (PET)&#39;</span>,</span>
+<span id="cb7-77"><a href="#cb7-77" tabindex="-1"></a>  <span class="st">&#39;Morton CRAE (PET)&#39;</span>,</span>
+<span id="cb7-78"><a href="#cb7-78" tabindex="-1"></a>  <span class="st">&#39;Morton CRAE (wet areal ET)&#39;</span>,</span>
+<span id="cb7-79"><a href="#cb7-79" tabindex="-1"></a>  <span class="st">&#39;Morton CRAE (actual areal ET)&#39;</span>,</span>
+<span id="cb7-80"><a href="#cb7-80" tabindex="-1"></a>  <span class="st">&#39;Morton CRWE (PET)&#39;</span>,</span>
+<span id="cb7-81"><a href="#cb7-81" tabindex="-1"></a>  <span class="st">&#39;Morton CRWE (shallow Lake)&#39;</span>,</span>
+<span id="cb7-82"><a href="#cb7-82" tabindex="-1"></a>  <span class="st">&#39;Turc (ref. crop, non-humid)&#39;</span>),</span>
+<span id="cb7-83"><a href="#cb7-83" tabindex="-1"></a>  <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">3</span>),</span>
+<span id="cb7-84"><a href="#cb7-84" tabindex="-1"></a>  <span class="at">col=</span><span class="fu">c</span>(<span class="st">&#39;black&#39;</span>,<span class="st">&#39;red&#39;</span>,<span class="st">&#39;green&#39;</span>,<span class="st">&#39;blue&#39;</span>,<span class="st">&#39;black&#39;</span>,<span class="st">&#39;red&#39;</span>,<span class="st">&#39;green&#39;</span>,<span class="st">&#39;blue&#39;</span>,<span class="st">&#39;black&#39;</span>,<span class="st">&#39;red&#39;</span>)</span>
+<span id="cb7-85"><a href="#cb7-85" tabindex="-1"></a>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

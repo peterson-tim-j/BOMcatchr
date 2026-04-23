@@ -1,52 +1,26 @@
----
-title: "Extract water year area weighted precipitation"
-description: >
-  This vignette shows how to build the netCDF data file and then
-  extract user defined water year area weighted precipitation data for a catchment.
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Extract water year area weighted precipitation}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\usepackage[utf8]{inputenc}
----
-
-```{r, include = FALSE}
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 options(tibble.print_min = 4L, tibble.print_max = 4L)
-```
 
-```{r setup}
+## ----setup--------------------------------------------------------------------
 library(AWAPer, warn.conflicts = FALSE)
-```
 
-## Make netCDF files
-The first step is to create the netCDF file. Here grids are build for monthly precipitation, daily precipitation and the daily root measure square error (RMSE) from the interpolation of the rain gauge data - and only between the dates _update.from_ and _update.to_.
-
-First, let's define the start and end dates for data grids and the file names.
-
-```{r}
+## -----------------------------------------------------------------------------
 date.from = as.Date("2010-01-01","%Y-%m-%d")
 date.to = as.Date("2015-12-31","%Y-%m-%d")
 
 ncdfFilename = tempfile(fileext='.nc')
-```
 
-Next, let's make the data grids over this period. Note, the monthly root mean square interpolation error (RMSE) gridded data is not provided the Bureau of Meteorology and is therefore not able to be used below.
-```{r}
+## -----------------------------------------------------------------------------
 fname = makeNetCDF_file(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('precip', 'precip.RMSE', 'precip.monthly'))
-```
-## Load a catchment boundary
-Now that we have the meteorological data we can begin extracting data for two catchments. Here the catchment boundaries built into the package are used.
-```{r}
-data("catchments")
-```
-## Extract calendar year precipitation
-Next let's extract the calendar year area weighted total precipitation across the two catchments. The data is extracted between the dates _extract.from_ and _extract.to_. Because the output time step can be estimated from both the daily and monthly source data, both can be extracted at the same time.
 
-```{r}
+## -----------------------------------------------------------------------------
+data("catchments")
+
+## -----------------------------------------------------------------------------
 climateData.annual = extractCatchmentData(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
@@ -55,11 +29,8 @@ climateData.annual = extractCatchmentData(ncdfFilename=ncdfFilename,
                       temporal.timestep = 'annual',
                       temporal.function.name='sum',
                       spatial.function.name='var')
-```
 
-Now let's also estimate the uncertainty in the calender year rainfall using the root mean square interpolation error (RMSE). Specifically, we are assuming that the error is unbiased, which allows us to assume the RMSE equals the standard deviation. Taking the square of it gives us the variance, which we can sum over the water year. Once all of the calender year data is extracted, the total annual precipitation is plotted.
-
-```{r}
+## -----------------------------------------------------------------------------
 sqrd.sum <- function(x) {return(sum(x^2))}
 
 climateData.annual.err = extractCatchmentData(ncdfFilename=ncdfFilename,
@@ -70,12 +41,8 @@ climateData.annual.err = extractCatchmentData(ncdfFilename=ncdfFilename,
                       temporal.timestep = 'annual',
                       temporal.function.name = sqrd.sum,
                       spatial.function.name = 'var')
-```
 
-```{r}
-#| fig.width = 8,
-#| fig.height = 6
-
+## -----------------------------------------------------------------------------
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
@@ -83,38 +50,28 @@ for (i in 1:length(catchments$CatchID)) {
 
   filt = climateData.annual$temporal.sum$Location.ID == catchments$CatchID[i]
 
-  # Plot precipitation from monthly data
-  tmp.date = climateData.annual$temporal.sum[filt,]
-  x.data = tmp.date$year
-  y.data = tmp.date$precip.monthly
-
-  # Plot calendar year precipitation from daily data
-  plot(x = x.data,
-       y = y.data,
-       type = "l",
-       col = "red",
-       lwd = 1.2,
-       mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data) * 1.05)),
-       ylab = "Precip. [mm/year]",
-       xlab = "Calender year",
-       xaxs = "r",
-       bty = "l",
-       yaxs = "r",
-       main=paste('Catchment ID',catchments$CatchID[i]))
-
   # Get water year data from daily data
   tmp.date = climateData.annual$temporal.sum[filt,]
+  x.data = as.Date(ISOdate(tmp.date$year, tmp.date$month, tmp.date$day))
   y.data = tmp.date$precip
   tmp.date = climateData.annual.err$temporal.sqrd.sum[filt,]
   y.data.low = y.data - 2*sqrt(tmp.date$precip.RMSE)
   y.data.hi = y.data + 2*sqrt(tmp.date$precip.RMSE)
 
-  lines(x = x.data,
+  # Plot calendar year precipitation from daily data
+  plot(x = x.data,
        y = y.data,
        type = "l",
        col = "blue",
-       lwd = 1.2)
+       lwd = 1.2,
+       mgp = c(2, 0.5, 0),
+       ylim = c(0, ceiling(max(y.data.hi))),
+       ylab = "Precip. [mm/year]",
+       xlab = "Calender year",
+       xaxs = "i",
+       bty = "l",
+       yaxs = "i",
+       main=paste('Catchment ID',catchments$CatchID[i]))
 
   # Add interpolation error bars for water years precipitation from daily data
   arrows(x0 = x.data,
@@ -125,6 +82,15 @@ for (i in 1:length(catchments$CatchID)) {
          code=3,
          length=0.06,
          col="black")
+
+  # Plot precipitation from monthly data
+  y.data = tmp.date$precip.monthly
+
+  lines(x = x.data,
+       y = y.data,
+       type = "l",
+       col = "red",
+       lwd = 1.2)
 
   # Add legend
   legend("bottomleft",
@@ -137,17 +103,12 @@ for (i in 1:length(catchments$CatchID)) {
          xpd = NA,
          cex=0.75)
 }
-```
 
-## Extract water year precipitation
-Alternatively the water-year area weighted total precipitation cn be extracted. To do this, an index to start of each water year is required. Here the water year starts on the first of March. Note, the same approach can be used to extract data over other time steps, such as seasonal.
-
-```{r}
+## -----------------------------------------------------------------------------
 dates = seq.Date(date.from, date.to, by ='day')
 wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
-```
 
-```{r}
+## -----------------------------------------------------------------------------
 climateData.daily2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
@@ -156,11 +117,8 @@ climateData.daily2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name='sum',
                       spatial.function.name='var')
-```
 
-Now let's estimate the uncertainty in the water year rainfall using the root mean square interpolation error (RMSE).
-
-```{r}
+## -----------------------------------------------------------------------------
 climateData.daily2wateryear.err = extractCatchmentData(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
@@ -169,15 +127,12 @@ climateData.daily2wateryear.err = extractCatchmentData(ncdfFilename=ncdfFilename
                       temporal.timestep = wateryear.ind,
                       temporal.function.name = sqrd.sum,
                       spatial.function.name = 'var')
-```
-Finally, let's also extract the water year using the monthly gridded precipitation data.
 
-```{r}
+## -----------------------------------------------------------------------------
 dates = seq.Date(date.from, date.to, by ='month')
 wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
-```
 
-```{r}
+## -----------------------------------------------------------------------------
 climateData.month2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
@@ -186,65 +141,47 @@ climateData.month2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name='sum',
                       spatial.function.name='var')
-```
 
-Before plotting the water year data, the time steps with less than a full water year of data are filtered out.
-```{r}
+## -----------------------------------------------------------------------------
 filt = climateData.daily2wateryear$temporal.sum$days.per.timestep >= 365
 climateData.daily2wateryear$temporal.sum = climateData.daily2wateryear$temporal.sum[filt, ]
 
 filt = climateData.daily2wateryear.err$temporal.sqrd.sum$days.per.timestep >= 365
 climateData.daily2wateryear.err$temporal.sqrd.sum = climateData.daily2wateryear.err$temporal.sqrd.sum[filt, ]
 
-filt = climateData.month2wateryear$temporal.sum$months.per.timestep == 12
+filt = climateData.month2wateryear$temporal.sum$days.per.timestep == 12
 climateData.month2wateryear$temporal.sum = climateData.month2wateryear$temporal.sum[filt, ]
 
-```
 
-Now let's compare the two estimates of water year precipitation at the two catchments. The blue line shows the water year total rainfall calculated from the daily data, with the black vertical bars denoting the estimated 5th to 95th error from the interpolation of rain gauges. The red line shows the the water year total rainfall calculated from the monthly data.
-```{r}
-#| fig.width = 8,
-#| fig.height = 6
-
+## -----------------------------------------------------------------------------
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
 for (i in 1:length(catchments$CatchID)) {
 
-  # Water years precipitation from monthly data.
-  filt = climateData.month2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
-  tmp.date = climateData.month2wateryear$temporal.sum[filt,]
-  x.data = tmp.date$year
-  y.data = tmp.date$precip.monthly
-
-  plot(x = x.data,
-       y = y.data,
-       type = "l",
-       col = "red",
-       lwd = 1.2,
-       mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data) * 1.05)),
-       ylab = "Precip. [mm/year]",
-       xlab = "Water year (end year)",
-       xaxs = "r",
-       bty = "l",
-       yaxs = "r",
-       main=paste('Catchment ID',catchments$CatchID[i]))
-
   # Get water year data from daily data.
   filt = climateData.daily2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
   tmp.date = climateData.daily2wateryear$temporal.sum[filt,]
-  x.data = tmp.date$year
+  x.data = as.Date(ISOdate(tmp.date$year, tmp.date$month, tmp.date$day))
   y.data = tmp.date$precip
   tmp.date = climateData.daily2wateryear.err$temporal.sqrd.sum[filt,]
   y.data.low = y.data - 1.645 * sqrt(tmp.date$precip.RMSE)
   y.data.hi = y.data + 1.645 * sqrt(tmp.date$precip.RMSE)
 
-  lines(x = x.data,
+  # plot water years precipitation from daily data
+  plot(x = x.data,
        y = y.data,
        type = "l",
        col = "blue",
-       lwd = 1.2)
+       lwd = 1.2,
+       mgp = c(2, 0.5, 0),
+       ylim = c(0, ceiling(max(y.data.hi))),
+       ylab = "Precip. [mm/year]",
+       xlab = "Water year",
+       xaxs = "i",
+       bty = "l",
+       yaxs = "i",
+       main=paste('Catchment ID',catchments$CatchID[i]))
 
   # Add interpolation error bars for water years precipitation from daily data
   arrows(x0 = x.data,
@@ -254,7 +191,19 @@ for (i in 1:length(catchments$CatchID)) {
          angle=90,
          code=3,
          length=0.06,
-         col="black")
+         col="lightblue")
+
+  # Water years precipitation from monthly data.
+  filt = climateData.month2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
+  tmp.date = climateData.month2wateryear$temporal.sum[filt,]
+  x.data = as.Date(ISOdate(tmp.date$year, tmp.date$month, tmp.date$day))
+  y.data = tmp.date$precip.monthly
+
+  lines(x = x.data,
+       y = y.data,
+       type = "l",
+       col = "red",
+       lwd = 1.2)
 
   # Add legend
   legend("bottomleft",
@@ -267,5 +216,4 @@ for (i in 1:length(catchments$CatchID)) {
          xpd = NA,
          cex=0.75)
 }
-```
 

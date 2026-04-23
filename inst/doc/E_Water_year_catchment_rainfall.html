@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Extract water year area weighted precipitation</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Extract water year area weighted
+precipitation</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(AWAPer, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div id="make-netcdf-files" class="section level2">
+<h2>Make netCDF files</h2>
+<p>The first step is to create the netCDF file. Here grids are build for
+monthly precipitation, daily precipitation and the daily root measure
+square error (RMSE) from the interpolation of the rain gauge data - and
+only between the dates <em>update.from</em> and <em>update.to</em>.</p>
+<p>First, let’s define the start and end dates for data grids and the
+file names.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>date.from <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="st">&quot;2010-01-01&quot;</span>,<span class="st">&quot;%Y-%m-%d&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>date.to <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="st">&quot;2015-12-31&quot;</span>,<span class="st">&quot;%Y-%m-%d&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>ncdfFilename <span class="ot">=</span> <span class="fu">tempfile</span>(<span class="at">fileext=</span><span class="st">&#39;.nc&#39;</span>)</span></code></pre></div>
+<p>Next, let’s make the data grids over this period. Note, the monthly
+root mean square interpolation error (RMSE) gridded data is not provided
+the Bureau of Meteorology and is therefore not able to be used
+below.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>fname <span class="ot">=</span> <span class="fu">makeNetCDF_file</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                         <span class="at">updateFrom =</span> date.from,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                         <span class="at">updateTo =</span> date.to,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                         <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip&#39;</span>, <span class="st">&#39;precip.RMSE&#39;</span>, <span class="st">&#39;precip.monthly&#39;</span>))</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt;     Testing precip.RMSE grid data.</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;     Testing precip.monthly grid data.</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;        - New variables to add: precip  precip.RMSE  precip.monthly</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2010-01-01  to  2015-12-31</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; Data construction FINISHED.</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;                Imported Errors</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; precip             2191      0</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; precip.RMSE        2191      0</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; precip.monthly       72      0</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:01:02:43</span></span></code></pre></div>
+</div>
+<div id="load-a-catchment-boundary" class="section level2">
+<h2>Load a catchment boundary</h2>
+<p>Now that we have the meteorological data we can begin extracting data
+for two catchments. Here the catchment boundaries built into the package
+are used.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;catchments&quot;</span>)</span></code></pre></div>
+</div>
+<div id="extract-calendar-year-precipitation" class="section level2">
+<h2>Extract calendar year precipitation</h2>
+<p>Next let’s extract the calendar year area weighted total
+precipitation across the two catchments. The data is extracted between
+the dates <em>extract.from</em> and <em>extract.to</em>. Because the
+output time step can be estimated from both the daily and monthly source
+data, both can be extracted at the same time.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>climateData.annual <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span>ncdfFilename,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                      <span class="at">extractFrom=</span>date.from,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                      <span class="at">extractTo=</span>date.to,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                      <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip&#39;</span>, <span class="st">&#39;precip.monthly&#39;</span>),</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                      <span class="at">locations=</span>catchments,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> <span class="st">&#39;annual&#39;</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>                      <span class="at">temporal.function.name=</span><span class="st">&#39;sum&#39;</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>                      <span class="at">spatial.function.name=</span><span class="st">&#39;var&#39;</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2015-12-31</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2015-12-31  at  2  locations</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:16</span></span></code></pre></div>
+<p>Now let’s also estimate the uncertainty in the calender year rainfall
+using the root mean square interpolation error (RMSE). Specifically, we
+are assuming that the error is unbiased, which allows us to assume the
+RMSE equals the standard deviation. Taking the square of it gives us the
+variance, which we can sum over the water year. Once all of the calender
+year data is extracted, the total annual precipitation is plotted.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>sqrd.sum <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {<span class="fu">return</span>(<span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>))}</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>climateData.annual.err <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span>ncdfFilename,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>                      <span class="at">extractFrom=</span>date.from,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                      <span class="at">extractTo=</span>date.to,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                      <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip.RMSE&#39;</span>),</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>                      <span class="at">locations=</span>catchments,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> <span class="st">&#39;annual&#39;</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>                      <span class="at">temporal.function.name =</span> sqrd.sum,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>                      <span class="at">spatial.function.name =</span> <span class="st">&#39;var&#39;</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2015-12-31</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2015-12-31  at  2  locations</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:00</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mar =</span>  <span class="fu">c</span>(<span class="dv">5</span>, <span class="fl">7.5</span>, <span class="dv">4</span>, <span class="fl">2.7</span>) <span class="sc">+</span> <span class="fl">0.1</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># Loop through each catchment and plot the daily precipitation and PET.</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(catchments<span class="sc">$</span>CatchID)) {</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  filt <span class="ot">=</span> climateData.annual<span class="sc">$</span>temporal.sum<span class="sc">$</span>Location.ID <span class="sc">==</span> catchments<span class="sc">$</span>CatchID[i]</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="co"># Get water year data from daily data</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  tmp.date <span class="ot">=</span> climateData.annual<span class="sc">$</span>temporal.sum[filt,]</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  x.data <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="fu">ISOdate</span>(tmp.date<span class="sc">$</span>year, tmp.date<span class="sc">$</span>month, tmp.date<span class="sc">$</span>day))</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  y.data <span class="ot">=</span> tmp.date<span class="sc">$</span>precip</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  tmp.date <span class="ot">=</span> climateData.annual.err<span class="sc">$</span>temporal.sqrd.sum[filt,]</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  y.data.low <span class="ot">=</span> y.data <span class="sc">-</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">sqrt</span>(tmp.date<span class="sc">$</span>precip.RMSE)</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  y.data.hi <span class="ot">=</span> y.data <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">sqrt</span>(tmp.date<span class="sc">$</span>precip.RMSE)</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  <span class="co"># Plot calendar year precipitation from daily data</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="at">x =</span> x.data,</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>       <span class="at">y =</span> y.data,</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>       <span class="at">type =</span> <span class="st">&quot;l&quot;</span>,</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>       <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>       <span class="at">lwd =</span> <span class="fl">1.2</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>       <span class="at">mgp =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="fl">0.5</span>, <span class="dv">0</span>),</span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>       <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">ceiling</span>(<span class="fu">max</span>(y.data.hi))),</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>       <span class="at">ylab =</span> <span class="st">&quot;Precip. [mm/year]&quot;</span>,</span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>       <span class="at">xlab =</span> <span class="st">&quot;Calender year&quot;</span>,</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a>       <span class="at">xaxs =</span> <span class="st">&quot;i&quot;</span>,</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">&quot;l&quot;</span>,</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a>       <span class="at">yaxs =</span> <span class="st">&quot;i&quot;</span>,</span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a>       <span class="at">main=</span><span class="fu">paste</span>(<span class="st">&#39;Catchment ID&#39;</span>,catchments<span class="sc">$</span>CatchID[i]))</span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>  <span class="co"># Add interpolation error bars for water years precipitation from daily data</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a>  <span class="fu">arrows</span>(<span class="at">x0 =</span> x.data,</span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a>         <span class="at">y0 =</span> y.data.low,</span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a>         <span class="at">x1 =</span> x.data,</span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a>         <span class="at">y1 =</span> y.data.hi,</span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a>         <span class="at">angle=</span><span class="dv">90</span>,</span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a>         <span class="at">code=</span><span class="dv">3</span>,</span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a>         <span class="at">length=</span><span class="fl">0.06</span>,</span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a>         <span class="at">col=</span><span class="st">&quot;black&quot;</span>)</span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a>  <span class="co"># Plot precipitation from monthly data</span></span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a>  y.data <span class="ot">=</span> tmp.date<span class="sc">$</span>precip.monthly</span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="at">x =</span> x.data,</span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a>       <span class="at">y =</span> y.data,</span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a>       <span class="at">type =</span> <span class="st">&quot;l&quot;</span>,</span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a>       <span class="at">col =</span> <span class="st">&quot;red&quot;</span>,</span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a>       <span class="at">lwd =</span> <span class="fl">1.2</span>)</span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a>  <span class="co"># Add legend</span></span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a>  <span class="fu">legend</span>(<span class="st">&quot;bottomleft&quot;</span>,</span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a>         <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a>         <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a>         <span class="at">inset =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="sc">-</span><span class="fl">0.01</span>),</span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a>         <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span>),</span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a>         <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;blue&quot;</span>,  <span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>),</span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a>         <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;From daily data&quot;</span>, <span class="st">&quot;5-95 %ile error&quot;</span>, <span class="st">&quot;From monthly data&quot;</span>),</span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a>         <span class="at">xpd =</span> <span class="cn">NA</span>,</span>
+<span id="cb7-59"><a href="#cb7-59" tabindex="-1"></a>         <span class="at">cex=</span><span class="fl">0.75</span>)</span>
+<span id="cb7-60"><a href="#cb7-60" tabindex="-1"></a>}</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="extract-water-year-precipitation" class="section level2">
+<h2>Extract water year precipitation</h2>
+<p>Alternatively the water-year area weighted total precipitation cn be
+extracted. To do this, an index to start of each water year is required.
+Here the water year starts on the first of March. Note, the same
+approach can be used to extract data over other time steps, such as
+seasonal.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>dates <span class="ot">=</span> <span class="fu">seq.Date</span>(date.from, date.to, <span class="at">by =</span><span class="st">&#39;day&#39;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>wateryear.ind <span class="ot">=</span> <span class="fu">which</span>(<span class="fu">as.numeric</span>(<span class="fu">format</span>(dates, <span class="st">&#39;%m&#39;</span>)) <span class="sc">==</span> <span class="dv">3</span> <span class="sc">&amp;</span> <span class="fu">as.numeric</span>(<span class="fu">format</span>(dates, <span class="st">&#39;%d&#39;</span>))<span class="sc">==</span><span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>climateData.daily2wateryear <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span>ncdfFilename,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                      <span class="at">extractFrom=</span>date.from,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                      <span class="at">extractTo=</span>date.to,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>                      <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip&#39;</span>),</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>                      <span class="at">locations=</span>catchments,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> wateryear.ind,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>                      <span class="at">temporal.function.name=</span><span class="st">&#39;sum&#39;</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>                      <span class="at">spatial.function.name=</span><span class="st">&#39;var&#39;</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2015-12-31</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2015-12-31  at  2  locations</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:00</span></span></code></pre></div>
+<p>Now let’s estimate the uncertainty in the water year rainfall using
+the root mean square interpolation error (RMSE).</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>climateData.daily2wateryear.err <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span>ncdfFilename,</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>                      <span class="at">extractFrom=</span>date.from,</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>                      <span class="at">extractTo=</span>date.to,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>                      <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip.RMSE&#39;</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>                      <span class="at">locations=</span>catchments,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> wateryear.ind,</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>                      <span class="at">temporal.function.name =</span> sqrd.sum,</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>                      <span class="at">spatial.function.name =</span> <span class="st">&#39;var&#39;</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2015-12-31</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2015-12-31  at  2  locations</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:02</span></span></code></pre></div>
+<p>Finally, let’s also extract the water year using the monthly gridded
+precipitation data.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>dates <span class="ot">=</span> <span class="fu">seq.Date</span>(date.from, date.to, <span class="at">by =</span><span class="st">&#39;month&#39;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>wateryear.ind <span class="ot">=</span> <span class="fu">which</span>(<span class="fu">as.numeric</span>(<span class="fu">format</span>(dates, <span class="st">&#39;%m&#39;</span>)) <span class="sc">==</span> <span class="dv">3</span> <span class="sc">&amp;</span> <span class="fu">as.numeric</span>(<span class="fu">format</span>(dates, <span class="st">&#39;%d&#39;</span>))<span class="sc">==</span><span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>climateData.month2wateryear <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span>ncdfFilename,</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>                      <span class="at">extractFrom=</span>date.from,</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                      <span class="at">extractTo=</span>date.to,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>                      <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip.monthly&#39;</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>                      <span class="at">locations=</span>catchments,</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> wateryear.ind,</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>                      <span class="at">temporal.function.name=</span><span class="st">&#39;sum&#39;</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>                      <span class="at">spatial.function.name=</span><span class="st">&#39;var&#39;</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2015-12-31</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2015-12-31  at  2  locations</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt; Starting data extraction:</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:02</span></span></code></pre></div>
+<p>Before plotting the water year data, the time steps with less than a
+full water year of data are filtered out.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>filt <span class="ot">=</span> climateData.daily2wateryear<span class="sc">$</span>temporal.sum<span class="sc">$</span>days.per.timestep <span class="sc">&gt;=</span> <span class="dv">365</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>climateData.daily2wateryear<span class="sc">$</span>temporal.sum <span class="ot">=</span> climateData.daily2wateryear<span class="sc">$</span>temporal.sum[filt, ]</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>filt <span class="ot">=</span> climateData.daily2wateryear.err<span class="sc">$</span>temporal.sqrd.sum<span class="sc">$</span>days.per.timestep <span class="sc">&gt;=</span> <span class="dv">365</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>climateData.daily2wateryear.err<span class="sc">$</span>temporal.sqrd.sum <span class="ot">=</span> climateData.daily2wateryear.err<span class="sc">$</span>temporal.sqrd.sum[filt, ]</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>filt <span class="ot">=</span> climateData.month2wateryear<span class="sc">$</span>temporal.sum<span class="sc">$</span>days.per.timestep <span class="sc">==</span> <span class="dv">12</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>climateData.month2wateryear<span class="sc">$</span>temporal.sum <span class="ot">=</span> climateData.month2wateryear<span class="sc">$</span>temporal.sum[filt, ]</span></code></pre></div>
+<p>Now let’s compare the two estimates of water year precipitation at
+the two catchments. The blue line shows the water year total rainfall
+calculated from the daily data, with the black vertical bars denoting
+the estimated 5th to 95th error from the interpolation of rain gauges.
+The red line shows the the water year total rainfall calculated from the
+monthly data.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mar =</span>  <span class="fu">c</span>(<span class="dv">5</span>, <span class="fl">7.5</span>, <span class="dv">4</span>, <span class="fl">2.7</span>) <span class="sc">+</span> <span class="fl">0.1</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co"># Loop through each catchment and plot the daily precipitation and PET.</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(catchments<span class="sc">$</span>CatchID)) {</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  <span class="co"># Get water year data from daily data.</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>  filt <span class="ot">=</span> climateData.daily2wateryear<span class="sc">$</span>temporal.sum<span class="sc">$</span>Location.ID <span class="sc">==</span> catchments<span class="sc">$</span>CatchID[i]</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>  tmp.date <span class="ot">=</span> climateData.daily2wateryear<span class="sc">$</span>temporal.sum[filt,]</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>  x.data <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="fu">ISOdate</span>(tmp.date<span class="sc">$</span>year, tmp.date<span class="sc">$</span>month, tmp.date<span class="sc">$</span>day))</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>  y.data <span class="ot">=</span> tmp.date<span class="sc">$</span>precip</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>  tmp.date <span class="ot">=</span> climateData.daily2wateryear.err<span class="sc">$</span>temporal.sqrd.sum[filt,]</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>  y.data.low <span class="ot">=</span> y.data <span class="sc">-</span> <span class="fl">1.645</span> <span class="sc">*</span> <span class="fu">sqrt</span>(tmp.date<span class="sc">$</span>precip.RMSE)</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>  y.data.hi <span class="ot">=</span> y.data <span class="sc">+</span> <span class="fl">1.645</span> <span class="sc">*</span> <span class="fu">sqrt</span>(tmp.date<span class="sc">$</span>precip.RMSE)</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>  <span class="co"># plot water years precipitation from daily data</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="at">x =</span> x.data,</span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>       <span class="at">y =</span> y.data,</span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a>       <span class="at">type =</span> <span class="st">&quot;l&quot;</span>,</span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>       <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>,</span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>       <span class="at">lwd =</span> <span class="fl">1.2</span>,</span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>       <span class="at">mgp =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="fl">0.5</span>, <span class="dv">0</span>),</span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a>       <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">ceiling</span>(<span class="fu">max</span>(y.data.hi))),</span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a>       <span class="at">ylab =</span> <span class="st">&quot;Precip. [mm/year]&quot;</span>,</span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a>       <span class="at">xlab =</span> <span class="st">&quot;Water year&quot;</span>,</span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a>       <span class="at">xaxs =</span> <span class="st">&quot;i&quot;</span>,</span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">&quot;l&quot;</span>,</span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a>       <span class="at">yaxs =</span> <span class="st">&quot;i&quot;</span>,</span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a>       <span class="at">main=</span><span class="fu">paste</span>(<span class="st">&#39;Catchment ID&#39;</span>,catchments<span class="sc">$</span>CatchID[i]))</span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a></span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a>  <span class="co"># Add interpolation error bars for water years precipitation from daily data</span></span>
+<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a>  <span class="fu">arrows</span>(<span class="at">x0 =</span> x.data,</span>
+<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a>         <span class="at">y0 =</span> y.data.low,</span>
+<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a>         <span class="at">x1 =</span> x.data,</span>
+<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a>         <span class="at">y1 =</span> y.data.hi,</span>
+<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a>         <span class="at">angle=</span><span class="dv">90</span>,</span>
+<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a>         <span class="at">code=</span><span class="dv">3</span>,</span>
+<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a>         <span class="at">length=</span><span class="fl">0.06</span>,</span>
+<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a>         <span class="at">col=</span><span class="st">&quot;lightblue&quot;</span>)</span>
+<span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a></span>
+<span id="cb14-40"><a href="#cb14-40" tabindex="-1"></a>  <span class="co"># Water years precipitation from monthly data.</span></span>
+<span id="cb14-41"><a href="#cb14-41" tabindex="-1"></a>  filt <span class="ot">=</span> climateData.month2wateryear<span class="sc">$</span>temporal.sum<span class="sc">$</span>Location.ID <span class="sc">==</span> catchments<span class="sc">$</span>CatchID[i]</span>
+<span id="cb14-42"><a href="#cb14-42" tabindex="-1"></a>  tmp.date <span class="ot">=</span> climateData.month2wateryear<span class="sc">$</span>temporal.sum[filt,]</span>
+<span id="cb14-43"><a href="#cb14-43" tabindex="-1"></a>  x.data <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="fu">ISOdate</span>(tmp.date<span class="sc">$</span>year, tmp.date<span class="sc">$</span>month, tmp.date<span class="sc">$</span>day))</span>
+<span id="cb14-44"><a href="#cb14-44" tabindex="-1"></a>  y.data <span class="ot">=</span> tmp.date<span class="sc">$</span>precip.monthly</span>
+<span id="cb14-45"><a href="#cb14-45" tabindex="-1"></a></span>
+<span id="cb14-46"><a href="#cb14-46" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="at">x =</span> x.data,</span>
+<span id="cb14-47"><a href="#cb14-47" tabindex="-1"></a>       <span class="at">y =</span> y.data,</span>
+<span id="cb14-48"><a href="#cb14-48" tabindex="-1"></a>       <span class="at">type =</span> <span class="st">&quot;l&quot;</span>,</span>
+<span id="cb14-49"><a href="#cb14-49" tabindex="-1"></a>       <span class="at">col =</span> <span class="st">&quot;red&quot;</span>,</span>
+<span id="cb14-50"><a href="#cb14-50" tabindex="-1"></a>       <span class="at">lwd =</span> <span class="fl">1.2</span>)</span>
+<span id="cb14-51"><a href="#cb14-51" tabindex="-1"></a></span>
+<span id="cb14-52"><a href="#cb14-52" tabindex="-1"></a>  <span class="co"># Add legend</span></span>
+<span id="cb14-53"><a href="#cb14-53" tabindex="-1"></a>  <span class="fu">legend</span>(<span class="st">&quot;bottomleft&quot;</span>,</span>
+<span id="cb14-54"><a href="#cb14-54" tabindex="-1"></a>         <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb14-55"><a href="#cb14-55" tabindex="-1"></a>         <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb14-56"><a href="#cb14-56" tabindex="-1"></a>         <span class="at">inset =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="sc">-</span><span class="fl">0.01</span>),</span>
+<span id="cb14-57"><a href="#cb14-57" tabindex="-1"></a>         <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span>),</span>
+<span id="cb14-58"><a href="#cb14-58" tabindex="-1"></a>         <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;blue&quot;</span>,  <span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>),</span>
+<span id="cb14-59"><a href="#cb14-59" tabindex="-1"></a>         <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;From daily data&quot;</span>, <span class="st">&quot;5-95 %ile error&quot;</span>, <span class="st">&quot;From monthly data&quot;</span>),</span>
+<span id="cb14-60"><a href="#cb14-60" tabindex="-1"></a>         <span class="at">xpd =</span> <span class="cn">NA</span>,</span>
+<span id="cb14-61"><a href="#cb14-61" tabindex="-1"></a>         <span class="at">cex=</span><span class="fl">0.75</span>)</span>
+<span id="cb14-62"><a href="#cb14-62" tabindex="-1"></a>}</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
