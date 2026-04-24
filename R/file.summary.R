@@ -1,4 +1,4 @@
-#' Summary of existing netCDF data file.
+#' Summarise existing netCDF file.
 #'
 #' \code{file.summary} sumarises the netCDF variables, units and date ranges.
 #'

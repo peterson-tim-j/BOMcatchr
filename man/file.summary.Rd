@@ -2,7 +2,7 @@
 % Please edit documentation in R/file.summary.R
 \name{file.summary}
 \alias{file.summary}
-\title{Get a summary of an existing netCDF data file.}
+\title{Summarise existing netCDF file.}
 \usage{
 file.summary(ncfile)
 }
