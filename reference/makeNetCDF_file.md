@@ -141,7 +141,7 @@ file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
 #> Summary of time points successfully imported (and errors).
 #>        Imported Errors
 #> precip       11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:08
+#> Total run time (DD:HH:MM:SS): 00:00:00:07
 
 # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 # the same file names but \code{updateFrom=NA}.
@@ -160,7 +160,7 @@ file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
 #> Summary of time points successfully imported (and errors).
 #>        Imported Errors
 #> precip       11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:06
+#> Total run time (DD:HH:MM:SS): 00:00:00:05
 
  # Remove temp. file
  unlink(ncdfFilename)

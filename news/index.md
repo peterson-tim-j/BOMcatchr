@@ -1,5 +1,17 @@
 # Changelog
 
+## AWAPer 0.2.00
+
+- Final version of AWAPer before function names changed from that
+  published in the paper.
+
+- Improvements to robustness of data extraction made, eg. daily and
+  monthly data extracted in one call.
+
+- Water year functionality fixed and vignette added.
+
+- Documentation expanded to detail returned data.frames.
+
 ## AWAPer 0.1.60
 
 - Major improvements to robustness and the data sources handled.

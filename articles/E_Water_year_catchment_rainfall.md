@@ -40,28 +40,28 @@ fname = makeNetCDF_file(ncdfFilename = ncdfFilename,
 #>        - Data will be updated from  2010-01-01  to  2015-12-31
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpK8f0XE/986091 2020-08-29 00:31', reason 'No such file or
+#> remove file '/tmp/Rtmposp4fc/986091 2020-08-29 00:31', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpK8f0XE/976111 2020-08-29 00:32', reason 'No such file or
+#> remove file '/tmp/Rtmposp4fc/976111 2020-08-29 00:32', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpK8f0XE/931641 2020-08-29 00:44', reason 'No such file or
+#> remove file '/tmp/Rtmposp4fc/931641 2020-08-29 00:44', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpK8f0XE/924657 2020-08-29 00:58', reason 'No such file or
+#> remove file '/tmp/Rtmposp4fc/924657 2020-08-29 00:58', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpK8f0XE/996250 2020-08-29 01:11', reason 'No such file or
+#> remove file '/tmp/Rtmposp4fc/996250 2020-08-29 01:11', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpK8f0XE/973278 2020-08-29 01:12', reason 'No such file or
+#> remove file '/tmp/Rtmposp4fc/973278 2020-08-29 01:12', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpK8f0XE/998987 2020-08-29 01:13', reason 'No such file or
+#> remove file '/tmp/Rtmposp4fc/998987 2020-08-29 01:13', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpK8f0XE/944133 2020-08-29 01:24', reason 'No such file or
+#> remove file '/tmp/Rtmposp4fc/944133 2020-08-29 01:24', reason 'No such file or
 #> directory'
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).
@@ -69,7 +69,7 @@ fname = makeNetCDF_file(ncdfFilename = ncdfFilename,
 #> precip             2191      0
 #> precip.RMSE        2191      0
 #> precip.monthly       72      0
-#> Total run time (DD:HH:MM:SS): 00:00:44:44
+#> Total run time (DD:HH:MM:SS): 00:00:43:41
 ```
 
 ## Load a catchment boundary
@@ -111,7 +111,7 @@ climateData.annual = extractCatchmentData(ncdfFilename=ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:01
+#> Total run time (DD:HH:MM:SS): 00:00:01:03
 ```
 
 Now let’s also estimate the uncertainty in the calender year rainfall
@@ -142,7 +142,7 @@ climateData.annual.err = extractCatchmentData(ncdfFilename=ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:51
+#> Total run time (DD:HH:MM:SS): 00:00:00:54
 ```
 
 ``` r
@@ -243,7 +243,7 @@ climateData.daily2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:51
+#> Total run time (DD:HH:MM:SS): 00:00:00:55
 ```
 
 Now let’s estimate the uncertainty in the water year rainfall using the
@@ -268,7 +268,7 @@ climateData.daily2wateryear.err = extractCatchmentData(ncdfFilename=ncdfFilename
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:51
+#> Total run time (DD:HH:MM:SS): 00:00:00:54
 ```
 
 Finally, let’s also extract the water year using the monthly gridded

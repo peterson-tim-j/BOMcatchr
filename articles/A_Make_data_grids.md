@@ -61,7 +61,7 @@ ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdfFilename,
 #> precip       11      0
 #> tmin         11      0
 #> tmax         11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:25
+#> Total run time (DD:HH:MM:SS): 00:00:00:21
 ```
 
 Now let’s get a summary of the netCDF file that we’ve created. Note that
@@ -114,7 +114,7 @@ ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
 #> precip       11      0
 #> tmin         11      0
 #> tmax         11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:25
+#> Total run time (DD:HH:MM:SS): 00:00:00:15
 ```
 
 ## Add a variable to existing data grids
@@ -198,7 +198,7 @@ ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
 #> tmin           16      0
 #> tmax           16      0
 #> vprp           16      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:58
+#> Total run time (DD:HH:MM:SS): 00:00:00:52
 ```
 
 Now let’s check that the file includes both the prior four variables

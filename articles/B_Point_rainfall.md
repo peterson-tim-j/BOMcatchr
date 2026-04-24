@@ -63,7 +63,7 @@ fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
 #>                Imported Errors
 #> precip              365      0
 #> precip.monthly       12      0
-#> Total run time (DD:HH:MM:SS): 00:00:04:26
+#> Total run time (DD:HH:MM:SS): 00:00:03:45
 ```
 
 ## Set the points for data extraction
@@ -110,7 +110,7 @@ extracted.data = extractCatchmentData(ncdfFilename = ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:23
+#> Total run time (DD:HH:MM:SS): 00:00:00:24
 ```
 
 ## Plot the daily precipitation at each site
