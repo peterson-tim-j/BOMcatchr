@@ -1,4 +1,4 @@
-#' Get a summary of an existing netCDF data file.
+#' Summary of existing netCDF data file.
 #'
 #' \code{file.summary} sumarises the netCDF variables, units and date ranges.
 #'
@@ -6,9 +6,18 @@
 #' returns a data.frame of variables, unit, stand and end dates of the data.
 #' @param ncfile file name of the netCDF data file built by this package.
 #' @return
-#' data.frame of variables, netcdf group for the variable
-#' (i.e. the grid geometry group) , time step, start and end date
-#' for the variable data .
+#' data.frame summarising the attributes of each variable in the netCDF file. The data.frame includes the
+#' following columns:
+#' \itemize{
+#'  \item{\code{group}: string for the netCDF group in which the variable is placed,}
+#'  \item{\code{var.string}: string for the group and variable name.}
+#'  \item{\code{from} : Date variable for the start of the first time step containing data.}
+#'  \item{\code{to} : Date variable for the end of the last time step containing data.}
+#'  \item{\code{time.step} : string for the time step of the data.}
+#'  \item{\code{time.datum} : string for time datum from which netCDF layers are indexed.}
+#'  \item{\code{units} : string for units of the variable.}
+#'  \item{\code{ellipsoid.crs} : string for Coordinate Reference System (CRS) for the gridded data ellipsoid.}
+#' }
 #'
 #' @export
 file.summary <- function(ncfile) {
