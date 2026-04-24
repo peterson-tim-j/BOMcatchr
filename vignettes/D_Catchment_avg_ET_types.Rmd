@@ -33,7 +33,7 @@ ncdfFilename = tempfile(fileext='.nc')
 
 Next, let's make the data grids over this period.
 ```{r}
-makeNetCDF_file(ncdfFilename = ncdfFilename,
+build.grids(ncdfFilename = ncdfFilename,
                    updateFrom = date.from,
                    updateTo = date.to,
                    vars = c('precip','tmin', 'tmax',

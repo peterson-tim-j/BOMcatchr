@@ -31,7 +31,7 @@ dataFrom = as.Date("2010-01-01","%Y-%m-%d")
 dataTo = as.Date("2010-12-31","%Y-%m-%d")
 ```
 
-The netCDF file contains grids of daily rainfall for all of Australia and is used below to extract data at points of interest. Often users run _makeNetCDF_file_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _makeNetCDF_file_ is run with the the netCDF file name pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to yesterday.
+The netCDF file contains grids of daily rainfall for all of Australia and is used below to extract data at points of interest. Often users run _build.grids_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _build.grids_ is run with the the netCDF file name pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to yesterday.
 
 To start to create the grids, the file name for the netCDF grids needs to be defined. Here we'll just use a temporary file. You should change this to a non-temporary file name and folder.
 ```{r}
@@ -39,7 +39,7 @@ ncdfFilename = tempfile(fileext='.nc')
 ```
 Now with the inputs defined we can download the gridded data and build the netCDF file. Note, here _vars_ is set to only download daily precipitation.
 ```{r}
-fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
+fnames = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = dataFrom,
                          updateTo = dataTo,
                          vars = c('precip', 'precip.monthly'))

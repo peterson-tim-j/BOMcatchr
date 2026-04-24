@@ -25,7 +25,7 @@ This example shows the steps required to build the netCDF data grid file.
 
 First, let's define the dates for the data grids. Here the data grids are created for data between the dates _updateTo_ and _updateTo_. If the latter two dates were not input then data would be downloaded from 1/1/1900 to yesterday.
 
-Note, in practice users often run _makeNetCDF_file_ once to build the netCDF data file that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDF grids for multiple projects, rather than re-building the netCDF grids for each project.
+Note, in practice users often run _build.grids_ once to build the netCDF data file that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDF grids for multiple projects, rather than re-building the netCDF grids for each project.
 
 ```{r}
 startDate <- as.Date(Sys.Date()-15,"%Y-%m-%d")
@@ -41,7 +41,7 @@ Now we're ready to download and build the netCDF grids.
 
 The netCDF data file contains grids of daily rainfall, minimum and maximum temperature. Below, this will be updated to include vapour pressure and solar radiation for all of Australia.
 ```{r}
-ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdfFilename,
+ncdffile.name <- build.grids(ncdfFilename=ncdfFilename,
                 updateFrom=startDate, updateTo=endDate,
                 vars = c('precip','tmin','tmax'))
 ```
@@ -58,7 +58,7 @@ Now that we've built the above file, the updating can be demonstrated. The BoM g
 The package allows for such updating between user defined dates. Here we'll update the data between the dates defined prior. Also, note that \code{vars} is not defined. This will cause all variables in the original file to be updated. That said, individual variables can be updated.
 
 ```{r}
-ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate)
 ```
 
@@ -67,7 +67,7 @@ ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
 Here we'll update the data grids to also include vapour pressure. Here the same date range will be used. Because the date range of the new variable equals the date range of the existing variables, only vapour pressure data is updated. This feature can be used to update the data of a single variable as required.
 
 ```{r}
-ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate,
                 vars = c('vprp'))
 ```
@@ -86,7 +86,7 @@ startDate <- startDate - 5
 ```
 
 ```{r}
-ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate,
                 vars = c('solarrad'))
 ```

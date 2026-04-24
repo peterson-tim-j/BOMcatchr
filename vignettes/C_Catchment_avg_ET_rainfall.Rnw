@@ -32,7 +32,7 @@ The first step is to create the netCDF file of the gridded data. Here grids are 
 
 If the latter two dates were not input then data would be downloaded from 1/1/1900 to two days ago. The netCDF file contains grids of the daily data for all of Australia and is used below to extract data within the catchment boundaries of interest.
 
-Often users run _makeNetCDF_file_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _makeNetCDF_file_ is run with the the netCDF file name pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to two days ago.
+Often users run _build.grids_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _build.grids_ is run with the the netCDF file name pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to two days ago.
 
 First, let's define the start and end dates for data grids and the file names.
 
@@ -45,7 +45,7 @@ ncdfFilename = tempfile(fileext='.nc')
 
 Next, let's make the data grids over this period.
 ```{r}
-fname = makeNetCDF_file(ncdfFilename = ncdfFilename,
+fname = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad'))
