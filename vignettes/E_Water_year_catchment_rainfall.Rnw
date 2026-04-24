@@ -47,7 +47,7 @@ data("catchments")
 Next let's extract the calendar year area weighted total precipitation across the two catchments. The data is extracted between the dates _extract.from_ and _extract.to_. Because the output time step can be estimated from both the daily and monthly source data, both can be extracted at the same time.
 
 ```{r}
-climateData.annual = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.annual = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('precip', 'precip.monthly'),
@@ -62,7 +62,7 @@ Now let's also estimate the uncertainty in the calender year rainfall using the 
 ```{r}
 sqrd.sum <- function(x) {return(sum(x^2))}
 
-climateData.annual.err = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.annual.err = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('precip.RMSE'),
@@ -148,7 +148,7 @@ wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(d
 ```
 
 ```{r}
-climateData.daily2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.daily2wateryear = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('precip'),
@@ -161,7 +161,7 @@ climateData.daily2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
 Now let's estimate the uncertainty in the water year rainfall using the root mean square interpolation error (RMSE).
 
 ```{r}
-climateData.daily2wateryear.err = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.daily2wateryear.err = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('precip.RMSE'),
@@ -178,7 +178,7 @@ wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(d
 ```
 
 ```{r}
-climateData.month2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.month2wateryear = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('precip.monthly'),

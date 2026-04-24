@@ -26,7 +26,7 @@ test_that("netCDF grid can be created",
           data("catchments")
 
           # Extract catchment average monthly data P for Bet Bet Creek.
-          climateData.P= extractCatchmentData(ncdfFilename=ncdfFilename,
+          climateData.P= extract.data(ncdfFilename=ncdfFilename,
                                               extractFrom=startDate, extractTo=endDate,
                                               locations=catchments,
                                               vars = c('precip'),
@@ -47,7 +47,7 @@ test_that("netCDF grid can be created",
 
           # Extract catchment average data for Bet Bet Creek with
           # the Mortons CRAE estimate of potential ET.
-          climateData.P_PET= extractCatchmentData(ncdfFilename=ncdfFilename,
+          climateData.P_PET= extract.data(ncdfFilename=ncdfFilename,
                                                   extractFrom=startDate, extractTo=endDate,
                                                   locations=catchments,
                                                   vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),

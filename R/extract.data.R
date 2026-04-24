@@ -2,7 +2,7 @@
 #' Extract data over catchment area and duration .
 #'
 #' @description
-#' extractCatchmentData extracts the AWAP climate data for each point or polygon. For the latter, either the daily spatial mean and variance (or user defined function) of
+#' extract.data extracts the AWAP climate data for each point or polygon. For the latter, either the daily spatial mean and variance (or user defined function) of
 #' each climate metric is calculated or the spatial data is returned.
 #'
 #' @details
@@ -49,7 +49,7 @@
 #' calculated from the available gridded data (see \code{ET.} inputs below). To calculate the ET, all of the required inputs for the calculation
 #' ET must also be extracted (i.e. the input for such would generally be \code{c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')}.
 #' Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
-#' provided by \code{rownames(AWAPer::file.summary(ncdfFilename))}.
+#' provided by \code{rownames(AWAPer::grid.summary(ncdfFilename))}.
 #' @param locations is either the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
 #' already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS 80, and the first column must be a unique ID.
 #' @param temporal.timestep character string for the time step of the output data. The options are \code{daily}, \code{weekly}, \code{monthly}, \code{quarterly},
@@ -127,7 +127,7 @@
 #'
 #' # Extract daily precip. data (not Tmin, Tmax, VPD, ET).
 #' # Note, the input "locations" can also be a file to a ESRI shape file.
-#' climateData = extractCatchmentData(ncdfFilename=file.name,
+#' climateData = extract.data(ncdfFilename=file.name,
 #'               extractFrom=startDate,
 #'               extractTo=endDate,
 #'               vars = c('precip'),
@@ -144,7 +144,7 @@
 #' unlink(ncdfFilename)
 #' }
 #' @export
-extractCatchmentData <- function(
+extract.data <- function(
     ncdfFilename=file.path(getwd(),'AWAP.nc'),
     extractFrom = as.Date("1900-01-01","%Y-%m-%d"),
     extractTo  = as.Date(Sys.Date(),"%Y-%m-%d"),
@@ -176,7 +176,7 @@ extractCatchmentData <- function(
 
   # If vars is empty, then extract all variables in the file.
   if (length(vars)==1 && vars=='') {
-    vars = rownames(file.summary(ncdfFilename))
+    vars = rownames(grid.summary(ncdfFilename))
   }
   # Check if vars include ET. If so remove and set getET=T
   getET = F
@@ -190,7 +190,7 @@ extractCatchmentData <- function(
   base.var.name = vars[1]
 
   # Check if the required variable is within the netcdf file.
-  vars.prior.summary <- file.summary(ncdfFilename)
+  vars.prior.summary <- grid.summary(ncdfFilename)
   vars.prior = row.names(vars.prior.summary)
   if (any(!(vars %in% vars.prior))) {
     stop('The netCDF file does not contain data for the requested variables. Update the netCDF grid and try again.')

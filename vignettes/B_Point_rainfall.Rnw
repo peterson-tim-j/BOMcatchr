@@ -62,7 +62,7 @@ Now let's extract the daily precipitation at the two locations. The data is extr
 
 Note the netCDF file _ncdfFilename_ must be in the working directory or the full file path must be given.
 ```{r}
-extracted.data = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.data = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,
@@ -142,7 +142,7 @@ Now let's compare the gauge data at a monthly time step with the extracted month
 
 First, let's extract the daily data at a monthly scale
 ```{r}
-extracted.daily2monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.daily2monthly = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,
@@ -153,7 +153,7 @@ extracted.daily2monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
 ```
 Next let's extract the monthly data product.
 ```{r}
-extracted.monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.monthly = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,

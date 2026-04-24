@@ -41,7 +41,7 @@
 #' @return
 #' A string containing the full file name to the netCDF file.
 #'
-#' @seealso \code{\link{extractCatchmentData}} for extracting catchment daily average and variance data.
+#' @seealso \code{\link{extract.data}} for extracting catchment daily average and variance data.
 #'
 #' @references
 #' David A. Jones, William Wang and Robert Fawcett, (2009), High-quality spatial climate data-sets for Australia,
@@ -126,7 +126,7 @@ build.grids <- function(
   # If vars is empty, then set the defaults.
   if (length(vars)==1 && vars=='') {
     if (file.exists(ncdfFilename))
-      vars = rownames(file.summary(ncdfFilename))
+      vars = rownames(grid.summary(ncdfFilename))
     else
       vars = rownames(get.variableSource())
   }
@@ -147,7 +147,7 @@ build.grids <- function(
   vars.prior = c()
   if (file.exists(ncdfFilename)) {
     # Get the list of existing variables.
-    vars.prior.summary <- file.summary(ncdfFilename)
+    vars.prior.summary <- grid.summary(ncdfFilename)
     grid.prior = vars.prior.summary$group
     vars.prior = row.names(vars.prior.summary)
 
@@ -505,7 +505,7 @@ build.grids <- function(
   }
 
   # Get the start and end dates for each variable to be updated
-  vars.summary <- file.summary(ncdfFilename)
+  vars.summary <- grid.summary(ncdfFilename)
 
   # Set update from to the end of the current data
   if (is.na(updateFrom))

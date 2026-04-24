@@ -48,7 +48,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdfFilename,
 
 Now let's get a summary of the netCDF file that we've created. Note that the output data.frame shows the expected variables over the expected date range.
 ```{r}
-summary.df <- AWAPer::file.summary(ncdffile.name)
+summary.df <- AWAPer::grids.summary(ncdffile.name)
 summary.df
 ```
 ## Update an existing variable
@@ -74,7 +74,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
 
 Now let's check that the file includes both the original three variable plus vapour pressure.
 ```{r}
-summary.df <- AWAPer::file.summary(ncdffile.name)
+summary.df <- AWAPer::grids.summary(ncdffile.name)
 summary.df
 ```
 ## Add a variable to existing data grids and update other variables
@@ -93,6 +93,6 @@ ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
 
 Now let's check that the file includes both the prior four variables plus solar radiation.
 ```{r}
-summary.df <- AWAPer::file.summary(ncdffile.name)
+summary.df <- AWAPer::grids.summary(ncdffile.name)
 summary.df
 ```

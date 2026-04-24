@@ -98,5 +98,5 @@ David A. Jones, William Wang and Robert Fawcett, (2009), High-quality spatial cl
 Australian Meteorological and Oceanographic Journal, 58 , p233-248.
 }
 \seealso{
-\code{\link{extractCatchmentData}} for extracting catchment daily average and variance data.
+\code{\link{extract.data}} for extracting catchment daily average and variance data.
 }

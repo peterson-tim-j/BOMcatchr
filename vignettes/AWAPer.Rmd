@@ -38,7 +38,7 @@ See [here](https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.ht
 
 ## Extract weather data
 
-Once the netCDF data grids are created, extract data using the [extractCatchmentData](https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.html) function. The essential user inputs are:
+Once the netCDF data grids are created, extract data using the [extract.data](https://peterson-tim-j.github.io/AWAPer/reference/extract.data.html) function. The essential user inputs are:
 
 1. _ncdfFilename _ file name pointing to the netCDF file.
 1. _locations_ defining the locations at which the data is to be xtracted. it can be a full file name to an ESRI shape file of points or polygons or a shape file already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS 80, and the first column must be a unique ID.

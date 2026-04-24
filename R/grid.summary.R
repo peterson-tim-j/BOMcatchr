@@ -1,6 +1,6 @@
 #' Summarise existing netCDF file.
 #'
-#' \code{file.summary} sumarises the netCDF variables, units and date ranges.
+#' \code{grid.summary} sumarises the netCDF variables, units and date ranges.
 #'
 #' This function opens an existing netCDF file built using the package and
 #' returns a data.frame of variables, unit, stand and end dates of the data.
@@ -20,7 +20,7 @@
 #' }
 #'
 #' @export
-file.summary <- function(ncfile) {
+grid.summary <- function(ncfile) {
 
   if (!is.character(ncfile))
     stop('ncdfFilename is invalid. It must be a character string for the file name.')
