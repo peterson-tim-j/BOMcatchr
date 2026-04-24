@@ -49,6 +49,7 @@ devtools::load_all()
 browseVignettes("BOMcatchr")
 
 # Move vignettes to inst/doc so that they're prebuilt.
+unlink('inst/doc', recursive = T)
 file.rename(from = 'doc/', to = 'inst/doc')
 
 # Update github.io page using pkgdown()
