@@ -31,13 +31,13 @@
 #' @param vars is a vector of variables names to build or update. The available variables are: daily precipitation,
 #' monthly precipitation, daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
 #' Any or all of the defaults are available. If \code{vars=''} and the netCDF does not exist, then the default is
-#' \code{c('precip', 'precip.monthly','tmin', 'tmax', 'vprp', 'solarrad')} and provided by \code{rownames(get.variableSource())}.
+#' \code{c('precip', 'precip.monthly','tmin', 'tmax', 'vprp', 'solarrad')} and provided by \code{rownames(grid.sources())}.
 #' However, if \code{vars=''} and the netCDF file does exist, then default is to use the variable names in the file.
 #' @param keepFiles is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.
 #' @param compressionLevel is the netCDF compression level between 1 (low) and 9 (high), and \code{NA} for no compression.
 #' Note, data extraction runtime may slightly increase with the level of compression. The default is \code{5}.
 #' @param vars.sourceData is a data.frame of variable unit, time step and source URLs. This input is provided in-case the default URLs need to be changed.
-#' The default is \code{get.variableSource())}
+#' The default is \code{grid.sources())}
 #' @return
 #' A string containing the full file name to the netCDF file.
 #'
@@ -82,7 +82,7 @@ build.grids <- function(
   vars = '',
   keepFiles=FALSE,
   compressionLevel = 5,
-  vars.sourceData = get.variableSource() )  {
+  vars.sourceData = grid.sources() )  {
 
   # To Update HTML documentationm:
   # devtools::document()
@@ -128,11 +128,11 @@ build.grids <- function(
     if (file.exists(ncdfFilename))
       vars = rownames(grid.summary(ncdfFilename))
     else
-      vars = rownames(get.variableSource())
+      vars = rownames(grid.sources())
   }
 
   # Check the input variables
-  vars.all = get.variableSource()
+  vars.all = grid.sources()
   vars.all.names = rownames(vars.all)
   if (length(vars)==0)
     stop('The input data variable names,  vars, must be input.')
@@ -261,7 +261,7 @@ build.grids <- function(
     gridgeo[ivar,]$nodata <- headerData$nodata
     gridgeo[ivar,]$has.geom = TRUE;
 
-    # Add ellipsoid CRS from get.variableSource()
+    # Add ellipsoid CRS from grid.sources()
     gridgeo[ivar,]$ellipsoid.crs = vars.all[ivar,]$ellipsoid.crs
 
     # Add time step for variable

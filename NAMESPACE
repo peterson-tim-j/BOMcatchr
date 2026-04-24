@@ -2,5 +2,5 @@
 
 export(build.grids)
 export(extract.data)
-export(get.variableSource)
+export(grid.sources)
 export(grid.summary)

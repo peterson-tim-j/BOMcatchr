@@ -11,7 +11,7 @@ build.grids(
   vars = "",
   keepFiles = FALSE,
   compressionLevel = 5,
-  vars.sourceData = get.variableSource()
+  vars.sourceData = grid.sources()
 )
 }
 \arguments{
@@ -30,7 +30,7 @@ updated with new data to \code{updateFrom}. The default is two days ago as YYYY-
 \item{vars}{is a vector of variables names to build or update. The available variables are: daily precipitation,
 monthly precipitation, daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
 Any or all of the defaults are available. If \code{vars=''} and the netCDF does not exist, then the default is
-\code{c('precip', 'precip.monthly','tmin', 'tmax', 'vprp', 'solarrad')} and provided by \code{rownames(get.variableSource())}.
+\code{c('precip', 'precip.monthly','tmin', 'tmax', 'vprp', 'solarrad')} and provided by \code{rownames(grid.sources())}.
 However, if \code{vars=''} and the netCDF file does exist, then default is to use the variable names in the file.}
 
 \item{keepFiles}{is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.}
@@ -39,7 +39,7 @@ However, if \code{vars=''} and the netCDF file does exist, then default is to us
 Note, data extraction runtime may slightly increase with the level of compression. The default is \code{5}.}
 
 \item{vars.sourceData}{is a data.frame of variable unit, time step and source URLs. This input is provided in-case the default URLs need to be changed.
-The default is \code{get.variableSource())}}
+The default is \code{grid.sources())}}
 }
 \value{
 A string containing the full file name to the netCDF file.
