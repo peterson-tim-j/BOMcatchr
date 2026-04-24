@@ -1,8 +1,6 @@
 # This R scrpt details the step required to build the CRAN .tar.gz file for submission to CRAN and how to build the manual PDF.
 #------------------------------------------------
 
-setwd('BOMcatchr')
-
 # Build docs
 library(roxygen2)
 devtools::document()
@@ -16,7 +14,6 @@ system(paste(shQuote(file.path(R.home("bin"), "R")),"CMD", "Rd2pdf", shQuote(pat
 testthat::test_dir("tests/testthat")
 
 # devtools checks added
-setwd('..')
 devtools::check('BOMcatchr', vignettes=F)
 
 # Convert vignette *.Rnw source diles to a Knitr *.Rms
