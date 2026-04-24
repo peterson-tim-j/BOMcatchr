@@ -1,6 +1,6 @@
-# Build netCDF files of the Bureau of Meteorology (Australia) national gridded climate data.
+# Build a netCDF file of climate data.
 
-`makeNetCDF_file` builds two netCDF files containing Australian climate
+`makeNetCDF_file` builds one netCDF file containing Australian climate
 data.
 
 ## Usage
@@ -8,17 +8,12 @@ data.
 ``` r
 makeNetCDF_file(
   ncdfFilename = file.path(getwd(), "AWAP.nc"),
-  ncdfSolarFilename = file.path(getwd(), "AWAP_solar.nc"),
   updateFrom = as.Date("1900-01-01", "%Y-%m-%d"),
   updateTo = as.Date(Sys.Date() - 2, "%Y-%m-%d"),
-  workingFolder = getwd(),
+  vars = "",
   keepFiles = FALSE,
   compressionLevel = 5,
-  urlPrecip = getURLs()$precip,
-  urlTmin = getURLs()$Tmin,
-  urlTmax = getURLs()$Tmax,
-  urlVprp = getURLs()$vprp,
-  urlSolarrad = getURLs()$solarrad
+  vars.sourceData = get.variableSource()
 )
 ```
 
@@ -26,33 +21,38 @@ makeNetCDF_file(
 
 - ncdfFilename:
 
-  is a file path (as string) and name to the netCDF file. The default
-  file name and path is `file.path(getwd(),'AWAP.nc')`.
-
-- ncdfSolarFilename:
-
-  is the file path (as string) and name to the netCDF file. The default
-  namefile and path `file.path(getwd(),'AWAP_solar.nc')`.
+  is a file path (as string) and name to the netCDF file. If only a file
+  name is given, then the file is assumed to exist / be created in
+  [`getwd()`](https://rdrr.io/r/base/getwd.html). The default file name
+  and path is `file.path(getwd(),'AWAP.nc')`.
 
 - updateFrom:
 
   is a date string specifying the start date for the AWAP data. If
-  `ncdfFilename` and `ncdfSolarFilename` are specified and exist, then
-  the netCDF grids will be updated with new data from `updateFrom`. To
-  update the files from the end of the last day in the file set
-  `updateFrom=NA`. The default is `"1900-1-1"`.
+  `ncdfFilename` is specified and exist, then the netCDF grids will be
+  updated with new data from `updateFrom`. To update the file from the
+  end of the last day in the file set `updateFrom=NA`. The default is
+  `"1900-1-1"`.
 
 - updateTo:
 
   is a date string specifying the end date for the AWAP data. If
-  `ncdfFilename` and `ncdfSolarFilename` are specified and exist, then
-  the netCDF grids will be updated with new data to `updateFrom`. The
-  default is two days ago as YYYY-MM-DD.
+  `ncdfFilename` is specified and exist, then the netCDF grids will be
+  updated with new data to `updateFrom`. The default is two days ago as
+  YYYY-MM-DD.
 
-- workingFolder:
+- vars:
 
-  is the file path (as string) in which to download the AWAP grid files.
-  The default is [`getwd()`](https://rdrr.io/r/base/getwd.html).
+  is a vector of variables names to build or update. The available
+  variables are: daily precipitation, monthly precipitation, daily
+  minimum temperature, daily maximum temperature, daily 3pm vapour
+  pressure grids and daily solar radiation. Any or all of the defaults
+  are available. If `vars=''` and the netCDF does not exist, then the
+  default is
+  `c('precip', 'precip.monthly','tmin', 'tmax', 'vprp', 'solarrad')` and
+  provided by `rownames(get.variableSource())`. However, if `vars=''`
+  and the netCDF file does exist, then default is to use the variable
+  names in the file.
 
 - keepFiles:
 
@@ -62,52 +62,31 @@ makeNetCDF_file(
 - compressionLevel:
 
   is the netCDF compression level between 1 (low) and 9 (high), and `NA`
-  for no compression. Note, data extracion runtime may slightly increase
-  with the level of compression. The default is `5`.
+  for no compression. Note, data extraction runtime may slightly
+  increase with the level of compression. The default is `5`.
 
-- urlPrecip:
+- vars.sourceData:
 
-  URL to the folder containing the AWAP daily precipittaion grids. The
-  default is from `getURLs()$precip`.
-
-- urlTmin:
-
-  URL to the folder containing the AWAP daily minimum temperature grids.
-  The default is from `getURLs()$Tmin`.
-
-- urlTmax:
-
-  URL to the folder containing the AWAP daily maximum temperature grids.
-  The default is from `getURLs()$Tmax`.
-
-- urlVprp:
-
-  URL to the folder containing the AWAP daily vapour pressure grids. The
-  default is from `getURLs()$vprp`.
-
-- urlSolarrad:
-
-  URL to the folder containing the AWAP daily solar radiation grids. The
-  default is from `getURLs()$solarrad`.
+  is a data.frame of variable unit, time step and source URLs. This
+  input is provided in-case the default URLs need to be changed. The
+  default is `get.variableSource())`
 
 ## Value
 
-A list variable containing the full file name to the AWAP data and the
-AWAP solar data.
+A string containing the full file name to the netCDF file.
 
 ## Details
 
-makeNetCDF_file creates two netCDF files of daily climate data.
+makeNetCDF_file creates one netCDF file of daily climate data.
 
-One of the netCDF files contains precipitation, minimum daily
-temperature, maximum daily temperature and vappour pressure. It should
-span from 1/1/1900 to today and requires ~20GB of hard-drive space
-(using default compression). The second netCDF file contains the solar
-radiation and started from 1/1/1990 and be ~24GB and spatial gaps are
-infilled using a 3x3 moving average repeated 3 times. To minimise the
-runtime in extracting data, both files should be stored locally and not
-on a network drive. Also, building the files requires installation of
-7zip.
+One netCDF file is created than contains precipitation, minimum daily
+temperature, maximum daily temperature and vapour pressure and the solar
+radiation data. It should span from 1/1/1900 to yesterday and requires
+~20GB of hard-drive space (using default compression). For the solar
+radiation, spatial gaps are infilled using a 3x3 moving average repeated
+3 times. To minimise the runtime in extracting data, the netCDF file
+should be stored locally and not on a network drive. Also, building the
+file requires installation of 7zip.
 
 The climate data is sourced from the Bureau of Meteorology Australian
 Water Availability Project (<http://www.bom.gov.au/jsp/awap/>. For
@@ -116,9 +95,9 @@ details see Jones et al. (2009).
 The output from this function is required for all data extraction
 functions within this package and must be ran prior.
 
-The function can be used to build netCDF files from stratch or to update
-existng netCDF files previously derived from this function. To not build
-or update a variable, set its respective URL to `NA`.
+The function can be used to a build netCDF file from scratch or to
+update an existing netCDF file previously derived from this function. To
+not build or update a variable, set its respective URL to `NA`.
 
 ## References
 
@@ -142,57 +121,48 @@ for extracting catchment daily average and variance data.
 startDate = as.Date(Sys.Date()-15,"%Y-%m-%d")
 endDate = as.Date(Sys.Date()-5,"%Y-%m-%d")
 
-# Set names for netCDF files (in the system temp. directory).
+# Set names for the netCDF file (in the system temp. directory).
 ncdfFilename = tempfile(fileext='.nc')
-ncdfSolarFilename = tempfile(fileext='.nc')
 
 # \donttest{
-# Build netCDF grids for all data but only over the defined time period.
+# Build netCDF grids for daily precipitation and only over the defined time period.
 file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
-             ncdfSolarFilename=ncdfSolarFilename,
-             updateFrom=startDate, updateTo=endDate)
-#> Starting to build both netCDF files.
-#> ... Testing downloading of AWAP precip. grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/docs/reference/precip.20000101.grid.gz
-#> ... Testing downloading of AWAP tmin grid
-#> ... Testing downloading of AWAP tmax grid
-#> ... Testing downloading of AWAP vapour pressure grid
-#> ... Testing downloading of AWAP solar grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/docs/reference/solarrad.20000101.grid.gz
-#> ... Building AWAP netcdf file.
-#>     NetCDF data will be updated from  2025-11-23  to  2025-12-03
-#> ... Downloading non-solar data and importing to netcdf file:
-#>     NetCDF Solar data will be updated from  2025-11-23  to  2025-12-03
-#> ... Downloading solar data and importing to netcdf file:
+             updateFrom=startDate,
+             updateTo=endDate,
+             vars = c('precip'))
+#> ... Testing downloading of each variable.
+#>     Testing precip grid data.
+#> ... NetCDF file will be updated as follows:
+#>        - New variables to add: precip  
+#>        - Existing variables to modify: (none)
+#>        - Data will be updated from  2026-04-09  to  2026-04-19
+#> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:57
+#> Summary of time points successfully imported (and errors).
+#>        Imported Errors
+#> precip       11      0
+#> Total run time (DD:HH:MM:SS): 00:00:00:08
 
 # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 # the same file names but \code{updateFrom=NA}.
 file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
-             ncdfSolarFilename=ncdfSolarFilename,
              updateFrom=NA)
-#> Starting to update both netCDF files.
-#> ... Testing downloading of AWAP precip. grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/docs/reference/precip.20000101.grid.gz
-#> ... Testing downloading of AWAP tmin grid
-#> ... Testing downloading of AWAP tmax grid
-#> ... Testing downloading of AWAP vapour pressure grid
-#> ... Testing downloading of AWAP solar grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/docs/reference/solarrad.20000101.grid.gz
-#>     NetCDF data will be updated from  2025-12-03  to  2025-12-07
-#> ... Downloading non-solar data and importing to netcdf file:
-#>     NetCDF Solar data will be updated from  2025-12-03  to  2025-12-07
-#> ... Downloading solar data and importing to netcdf file:
+#> ... Testing downloading of each variable.
+#>     Testing precip grid data.
+#> ... updateFrom reduced to ensure all variables have the same start date.
+#> ... updateTo increased to ensure all variables have the same end date.
+#> ... NetCDF file will be updated as follows:
+#>        - New variables to add: (none)
+#>        - Existing variables to modify: precip  
+#>        - Data will be updated from  2026-04-09  to  2026-04-19
+#> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:31
+#> Summary of time points successfully imported (and errors).
+#>        Imported Errors
+#> precip       11      0
+#> Total run time (DD:HH:MM:SS): 00:00:00:06
 
- # Remove temp. files
+ # Remove temp. file
  unlink(ncdfFilename)
- unlink(ncdfSolarFilename)
 # }
 ```

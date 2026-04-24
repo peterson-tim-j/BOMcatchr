@@ -1,4 +1,4 @@
-# `extractCatchmentData` extracts catchment average climate data from netCDF files containing Australian climate data.
+# Extract data over catchment area and duration .
 
 extractCatchmentData extracts the AWAP climate data for each point or
 polygon. For the latter, either the daily spatial mean and variance (or
@@ -10,23 +10,18 @@ spatial data is returned.
 ``` r
 extractCatchmentData(
   ncdfFilename = file.path(getwd(), "AWAP.nc"),
-  ncdfSolarFilename = file.path(getwd(), "AWAP_solar.nc"),
   extractFrom = as.Date("1900-01-01", "%Y-%m-%d"),
   extractTo = as.Date(Sys.Date(), "%Y-%m-%d"),
-  getPrecip = TRUE,
-  getTmin = TRUE,
-  getTmax = TRUE,
-  getVprp = TRUE,
-  getSolarrad = TRUE,
-  getET = TRUE,
-  DEM.res = 10,
+  vars = "",
   locations = NULL,
   temporal.timestep = "daily",
   temporal.function.name = "mean",
   spatial.function.name = "var",
-  interpMethod = "",
+  interp.method = "",
+  missing.method = c("5", "linear", "mean"),
   ET.function = "ET.MortonCRAE",
-  ET.Mortons.est = "potential ET",
+  ET.DEM.res = 10,
+  ET.Mortons.est = "wet areal ET",
   ET.Turc.humid = F,
   ET.timestep = "monthly",
   ET.missing_method = "DoY average",
@@ -41,10 +36,6 @@ extractCatchmentData(
 
   is a full file name (as string) to the netCDF file.
 
-- ncdfSolarFilename:
-
-  is the full file name (as string) to the netCDF file.
-
 - extractFrom:
 
   is a date string specifying the start date for data extraction. The
@@ -55,39 +46,21 @@ extractCatchmentData(
   is a date string specifying the end date for the data extraction. The
   default is today's date as YYYY-MM-DD.
 
-- getPrecip:
+- vars:
 
-  logical variable for extracting precipitation. Default is `TRUE`.
-
-- getTmin:
-
-  logical variable for extracting Tmin. Default is `TRUE`.
-
-- getTmax:
-
-  logical variable for extracting Tmax. Default is `TRUE`.
-
-- getVprp:
-
-  logical variable for extracting vapour pressure. Default is `TRUE`.
-
-- getSolarrad:
-
-  logical variable for extracting solar radiation. Default is `TRUE`.
-
-- getET:
-
-  logical variable for calculating Morton's potential ET. Note, to
-  calculate set `getTmin=T`, `getTmax=T`, `getVprp=T` and
-  `getSolarrad=T`. Default is `TRUE`.
-
-- DEM.res:
-
-  is the zoom resolution for the land surface elevation. `elevatr`
-  package is used to extract elevation (metres) from AWS Open Data
-  Terrain Tiles. This input controls the zoom resolution. Higher values
-  increase accuracy, but are significantly slower. See details. Default
-  is 10.
+  is a vector of variables names to extract. The available variables
+  are: daily precipitation, daily minimum temperature, daily maximum
+  temperature, daily 3pm vapour pressure grids and daily solar radiation
+  and evapotranspiration. The input vector for these options are
+  `c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')`.
+  Importantly, the input `et` is calculated from the available gridded
+  data (see `ET.` inputs below). To calculate the ET, all of the
+  required inputs for the calculation ET must also be extracted (i.e.
+  the input for such would generally be
+  `c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')`. Any or all of
+  the defaults are available. The default `''` and this will result in
+  all of the variables in the netCDF file and provided by
+  `rownames(AWAPer::file.summary(ncdfFilename))`.
 
 - locations:
 
@@ -118,7 +91,7 @@ extractCatchmentData(
   spatial spread in each variable. If `NA` or `""` and `locations` is a
   polygon, then the spatial data is returned. The default is `var`.
 
-- interpMethod:
+- interp.method:
 
   character string defining the method for interpolating the gridded
   data (see
@@ -126,6 +99,36 @@ extractCatchmentData(
   The options are: `'simple'`, `'bilinear'` and `''`. The default is
   `''`. This will set the interpolation to `'simple'` when `locations`
   is a polygon(s) and to `'bilinear'` when `locations` are points.
+
+- missing.method:
+
+  three character vector for the settings to fill gaps in the source
+  data. The three inputs control the following. \# 1) the infilling of
+  small holes in the source grids using focal(), which takes the mean of
+  the non-NA surrounding grid cells. The user input controls the maximum
+  hole size filled, in units of number of grid cells. Where the hole is
+  greater than the input, a gap within the hole will remain. The default
+  maximum hole size infilled is 5x5 grid cells. 2) Gaps that remain
+  after the hole infilling, or time steps with no observations, are
+  interpolated over time. Only gaps with observations prior to the gap
+  are interpolated. The interpolation method is user-defined and
+  includes `'constant'`, `'linear'`, `'fmm'`, `'periodic'`, `'natural'`,
+  `'monoH.FC'` and `'hyman'`. The default is `'linear'`. See
+  [`approx`](https://rdrr.io/r/stats/approxfun.html) and
+  [`splinefun`](https://rdrr.io/r/stats/splinefun.html) for details. 3)
+  Gaps that remain (often due to the extraction date being prior to the
+  start of the observation record of a variable) are estimated from,
+  say, the mean for each day of the year. Specifically, the extracted
+  observed data is allocated to each calender day. If, say, there are
+  ten years of daily data then each day of the year will have ten
+  observations. All gaps of the same corresponding calender day will
+  then be assigned a value from a user-defined function from these
+  observations (NB: when only one observed value exists for the day,
+  then the observed value is returned). The default function is `mean`.
+  Other standard functions (e.g. `median`) or user defined functions can
+  be used. The default for this input is `c('5', 'linear', 'mean')`. All
+  gap filling method can be turned off with the input `c('0', '', '')`,
+  which is useful to identify the interpolated data points.
 
 - ET.function:
 
@@ -141,14 +144,25 @@ extractCatchmentData(
   [`ET.MortonCRWE`](https://rdrr.io/pkg/Evapotranspiration/man/ET.MortonCRWE.html),
   [`ET.Turc`](https://rdrr.io/pkg/Evapotranspiration/man/ET.Turc.html).
   Default is
-  [`ET.MortonCRAE`](https://rdrr.io/pkg/Evapotranspiration/man/ET.MortonCRAE.html).
+  [`ET.MortonCRAE`](https://rdrr.io/pkg/Evapotranspiration/man/ET.MortonCRAE.html)
+  i.e. the complementary relationship for areal evapotranspiration .
+
+- ET.DEM.res:
+
+  is the zoom resolution for the land surface elevation and is required
+  to calculate the ET. `elevatr` package is used to extract elevation
+  (metres) from AWS Open Data Terrain Tiles. This input controls the
+  zoom resolution. Higher values increase accuracy, but are
+  significantly slower. See details. Default is 10.
 
 - ET.Mortons.est:
 
   character string for the type of Morton's ET estimate. For
   `ET.MortonCRAE`, the options are `potential ET`,`wet areal ET` or
   `actual areal ET`. For `ET.MortonCRWE`, the options are `potential ET`
-  or `shallow lake ET`. The default is `potential ET`.
+  or `shallow lake ET`. The default is `wet areal ET`, which when
+  `ET.function = 'ET.MortonCRAE'` it provides an estimate of the wet
+  areal potential evapotranspiration.
 
 - ET.Turc.humid:
 
@@ -247,11 +261,11 @@ the estimates of ET prior to 1990.
 Some measures of ET require land surface elevation. Here, elevation at
 the centre of each 0.05 degree grid cell is obtained using the `elevatr`
 package, which here uses data from the Amazon Web Service AWS Open Data
-Terrain Tiles. The data sources change with the user set `DEM.res` zoom.
-The options are 1 to 15. The default of 10 is reasonably computationally
-efficient and has a resolution of about 108 m, with is acceptable given
-the 0.05 degree resolution of the BOM source data grids equates to about
-5 km x 5 km. For details see
+Terrain Tiles. The data sources change with the user set `ET.DEM.res`
+zoom. The options are 1 to 15. The default of 10 is reasonably
+computationally efficient and has a resolution of about 108 m, with is
+acceptable given the 0.05 degree resolution of the BOM source data grids
+equates to about 5 km x 5 km. For details see
 <https://github.com/tilezen/joerd/blob/master/docs/data-sources.md>
 
 Also, when "locations" is points (not polygons), then the netCDF grids
@@ -270,7 +284,6 @@ for building the NetCDF files of daily climate data.
 
 ``` r
 # The example shows how to extract and save data.
-# For an additional example see \url{https://github.com/peterson-tim-j/AWAPer/blob/master/README.md}
 #---------------------------------------
 library(sp)
 
@@ -279,28 +292,29 @@ library(sp)
 startDate = as.Date("2000-01-01","%Y-%m-%d")
 endDate = as.Date("2000-01-14","%Y-%m-%d")
 
-# Set names for netCDF files.
+# Set names for netCDF file.
 ncdfFilename = tempfile(fileext='.nc')
-ncdfSolarFilename = tempfile(fileext='.nc')
 
 # Build netCDF grids and over a defined time period.
 # Only precip data is to be added to the netCDF files.
 # This is because the URLs for the other variables are set to zero.
 # \donttest{
-file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
-             ncdfSolarFilename=ncdfSolarFilename,
-             updateFrom=startDate, updateTo=endDate,
-             urlTmin=NA, urlTmax=NA, urlVprp=NA, urlSolarrad=NA)
-#> Starting to build both netCDF files.
-#> ... Testing downloading of AWAP precip. grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/docs/reference/precip.20000101.grid.gz
-#> ... Building AWAP netcdf file.
-#>     NetCDF data will be updated from  2000-01-01  to  2000-01-14
-#> ... Downloading non-solar data and importing to netcdf file:
-#> Warning: Note, the solar radiation data netCDF file will not be built or updated.
+file.name = makeNetCDF_file(ncdfFilename=ncdfFilename,
+             updateFrom=startDate,
+             updateTo=endDate,
+             vars = c('precip'))
+#> ... Testing downloading of each variable.
+#>     Testing precip grid data.
+#> ... NetCDF file will be updated as follows:
+#>        - New variables to add: precip  
+#>        - Existing variables to modify: (none)
+#>        - Data will be updated from  2000-01-01  to  2000-01-14
+#> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:12
+#> Summary of time points successfully imported (and errors).
+#>        Imported Errors
+#> precip       14      0
+#> Total run time (DD:HH:MM:SS): 00:00:00:11
 
 # Load example catchment boundaries and remove all but the first.
 # Note, this is done only to speed up the example runtime.
@@ -309,20 +323,22 @@ catchments = catchments[1,]
 
 # Extract daily precip. data (not Tmin, Tmax, VPD, ET).
 # Note, the input "locations" can also be a file to a ESRI shape file.
-climateData = extractCatchmentData(ncdfFilename=file.names$ncdfFilename,
-              ncdfSolarFilename=file.names$ncdfSolarFilename,
-              extractFrom=startDate, extractTo=endDate,
-              getTmin = FALSE, getTmax = FALSE, getVprp = FALSE,
-              getSolarrad = FALSE, getET = FALSE,
+climateData = extractCatchmentData(ncdfFilename=file.name,
+              extractFrom=startDate,
+              extractTo=endDate,
+              vars = c('precip'),
               locations=catchments,
               temporal.timestep = 'daily')
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2000-01-01 to 2000-01-14
+#>     NetCDF climate data exists from 2000-01-01 to 2000-01-14
 #>     Data will be extracted from  2000-01-01  to  2000-01-14  at  1  locations 
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Starting to extract data across all locations:
-#> ... Calculating area weighted daily data.
+#> ... Building catchment weights for each grid.
+#> Loading required namespace: ncdf4
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
 #> Total run time (DD:HH:MM:SS): 00:00:00:04
 
@@ -334,6 +350,5 @@ climateDataVar = climateData$catchmentSpatial.var
 
 # Remove temp. files
 unlink(ncdfFilename)
-unlink(ncdfSolarFilename)
 # }
 ```

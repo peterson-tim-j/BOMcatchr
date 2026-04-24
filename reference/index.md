@@ -3,17 +3,14 @@
 ## All functions
 
 - [`catchments`](https://peterson-tim-j.github.io/AWAPer/reference/catchments.md)
-  : Example catchment boundary polygons.
-
+  : Example catchment boundaries.
 - [`extractCatchmentData()`](https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.md)
-  :
-
-  `extractCatchmentData` extracts catchment average climate data from
-  netCDF files containing Australian climate data.
-
-- [`getURLs()`](https://peterson-tim-j.github.io/AWAPer/reference/getURLs.md)
-  : Get default URLs for loading data.
-
+  : Extract data over catchment area and duration .
+- [`file.summary()`](https://peterson-tim-j.github.io/AWAPer/reference/file.summary.md)
+  : Summarise existing netCDF file.
+- [`get.variableSource()`](https://peterson-tim-j.github.io/AWAPer/reference/get.variableSource.md)
+  : Source data URLs and attributes.
 - [`makeNetCDF_file()`](https://peterson-tim-j.github.io/AWAPer/reference/makeNetCDF_file.md)
-  : Build netCDF files of the Bureau of Meteorology (Australia) national
-  gridded climate data.
+  : Build a netCDF file of climate data.
+- [`raingauge`](https://peterson-tim-j.github.io/AWAPer/reference/raingauge.md)
+  : Example rain gauge data.

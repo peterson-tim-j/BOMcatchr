@@ -7,9 +7,9 @@ ARCMAP ASCII grid file.
 
 ``` r
 get.ASCII.file.header(
-  data.type.label,
+  des.file.name,
+  ivar.file.ext,
   workingFolder,
-  datestring,
   remove.file = T
 )
 ```

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AWAPer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.50</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.00</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,9 +20,10 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/A_Make_data_grids.html">Make source data grids</a></li>
-    <li><a class="dropdown-item" href="../articles/B_Point_rainfall.html">Extract daily point precipitation</a></li>
-    <li><a class="dropdown-item" href="../articles/C_Catchment_avg_ET_rainfall.html">Extract daily area weighted potential PET and precipitation and map</a></li>
+    <li><a class="dropdown-item" href="../articles/B_Point_rainfall.html">Extract daily and monthly point precipitation</a></li>
+    <li><a class="dropdown-item" href="../articles/C_Catchment_avg_ET_rainfall.html">Extract daily area weighted PET and precipitation</a></li>
     <li><a class="dropdown-item" href="../articles/D_Catchment_avg_ET_types.html">Extract various measures of evapotranspiration</a></li>
+    <li><a class="dropdown-item" href="../articles/E_Water_year_catchment_rainfall.html">Extract water year area weighted precipitation</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -41,8 +42,18 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.60" id="awaper-0160">AWAPer 0.1.60<a class="anchor" aria-label="anchor" href="#awaper-0160"></a></h2>
+<ul><li><p>Major improvements to robustness and the data sources handled.</p></li>
+<li><p>All data is now stored with one netCDF files. This is achieved using netCDF groups.</p></li>
+<li><p>All source data attributes (e.g. url, time step, spatial datum) are now no longer hard coded, but rather supplied by get.variableSource(). This allows updating for source data information without package changes.</p></li>
+<li><p>Monthly source precipitation grids now handled (see [here] (<a href="https://www.bom.gov.au/climate/austmaps/about-agcd-maps.shtml" class="external-link uri">https://www.bom.gov.au/climate/austmaps/about-agcd-maps.shtml</a>) for details of monthly gridded data).</p></li>
+<li><p>Vignettes extended to better evaluate results against rain gauge data and demonstrate the new features.<br></p></li>
+<li><p>Stronger error handling of input dates and ET settings.</p></li>
+<li><p>Summary of build netcDF file now provided by file.summary()</p></li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.50" id="awaper-0150">AWAPer 0.1.50<a class="anchor" aria-label="anchor" href="#awaper-0150"></a></h2>
-<ul><li><p>Function again after being removed from CRAN because of BOM download issues! 🎉</p></li>
+<ul><li><p>Functional again after being removed from CRAN because of BOM download issues! 🎉</p></li>
 <li><p><a href="https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.html">extractCatchmentData</a> function modified to no longer require download of a digital elevation model (DEM) when calculating ET. Instead the <a href="https://cran.r-project.org/web/packages/elevatr/index.html" class="external-link">elevatr</a> package is used to download elevations from an Amazon Web Service.</p></li>
 <li>
 <p>Vignette:</p>
@@ -53,7 +64,8 @@
 <li><a href="https://peterson-tim-j.github.io/AWAPer/articles/D_Catchment_avg_ET_types.html">Extracting time-series ET area weighted data</a></li>
 </ul></li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

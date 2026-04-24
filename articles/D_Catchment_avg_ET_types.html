@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AWAPer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.50</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.00</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,9 +39,10 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/A_Make_data_grids.html">Make source data grids</a></li>
-    <li><a class="dropdown-item" href="../articles/B_Point_rainfall.html">Extract daily point precipitation</a></li>
-    <li><a class="dropdown-item" href="../articles/C_Catchment_avg_ET_rainfall.html">Extract daily area weighted potential PET and precipitation and map</a></li>
+    <li><a class="dropdown-item" href="../articles/B_Point_rainfall.html">Extract daily and monthly point precipitation</a></li>
+    <li><a class="dropdown-item" href="../articles/C_Catchment_avg_ET_rainfall.html">Extract daily area weighted PET and precipitation</a></li>
     <li><a class="dropdown-item" href="../articles/D_Catchment_avg_ET_types.html">Extract various measures of evapotranspiration</a></li>
+    <li><a class="dropdown-item" href="../articles/E_Water_year_catchment_rainfall.html">Extract water year area weighted precipitation</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -86,38 +87,35 @@ file names.</p>
 <code class="sourceCode R"><span><span class="va">date.from</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2010-01-01"</span>,<span class="st">"%Y-%m-%d"</span><span class="op">)</span></span>
 <span><span class="va">date.to</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2010-12-31"</span>,<span class="st">"%Y-%m-%d"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ncdfFilename</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.nc'</span><span class="op">)</span></span>
-<span><span class="va">ncdfSolarFilename</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.nc'</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">ncdfFilename</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.nc'</span><span class="op">)</span></span></code></pre></div>
 <p>Next, let’s make the data grids over this period.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/makeNetCDF_file.html">makeNetCDF_file</a></span><span class="op">(</span>ncdfFilename <span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                   ncdfSolarFilename <span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                   updateFrom <span class="op">=</span> <span class="va">date.from</span>,</span>
-<span>                   updateTo <span class="op">=</span> <span class="va">date.to</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Starting to build both netCDF files.</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP precip. grid</span></span>
-<span><span class="co">#&gt; ... Getting grid gemoetry from file.</span></span>
-<span><span class="co">#&gt; ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/precip.20000101.grid.gz</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP tmin grid</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP tmax grid</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP vapour pressure grid</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP solar grid</span></span>
-<span><span class="co">#&gt; ... Getting grid gemoetry from file.</span></span>
-<span><span class="co">#&gt; ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/solarrad.20000101.grid.gz</span></span>
-<span><span class="co">#&gt; ... Building AWAP netcdf file.</span></span>
-<span><span class="co">#&gt;     NetCDF data will be updated from  2010-01-01  to  2010-12-31</span></span>
-<span><span class="co">#&gt; ... Downloading non-solar data and importing to netcdf file:</span></span>
-<span><span class="co">#&gt; Syncing 365 days of data to netCDF file. The time point to be synched is: 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF Solar data will be updated from  2010-01-01  to  2010-12-31</span></span>
-<span><span class="co">#&gt; ... Downloading solar data and importing to netcdf file:</span></span>
-<span><span class="co">#&gt; Syncing 365 days of data to netCDF file. The time point to be synched is: 2010-12-31</span></span>
+<span>                   updateTo <span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                   vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'precip'</span>,<span class="st">'tmin'</span>, <span class="st">'tmax'</span>,</span>
+<span>                   <span class="st">'vprp'</span>, <span class="st">'solarrad'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span><span class="co">#&gt;     Testing tmin grid data.</span></span>
+<span><span class="co">#&gt;     Testing tmax grid data.</span></span>
+<span><span class="co">#&gt;     Testing vprp grid data.</span></span>
+<span><span class="co">#&gt;     Testing solarrad grid data.</span></span>
+<span><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span><span class="co">#&gt;        - New variables to add: precip  tmin  tmax  vprp  solarrad</span></span>
+<span><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
+<span><span class="co">#&gt;        - Data will be updated from  2010-01-01  to  2010-12-31</span></span>
+<span><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span><span class="co">#&gt; Data construction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:33:20</span></span>
-<span><span class="co">#&gt; $ncdfFilename</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpI6rj84/file68361f0e24dc.nc"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $ncdfSolarFilename</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpI6rj84/file6836371979fc.nc"</span></span></code></pre></div>
+<span><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span><span class="co">#&gt;          Imported Errors</span></span>
+<span><span class="co">#&gt; precip        365      0</span></span>
+<span><span class="co">#&gt; tmin          365      0</span></span>
+<span><span class="co">#&gt; tmax          365      0</span></span>
+<span><span class="co">#&gt; vprp          365      0</span></span>
+<span><span class="co">#&gt; solarrad      365      0</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:25:59</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmplLpB36/file2f9e544d08fd.nc"</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="load-a-catchment-boundary">Load a catchment boundary<a class="anchor" aria-label="anchor" href="#load-a-catchment-boundary"></a>
 </h2>
@@ -142,398 +140,379 @@ following commands change: <em>ET.function</em> , <em>ET.timestep</em>
 and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">climateData.ET.HargreavesSamani</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                                ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                                extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                                locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                                spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                                ET.function<span class="op">=</span><span class="st">'ET.HargreavesSamani'</span>,</span>
 <span>                                ET.timestep <span class="op">=</span> <span class="st">'daily'</span>,</span>
-<span>                                ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                                ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required namespace: sp</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; Loading required namespace: ncdf4</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:26</span></span>
 <span></span>
 <span><span class="va">climateData.ET.JensenHaise</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                                ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                                extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                                locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                                spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                                ET.function<span class="op">=</span><span class="st">'ET.JensenHaise'</span>,</span>
 <span>                                ET.timestep <span class="op">=</span> <span class="st">'daily'</span>,</span>
-<span>                                ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                                ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:44</span></span>
 <span></span>
 <span><span class="va">climateData.ET.Makkink</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                                ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                                extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>,<span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                                locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                                spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                                ET.function<span class="op">=</span><span class="st">'ET.Makkink'</span>,</span>
 <span>                                ET.timestep <span class="op">=</span> <span class="st">'daily'</span>,</span>
-<span>                                ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                                ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:44</span></span>
 <span></span>
 <span><span class="va">climateData.ET.McGuinnessBordne</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                               ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                               extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                               extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                               vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                               locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                               spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                               ET.function<span class="op">=</span><span class="st">'ET.McGuinnessBordne'</span>,</span>
 <span>                               ET.timestep <span class="op">=</span> <span class="st">'daily'</span>,</span>
-<span>                               ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                               ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:09</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:22</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRAE</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                               ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                               extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                               extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                               vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                               locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                               spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                               ET.function<span class="op">=</span><span class="st">'ET.MortonCRAE'</span>,</span>
 <span>                               ET.timestep <span class="op">=</span> <span class="st">'monthly'</span>,</span>
-<span>                               ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                               ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:06</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRAE.potentialET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                               ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                               extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                               extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                               vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                               locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                               spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                               ET.function<span class="op">=</span><span class="st">'ET.MortonCRAE'</span>,</span>
 <span>                               ET.timestep <span class="op">=</span> <span class="st">'monthly'</span>,</span>
 <span>                               ET.Mortons.est<span class="op">=</span><span class="st">'potential ET'</span>,</span>
-<span>                               ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                               ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:06</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRAE.wetarealET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                                ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                                extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                                locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                                spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                                ET.function<span class="op">=</span><span class="st">'ET.MortonCRAE'</span>,</span>
 <span>                                ET.timestep <span class="op">=</span> <span class="st">'monthly'</span>,</span>
 <span>                                ET.Mortons.est<span class="op">=</span><span class="st">'wet areal ET'</span>,</span>
-<span>                                ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                                ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:06</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRAE.actualarealET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                                 ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                                 extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                 extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                                 vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                                 locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                                 spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                                 ET.function<span class="op">=</span><span class="st">'ET.MortonCRAE'</span>,</span>
 <span>                                 ET.timestep <span class="op">=</span> <span class="st">'monthly'</span>,</span>
 <span>                                 ET.Mortons.est<span class="op">=</span><span class="st">'actual areal ET'</span>,</span>
-<span>                                 ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                                 ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:06</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRWE</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                                 ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                                 extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                 extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                                 vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                                 locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                                 spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                                 ET.function<span class="op">=</span><span class="st">'ET.MortonCRWE'</span>,</span>
 <span>                                 ET.timestep <span class="op">=</span> <span class="st">'monthly'</span>,</span>
-<span>                                 ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                                 ET.Mortons.est <span class="op">=</span> <span class="st">'potential ET'</span>,</span>
+<span>                                 ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:05</span></span>
 <span></span>
 <span><span class="va">climateData.ET.MortonCRWE.shallowLake</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                                 ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                                 extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                 extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                                 vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                                 locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                                 spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                                 ET.function<span class="op">=</span><span class="st">'ET.MortonCRWE'</span>,</span>
 <span>                                 ET.timestep <span class="op">=</span> <span class="st">'monthly'</span>,</span>
 <span>                                 ET.Mortons.est <span class="op">=</span> <span class="st">'shallow lake ET'</span>,</span>
-<span>                                 ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                                 ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:12</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:05</span></span>
 <span></span>
 <span><span class="va">climateData.ET.Turc</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
-<span>                                 ncdfSolarFilename<span class="op">=</span> <span class="va">ncdfSolarFilename</span>,</span>
 <span>                                 extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                 extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
+<span>                                 vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
 <span>                                 locations<span class="op">=</span><span class="va">catchments</span>,</span>
 <span>                                 spatial.function.name<span class="op">=</span><span class="st">'IQR'</span>,</span>
 <span>                                 ET.function<span class="op">=</span><span class="st">'ET.Turc'</span>,</span>
 <span>                                 ET.timestep <span class="op">=</span> <span class="st">'daily'</span>,</span>
-<span>                                 ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span>;</span>
+<span>                                 ET.constants<span class="op">=</span> <span class="va">constants</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Extraction data summary:</span></span>
-<span><span class="co">#&gt;     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31</span></span>
-<span><span class="co">#&gt;     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31</span></span>
+<span><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2010-12-31</span></span>
 <span><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations</span></span>
 <span><span class="co">#&gt;     WARNING: The extraction duration is &lt; 2 years and getET = TRUE.</span></span>
 <span><span class="co">#&gt;              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".</span></span>
 <span><span class="co">#&gt; Starting data extraction:</span></span>
-<span><span class="co">#&gt; ... Building catchment weights</span></span>
-<span><span class="co">#&gt; ... Extracted DEM elevations from AWS.</span></span>
+<span><span class="co">#&gt; ... Building catchment weights for each grid.</span></span>
+<span><span class="co">#&gt; ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).</span></span>
 <span><span class="co">#&gt; Mosaicing &amp; Projecting</span></span>
 <span><span class="co">#&gt; Note: Elevation units are in meters</span></span>
-<span><span class="co">#&gt; ... Starting to extract data across all locations:</span></span>
-<span><span class="co">#&gt; ... Calculating mean daily solar radiation &lt;1990-1-1</span></span>
-<span><span class="co">#&gt; ... Linearly interpolating gaps in daily solar.</span></span>
-<span><span class="co">#&gt; ... Calculating area weighted daily data.</span></span>
-<span><span class="co">#&gt;     Working on ET for location 1 of 2</span></span>
-<span><span class="co">#&gt;     Working on ET for location 2 of 2</span></span>
+<span><span class="co">#&gt; ... Starting to extract data across all variable and locations:</span></span>
+<span><span class="co">#&gt; ... Linearly interpolating gaps</span></span>
+<span><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
+<span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
+<span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:09</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:42</span></span></code></pre></div>
 <p>Next each estimate is plotted over time.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
-<span>            <span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
-<span>            <span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">ET_mm</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
+<code class="sourceCode R"><span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">Location.ID</span><span class="op">==</span><span class="fl">407214</span></span>
+<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
+<span>            <span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
+<span>            <span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.HargreavesSamani</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">et</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
 <span>            col<span class="op">=</span><span class="st">'black'</span>,lty<span class="op">=</span><span class="fl">1</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="fl">2010</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="fl">2010</span>,<span class="fl">12</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>            ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span>,type<span class="op">=</span><span class="st">'l'</span>, ylab<span class="op">=</span><span class="st">'ET [mm/d]'</span>,xlab<span class="op">=</span><span class="st">'Date'</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.JensenHaise</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.JensenHaise</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
-<span>            <span class="va">climateData.ET.JensenHaise</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
-<span>            <span class="va">climateData.ET.JensenHaise</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.JensenHaise</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">ET_mm</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
+<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.JensenHaise</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">Location.ID</span><span class="op">==</span><span class="fl">407214</span></span>
+<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.JensenHaise</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
+<span>            <span class="va">climateData.ET.JensenHaise</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
+<span>            <span class="va">climateData.ET.JensenHaise</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.JensenHaise</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">et</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
 <span>            col<span class="op">=</span><span class="st">'red'</span>,lty<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.Makkink</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.Makkink</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
-<span>            <span class="va">climateData.ET.Makkink</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
-<span>            <span class="va">climateData.ET.Makkink</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.Makkink</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">ET_mm</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
+<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.Makkink</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">Location.ID</span><span class="op">==</span><span class="fl">407214</span></span>
+<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.Makkink</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
+<span>            <span class="va">climateData.ET.Makkink</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
+<span>            <span class="va">climateData.ET.Makkink</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.Makkink</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">et</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
 <span>            col<span class="op">=</span><span class="st">'green'</span>,lty<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.McGuinnessBordne</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.McGuinnessBordne</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
-<span>            <span class="va">climateData.ET.McGuinnessBordne</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
-<span>            <span class="va">climateData.ET.McGuinnessBordne</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.McGuinnessBordne</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">ET_mm</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
+<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.McGuinnessBordne</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">Location.ID</span><span class="op">==</span><span class="fl">407214</span></span>
+<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.McGuinnessBordne</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
+<span>            <span class="va">climateData.ET.McGuinnessBordne</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
+<span>            <span class="va">climateData.ET.McGuinnessBordne</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.McGuinnessBordne</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">et</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
 <span>            col<span class="op">=</span><span class="st">'blue'</span>,lty<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.MortonCRAE.potentialET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.MortonCRAE.potentialET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
-<span>            <span class="va">climateData.ET.MortonCRAE.potentialET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
-<span>            <span class="va">climateData.ET.MortonCRAE.potentialET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.MortonCRAE.potentialET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">ET_mm</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
+<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.MortonCRAE.potentialET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">Location.ID</span><span class="op">==</span><span class="fl">407214</span></span>
+<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.MortonCRAE.potentialET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
+<span>            <span class="va">climateData.ET.MortonCRAE.potentialET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
+<span>            <span class="va">climateData.ET.MortonCRAE.potentialET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.MortonCRAE.potentialET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">et</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
 <span>            col<span class="op">=</span><span class="st">'black'</span>,lty<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.MortonCRAE.wetarealET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.MortonCRAE.wetarealET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
-<span>            <span class="va">climateData.ET.MortonCRAE.wetarealET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
-<span>            <span class="va">climateData.ET.MortonCRAE.wetarealET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.MortonCRAE.wetarealET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">ET_mm</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
+<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.MortonCRAE.wetarealET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">Location.ID</span><span class="op">==</span><span class="fl">407214</span></span>
+<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.MortonCRAE.wetarealET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
+<span>            <span class="va">climateData.ET.MortonCRAE.wetarealET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
+<span>            <span class="va">climateData.ET.MortonCRAE.wetarealET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.MortonCRAE.wetarealET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">et</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
 <span>            col<span class="op">=</span><span class="st">'red'</span>,lty<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.MortonCRAE.actualarealET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.MortonCRAE.actualarealET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
-<span>            <span class="va">climateData.ET.MortonCRAE.actualarealET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
-<span>            <span class="va">climateData.ET.MortonCRAE.actualarealET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.MortonCRAE.actualarealET</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">ET_mm</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
+<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.MortonCRAE.actualarealET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">Location.ID</span><span class="op">==</span><span class="fl">407214</span></span>
+<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.MortonCRAE.actualarealET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
+<span>            <span class="va">climateData.ET.MortonCRAE.actualarealET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
+<span>            <span class="va">climateData.ET.MortonCRAE.actualarealET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.MortonCRAE.actualarealET</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">et</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
 <span>            col<span class="op">=</span><span class="st">'green'</span>,lty<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.MortonCRWE</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.MortonCRWE</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
-<span>            <span class="va">climateData.ET.MortonCRWE</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
-<span>            <span class="va">climateData.ET.MortonCRWE</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.MortonCRWE</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">ET_mm</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
+<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.MortonCRWE</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">Location.ID</span><span class="op">==</span><span class="fl">407214</span></span>
+<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.MortonCRWE</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
+<span>            <span class="va">climateData.ET.MortonCRWE</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
+<span>            <span class="va">climateData.ET.MortonCRWE</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.MortonCRWE</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">et</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
 <span>            col<span class="op">=</span><span class="st">'blue'</span>,lty<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.MortonCRWE.shallowLake</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.MortonCRWE.shallowLake</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
-<span>            <span class="va">climateData.ET.MortonCRWE.shallowLake</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
-<span>            <span class="va">climateData.ET.MortonCRWE.shallowLake</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.MortonCRWE.shallowLake</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">ET_mm</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
+<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.MortonCRWE.shallowLake</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">Location.ID</span><span class="op">==</span><span class="fl">407214</span></span>
+<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.MortonCRWE.shallowLake</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
+<span>            <span class="va">climateData.ET.MortonCRWE.shallowLake</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
+<span>            <span class="va">climateData.ET.MortonCRWE.shallowLake</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.MortonCRWE.shallowLake</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">et</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
 <span>            col<span class="op">=</span><span class="st">'black'</span>,lty<span class="op">=</span><span class="fl">3</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.Turc</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">CatchID</span><span class="op">==</span><span class="fl">407214</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.Turc</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
-<span>            <span class="va">climateData.ET.Turc</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
-<span>            <span class="va">climateData.ET.Turc</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.Turc</span><span class="op">$</span><span class="va">catchmentTemporal.mean</span><span class="op">$</span><span class="va">ET_mm</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
+<span><span class="va">filt</span> <span class="op">=</span> <span class="va">climateData.ET.Turc</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">Location.ID</span><span class="op">==</span><span class="fl">407214</span></span>
+<span><span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ISOdatetime.html" class="external-link">ISOdate</a></span><span class="op">(</span><span class="va">climateData.ET.Turc</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">year</span>,</span>
+<span>            <span class="va">climateData.ET.Turc</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">month</span>,</span>
+<span>            <span class="va">climateData.ET.Turc</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">d</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>, <span class="va">climateData.ET.Turc</span><span class="op">$</span><span class="va">temporal.mean</span><span class="op">$</span><span class="va">et</span><span class="op">[</span><span class="va">filt</span><span class="op">]</span>,</span>
 <span>            col<span class="op">=</span><span class="st">'red'</span>,lty<span class="op">=</span><span class="fl">3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span>x<span class="op">=</span><span class="st">'topright'</span>, legend<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -545,12 +524,12 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span>  <span class="st">'Morton CRAE (wet areal ET)'</span>,</span>
 <span>  <span class="st">'Morton CRAE (actual areal ET)'</span>,</span>
 <span>  <span class="st">'Morton CRWE (PET)'</span>,</span>
-<span>  <span class="st">'Morton CRWE (shallowLake)'</span>,</span>
-<span>  <span class="st">'Turc (ref. crop, non-humid'</span><span class="op">)</span>,</span>
+<span>  <span class="st">'Morton CRWE (shallow Lake)'</span>,</span>
+<span>  <span class="st">'Turc (ref. crop, non-humid)'</span><span class="op">)</span>,</span>
 <span>  lty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">2</span>,<span class="fl">2</span>,<span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">3</span><span class="op">)</span>,</span>
 <span>  col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'black'</span>,<span class="st">'red'</span>,<span class="st">'green'</span>,<span class="st">'blue'</span>,<span class="st">'black'</span>,<span class="st">'red'</span>,<span class="st">'green'</span>,<span class="st">'blue'</span>,<span class="st">'black'</span>,<span class="st">'red'</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="D_Catchment_avg_ET_types_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" width="768"></p>
+<p><img src="D_Catchment_avg_ET_types_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="768"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

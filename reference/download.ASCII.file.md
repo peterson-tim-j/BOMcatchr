@@ -6,7 +6,15 @@ from a URL.
 ## Usage
 
 ``` r
-download.ASCII.file(url.string, data.type.label, workingFolder, datestring)
+download.ASCII.file(
+  url.string,
+  ivar.url.ext,
+  ivar.file.ext,
+  ivar.timestep,
+  data.type.label,
+  workingFolder,
+  datestring
+)
 ```
 
 ## Value

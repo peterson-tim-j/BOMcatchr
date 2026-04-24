@@ -18,40 +18,37 @@ date.from = as.Date("2010-01-01","%Y-%m-%d")
 date.to = as.Date("2010-12-31","%Y-%m-%d")
 
 ncdfFilename = tempfile(fileext='.nc')
-ncdfSolarFilename = tempfile(fileext='.nc')
 ```
 
 Next, let’s make the data grids over this period.
 
 ``` r
 makeNetCDF_file(ncdfFilename = ncdfFilename,
-                   ncdfSolarFilename = ncdfSolarFilename,
                    updateFrom = date.from,
-                   updateTo = date.to)
-#> Starting to build both netCDF files.
-#> ... Testing downloading of AWAP precip. grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/precip.20000101.grid.gz
-#> ... Testing downloading of AWAP tmin grid
-#> ... Testing downloading of AWAP tmax grid
-#> ... Testing downloading of AWAP vapour pressure grid
-#> ... Testing downloading of AWAP solar grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/solarrad.20000101.grid.gz
-#> ... Building AWAP netcdf file.
-#>     NetCDF data will be updated from  2010-01-01  to  2010-12-31
-#> ... Downloading non-solar data and importing to netcdf file:
-#> Syncing 365 days of data to netCDF file. The time point to be synched is: 2010-12-31
-#>     NetCDF Solar data will be updated from  2010-01-01  to  2010-12-31
-#> ... Downloading solar data and importing to netcdf file:
-#> Syncing 365 days of data to netCDF file. The time point to be synched is: 2010-12-31
+                   updateTo = date.to,
+                   vars = c('precip','tmin', 'tmax',
+                   'vprp', 'solarrad'))
+#> ... Testing downloading of each variable.
+#>     Testing precip grid data.
+#>     Testing tmin grid data.
+#>     Testing tmax grid data.
+#>     Testing vprp grid data.
+#>     Testing solarrad grid data.
+#> ... NetCDF file will be updated as follows:
+#>        - New variables to add: precip  tmin  tmax  vprp  solarrad
+#>        - Existing variables to modify: (none)
+#>        - Data will be updated from  2010-01-01  to  2010-12-31
+#> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:33:20
-#> $ncdfFilename
-#> [1] "/tmp/RtmpI6rj84/file68361f0e24dc.nc"
-#> 
-#> $ncdfSolarFilename
-#> [1] "/tmp/RtmpI6rj84/file6836371979fc.nc"
+#> Summary of time points successfully imported (and errors).
+#>          Imported Errors
+#> precip        365      0
+#> tmin          365      0
+#> tmax          365      0
+#> vprp          365      0
+#> solarrad      365      0
+#> Total run time (DD:HH:MM:SS): 00:00:25:59
+#> [1] "/tmp/RtmplLpB36/file2f9e544d08fd.nc"
 ```
 
 ## Load a catchment boundary
@@ -82,401 +79,382 @@ following commands change: *ET.function* , *ET.timestep* and
 
 ``` r
 climateData.ET.HargreavesSamani = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                ncdfSolarFilename= ncdfSolarFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
+                                vars = c('tmax', 'tmin', 'et'),
                                 locations=catchments,
                                 spatial.function.name='IQR',
                                 ET.function='ET.HargreavesSamani',
                                 ET.timestep = 'daily',
-                                ET.constants= constants);
+                                ET.constants= constants)
+#> Loading required namespace: sp
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> Loading required namespace: ncdf4
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:08
+#> Total run time (DD:HH:MM:SS): 00:00:00:26
 
 climateData.ET.JensenHaise = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                ncdfSolarFilename= ncdfSolarFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
+                                vars = c('tmax', 'tmin', 'solarrad', 'et'),
                                 locations=catchments,
                                 spatial.function.name='IQR',
                                 ET.function='ET.JensenHaise',
                                 ET.timestep = 'daily',
-                                ET.constants= constants);
+                                ET.constants= constants)
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:08
+#> Total run time (DD:HH:MM:SS): 00:00:00:44
 
 climateData.ET.Makkink = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                ncdfSolarFilename= ncdfSolarFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
+                                vars = c('tmax', 'tmin','solarrad', 'et'),
                                 locations=catchments,
                                 spatial.function.name='IQR',
                                 ET.function='ET.Makkink',
                                 ET.timestep = 'daily',
-                                ET.constants= constants);
+                                ET.constants= constants)
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:08
+#> Total run time (DD:HH:MM:SS): 00:00:00:44
 
 climateData.ET.McGuinnessBordne = extractCatchmentData(ncdfFilename= ncdfFilename,
-                               ncdfSolarFilename= ncdfSolarFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
+                               vars = c('tmax', 'tmin', 'et'),
                                locations=catchments,
                                spatial.function.name='IQR',
                                ET.function='ET.McGuinnessBordne',
                                ET.timestep = 'daily',
-                               ET.constants= constants);
+                               ET.constants= constants)
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:09
+#> Total run time (DD:HH:MM:SS): 00:00:00:22
 
 climateData.ET.MortonCRAE = extractCatchmentData(ncdfFilename= ncdfFilename,
-                               ncdfSolarFilename= ncdfSolarFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
+                               vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                locations=catchments,
                                spatial.function.name='IQR',
                                ET.function='ET.MortonCRAE',
                                ET.timestep = 'monthly',
-                               ET.constants= constants);
+                               ET.constants= constants)
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:12
+#> Total run time (DD:HH:MM:SS): 00:00:01:06
 
 climateData.ET.MortonCRAE.potentialET = extractCatchmentData(ncdfFilename= ncdfFilename,
-                               ncdfSolarFilename= ncdfSolarFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
+                               vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                locations=catchments,
                                spatial.function.name='IQR',
                                ET.function='ET.MortonCRAE',
                                ET.timestep = 'monthly',
                                ET.Mortons.est='potential ET',
-                               ET.constants= constants);
+                               ET.constants= constants)
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:12
+#> Total run time (DD:HH:MM:SS): 00:00:01:06
 
 climateData.ET.MortonCRAE.wetarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                ncdfSolarFilename= ncdfSolarFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
+                                vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                 locations=catchments,
                                 spatial.function.name='IQR',
                                 ET.function='ET.MortonCRAE',
                                 ET.timestep = 'monthly',
                                 ET.Mortons.est='wet areal ET',
-                                ET.constants= constants);
+                                ET.constants= constants)
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:12
+#> Total run time (DD:HH:MM:SS): 00:00:01:06
 
 climateData.ET.MortonCRAE.actualarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                 ncdfSolarFilename= ncdfSolarFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
+                                 vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                  locations=catchments,
                                  spatial.function.name='IQR',
                                  ET.function='ET.MortonCRAE',
                                  ET.timestep = 'monthly',
                                  ET.Mortons.est='actual areal ET',
-                                 ET.constants= constants);
+                                 ET.constants= constants)
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:12
+#> Total run time (DD:HH:MM:SS): 00:00:01:06
 
 climateData.ET.MortonCRWE = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                 ncdfSolarFilename= ncdfSolarFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
+                                 vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                  locations=catchments,
                                  spatial.function.name='IQR',
                                  ET.function='ET.MortonCRWE',
                                  ET.timestep = 'monthly',
-                                 ET.constants= constants);
+                                 ET.Mortons.est = 'potential ET',
+                                 ET.constants= constants)
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:12
+#> Total run time (DD:HH:MM:SS): 00:00:01:05
 
 climateData.ET.MortonCRWE.shallowLake = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                 ncdfSolarFilename= ncdfSolarFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
+                                 vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                  locations=catchments,
                                  spatial.function.name='IQR',
                                  ET.function='ET.MortonCRWE',
                                  ET.timestep = 'monthly',
                                  ET.Mortons.est = 'shallow lake ET',
-                                 ET.constants= constants);
+                                 ET.constants= constants)
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:12
+#> Total run time (DD:HH:MM:SS): 00:00:01:05
 
 climateData.ET.Turc = extractCatchmentData(ncdfFilename= ncdfFilename,
-                                 ncdfSolarFilename= ncdfSolarFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
+                                 vars = c('tmax', 'tmin', 'solarrad', 'et'),
                                  locations=catchments,
                                  spatial.function.name='IQR',
                                  ET.function='ET.Turc',
                                  ET.timestep = 'daily',
-                                 ET.constants= constants);
+                                 ET.constants= constants)
 #> Extraction data summary:
-#>     NetCDF non-solar radiation climate data exists from 2010-01-01 to 2010-12-31
-#>     NetCDF solar radiation data exists from 2010-01-01 to 2010-12-31
+#>     NetCDF climate data exists from 2010-01-01 to 2010-12-31
 #>     Data will be extracted from  2010-01-01  to  2010-12-31  at  2  locations
 #>     WARNING: The extraction duration is < 2 years and getET = TRUE.
 #>              Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".
 #> Starting data extraction:
-#> ... Building catchment weights
-#> ... Extracted DEM elevations from AWS.
+#> ... Building catchment weights for each grid.
+#> ... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).
 #> Mosaicing & Projecting
 #> Note: Elevation units are in meters
-#> ... Starting to extract data across all locations:
-#> ... Calculating mean daily solar radiation <1990-1-1
-#> ... Linearly interpolating gaps in daily solar.
-#> ... Calculating area weighted daily data.
-#>     Working on ET for location 1 of 2
-#>     Working on ET for location 2 of 2
+#> ... Starting to extract data across all variable and locations:
+#> ... Linearly interpolating gaps
+#> ... Backfilling dates prior to the start of observations
+#> ... Calculate daily ET at each grid cell.
+#> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:09
+#> Total run time (DD:HH:MM:SS): 00:00:00:42
 ```
 
 Next each estimate is plotted over time.
 
 ``` r
-filt = climateData.ET.HargreavesSamani$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.HargreavesSamani$catchmentTemporal.mean$year,
-            climateData.ET.HargreavesSamani$catchmentTemporal.mean$month,
-            climateData.ET.HargreavesSamani$catchmentTemporal.mean$day)
-plot(d[filt], climateData.ET.HargreavesSamani$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.HargreavesSamani$temporal.mean$Location.ID==407214
+d = ISOdate(climateData.ET.HargreavesSamani$temporal.mean$year,
+            climateData.ET.HargreavesSamani$temporal.mean$month,
+            climateData.ET.HargreavesSamani$temporal.mean$day)
+plot(d[filt], climateData.ET.HargreavesSamani$temporal.mean$et[filt],
             col='black',lty=1, xlim = c(ISOdate(2010,1,1), ISOdate(2010,12,1)),
             ylim=c(0, 30),type='l', ylab='ET [mm/d]',xlab='Date')
 
-filt = climateData.ET.JensenHaise$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.JensenHaise$catchmentTemporal.mean$year,
-            climateData.ET.JensenHaise$catchmentTemporal.mean$month,
-            climateData.ET.JensenHaise$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.JensenHaise$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.JensenHaise$temporal.mean$Location.ID==407214
+d = ISOdate(climateData.ET.JensenHaise$temporal.mean$year,
+            climateData.ET.JensenHaise$temporal.mean$month,
+            climateData.ET.JensenHaise$temporal.mean$day)
+lines(d[filt], climateData.ET.JensenHaise$temporal.mean$et[filt],
             col='red',lty=1)
 
-filt = climateData.ET.Makkink$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.Makkink$catchmentTemporal.mean$year,
-            climateData.ET.Makkink$catchmentTemporal.mean$month,
-            climateData.ET.Makkink$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.Makkink$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.Makkink$temporal.mean$Location.ID==407214
+d = ISOdate(climateData.ET.Makkink$temporal.mean$year,
+            climateData.ET.Makkink$temporal.mean$month,
+            climateData.ET.Makkink$temporal.mean$day)
+lines(d[filt], climateData.ET.Makkink$temporal.mean$et[filt],
             col='green',lty=1)
 
-filt = climateData.ET.McGuinnessBordne$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.McGuinnessBordne$catchmentTemporal.mean$year,
-            climateData.ET.McGuinnessBordne$catchmentTemporal.mean$month,
-            climateData.ET.McGuinnessBordne$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.McGuinnessBordne$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.McGuinnessBordne$temporal.mean$Location.ID==407214
+d = ISOdate(climateData.ET.McGuinnessBordne$temporal.mean$year,
+            climateData.ET.McGuinnessBordne$temporal.mean$month,
+            climateData.ET.McGuinnessBordne$temporal.mean$day)
+lines(d[filt], climateData.ET.McGuinnessBordne$temporal.mean$et[filt],
             col='blue',lty=1)
 
-filt = climateData.ET.MortonCRAE.potentialET$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.MortonCRAE.potentialET$catchmentTemporal.mean$year,
-            climateData.ET.MortonCRAE.potentialET$catchmentTemporal.mean$month,
-            climateData.ET.MortonCRAE.potentialET$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.MortonCRAE.potentialET$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.MortonCRAE.potentialET$temporal.mean$Location.ID==407214
+d = ISOdate(climateData.ET.MortonCRAE.potentialET$temporal.mean$year,
+            climateData.ET.MortonCRAE.potentialET$temporal.mean$month,
+            climateData.ET.MortonCRAE.potentialET$temporal.mean$day)
+lines(d[filt], climateData.ET.MortonCRAE.potentialET$temporal.mean$et[filt],
             col='black',lty=2)
 
-filt = climateData.ET.MortonCRAE.wetarealET$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.MortonCRAE.wetarealET$catchmentTemporal.mean$year,
-            climateData.ET.MortonCRAE.wetarealET$catchmentTemporal.mean$month,
-            climateData.ET.MortonCRAE.wetarealET$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.MortonCRAE.wetarealET$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.MortonCRAE.wetarealET$temporal.mean$Location.ID==407214
+d = ISOdate(climateData.ET.MortonCRAE.wetarealET$temporal.mean$year,
+            climateData.ET.MortonCRAE.wetarealET$temporal.mean$month,
+            climateData.ET.MortonCRAE.wetarealET$temporal.mean$day)
+lines(d[filt], climateData.ET.MortonCRAE.wetarealET$temporal.mean$et[filt],
             col='red',lty=2)
 
-filt = climateData.ET.MortonCRAE.actualarealET$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.MortonCRAE.actualarealET$catchmentTemporal.mean$year,
-            climateData.ET.MortonCRAE.actualarealET$catchmentTemporal.mean$month,
-            climateData.ET.MortonCRAE.actualarealET$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.MortonCRAE.actualarealET$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.MortonCRAE.actualarealET$temporal.mean$Location.ID==407214
+d = ISOdate(climateData.ET.MortonCRAE.actualarealET$temporal.mean$year,
+            climateData.ET.MortonCRAE.actualarealET$temporal.mean$month,
+            climateData.ET.MortonCRAE.actualarealET$temporal.mean$day)
+lines(d[filt], climateData.ET.MortonCRAE.actualarealET$temporal.mean$et[filt],
             col='green',lty=2)
 
-filt = climateData.ET.MortonCRWE$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.MortonCRWE$catchmentTemporal.mean$year,
-            climateData.ET.MortonCRWE$catchmentTemporal.mean$month,
-            climateData.ET.MortonCRWE$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.MortonCRWE$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.MortonCRWE$temporal.mean$Location.ID==407214
+d = ISOdate(climateData.ET.MortonCRWE$temporal.mean$year,
+            climateData.ET.MortonCRWE$temporal.mean$month,
+            climateData.ET.MortonCRWE$temporal.mean$day)
+lines(d[filt], climateData.ET.MortonCRWE$temporal.mean$et[filt],
             col='blue',lty=2)
 
-filt = climateData.ET.MortonCRWE.shallowLake$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.MortonCRWE.shallowLake$catchmentTemporal.mean$year,
-            climateData.ET.MortonCRWE.shallowLake$catchmentTemporal.mean$month,
-            climateData.ET.MortonCRWE.shallowLake$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.MortonCRWE.shallowLake$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.MortonCRWE.shallowLake$temporal.mean$Location.ID==407214
+d = ISOdate(climateData.ET.MortonCRWE.shallowLake$temporal.mean$year,
+            climateData.ET.MortonCRWE.shallowLake$temporal.mean$month,
+            climateData.ET.MortonCRWE.shallowLake$temporal.mean$day)
+lines(d[filt], climateData.ET.MortonCRWE.shallowLake$temporal.mean$et[filt],
             col='black',lty=3)
 
-filt = climateData.ET.Turc$catchmentTemporal.mean$CatchID==407214
-d = ISOdate(climateData.ET.Turc$catchmentTemporal.mean$year,
-            climateData.ET.Turc$catchmentTemporal.mean$month,
-            climateData.ET.Turc$catchmentTemporal.mean$day)
-lines(d[filt], climateData.ET.Turc$catchmentTemporal.mean$ET_mm[filt],
+filt = climateData.ET.Turc$temporal.mean$Location.ID==407214
+d = ISOdate(climateData.ET.Turc$temporal.mean$year,
+            climateData.ET.Turc$temporal.mean$month,
+            climateData.ET.Turc$temporal.mean$day)
+lines(d[filt], climateData.ET.Turc$temporal.mean$et[filt],
             col='red',lty=3)
 
 legend(x='topright', legend=c(
@@ -488,8 +466,8 @@ legend(x='topright', legend=c(
   'Morton CRAE (wet areal ET)',
   'Morton CRAE (actual areal ET)',
   'Morton CRWE (PET)',
-  'Morton CRWE (shallowLake)',
-  'Turc (ref. crop, non-humid'),
+  'Morton CRWE (shallow Lake)',
+  'Turc (ref. crop, non-humid)'),
   lty = c(1,1,1,1,2,2,2,2,3,3),
   col=c('black','red','green','blue','black','red','green','blue','black','red')
 )

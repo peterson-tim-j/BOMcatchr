@@ -1,97 +1,228 @@
 # Make source data grids
 
 ``` r
-library(AWAPer, warn.conflicts = FALSE)
+library(AWAPer)
 ```
 
-This example shows how to build the required data files and then update
-them.
+This example shows how to build the required data file and then update
+it.
 
 ## Make netCDF file
 
 This example shows the steps required to build the netCDF data grid
-files.
+file.
 
 First, let’s define the dates for the data grids. Here the data grids
 are created for data between the dates *updateTo* and *updateTo*. If the
 latter two dates were not input then data would be downloaded from
 1/1/1900 to yesterday.
 
+Note, in practice users often run *makeNetCDF_file* once to build the
+netCDF data file that contain all variables over the entire record
+length (which requires ~5GB disk storage) and then use the netCDF grids
+for multiple projects, rather than re-building the netCDF grids for each
+project.
+
 ``` r
-startDate = as.Date(Sys.Date()-15,"%Y-%m-%d")
-endDate = as.Date(Sys.Date()-5,"%Y-%m-%d")
+startDate <- as.Date(Sys.Date()-15,"%Y-%m-%d")
+endDate <- as.Date(Sys.Date()-5,"%Y-%m-%d")
 ```
 
 Next the file name for the netCDF grids need to be defined. Here we’ll
-just use temporary files. You should change this to a non-temporary file
-name and folder.
+just use a temporary file. You should change this to a non-temporary
+file name and folder.
 
 ``` r
-# Set names for netCDF files (in the system temp. directory).
-ncdfFilename = tempfile(fileext='.nc')
-ncdfSolarFilename = tempfile(fileext='.nc')
+ncdfFilename <- tempfile(fileext='.nc')
 ```
 
 Now we’re ready to download and build the netCDF grids.
 
-The netCDF data files contains grids of daily rainfall, temperature,
-vapour pressure deficit and solar radiation for all of Australia.
+The netCDF data file contains grids of daily rainfall, minimum and
+maximum temperature. Below, this will be updated to include vapour
+pressure and solar radiation for all of Australia.
 
 ``` r
-file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
-             ncdfSolarFilename=ncdfSolarFilename,
-             updateFrom=startDate, updateTo=endDate)
-#> Starting to build both netCDF files.
-#> ... Testing downloading of AWAP precip. grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/precip.20000101.grid.gz
-#> ... Testing downloading of AWAP tmin grid
-#> ... Testing downloading of AWAP tmax grid
-#> ... Testing downloading of AWAP vapour pressure grid
-#> ... Testing downloading of AWAP solar grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/solarrad.20000101.grid.gz
-#> ... Building AWAP netcdf file.
-#>     NetCDF data will be updated from  2025-11-24  to  2025-12-04
-#> ... Downloading non-solar data and importing to netcdf file:
-#>     NetCDF Solar data will be updated from  2025-11-24  to  2025-12-04
-#> ... Downloading solar data and importing to netcdf file:
+ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdfFilename,
+                updateFrom=startDate, updateTo=endDate,
+                vars = c('precip','tmin','tmax'))
+#> ... Testing downloading of each variable.
+#>     Testing precip grid data.
+#>     Testing tmin grid data.
+#>     Testing tmax grid data.
+#> ... NetCDF file will be updated as follows:
+#>        - New variables to add: precip  tmin  tmax
+#>        - Existing variables to modify: (none)
+#>        - Data will be updated from  2026-04-09  to  2026-04-19
+#> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:13
+#> Summary of time points successfully imported (and errors).
+#>        Imported Errors
+#> precip       11      0
+#> tmin         11      0
+#> tmax         11      0
+#> Total run time (DD:HH:MM:SS): 00:00:00:25
 ```
 
-## Update existing data grids
-
-Now that we’ve built the above files, the updating can be demonstrated.
-Here we’ll updating the data grids to one day ago.
-
-Often users run *makeNetCDF_file* once to build netCDF data files that
-contain all variables over the entire record length (which requires ~5GB
-disk storage) and then use the netCDFs grids for multiple projects,
-rather than re-building the netCDF for each project.
-
-Also, if *makeNetCDF_file* is run with the the file names pointing to
-existing files and *updateFrom=NA* then the netCDF files will be updated
-to yesterday.
+Now let’s get a summary of the netCDF file that we’ve created. Note that
+the output data.frame shows the expected variables over the expected
+date range.
 
 ``` r
-file.names = makeNetCDF_file(ncdfFilename=ncdfFilename,
-             ncdfSolarFilename=ncdfSolarFilename,
-             updateFrom=NA)
-#> Starting to update both netCDF files.
-#> ... Testing downloading of AWAP precip. grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/precip.20000101.grid.gz
-#> ... Testing downloading of AWAP tmin grid
-#> ... Testing downloading of AWAP tmax grid
-#> ... Testing downloading of AWAP vapour pressure grid
-#> ... Testing downloading of AWAP solar grid
-#> ... Getting grid gemoetry from file.
-#> ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/solarrad.20000101.grid.gz
-#>     NetCDF data will be updated from  2025-12-04  to  2025-12-07
-#> ... Downloading non-solar data and importing to netcdf file:
-#>     NetCDF Solar data will be updated from  2025-12-04  to  2025-12-07
-#> ... Downloading solar data and importing to netcdf file:
+summary.df <- AWAPer::file.summary(ncdffile.name)
+summary.df
+#>        group   var.string       from         to time.step
+#> precip grid1 grid1/precip 2026-04-09 2026-04-19      days
+#> tmin   grid1   grid1/tmin 2026-04-09 2026-04-19      days
+#> tmax   grid1   grid1/tmax 2026-04-09 2026-04-19      days
+#>                                    time.datum  units              ellipsoid.crs
+#> precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80
+#> tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80
+#> tmax   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80
+```
+
+## Update an existing variable
+
+Now that we’ve built the above file, the updating can be demonstrated.
+The BoM gridded data undergoes a detailed review and update process (see
+[https://www.bom.gov.au/climate/austmaps/about-rain-maps.shtml](https://peterson-tim-j.github.io/AWAPer/articles/here)
+and
+[https://www.bom.gov.au/climate/austmaps/update-schedule.shtml](https://peterson-tim-j.github.io/AWAPer/articles/here)
+). Hence, the netCDF grids that one may have built some time ago may be
+require updating with revised BoM data.
+
+The package allows for such updating between user defined dates. Here
+we’ll update the data between the dates defined prior. Also, note that
+is not defined. This will cause all variables in the original file to be
+updated. That said, individual variables can be updated.
+
+``` r
+ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+                updateFrom=startDate, updateTo=endDate)
+#> ... Testing downloading of each variable.
+#>     Testing precip grid data.
+#>     Testing tmin grid data.
+#>     Testing tmax grid data.
+#> ... NetCDF file will be updated as follows:
+#>        - New variables to add: (none)
+#>        - Existing variables to modify: precip  tmin  tmax
+#>        - Data will be updated from  2026-04-09  to  2026-04-19
+#> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:26
+#> Summary of time points successfully imported (and errors).
+#>        Imported Errors
+#> precip       11      0
+#> tmin         11      0
+#> tmax         11      0
+#> Total run time (DD:HH:MM:SS): 00:00:00:25
+```
+
+## Add a variable to existing data grids
+
+Here we’ll update the data grids to also include vapour pressure. Here
+the same date range will be used. Because the date range of the new
+variable equals the date range of the existing variables, only vapour
+pressure data is updated. This feature can be used to update the data of
+a single variable as required.
+
+``` r
+ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+                updateFrom=startDate, updateTo=endDate,
+                vars = c('vprp'))
+#> ... Testing downloading of each variable.
+#>     Testing vprp grid data.
+#>     Testing precip grid data.
+#>     Testing tmin grid data.
+#>     Testing tmax grid data.
+#> ... NetCDF file will be updated as follows:
+#>        - New variables to add: vprp
+#>        - Existing variables to modify: (none)
+#>        - Data will be updated from  2026-04-09  to  2026-04-19
+#> ... Downloading data for each variable and importing to netcdf file:
+#> Data construction FINISHED.
+#> Summary of time points successfully imported (and errors).
+#>      Imported Errors
+#> vprp       11      0
+#> Total run time (DD:HH:MM:SS): 00:00:00:10
+```
+
+Now let’s check that the file includes both the original three variable
+plus vapour pressure.
+
+``` r
+summary.df <- AWAPer::file.summary(ncdffile.name)
+summary.df
+#>        group   var.string       from         to time.step
+#> precip grid1 grid1/precip 2026-04-09 2026-04-19      days
+#> tmin   grid1   grid1/tmin 2026-04-09 2026-04-19      days
+#> tmax   grid1   grid1/tmax 2026-04-09 2026-04-19      days
+#> vprp   grid1   grid1/vprp 2026-04-09 2026-04-19      days
+#>                                    time.datum  units              ellipsoid.crs
+#> precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80
+#> tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80
+#> tmax   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80
+#> vprp   days since 1900-01-01 00:00:00.0 -0:00    hpa +proj=longlat +ellps=GRS80
+```
+
+## Add a variable to existing data grids and update other variables
+
+Now lets add solar radiation. Here an earlier start date will be used.
+However, because the date range of all variables within the netCDF file
+must be equal, the date range of the other variables must also be
+updated.
+
+``` r
+startDate <- startDate - 5
+```
+
+``` r
+ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+                updateFrom=startDate, updateTo=endDate,
+                vars = c('solarrad'))
+#> ... Testing downloading of each variable.
+#>     Testing solarrad grid data.
+#>     Testing precip grid data.
+#>     Testing tmin grid data.
+#>     Testing tmax grid data.
+#>     Testing vprp grid data.
+#> ... NetCDF file will be updated as follows:
+#>        - New variables to add: solarrad
+#>        - Existing variables to modify: precip  tmin  tmax  vprp
+#>        - Data will be updated from  2026-04-04  to  2026-04-19
+#> ... Downloading data for each variable and importing to netcdf file:
+#> Data construction FINISHED.
+#> Summary of time points successfully imported (and errors).
+#>          Imported Errors
+#> solarrad       16      0
+#> precip         16      0
+#> tmin           16      0
+#> tmax           16      0
+#> vprp           16      0
+#> Total run time (DD:HH:MM:SS): 00:00:00:58
+```
+
+Now let’s check that the file includes both the prior four variables
+plus solar radiation.
+
+``` r
+summary.df <- AWAPer::file.summary(ncdffile.name)
+summary.df
+#>          group     var.string       from         to time.step
+#> precip   grid1   grid1/precip 2026-04-04 2026-04-19      days
+#> tmin     grid1     grid1/tmin 2026-04-04 2026-04-19      days
+#> tmax     grid1     grid1/tmax 2026-04-04 2026-04-19      days
+#> vprp     grid1     grid1/vprp 2026-04-04 2026-04-19      days
+#> solarrad grid2 grid2/solarrad 2026-04-04 2026-04-19      days
+#>                                      time.datum  units
+#> precip   days since 1900-01-01 00:00:00.0 -0:00 mm/day
+#> tmin     days since 1900-01-01 00:00:00.0 -0:00  deg_C
+#> tmax     days since 1900-01-01 00:00:00.0 -0:00  deg_C
+#> vprp     days since 1900-01-01 00:00:00.0 -0:00    hpa
+#> solarrad days since 1900-01-01 00:00:00.0 -0:00 MJ/m^2
+#>                       ellipsoid.crs
+#> precip   +proj=longlat +ellps=GRS80
+#> tmin     +proj=longlat +ellps=GRS80
+#> tmax     +proj=longlat +ellps=GRS80
+#> vprp     +proj=longlat +ellps=GRS80
+#> solarrad +proj=longlat +ellps=GRS80
 ```

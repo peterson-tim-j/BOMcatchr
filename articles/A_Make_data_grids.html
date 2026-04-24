@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AWAPer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.50</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.00</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,9 +39,10 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/A_Make_data_grids.html">Make source data grids</a></li>
-    <li><a class="dropdown-item" href="../articles/B_Point_rainfall.html">Extract daily point precipitation</a></li>
-    <li><a class="dropdown-item" href="../articles/C_Catchment_avg_ET_rainfall.html">Extract daily area weighted potential PET and precipitation and map</a></li>
+    <li><a class="dropdown-item" href="../articles/B_Point_rainfall.html">Extract daily and monthly point precipitation</a></li>
+    <li><a class="dropdown-item" href="../articles/C_Catchment_avg_ET_rainfall.html">Extract daily area weighted PET and precipitation</a></li>
     <li><a class="dropdown-item" href="../articles/D_Catchment_avg_ET_types.html">Extract various measures of evapotranspiration</a></li>
+    <li><a class="dropdown-item" href="../articles/E_Water_year_catchment_rainfall.html">Extract water year area weighted precipitation</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -74,85 +75,203 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/peterson-tim-j/AWAPer" class="external-link">AWAPer</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p>This example shows how to build the required data files and then
-update them.</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/peterson-tim-j/AWAPer" class="external-link">AWAPer</a></span><span class="op">)</span></span></code></pre></div>
+<p>This example shows how to build the required data file and then
+update it.</p>
 <div class="section level2">
 <h2 id="make-netcdf-file">Make netCDF file<a class="anchor" aria-label="anchor" href="#make-netcdf-file"></a>
 </h2>
 <p>This example shows the steps required to build the netCDF data grid
-files.</p>
+file.</p>
 <p>First, let’s define the dates for the data grids. Here the data grids
 are created for data between the dates <em>updateTo</em> and
 <em>updateTo</em>. If the latter two dates were not input then data
 would be downloaded from 1/1/1900 to yesterday.</p>
+<p>Note, in practice users often run <em>makeNetCDF_file</em> once to
+build the netCDF data file that contain all variables over the entire
+record length (which requires ~5GB disk storage) and then use the netCDF
+grids for multiple projects, rather than re-building the netCDF grids
+for each project.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">startDate</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">15</span>,<span class="st">"%Y-%m-%d"</span><span class="op">)</span></span>
-<span><span class="va">endDate</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">5</span>,<span class="st">"%Y-%m-%d"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">startDate</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">15</span>,<span class="st">"%Y-%m-%d"</span><span class="op">)</span></span>
+<span><span class="va">endDate</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">5</span>,<span class="st">"%Y-%m-%d"</span><span class="op">)</span></span></code></pre></div>
 <p>Next the file name for the netCDF grids need to be defined. Here
-we’ll just use temporary files. You should change this to a
+we’ll just use a temporary file. You should change this to a
 non-temporary file name and folder.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Set names for netCDF files (in the system temp. directory).</span></span>
-<span><span class="va">ncdfFilename</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.nc'</span><span class="op">)</span></span>
-<span><span class="va">ncdfSolarFilename</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.nc'</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">ncdfFilename</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.nc'</span><span class="op">)</span></span></code></pre></div>
 <p>Now we’re ready to download and build the netCDF grids.</p>
-<p>The netCDF data files contains grids of daily rainfall, temperature,
-vapour pressure deficit and solar radiation for all of Australia.</p>
+<p>The netCDF data file contains grids of daily rainfall, minimum and
+maximum temperature. Below, this will be updated to include vapour
+pressure and solar radiation for all of Australia.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">file.names</span> <span class="op">=</span> <span class="fu"><a href="../reference/makeNetCDF_file.html">makeNetCDF_file</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
-<span>             ncdfSolarFilename<span class="op">=</span><span class="va">ncdfSolarFilename</span>,</span>
-<span>             updateFrom<span class="op">=</span><span class="va">startDate</span>, updateTo<span class="op">=</span><span class="va">endDate</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Starting to build both netCDF files.</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP precip. grid</span></span>
-<span><span class="co">#&gt; ... Getting grid gemoetry from file.</span></span>
-<span><span class="co">#&gt; ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/precip.20000101.grid.gz</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP tmin grid</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP tmax grid</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP vapour pressure grid</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP solar grid</span></span>
-<span><span class="co">#&gt; ... Getting grid gemoetry from file.</span></span>
-<span><span class="co">#&gt; ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/solarrad.20000101.grid.gz</span></span>
-<span><span class="co">#&gt; ... Building AWAP netcdf file.</span></span>
-<span><span class="co">#&gt;     NetCDF data will be updated from  2025-11-24  to  2025-12-04</span></span>
-<span><span class="co">#&gt; ... Downloading non-solar data and importing to netcdf file:</span></span>
-<span><span class="co">#&gt;     NetCDF Solar data will be updated from  2025-11-24  to  2025-12-04</span></span>
-<span><span class="co">#&gt; ... Downloading solar data and importing to netcdf file:</span></span>
+<code class="sourceCode R"><span><span class="va">ncdffile.name</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/makeNetCDF_file.html">makeNetCDF_file</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
+<span>                updateFrom<span class="op">=</span><span class="va">startDate</span>, updateTo<span class="op">=</span><span class="va">endDate</span>,</span>
+<span>                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'precip'</span>,<span class="st">'tmin'</span>,<span class="st">'tmax'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span><span class="co">#&gt;     Testing tmin grid data.</span></span>
+<span><span class="co">#&gt;     Testing tmax grid data.</span></span>
+<span><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span><span class="co">#&gt;        - New variables to add: precip  tmin  tmax</span></span>
+<span><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
+<span><span class="co">#&gt;        - Data will be updated from  2026-04-09  to  2026-04-19</span></span>
+<span><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span><span class="co">#&gt; Data construction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:13</span></span></code></pre></div>
+<span><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span><span class="co">#&gt;        Imported Errors</span></span>
+<span><span class="co">#&gt; precip       11      0</span></span>
+<span><span class="co">#&gt; tmin         11      0</span></span>
+<span><span class="co">#&gt; tmax         11      0</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:25</span></span></code></pre></div>
+<p>Now let’s get a summary of the netCDF file that we’ve created. Note
+that the output data.frame shows the expected variables over the
+expected date range.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">summary.df</span> <span class="op">&lt;-</span> <span class="fu">AWAPer</span><span class="fu">::</span><span class="fu"><a href="../reference/file.summary.html">file.summary</a></span><span class="op">(</span><span class="va">ncdffile.name</span><span class="op">)</span></span>
+<span><span class="va">summary.df</span></span>
+<span><span class="co">#&gt;        group   var.string       from         to time.step</span></span>
+<span><span class="co">#&gt; precip grid1 grid1/precip 2026-04-09 2026-04-19      days</span></span>
+<span><span class="co">#&gt; tmin   grid1   grid1/tmin 2026-04-09 2026-04-19      days</span></span>
+<span><span class="co">#&gt; tmax   grid1   grid1/tmax 2026-04-09 2026-04-19      days</span></span>
+<span><span class="co">#&gt;                                    time.datum  units              ellipsoid.crs</span></span>
+<span><span class="co">#&gt; precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80</span></span>
+<span><span class="co">#&gt; tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span>
+<span><span class="co">#&gt; tmax   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="update-existing-data-grids">Update existing data grids<a class="anchor" aria-label="anchor" href="#update-existing-data-grids"></a>
+<h2 id="update-an-existing-variable">Update an existing variable<a class="anchor" aria-label="anchor" href="#update-an-existing-variable"></a>
 </h2>
-<p>Now that we’ve built the above files, the updating can be
-demonstrated. Here we’ll updating the data grids to one day ago.</p>
-<p>Often users run <em>makeNetCDF_file</em> once to build netCDF data
-files that contain all variables over the entire record length (which
-requires ~5GB disk storage) and then use the netCDFs grids for multiple
-projects, rather than re-building the netCDF for each project.</p>
-<p>Also, if <em>makeNetCDF_file</em> is run with the the file names
-pointing to existing files and <em>updateFrom=NA</em> then the netCDF
-files will be updated to yesterday.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">file.names</span> <span class="op">=</span> <span class="fu"><a href="../reference/makeNetCDF_file.html">makeNetCDF_file</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
-<span>             ncdfSolarFilename<span class="op">=</span><span class="va">ncdfSolarFilename</span>,</span>
-<span>             updateFrom<span class="op">=</span><span class="cn">NA</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Starting to update both netCDF files.</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP precip. grid</span></span>
-<span><span class="co">#&gt; ... Getting grid gemoetry from file.</span></span>
-<span><span class="co">#&gt; ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/precip.20000101.grid.gz</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP tmin grid</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP tmax grid</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP vapour pressure grid</span></span>
-<span><span class="co">#&gt; ... Testing downloading of AWAP solar grid</span></span>
-<span><span class="co">#&gt; ... Getting grid gemoetry from file.</span></span>
-<span><span class="co">#&gt; ... Deleting /home/runner/work/AWAPer/AWAPer/vignettes/solarrad.20000101.grid.gz</span></span>
-<span><span class="co">#&gt;     NetCDF data will be updated from  2025-12-04  to  2025-12-07</span></span>
-<span><span class="co">#&gt; ... Downloading non-solar data and importing to netcdf file:</span></span>
-<span><span class="co">#&gt;     NetCDF Solar data will be updated from  2025-12-04  to  2025-12-07</span></span>
-<span><span class="co">#&gt; ... Downloading solar data and importing to netcdf file:</span></span>
+<p>Now that we’ve built the above file, the updating can be
+demonstrated. The BoM gridded data undergoes a detailed review and
+update process (see <a href="here">https://www.bom.gov.au/climate/austmaps/about-rain-maps.shtml</a>
+and <a href="here">https://www.bom.gov.au/climate/austmaps/update-schedule.shtml</a>
+). Hence, the netCDF grids that one may have built some time ago may be
+require updating with revised BoM data.</p>
+<p>The package allows for such updating between user defined dates. Here
+we’ll update the data between the dates defined prior. Also, note that
+is not defined. This will cause all variables in the original file to be
+updated. That said, individual variables can be updated.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ncdffile.name</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/makeNetCDF_file.html">makeNetCDF_file</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdffile.name</span>,</span>
+<span>                updateFrom<span class="op">=</span><span class="va">startDate</span>, updateTo<span class="op">=</span><span class="va">endDate</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span><span class="co">#&gt;     Testing tmin grid data.</span></span>
+<span><span class="co">#&gt;     Testing tmax grid data.</span></span>
+<span><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span><span class="co">#&gt;        - New variables to add: (none)</span></span>
+<span><span class="co">#&gt;        - Existing variables to modify: precip  tmin  tmax</span></span>
+<span><span class="co">#&gt;        - Data will be updated from  2026-04-09  to  2026-04-19</span></span>
+<span><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span><span class="co">#&gt; Data construction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:26</span></span></code></pre></div>
+<span><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span><span class="co">#&gt;        Imported Errors</span></span>
+<span><span class="co">#&gt; precip       11      0</span></span>
+<span><span class="co">#&gt; tmin         11      0</span></span>
+<span><span class="co">#&gt; tmax         11      0</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:25</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="add-a-variable-to-existing-data-grids">Add a variable to existing data grids<a class="anchor" aria-label="anchor" href="#add-a-variable-to-existing-data-grids"></a>
+</h2>
+<p>Here we’ll update the data grids to also include vapour pressure.
+Here the same date range will be used. Because the date range of the new
+variable equals the date range of the existing variables, only vapour
+pressure data is updated. This feature can be used to update the data of
+a single variable as required.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ncdffile.name</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/makeNetCDF_file.html">makeNetCDF_file</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdffile.name</span>,</span>
+<span>                updateFrom<span class="op">=</span><span class="va">startDate</span>, updateTo<span class="op">=</span><span class="va">endDate</span>,</span>
+<span>                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'vprp'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span><span class="co">#&gt;     Testing vprp grid data.</span></span>
+<span><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span><span class="co">#&gt;     Testing tmin grid data.</span></span>
+<span><span class="co">#&gt;     Testing tmax grid data.</span></span>
+<span><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span><span class="co">#&gt;        - New variables to add: vprp</span></span>
+<span><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
+<span><span class="co">#&gt;        - Data will be updated from  2026-04-09  to  2026-04-19</span></span>
+<span><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
+<span><span class="co">#&gt; Data construction FINISHED.</span></span>
+<span><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span><span class="co">#&gt;      Imported Errors</span></span>
+<span><span class="co">#&gt; vprp       11      0</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:10</span></span></code></pre></div>
+<p>Now let’s check that the file includes both the original three
+variable plus vapour pressure.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">summary.df</span> <span class="op">&lt;-</span> <span class="fu">AWAPer</span><span class="fu">::</span><span class="fu"><a href="../reference/file.summary.html">file.summary</a></span><span class="op">(</span><span class="va">ncdffile.name</span><span class="op">)</span></span>
+<span><span class="va">summary.df</span></span>
+<span><span class="co">#&gt;        group   var.string       from         to time.step</span></span>
+<span><span class="co">#&gt; precip grid1 grid1/precip 2026-04-09 2026-04-19      days</span></span>
+<span><span class="co">#&gt; tmin   grid1   grid1/tmin 2026-04-09 2026-04-19      days</span></span>
+<span><span class="co">#&gt; tmax   grid1   grid1/tmax 2026-04-09 2026-04-19      days</span></span>
+<span><span class="co">#&gt; vprp   grid1   grid1/vprp 2026-04-09 2026-04-19      days</span></span>
+<span><span class="co">#&gt;                                    time.datum  units              ellipsoid.crs</span></span>
+<span><span class="co">#&gt; precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80</span></span>
+<span><span class="co">#&gt; tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span>
+<span><span class="co">#&gt; tmax   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span>
+<span><span class="co">#&gt; vprp   days since 1900-01-01 00:00:00.0 -0:00    hpa +proj=longlat +ellps=GRS80</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="add-a-variable-to-existing-data-grids-and-update-other-variables">Add a variable to existing data grids and update other
+variables<a class="anchor" aria-label="anchor" href="#add-a-variable-to-existing-data-grids-and-update-other-variables"></a>
+</h2>
+<p>Now lets add solar radiation. Here an earlier start date will be
+used. However, because the date range of all variables within the netCDF
+file must be equal, the date range of the other variables must also be
+updated.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">startDate</span> <span class="op">&lt;-</span> <span class="va">startDate</span> <span class="op">-</span> <span class="fl">5</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ncdffile.name</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/makeNetCDF_file.html">makeNetCDF_file</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdffile.name</span>,</span>
+<span>                updateFrom<span class="op">=</span><span class="va">startDate</span>, updateTo<span class="op">=</span><span class="va">endDate</span>,</span>
+<span>                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'solarrad'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span><span class="co">#&gt;     Testing solarrad grid data.</span></span>
+<span><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span><span class="co">#&gt;     Testing tmin grid data.</span></span>
+<span><span class="co">#&gt;     Testing tmax grid data.</span></span>
+<span><span class="co">#&gt;     Testing vprp grid data.</span></span>
+<span><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span><span class="co">#&gt;        - New variables to add: solarrad</span></span>
+<span><span class="co">#&gt;        - Existing variables to modify: precip  tmin  tmax  vprp</span></span>
+<span><span class="co">#&gt;        - Data will be updated from  2026-04-04  to  2026-04-19</span></span>
+<span><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
+<span><span class="co">#&gt; Data construction FINISHED.</span></span>
+<span><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span><span class="co">#&gt;          Imported Errors</span></span>
+<span><span class="co">#&gt; solarrad       16      0</span></span>
+<span><span class="co">#&gt; precip         16      0</span></span>
+<span><span class="co">#&gt; tmin           16      0</span></span>
+<span><span class="co">#&gt; tmax           16      0</span></span>
+<span><span class="co">#&gt; vprp           16      0</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:58</span></span></code></pre></div>
+<p>Now let’s check that the file includes both the prior four variables
+plus solar radiation.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">summary.df</span> <span class="op">&lt;-</span> <span class="fu">AWAPer</span><span class="fu">::</span><span class="fu"><a href="../reference/file.summary.html">file.summary</a></span><span class="op">(</span><span class="va">ncdffile.name</span><span class="op">)</span></span>
+<span><span class="va">summary.df</span></span>
+<span><span class="co">#&gt;          group     var.string       from         to time.step</span></span>
+<span><span class="co">#&gt; precip   grid1   grid1/precip 2026-04-04 2026-04-19      days</span></span>
+<span><span class="co">#&gt; tmin     grid1     grid1/tmin 2026-04-04 2026-04-19      days</span></span>
+<span><span class="co">#&gt; tmax     grid1     grid1/tmax 2026-04-04 2026-04-19      days</span></span>
+<span><span class="co">#&gt; vprp     grid1     grid1/vprp 2026-04-04 2026-04-19      days</span></span>
+<span><span class="co">#&gt; solarrad grid2 grid2/solarrad 2026-04-04 2026-04-19      days</span></span>
+<span><span class="co">#&gt;                                      time.datum  units</span></span>
+<span><span class="co">#&gt; precip   days since 1900-01-01 00:00:00.0 -0:00 mm/day</span></span>
+<span><span class="co">#&gt; tmin     days since 1900-01-01 00:00:00.0 -0:00  deg_C</span></span>
+<span><span class="co">#&gt; tmax     days since 1900-01-01 00:00:00.0 -0:00  deg_C</span></span>
+<span><span class="co">#&gt; vprp     days since 1900-01-01 00:00:00.0 -0:00    hpa</span></span>
+<span><span class="co">#&gt; solarrad days since 1900-01-01 00:00:00.0 -0:00 MJ/m^2</span></span>
+<span><span class="co">#&gt;                       ellipsoid.crs</span></span>
+<span><span class="co">#&gt; precip   +proj=longlat +ellps=GRS80</span></span>
+<span><span class="co">#&gt; tmin     +proj=longlat +ellps=GRS80</span></span>
+<span><span class="co">#&gt; tmax     +proj=longlat +ellps=GRS80</span></span>
+<span><span class="co">#&gt; vprp     +proj=longlat +ellps=GRS80</span></span>
+<span><span class="co">#&gt; solarrad +proj=longlat +ellps=GRS80</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

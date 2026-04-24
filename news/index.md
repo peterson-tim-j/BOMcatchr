@@ -1,8 +1,31 @@
 # Changelog
 
+## AWAPer 0.1.60
+
+- Major improvements to robustness and the data sources handled.
+
+- All data is now stored with one netCDF files. This is achieved using
+  netCDF groups.
+
+- All source data attributes (e.g. url, time step, spatial datum) are
+  now no longer hard coded, but rather supplied by get.variableSource().
+  This allows updating for source data information without package
+  changes.
+
+- Monthly source precipitation grids now handled (see \[here\]
+  (<https://www.bom.gov.au/climate/austmaps/about-agcd-maps.shtml>) for
+  details of monthly gridded data).
+
+- Vignettes extended to better evaluate results against rain gauge data
+  and demonstrate the new features.  
+
+- Stronger error handling of input dates and ET settings.
+
+- Summary of build netcDF file now provided by file.summary()
+
 ## AWAPer 0.1.50
 
-- Function again after being removed from CRAN because of BOM download
+- Functional again after being removed from CRAN because of BOM download
   issues! 🎉
 
 - [extractCatchmentData](https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.html)

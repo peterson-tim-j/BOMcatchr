@@ -5,6 +5,7 @@
 <url><loc>https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/articles/D_Catchment_avg_ET_types.html</loc></url>
+<url><loc>https://peterson-tim-j.github.io/AWAPer/articles/E_Water_year_catchment_rainfall.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/articles/index.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/authors.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/index.html</loc></url>
@@ -12,10 +13,12 @@
 <url><loc>https://peterson-tim-j.github.io/AWAPer/reference/catchments.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/reference/download.ASCII.file.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.html</loc></url>
+<url><loc>https://peterson-tim-j.github.io/AWAPer/reference/file.summary.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/reference/get.ASCII.file.header.html</loc></url>
-<url><loc>https://peterson-tim-j.github.io/AWAPer/reference/getURLs.html</loc></url>
+<url><loc>https://peterson-tim-j.github.io/AWAPer/reference/get.variableSource.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/reference/index.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/reference/makeNetCDF_file.html</loc></url>
+<url><loc>https://peterson-tim-j.github.io/AWAPer/reference/raingauge.html</loc></url>
 <url><loc>https://peterson-tim-j.github.io/AWAPer/reference/readin.ASCII.file.html</loc></url>
 </urlset>
 

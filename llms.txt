@@ -87,20 +87,17 @@ Follow the steps below to download and install 7z.
 ## All functions
 
 - [`catchments`](https://peterson-tim-j.github.io/AWAPer/reference/catchments.md)
-  : Example catchment boundary polygons.
-
+  : Example catchment boundaries.
 - [`extractCatchmentData()`](https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.md)
-  :
-
-  `extractCatchmentData` extracts catchment average climate data from
-  netCDF files containing Australian climate data.
-
-- [`getURLs()`](https://peterson-tim-j.github.io/AWAPer/reference/getURLs.md)
-  : Get default URLs for loading data.
-
+  : Extract data over catchment area and duration .
+- [`file.summary()`](https://peterson-tim-j.github.io/AWAPer/reference/file.summary.md)
+  : Summarise existing netCDF file.
+- [`get.variableSource()`](https://peterson-tim-j.github.io/AWAPer/reference/get.variableSource.md)
+  : Source data URLs and attributes.
 - [`makeNetCDF_file()`](https://peterson-tim-j.github.io/AWAPer/reference/makeNetCDF_file.md)
-  : Build netCDF files of the Bureau of Meteorology (Australia) national
-  gridded climate data.
+  : Build a netCDF file of climate data.
+- [`raingauge`](https://peterson-tim-j.github.io/AWAPer/reference/raingauge.md)
+  : Example rain gauge data.
 
 # Articles
 
@@ -112,31 +109,37 @@ Follow the steps below to download and install 7z.
   This vignette shows how to build the netCDF data file and then update
   it to new start and end dates.
 
-- [Gettings started with
-  AWAPer](https://peterson-tim-j.github.io/AWAPer/articles/AWAPer.md):
+- [Getting
+  started](https://peterson-tim-j.github.io/AWAPer/articles/AWAPer.md):
 
   This vignette outlines the key steps of building the netCDF data and
   then extracting data.
 
-- [Extract daily point
+- [Extract daily and monthly point
   precipitation](https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.md):
 
-  This vignette shows how to build a netCDF AWAP data file and then
-  extract the point precipitation data at a few locations over a usr
-  defined period. The extracted data is then compared with precipitation
-  gauge data.
+  This vignette shows how to build the netCDF data file and then extract
+  the point daily and monthly precipitation data at a few locations over
+  a user defined period. The extracted data is then compared with
+  precipitation gauge data at a daily and monthly time step.
 
-- [Extract daily area weighted potential PET and precipitation and
-  map](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.md):
+- [Extract daily area weighted PET and
+  precipitation](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.md):
 
   This vignette shows how to build the netCDF data file and then extract
   the area weighted PET and precipitation data for a catchment over a
   user defined period. The errors introduced from not using area
-  weighted methods (e.g centrod) are then demonstrated. output:
-  rmarkdown::html_vignette
+  weighted methods (e.g centroid) are then demonstrated.
 
 - [Extract various measures of
   evapotranspiration](https://peterson-tim-j.github.io/AWAPer/articles/D_Catchment_avg_ET_types.md):
 
   This vignette shows how to estimate various measures of the area
   weighted evapotranspiration.
+
+- [Extract water year area weighted
+  precipitation](https://peterson-tim-j.github.io/AWAPer/articles/E_Water_year_catchment_rainfall.md):
+
+  This vignette shows how to build the netCDF data file and then extract
+  user defined water year area weighted precipitation data for a
+  catchment.

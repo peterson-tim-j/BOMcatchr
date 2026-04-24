@@ -1,4 +1,4 @@
-# Gettings started with AWAPer
+# Getting started
 
 ## Introduction
 
