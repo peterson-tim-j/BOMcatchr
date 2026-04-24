@@ -1,3 +1,7 @@
+# BOMcatchr - 0.2.10
+
+* First release of renamed package to BOMcatchr
+
 # AWAPer 0.2.00
 
 * Final version of AWAPer before function names changed from that published in the paper.  
