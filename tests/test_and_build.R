@@ -53,7 +53,7 @@ file.rename(from = 'doc/', to = 'inst/doc')
 
 # Update github.io page using pkgdown()
 usethis::use_pkgdown_github_pages()
-pkgdown::build_site()
+pkgdown::build_site(  lazy = T)
 
 # Build the package for CRAN
 devtools::build(".")
