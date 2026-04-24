@@ -1,5 +1,5 @@
 #'
-#' \code{extractCatchmentData} extracts catchment average climate data from netCDF files containing Australian climate data.
+#' Extract data over catchment area and duration .
 #'
 #' @description
 #' extractCatchmentData extracts the AWAP climate data for each point or polygon. For the latter, either the daily spatial mean and variance (or user defined function) of

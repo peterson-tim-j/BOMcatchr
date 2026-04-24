@@ -2,7 +2,7 @@
 % Please edit documentation in R/extractCatchmentData.R
 \name{extractCatchmentData}
 \alias{extractCatchmentData}
-\title{\code{extractCatchmentData} extracts catchment average climate data from netCDF files containing Australian climate data.}
+\title{Extract data over catchment area and duration .}
 \usage{
 extractCatchmentData(
   ncdfFilename = file.path(getwd(), "AWAP.nc"),

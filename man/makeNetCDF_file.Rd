@@ -2,7 +2,7 @@
 % Please edit documentation in R/makeNetCDF_file.R
 \name{makeNetCDF_file}
 \alias{makeNetCDF_file}
-\title{Build a netCDF file of the Bureau of Meteorology (Australia) national gridded climate data.}
+\title{Build a netCDF file of climate data.}
 \usage{
 makeNetCDF_file(
   ncdfFilename = file.path(getwd(), "AWAP.nc"),

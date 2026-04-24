@@ -1,4 +1,4 @@
-#' Build a netCDF file of the Bureau of Meteorology (Australia) national gridded climate data.
+#' Build a netCDF file of climate data.
 #'
 #' \code{makeNetCDF_file} builds one netCDF file containing Australian climate data.
 #'
