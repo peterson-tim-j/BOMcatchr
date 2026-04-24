@@ -9,7 +9,7 @@
 ^pkgdown$
 ^doc$
 ^Meta$
-AWAPer.pdf
+BOMcatchr.pdf
 test_and_build.R
 NEWS.md
 NEWS.html

@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(AWAPer)
+library(BOMcatchr)
 
-test_check("AWAPer")
+test_check("BOMcatchr")

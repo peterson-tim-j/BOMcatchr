@@ -1,4 +1,4 @@
-citHeader("To cite AWAPer in publications, please use:")
+citHeader("To cite BOMcatchr in publications, please use:")
 
 citEntry(entry = "article",
   author  = "T. J. Peterson, C. Wasko, M. Saft and M. Peel",

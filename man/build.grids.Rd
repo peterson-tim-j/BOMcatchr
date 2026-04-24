@@ -67,7 +67,7 @@ derived from this function. To not build or update a variable, set its respectiv
 }
 \examples{
 # The example shows how to build the netCDF data cubes.
-# For an additional example see \url{https://github.com/peterson-tim-j/AWAPer/blob/master/README.md}
+# For an additional example see \url{https://github.com/peterson-tim-j/BOMcatchr/blob/master/README.md}
 #---------------------------------------
 
 # Set dates for building netCDFs and extracting data from 15 to 5 days ago.

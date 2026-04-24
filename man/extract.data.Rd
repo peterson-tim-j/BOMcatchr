@@ -38,7 +38,7 @@ The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'precip
 calculated from the available gridded data (see \code{ET.} inputs below). To calculate the ET, all of the required inputs for the calculation
 ET must also be extracted (i.e. the input for such would generally be \code{c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')}.
 Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
-provided by \code{rownames(AWAPer::grid.summary(ncdfFilename))}.}
+provided by \code{rownames(BOMcatchr::grid.summary(ncdfFilename))}.}
 
 \item{locations}{is either the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
 already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS 80, and the first column must be a unique ID.}

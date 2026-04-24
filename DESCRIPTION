@@ -1,4 +1,4 @@
-Package: AWAPer
+Package: BOMcatchr
 Type: Package
 Title: Catchment Area Weighted Climate Data Anywhere in Australia
 Version: 0.2.00
@@ -29,8 +29,8 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
 VignetteBuilder: knitr
-BugReports: https://github.com/peterson-tim-j/AWAPer/issues
-URL: https://github.com/peterson-tim-j/AWAPer, https://peterson-tim-j.github.io/AWAPer/
+BugReports: https://github.com/peterson-tim-j/BOMcatchr/issues
+URL: https://github.com/peterson-tim-j/BOMcatchr, https://peterson-tim-j.github.io/BOMcatchr/
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

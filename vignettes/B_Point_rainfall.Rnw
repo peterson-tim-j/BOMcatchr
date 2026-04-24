@@ -18,7 +18,7 @@ options(tibble.print_min = 4L, tibble.print_max = 4L)
 ```
 
 ```{r setup}
-library(AWAPer)
+library(BOMcatchr)
 ```
 This example shows how to build the required data files and then extract the daily rainfall at two sites. Here, one of the sites is at a rainfall gauge and the results are compared against observations.
 

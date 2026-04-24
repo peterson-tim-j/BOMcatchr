@@ -28,7 +28,7 @@ test_that("netCDF grid can be created",
       # Test the netcdf files can be opened.
       expect_no_error(
         {
-          summary.df <- AWAPer::grid.summary(ncdfFilename)
+          summary.df <- BOMcatchr::grid.summary(ncdfFilename)
 
           summary.df
         },
@@ -53,7 +53,7 @@ test_that("netCDF grid can be created",
       # Test the netcdf files can be opened.
       expect_no_error(
         {
-          summary.df <- AWAPer::grid.summary(ncdfFilename)
+          summary.df <- BOMcatchr::grid.summary(ncdfFilename)
         },
         message='Testing opening of netCDF grids and reading summary info.'
       )
