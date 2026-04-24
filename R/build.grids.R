@@ -84,12 +84,6 @@ build.grids <- function(
   compressionLevel = 5,
   vars.sourceData = grid.sources() )  {
 
-  # To Update HTML documentationm:
-  # devtools::document()
-  # NOTE, to build pdf manual. For Windows install: install.packages("tinytex"):
-  # path <- find.package("AWAPer")
-  # system(paste(shQuote(file.path(R.home("bin"), "R")),"CMD", "Rd2pdf", shQuote(path)))
-
   # Get system time to estimate run time at the end.
   sys.start.time = Sys.time()
 
