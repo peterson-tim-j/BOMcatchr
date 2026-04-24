@@ -3,12 +3,12 @@
 \docType{data}
 \name{raingauge}
 \alias{raingauge}
-\title{Rain gauge 63005 data for 2010.}
+\title{Example rain gauge data.}
 \format{
 data.frame of 8 columns and 365 rows.
 }
 \source{
-Bureau of Meteorology, Australia. See https://www.bom.gov.au/climate/data/index.shtml
+Bureau of Meteorology, Australia. See \url{https://www.bom.gov.au/climate/data/index.shtml}
 }
 \usage{
 data("raingauge")
