@@ -2,12 +2,22 @@
 % Please edit documentation in R/get.variableSource.R
 \name{get.variableSource}
 \alias{get.variableSource}
-\title{Get default variable data and source URLs.}
+\title{Source data URLs and attributes.}
 \usage{
 get.variableSource()
 }
 \value{
-data.frame of variables, units, time step an URLs to data.
+data.frame of the source data location and properties required by the package:
+\itemize{
+ \item{\code{label}: string description of the variable,}
+ \item{\code{units}: string for units of the variable.}
+ \item{\code{time.step} : string for the time step of the data. \code{days} or \code{months} are accepted.}
+ \item{\code{data.URL} : string of URL to the source gridded data.}
+ \item{\code{data.file.extension} : string for the file extension of the downloaded compressed source data.}
+ \item{\code{data.file.format} : string for file extension to the file required within the downloaded file.}
+ \item{\code{ncdf.name} : string for the name of the variable once input to the package netCDF file.}
+ \item{\code{ellipsoid.crs} : string for Coordinate Reference System (CRS) for the gridded data ellipsoid.}
+}
 }
 \description{
 \code{get.variableSource} get available variables, units and URLs to BoM gridded data.
