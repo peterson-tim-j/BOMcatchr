@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Extract various measures of evapotranspiration • AWAPer</title>
+<title>Extract various measures of evapotranspiration • BOMcatchr</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -22,9 +22,9 @@
 
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html">AWAPer</a>
+    <a class="navbar-brand me-2" href="../index.html">BOMcatchr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.00</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,12 +33,13 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../articles/AWAPer.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/BOMcatchr.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/A_Make_data_grids.html">Make source data grids</a></li>
+    <li><a class="dropdown-item" href="../articles/AWAPer.html">Getting started</a></li>
     <li><a class="dropdown-item" href="../articles/B_Point_rainfall.html">Extract daily and monthly point precipitation</a></li>
     <li><a class="dropdown-item" href="../articles/C_Catchment_avg_ET_rainfall.html">Extract daily area weighted PET and precipitation</a></li>
     <li><a class="dropdown-item" href="../articles/D_Catchment_avg_ET_types.html">Extract various measures of evapotranspiration</a></li>
@@ -51,7 +52,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/peterson-tim-j/AWAPer/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/peterson-tim-j/BOMcatchr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -68,14 +69,14 @@
       <h1>Extract various measures of evapotranspiration</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/peterson-tim-j/AWAPer/blob/master/vignettes/D_Catchment_avg_ET_types.Rmd" class="external-link"><code>vignettes/D_Catchment_avg_ET_types.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/peterson-tim-j/BOMcatchr/blob/master/vignettes/D_Catchment_avg_ET_types.Rmd" class="external-link"><code>vignettes/D_Catchment_avg_ET_types.Rmd</code></a></small>
       <div class="d-none name"><code>D_Catchment_avg_ET_types.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/peterson-tim-j/AWAPer" class="external-link">AWAPer</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/peterson-tim-j/BOMcatchr" class="external-link">BOMcatchr</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>This example calculates and plot various estimates of
 evaportranspiration. Ten different estimates of area weighted
 evapotranspiration over one year at catchment 407214 (Victoria,
@@ -90,7 +91,7 @@ file names.</p>
 <span><span class="va">ncdfFilename</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.nc'</span><span class="op">)</span></span></code></pre></div>
 <p>Next, let’s make the data grids over this period.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/makeNetCDF_file.html">makeNetCDF_file</a></span><span class="op">(</span>ncdfFilename <span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/build.grids.html">build.grids</a></span><span class="op">(</span>ncdfFilename <span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                   updateFrom <span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                   updateTo <span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                   vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'precip'</span>,<span class="st">'tmin'</span>, <span class="st">'tmax'</span>,</span>
@@ -114,8 +115,8 @@ file names.</p>
 <span><span class="co">#&gt; tmax          365      0</span></span>
 <span><span class="co">#&gt; vprp          365      0</span></span>
 <span><span class="co">#&gt; solarrad      365      0</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:20:51</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpS9DECO/file2ecf3a710b82.nc"</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:21:55</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmpMa2Png/file2f2c3dc40163.nc"</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="load-a-catchment-boundary">Load a catchment boundary<a class="anchor" aria-label="anchor" href="#load-a-catchment-boundary"></a>
 </h2>
@@ -139,7 +140,7 @@ requires a set of constants, which are loaded as follows.</p>
 following commands change: <em>ET.function</em> , <em>ET.timestep</em>
 and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">climateData.ET.HargreavesSamani</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<code class="sourceCode R"><span><span class="va">climateData.ET.HargreavesSamani</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -166,9 +167,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:28</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:27</span></span>
 <span></span>
-<span><span class="va">climateData.ET.JensenHaise</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<span><span class="va">climateData.ET.JensenHaise</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -195,7 +196,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
 <span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:45</span></span>
 <span></span>
-<span><span class="va">climateData.ET.Makkink</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<span><span class="va">climateData.ET.Makkink</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>,<span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -220,9 +221,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:45</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:44</span></span>
 <span></span>
-<span><span class="va">climateData.ET.McGuinnessBordne</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<span><span class="va">climateData.ET.McGuinnessBordne</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                               extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                               extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                               vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -249,7 +250,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
 <span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:23</span></span>
 <span></span>
-<span><span class="va">climateData.ET.MortonCRAE</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<span><span class="va">climateData.ET.MortonCRAE</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                               extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                               extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                               vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -276,7 +277,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
 <span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:09</span></span>
 <span></span>
-<span><span class="va">climateData.ET.MortonCRAE.potentialET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<span><span class="va">climateData.ET.MortonCRAE.potentialET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                               extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                               extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                               vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -302,9 +303,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:09</span></span>
 <span></span>
-<span><span class="va">climateData.ET.MortonCRAE.wetarealET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<span><span class="va">climateData.ET.MortonCRAE.wetarealET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                                vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -330,9 +331,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:09</span></span>
 <span></span>
-<span><span class="va">climateData.ET.MortonCRAE.actualarealET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<span><span class="va">climateData.ET.MortonCRAE.actualarealET</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                 extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                 extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                                 vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -358,9 +359,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:09</span></span>
 <span></span>
-<span><span class="va">climateData.ET.MortonCRWE</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<span><span class="va">climateData.ET.MortonCRWE</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                 extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                 extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                                 vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -386,9 +387,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:09</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
 <span></span>
-<span><span class="va">climateData.ET.MortonCRWE.shallowLake</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<span><span class="va">climateData.ET.MortonCRWE.shallowLake</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                 extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                 extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                                 vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -416,7 +417,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
 <span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:08</span></span>
 <span></span>
-<span><span class="va">climateData.ET.Turc</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<span><span class="va">climateData.ET.Turc</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                                 extractFrom<span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                                 extractTo<span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                                 vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>

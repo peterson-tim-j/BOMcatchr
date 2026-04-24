@@ -1,4 +1,4 @@
-# *AWAPer* - an R-package for catchment-weighted climate data anywhere in Australia
+# *BOMcatchr* - an R-package for catchment-weighted climate data anywhere in Australia
 
 Getting rainfall and evaporation time-series data is an essential first
 step for many hydrological studies. Too often this requires the tedious
@@ -7,9 +7,9 @@ study catchment. Rarely is there a weather station inside the catchment,
 but even if there is then the spatial variability of rainfall and
 evaporation throughout the catchment must be ignores - and errors
 introduced (see example
-[here](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#point-versus-area-weighted-rainfall-deficit)).
-*AWAPer* eliminates these challenges by allowing efficient estimate of
-area weighted (i.e. catchment weighted) weather time-series data
+[here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#point-versus-area-weighted-rainfall-deficit)).
+*BOMcatchr* eliminates these challenges by allowing efficient estimate
+of area weighted (i.e. catchment weighted) weather time-series data
 anywhere in Australia and at any time step.
 
 Some of the features include:
@@ -17,16 +17,16 @@ Some of the features include:
 1.  Area weighted and point precipitation, minimum and maximum
     temperature, vapour pressure and solar radiation anywhere in
     Australia at any time-step. See examples
-    [here](https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.html)
+    [here](https://peterson-tim-j.github.io/BOMcatchr/articles/B_Point_rainfall.html)
     and
-    [here](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data).
+    [here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data).
 2.  Maps of catchment weather variables over time showing the spatial
     variability in precipitation and potential evapotranspiration (see
     examples
-    [here](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet))
+    [here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet))
 3.  Ten measures of area weighted and point evapotranspiration (see
     examples
-    [here](https://peterson-tim-j.github.io/AWAPer/articles/D_Catchment_avg_ET_types.html))
+    [here](https://peterson-tim-j.github.io/BOMcatchr/articles/D_Catchment_avg_ET_types.html))
     using the [Evaporation
     package](https://cran.r-project.org/web/packages/Evapotranspiration/index.html),
     implementing [McMahon et al,
@@ -38,13 +38,13 @@ The meteorological data is sourced from Australian Bureau of Meteorology
 building compressed netCDF grids from the BOM data. Users generally
 build the netCDF grids using all historic data and then update as
 required (see example
-[here](https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.html)).
+[here](https://peterson-tim-j.github.io/BOMcatchr/articles/A_Make_data_grids.html)).
 
 The package development was funded by the Victorian Government The
 Department of Environment, Land, Water and Planning [*Climate and Water
 Initiate*](https://www.water.vic.gov.au/climate-change/research/vicwaci).
 For details of the approach see the [function
-references](https://peterson-tim-j.github.io/AWAPer/reference/index.html)
+references](https://peterson-tim-j.github.io/BOMcatchr/reference/index.html)
 or the journal paper [*Peterson et
 al. (2020)*](https://doi.org/10.1002/hyp.13637).
 
@@ -54,13 +54,13 @@ The package will soon be submitted to the R library (i.e. CRAN). In the
 meantime, you can install it from github using the following R command:
 
 ``` r
-remotes::install_github("peterson-tim-j/AWAPer")
+remotes::install_github("peterson-tim-j/BOMcatchr")
 ```
 
 Once installed, browse the package examples using the R-command:
 
 ``` r
-browseVignettes("AWAPer")
+browseVignettes("BOMcatchr")
 ```
 
 # Windows System Requiements
@@ -86,17 +86,17 @@ Follow the steps below to download and install 7z.
 
 ## All functions
 
-- [`catchments`](https://peterson-tim-j.github.io/AWAPer/reference/catchments.md)
-  : Example catchment boundaries.
-- [`extractCatchmentData()`](https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.md)
-  : Extract data over catchment area and duration .
-- [`file.summary()`](https://peterson-tim-j.github.io/AWAPer/reference/file.summary.md)
-  : Summarise existing netCDF file.
-- [`get.variableSource()`](https://peterson-tim-j.github.io/AWAPer/reference/get.variableSource.md)
-  : Source data URLs and attributes.
-- [`makeNetCDF_file()`](https://peterson-tim-j.github.io/AWAPer/reference/makeNetCDF_file.md)
+- [`build.grids()`](https://peterson-tim-j.github.io/BOMcatchr/reference/build.grids.md)
   : Build a netCDF file of climate data.
-- [`raingauge`](https://peterson-tim-j.github.io/AWAPer/reference/raingauge.md)
+- [`catchments`](https://peterson-tim-j.github.io/BOMcatchr/reference/catchments.md)
+  : Example catchment boundaries.
+- [`extract.data()`](https://peterson-tim-j.github.io/BOMcatchr/reference/extract.data.md)
+  : Extract data over catchment area and duration .
+- [`grid.sources()`](https://peterson-tim-j.github.io/BOMcatchr/reference/grid.sources.md)
+  : Source data URLs and attributes.
+- [`grid.summary()`](https://peterson-tim-j.github.io/BOMcatchr/reference/grid.summary.md)
+  : Summarise existing netCDF file.
+- [`raingauge`](https://peterson-tim-j.github.io/BOMcatchr/reference/raingauge.md)
   : Example rain gauge data.
 
 # Articles
@@ -104,27 +104,33 @@ Follow the steps below to download and install 7z.
 ### All vignettes
 
 - [Make source data
-  grids](https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.md):
+  grids](https://peterson-tim-j.github.io/BOMcatchr/articles/A_Make_data_grids.md):
 
   This vignette shows how to build the netCDF data file and then update
   it to new start and end dates.
 
 - [Getting
-  started](https://peterson-tim-j.github.io/AWAPer/articles/AWAPer.md):
+  started](https://peterson-tim-j.github.io/BOMcatchr/articles/AWAPer.md):
 
   This vignette outlines the key steps of building the netCDF data and
   then extracting data.
 
 - [Extract daily and monthly point
-  precipitation](https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.md):
+  precipitation](https://peterson-tim-j.github.io/BOMcatchr/articles/B_Point_rainfall.md):
 
   This vignette shows how to build the netCDF data file and then extract
   the point daily and monthly precipitation data at a few locations over
   a user defined period. The extracted data is then compared with
   precipitation gauge data at a daily and monthly time step.
 
+- [Getting
+  started](https://peterson-tim-j.github.io/BOMcatchr/articles/BOMcatchr.md):
+
+  This vignette outlines the key steps of building the netCDF data and
+  then extracting data.
+
 - [Extract daily area weighted PET and
-  precipitation](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.md):
+  precipitation](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.md):
 
   This vignette shows how to build the netCDF data file and then extract
   the area weighted PET and precipitation data for a catchment over a
@@ -132,13 +138,13 @@ Follow the steps below to download and install 7z.
   weighted methods (e.g centroid) are then demonstrated.
 
 - [Extract various measures of
-  evapotranspiration](https://peterson-tim-j.github.io/AWAPer/articles/D_Catchment_avg_ET_types.md):
+  evapotranspiration](https://peterson-tim-j.github.io/BOMcatchr/articles/D_Catchment_avg_ET_types.md):
 
   This vignette shows how to estimate various measures of the area
   weighted evapotranspiration.
 
 - [Extract water year area weighted
-  precipitation](https://peterson-tim-j.github.io/AWAPer/articles/E_Water_year_catchment_rainfall.md):
+  precipitation](https://peterson-tim-j.github.io/BOMcatchr/articles/E_Water_year_catchment_rainfall.md):
 
   This vignette shows how to build the netCDF data file and then extract
   user defined water year area weighted precipitation data for a

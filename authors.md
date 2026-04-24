@@ -10,7 +10,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/peterson-tim-j/AWAPer/blob/master/inst/CITATION)
+[`inst/CITATION`](https://github.com/peterson-tim-j/BOMcatchr/blob/master/inst/CITATION)
 
 Peterson T. J., Wasko C., Saft M. and Peel M. (2020), AWAPer: An R
 package for area weighted catchment daily meteorological data anywhere

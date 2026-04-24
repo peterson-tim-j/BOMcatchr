@@ -14,7 +14,7 @@ Each of the steps is outlined below.
 ## Build netCDF data
 
 The netCDF data grids are created using the function
-[build.grids](https://peterson-tim-j.github.io/AWAPer/reference/build.grids.html).
+[build.grids](https://peterson-tim-j.github.io/BOMcatchr/reference/build.grids.html).
 This requires user input of the following:
 
 1.  *ncdfFilename* to define where the netCDF file should be created.
@@ -32,13 +32,13 @@ This requires user input of the following:
     that variable to not be included in the netCDF data grids.
 
 See
-[here](https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.html)
+[here](https://peterson-tim-j.github.io/BOMcatchr/articles/A_Make_data_grids.html)
 for an example of how to build your first netCDF data file.
 
 ## Extract weather data
 
 Once the netCDF data grids are created, extract data using the
-[extract.data](https://peterson-tim-j.github.io/AWAPer/reference/extract.data.html)
+[extract.data](https://peterson-tim-j.github.io/BOMcatchr/reference/extract.data.html)
 function. The essential user inputs are:
 
 1.  *ncdfFilename* file name pointing to the netCDF file.
@@ -53,19 +53,19 @@ Many other user controls are available that control the duration,
 time-step, the spatial and temporal aggregation (e.g. *mean*, *sum*,
 *min* or *max*), the meteorological variables required and the measure
 of evapotranspiration. For examples of time-series extractions see
-[here](https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.html)
+[here](https://peterson-tim-j.github.io/BOMcatchr/articles/B_Point_rainfall.html)
 and
-[here](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data).
+[here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data).
 For examples of spatial data extractions see
-[here](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet)).
+[here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet)).
 
 ## Update netCDF data
 
 Over time, the existing netCDF data can be updated using the function
-[build.grids](https://peterson-tim-j.github.io/AWAPer/reference/build.grids.html).
+[build.grids](https://peterson-tim-j.github.io/BOMcatchr/reference/build.grids.html).
 Specifically, when an existing netCDF file is input, then the function
 updates the data between *updateFrom* and *updateTo*. These dates are
 automatically adjusted to ensure there are not date gaps in the data
 grids. Also, any data outside this periuod is not modified. See
-[here](https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.html#update-existing-data-grids)
+[here](https://peterson-tim-j.github.io/BOMcatchr/articles/A_Make_data_grids.html#update-existing-data-grids)
 for an exanmple.

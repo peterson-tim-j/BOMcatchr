@@ -1,4 +1,4 @@
-# *AWAPer* - an R-package for catchment-weighted climate data anywhere in Australia
+# *BOMcatchr* - an R-package for catchment-weighted climate data anywhere in Australia
 
 Getting rainfall and evaporation time-series data is an essential first
 step for many hydrological studies. Too often this requires the tedious
@@ -7,9 +7,9 @@ study catchment. Rarely is there a weather station inside the catchment,
 but even if there is then the spatial variability of rainfall and
 evaporation throughout the catchment must be ignores - and errors
 introduced (see example
-[here](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#point-versus-area-weighted-rainfall-deficit)).
-*AWAPer* eliminates these challenges by allowing efficient estimate of
-area weighted (i.e. catchment weighted) weather time-series data
+[here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#point-versus-area-weighted-rainfall-deficit)).
+*BOMcatchr* eliminates these challenges by allowing efficient estimate
+of area weighted (i.e. catchment weighted) weather time-series data
 anywhere in Australia and at any time step.
 
 Some of the features include:
@@ -17,16 +17,16 @@ Some of the features include:
 1.  Area weighted and point precipitation, minimum and maximum
     temperature, vapour pressure and solar radiation anywhere in
     Australia at any time-step. See examples
-    [here](https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.html)
+    [here](https://peterson-tim-j.github.io/BOMcatchr/articles/B_Point_rainfall.html)
     and
-    [here](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data).
+    [here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data).
 2.  Maps of catchment weather variables over time showing the spatial
     variability in precipitation and potential evapotranspiration (see
     examples
-    [here](https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet))
+    [here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet))
 3.  Ten measures of area weighted and point evapotranspiration (see
     examples
-    [here](https://peterson-tim-j.github.io/AWAPer/articles/D_Catchment_avg_ET_types.html))
+    [here](https://peterson-tim-j.github.io/BOMcatchr/articles/D_Catchment_avg_ET_types.html))
     using the [Evaporation
     package](https://cran.r-project.org/web/packages/Evapotranspiration/index.html),
     implementing [McMahon et al,
@@ -38,13 +38,13 @@ The meteorological data is sourced from Australian Bureau of Meteorology
 building compressed netCDF grids from the BOM data. Users generally
 build the netCDF grids using all historic data and then update as
 required (see example
-[here](https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.html)).
+[here](https://peterson-tim-j.github.io/BOMcatchr/articles/A_Make_data_grids.html)).
 
 The package development was funded by the Victorian Government The
 Department of Environment, Land, Water and Planning [*Climate and Water
 Initiate*](https://www.water.vic.gov.au/climate-change/research/vicwaci).
 For details of the approach see the [function
-references](https://peterson-tim-j.github.io/AWAPer/reference/index.html)
+references](https://peterson-tim-j.github.io/BOMcatchr/reference/index.html)
 or the journal paper [*Peterson et
 al. (2020)*](https://doi.org/10.1002/hyp.13637).
 
@@ -54,13 +54,13 @@ The package will soon be submitted to the R library (i.e. CRAN). In the
 meantime, you can install it from github using the following R command:
 
 ``` r
-remotes::install_github("peterson-tim-j/AWAPer")
+remotes::install_github("peterson-tim-j/BOMcatchr")
 ```
 
 Once installed, browse the package examples using the R-command:
 
 ``` r
-browseVignettes("AWAPer")
+browseVignettes("BOMcatchr")
 ```
 
 # Windows System Requiements

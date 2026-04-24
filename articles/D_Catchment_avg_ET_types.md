@@ -1,7 +1,7 @@
 # Extract various measures of evapotranspiration
 
 ``` r
-library(AWAPer, warn.conflicts = FALSE)
+library(BOMcatchr, warn.conflicts = FALSE)
 ```
 
 This example calculates and plot various estimates of
@@ -23,7 +23,7 @@ ncdfFilename = tempfile(fileext='.nc')
 Next, let’s make the data grids over this period.
 
 ``` r
-makeNetCDF_file(ncdfFilename = ncdfFilename,
+build.grids(ncdfFilename = ncdfFilename,
                    updateFrom = date.from,
                    updateTo = date.to,
                    vars = c('precip','tmin', 'tmax',
@@ -47,8 +47,8 @@ makeNetCDF_file(ncdfFilename = ncdfFilename,
 #> tmax          365      0
 #> vprp          365      0
 #> solarrad      365      0
-#> Total run time (DD:HH:MM:SS): 00:00:20:51
-#> [1] "/tmp/RtmpS9DECO/file2ecf3a710b82.nc"
+#> Total run time (DD:HH:MM:SS): 00:00:21:55
+#> [1] "/tmp/RtmpMa2Png/file2f2c3dc40163.nc"
 ```
 
 ## Load a catchment boundary
@@ -78,7 +78,7 @@ following commands change: *ET.function* , *ET.timestep* and
 *ET.Mortons.est* (when Morton’s estimate is derived).
 
 ``` r
-climateData.ET.HargreavesSamani = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.HargreavesSamani = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 vars = c('tmax', 'tmin', 'et'),
@@ -105,9 +105,9 @@ climateData.ET.HargreavesSamani = extractCatchmentData(ncdfFilename= ncdfFilenam
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:28
+#> Total run time (DD:HH:MM:SS): 00:00:00:27
 
-climateData.ET.JensenHaise = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.JensenHaise = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 vars = c('tmax', 'tmin', 'solarrad', 'et'),
@@ -134,7 +134,7 @@ climateData.ET.JensenHaise = extractCatchmentData(ncdfFilename= ncdfFilename,
 #> Data extraction FINISHED.
 #> Total run time (DD:HH:MM:SS): 00:00:00:45
 
-climateData.ET.Makkink = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.Makkink = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 vars = c('tmax', 'tmin','solarrad', 'et'),
@@ -159,9 +159,9 @@ climateData.ET.Makkink = extractCatchmentData(ncdfFilename= ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:45
+#> Total run time (DD:HH:MM:SS): 00:00:00:44
 
-climateData.ET.McGuinnessBordne = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.McGuinnessBordne = extract.data(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
                                vars = c('tmax', 'tmin', 'et'),
@@ -188,7 +188,7 @@ climateData.ET.McGuinnessBordne = extractCatchmentData(ncdfFilename= ncdfFilenam
 #> Data extraction FINISHED.
 #> Total run time (DD:HH:MM:SS): 00:00:00:23
 
-climateData.ET.MortonCRAE = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRAE = extract.data(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
                                vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -215,7 +215,7 @@ climateData.ET.MortonCRAE = extractCatchmentData(ncdfFilename= ncdfFilename,
 #> Data extraction FINISHED.
 #> Total run time (DD:HH:MM:SS): 00:00:01:09
 
-climateData.ET.MortonCRAE.potentialET = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRAE.potentialET = extract.data(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
                                vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -241,9 +241,9 @@ climateData.ET.MortonCRAE.potentialET = extractCatchmentData(ncdfFilename= ncdfF
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:08
+#> Total run time (DD:HH:MM:SS): 00:00:01:09
 
-climateData.ET.MortonCRAE.wetarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRAE.wetarealET = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -269,9 +269,9 @@ climateData.ET.MortonCRAE.wetarealET = extractCatchmentData(ncdfFilename= ncdfFi
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:08
+#> Total run time (DD:HH:MM:SS): 00:00:01:09
 
-climateData.ET.MortonCRAE.actualarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRAE.actualarealET = extract.data(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -297,9 +297,9 @@ climateData.ET.MortonCRAE.actualarealET = extractCatchmentData(ncdfFilename= ncd
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:08
+#> Total run time (DD:HH:MM:SS): 00:00:01:09
 
-climateData.ET.MortonCRWE = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRWE = extract.data(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -325,9 +325,9 @@ climateData.ET.MortonCRWE = extractCatchmentData(ncdfFilename= ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:09
+#> Total run time (DD:HH:MM:SS): 00:00:01:08
 
-climateData.ET.MortonCRWE.shallowLake = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRWE.shallowLake = extract.data(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -355,7 +355,7 @@ climateData.ET.MortonCRWE.shallowLake = extractCatchmentData(ncdfFilename= ncdfF
 #> Data extraction FINISHED.
 #> Total run time (DD:HH:MM:SS): 00:00:01:08
 
-climateData.ET.Turc = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.Turc = extract.data(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  vars = c('tmax', 'tmin', 'solarrad', 'et'),

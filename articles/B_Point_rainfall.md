@@ -1,7 +1,7 @@
 # Extract daily and monthly point precipitation
 
 ``` r
-library(AWAPer)
+library(BOMcatchr)
 ```
 
 This example shows how to build the required data files and then extract
@@ -26,11 +26,11 @@ dataTo = as.Date("2010-12-31","%Y-%m-%d")
 
 The netCDF file contains grids of daily rainfall for all of Australia
 and is used below to extract data at points of interest. Often users run
-*makeNetCDF_file* once to build netCDF data files that contain all
-variables over the entire record length (which requires ~5GB disk
-storage) and then use the netCDFs grids for multiple projects, rather
-than re-building the netCDF for each project. Also, if *makeNetCDF_file*
-is run with the the netCDF file name pointing to existing files and
+*build.grids* once to build netCDF data files that contain all variables
+over the entire record length (which requires ~5GB disk storage) and
+then use the netCDFs grids for multiple projects, rather than
+re-building the netCDF for each project. Also, if *build.grids* is run
+with the the netCDF file name pointing to existing files and
 *updateFrom=NA* then the netCDF files will be updated to yesterday.
 
 To start to create the grids, the file name for the netCDF grids needs
@@ -46,7 +46,7 @@ the netCDF file. Note, here *vars* is set to only download daily
 precipitation.
 
 ``` r
-fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
+fnames = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = dataFrom,
                          updateTo = dataTo,
                          vars = c('precip', 'precip.monthly'))
@@ -63,7 +63,7 @@ fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
 #>                Imported Errors
 #> precip              365      0
 #> precip.monthly       12      0
-#> Total run time (DD:HH:MM:SS): 00:00:03:45
+#> Total run time (DD:HH:MM:SS): 00:00:03:57
 ```
 
 ## Set the points for data extraction
@@ -93,7 +93,7 @@ Note the netCDF file *ncdfFilename* must be in the working directory or
 the full file path must be given.
 
 ``` r
-extracted.data = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.data = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,
@@ -110,7 +110,7 @@ extracted.data = extractCatchmentData(ncdfFilename = ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:24
+#> Total run time (DD:HH:MM:SS): 00:00:00:25
 ```
 
 ## Plot the daily precipitation at each site
@@ -200,7 +200,7 @@ scale.
 First, let’s extract the daily data at a monthly scale
 
 ``` r
-extracted.daily2monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.daily2monthly = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,
@@ -218,13 +218,13 @@ extracted.daily2monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:20
+#> Total run time (DD:HH:MM:SS): 00:00:00:21
 ```
 
 Next let’s extract the monthly data product.
 
 ``` r
-extracted.monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.monthly = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,

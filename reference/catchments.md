@@ -7,7 +7,7 @@ catchments are Creswick Creek (ID 407214, Vic., Australia, see
 <http://www.bom.gov.au/water/hrs/#id=407220>).
 
 The catchments can be used to extract catchment average climate data
-usng `extractCatchmentData`
+usng `extract.data`
 
 ## Usage
 
@@ -21,5 +21,5 @@ SpatialPolygonDataFrame
 
 ## See also
 
-[`extractCatchmentData`](https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.md)
+[`extract.data`](https://peterson-tim-j.github.io/BOMcatchr/reference/extract.data.md)
 for extracting catchment average climate data.

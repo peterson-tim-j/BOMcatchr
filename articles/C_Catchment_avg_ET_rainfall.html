@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Extract daily area weighted PET and precipitation • AWAPer</title>
+<title>Extract daily area weighted PET and precipitation • BOMcatchr</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -22,9 +22,9 @@
 
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html">AWAPer</a>
+    <a class="navbar-brand me-2" href="../index.html">BOMcatchr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.00</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,12 +33,13 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../articles/AWAPer.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/BOMcatchr.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/A_Make_data_grids.html">Make source data grids</a></li>
+    <li><a class="dropdown-item" href="../articles/AWAPer.html">Getting started</a></li>
     <li><a class="dropdown-item" href="../articles/B_Point_rainfall.html">Extract daily and monthly point precipitation</a></li>
     <li><a class="dropdown-item" href="../articles/C_Catchment_avg_ET_rainfall.html">Extract daily area weighted PET and precipitation</a></li>
     <li><a class="dropdown-item" href="../articles/D_Catchment_avg_ET_types.html">Extract various measures of evapotranspiration</a></li>
@@ -51,7 +52,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/peterson-tim-j/AWAPer/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/peterson-tim-j/BOMcatchr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -68,14 +69,14 @@
       <h1>Extract daily area weighted PET and precipitation</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/peterson-tim-j/AWAPer/blob/master/vignettes/C_Catchment_avg_ET_rainfall.Rmd" class="external-link"><code>vignettes/C_Catchment_avg_ET_rainfall.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/peterson-tim-j/BOMcatchr/blob/master/vignettes/C_Catchment_avg_ET_rainfall.Rmd" class="external-link"><code>vignettes/C_Catchment_avg_ET_rainfall.Rmd</code></a></small>
       <div class="d-none name"><code>C_Catchment_avg_ET_rainfall.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/peterson-tim-j/AWAPer" class="external-link">AWAPer</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/peterson-tim-j/BOMcatchr" class="external-link">BOMcatchr</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="load-extra-packages-for-the-vignette">Load extra packages for the vignette<a class="anchor" aria-label="anchor" href="#load-extra-packages-for-the-vignette"></a>
 </h2>
@@ -98,13 +99,13 @@ created in the working directory.</p>
 from 1/1/1900 to two days ago. The netCDF file contains grids of the
 daily data for all of Australia and is used below to extract data within
 the catchment boundaries of interest.</p>
-<p>Often users run <em>makeNetCDF_file</em> once to build netCDF data
-files that contain all variables over the entire record length (which
-requires ~5GB disk storage) and then use the netCDFs grids for multiple
-projects, rather than re-building the netCDF for each project. Also, if
-<em>makeNetCDF_file</em> is run with the the netCDF file name pointing
-to existing files and <em>updateFrom=NA</em> then the netCDF files will
-be updated to two days ago.</p>
+<p>Often users run <em>build.grids</em> once to build netCDF data files
+that contain all variables over the entire record length (which requires
+~5GB disk storage) and then use the netCDFs grids for multiple projects,
+rather than re-building the netCDF for each project. Also, if
+<em>build.grids</em> is run with the the netCDF file name pointing to
+existing files and <em>updateFrom=NA</em> then the netCDF files will be
+updated to two days ago.</p>
 <p>First, let’s define the start and end dates for data grids and the
 file names.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -114,7 +115,7 @@ file names.</p>
 <span><span class="va">ncdfFilename</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.nc'</span><span class="op">)</span></span></code></pre></div>
 <p>Next, let’s make the data grids over this period.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fname</span> <span class="op">=</span> <span class="fu"><a href="../reference/makeNetCDF_file.html">makeNetCDF_file</a></span><span class="op">(</span>ncdfFilename <span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
+<code class="sourceCode R"><span><span class="va">fname</span> <span class="op">=</span> <span class="fu"><a href="../reference/build.grids.html">build.grids</a></span><span class="op">(</span>ncdfFilename <span class="op">=</span> <span class="va">ncdfFilename</span>,</span>
 <span>                         updateFrom <span class="op">=</span> <span class="va">date.from</span>,</span>
 <span>                         updateTo <span class="op">=</span> <span class="va">date.to</span>,</span>
 <span>                         vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span><span class="op">)</span><span class="op">)</span></span>
@@ -137,7 +138,7 @@ file names.</p>
 <span><span class="co">#&gt; precip        123      0</span></span>
 <span><span class="co">#&gt; vprp          123      0</span></span>
 <span><span class="co">#&gt; solarrad      123      0</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:07:07</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:07:36</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="load-a-catchment-boundary">Load a catchment boundary<a class="anchor" aria-label="anchor" href="#load-a-catchment-boundary"></a>
@@ -156,17 +157,18 @@ variable.</p>
 <p>Here the daily area weighted average precipitation and PET is
 extracted across the two catchments. The data is extracted from the
 netCDF file <em>ncdfFilename</em> between the dates
-<em>extract.from</em> and <em>extract.to</em>. The other <em>AWAPer</em>
-variables <em>are</em> extracted because they are need for the
-calculation of Morton’s PET. Note the netCDF files must be in the
-working directory or the full file path must be given.</p>
+<em>extract.from</em> and <em>extract.to</em>. The other
+<em>BOMcatchr</em> variables <em>are</em> extracted because they are
+need for the calculation of Morton’s PET. Note the netCDF files must be
+in the working directory or the full file path must be given.</p>
 <p>Here Morton’s wet-environment areal evapotranspiration was estimated
 (other options are available). The use of Morton’s CREA formulation is
 defined by setting the <em>ET.function</em> variable to
 <em>‘ET.MortonCRAE’</em>. The calculation of the areal wet environment
 PET is defined by setting Morton’s specific variable
 <em>ET.Mortons.est</em> to <em>‘wet areal ET’</em> (note, other options
-exist within <em>AWAPer</em> for both variables). Lastly, following <a href="https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf" class="external-link">McMahon
+exist within <em>BOMcatchr</em> for both variables). Lastly, following
+<a href="https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf" class="external-link">McMahon
 et al, (2013)</a>, Morton’s PET is calculated at a monthly time step
 (not daily) to improve its reliability. The monthly estimate is then
 interpolated to daily.</p>
@@ -180,7 +182,7 @@ are being extracted, the default method to handle missing data and
 anomalies (e.g. Tmin &gt; Tmax) during ET calculations is automatically
 changed from the default of to .</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">climateData.daily</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
+<code class="sourceCode R"><span><span class="va">climateData.daily</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
 <span>                      extractFrom<span class="op">=</span><span class="va">date.from</span>,</span>
 <span>                      extractTo<span class="op">=</span><span class="va">date.to</span>,</span>
 <span>                      vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -288,7 +290,7 @@ function that accepts a single vector of data and returns a single
 number should work.</p>
 <p>First let’s extract only precipitation.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">PrecipData.monthly</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
+<code class="sourceCode R"><span><span class="va">PrecipData.monthly</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
 <span>                     extractFrom<span class="op">=</span><span class="va">date.from</span>,</span>
 <span>                     extractTo<span class="op">=</span><span class="va">date.to</span>,</span>
 <span>                     vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'precip'</span><span class="op">)</span>,</span>
@@ -318,7 +320,7 @@ spatial variability.</p>
 <p>Next let’s extract all variables and calculate the PET and then
 map.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">metData.monthly</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
+<code class="sourceCode R"><span><span class="va">metData.monthly</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
 <span>                     extractFrom<span class="op">=</span><span class="va">date.from</span>,</span>
 <span>                     extractTo<span class="op">=</span><span class="va">date.to</span>,</span>
 <span>                     vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -406,7 +408,7 @@ projection to GDA94.</p>
 <p>Next, the meteorological data and PET are derived using both the area
 weighted approach and centroids.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">metData.monthly.weighted</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
+<code class="sourceCode R"><span><span class="va">metData.monthly.weighted</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
 <span>                     extractFrom<span class="op">=</span><span class="va">date.from</span>,</span>
 <span>                     extractTo<span class="op">=</span><span class="va">date.to</span>,</span>
 <span>                     vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -434,9 +436,9 @@ weighted approach and centroids.</p>
 <span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:27</span></span>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:26</span></span>
 <span></span>
-<span><span class="va">metData.monthly.centroid</span> <span class="op">=</span> <span class="fu"><a href="../reference/extractCatchmentData.html">extractCatchmentData</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
+<span><span class="va">metData.monthly.centroid</span> <span class="op">=</span> <span class="fu"><a href="../reference/extract.data.html">extract.data</a></span><span class="op">(</span>ncdfFilename<span class="op">=</span><span class="va">ncdfFilename</span>,</span>
 <span>                     extractFrom<span class="op">=</span><span class="va">date.from</span>,</span>
 <span>                     extractTo<span class="op">=</span><span class="va">date.to</span>,</span>
 <span>                     vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'tmax'</span>, <span class="st">'tmin'</span>, <span class="st">'precip'</span>, <span class="st">'vprp'</span>, <span class="st">'solarrad'</span>, <span class="st">'et'</span><span class="op">)</span>,</span>
@@ -463,7 +465,7 @@ weighted approach and centroids.</p>
 <span><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:40</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:39</span></span></code></pre></div>
 <p>Now let’s compare the two estimates of precipitation, PET and
 rainfall deficit. The right most plots below show the rainfall deficit.
 It shows that using centroid estimate introduces errors of up to 6

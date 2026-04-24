@@ -33,9 +33,9 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../articles/BOMcatchr.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../articles/BOMcatchr.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/A_Make_data_grids.html">Make source data grids</a></li>
@@ -69,8 +69,8 @@
       <h1>Getting started</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/peterson-tim-j/BOMcatchr/blob/master/vignettes/AWAPer.Rmd" class="external-link"><code>vignettes/AWAPer.Rmd</code></a></small>
-      <div class="d-none name"><code>AWAPer.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/peterson-tim-j/BOMcatchr/blob/master/vignettes/BOMcatchr.Rmd" class="external-link"><code>vignettes/BOMcatchr.Rmd</code></a></small>
+      <div class="d-none name"><code>BOMcatchr.Rmd</code></div>
     </div>
 
     
@@ -90,7 +90,7 @@ duration and time-step.</li>
 <div class="section level2">
 <h2 id="build-netcdf-data">Build netCDF data<a class="anchor" aria-label="anchor" href="#build-netcdf-data"></a>
 </h2>
-<p>The netCDF data grids are created using the function <a href="https://peterson-tim-j.github.io/AWAPer/reference/build.grids.html" class="external-link">build.grids</a>.
+<p>The netCDF data grids are created using the function <a href="https://peterson-tim-j.github.io/BOMcatchr/reference/build.grids.html">build.grids</a>.
 This requires user input of the following:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -112,13 +112,13 @@ the default date of two days ago to extract all available data.</li>
 to be input to the netCDF data grids. Setting any of them to <em>NA</em>
 causes that variable to not be included in the netCDF data grids.</li>
 </ol>
-<p>See <a href="https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.html" class="external-link">here</a>
+<p>See <a href="https://peterson-tim-j.github.io/BOMcatchr/articles/A_Make_data_grids.html">here</a>
 for an example of how to build your first netCDF data file.</p>
 </div>
 <div class="section level2">
 <h2 id="extract-weather-data">Extract weather data<a class="anchor" aria-label="anchor" href="#extract-weather-data"></a>
 </h2>
-<p>Once the netCDF data grids are created, extract data using the <a href="https://peterson-tim-j.github.io/AWAPer/reference/extract.data.html" class="external-link">extract.data</a>
+<p>Once the netCDF data grids are created, extract data using the <a href="https://peterson-tim-j.github.io/BOMcatchr/reference/extract.data.html">extract.data</a>
 function. The essential user inputs are:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -134,20 +134,20 @@ the ellipsoid GRS 80, and the first column must be a unique ID.</li>
 time-step, the spatial and temporal aggregation (e.g. <em>mean</em>,
 <em>sum</em>, <em>min</em> or <em>max</em>), the meteorological
 variables required and the measure of evapotranspiration. For examples
-of time-series extractions see <a href="https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.html" class="external-link">here</a>
-and <a href="https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data" class="external-link">here</a>.
-For examples of spatial data extractions see <a href="https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet" class="external-link">here</a>).</p>
+of time-series extractions see <a href="https://peterson-tim-j.github.io/BOMcatchr/articles/B_Point_rainfall.html">here</a>
+and <a href="https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data">here</a>.
+For examples of spatial data extractions see <a href="https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet">here</a>).</p>
 </div>
 <div class="section level2">
 <h2 id="update-netcdf-data">Update netCDF data<a class="anchor" aria-label="anchor" href="#update-netcdf-data"></a>
 </h2>
 <p>Over time, the existing netCDF data can be updated using the function
-<a href="https://peterson-tim-j.github.io/AWAPer/reference/build.grids.html" class="external-link">build.grids</a>.
+<a href="https://peterson-tim-j.github.io/BOMcatchr/reference/build.grids.html">build.grids</a>.
 Specifically, when an existing netCDF file is input, then the function
 updates the data between <em>updateFrom</em> and <em>updateTo</em>.
 These dates are automatically adjusted to ensure there are not date gaps
 in the data grids. Also, any data outside this periuod is not modified.
-See <a href="https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.html#update-existing-data-grids" class="external-link">here</a>
+See <a href="https://peterson-tim-j.github.io/BOMcatchr/articles/A_Make_data_grids.html#update-existing-data-grids">here</a>
 for an exanmple.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

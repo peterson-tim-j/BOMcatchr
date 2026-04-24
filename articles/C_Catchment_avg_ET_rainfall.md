@@ -1,7 +1,7 @@
 # Extract daily area weighted PET and precipitation
 
 ``` r
-library(AWAPer, warn.conflicts = FALSE)
+library(BOMcatchr, warn.conflicts = FALSE)
 ```
 
 ## Load extra packages for the vignette
@@ -28,13 +28,13 @@ from 1/1/1900 to two days ago. The netCDF file contains grids of the
 daily data for all of Australia and is used below to extract data within
 the catchment boundaries of interest.
 
-Often users run *makeNetCDF_file* once to build netCDF data files that
+Often users run *build.grids* once to build netCDF data files that
 contain all variables over the entire record length (which requires ~5GB
 disk storage) and then use the netCDFs grids for multiple projects,
 rather than re-building the netCDF for each project. Also, if
-*makeNetCDF_file* is run with the the netCDF file name pointing to
-existing files and *updateFrom=NA* then the netCDF files will be updated
-to two days ago.
+*build.grids* is run with the the netCDF file name pointing to existing
+files and *updateFrom=NA* then the netCDF files will be updated to two
+days ago.
 
 First, let’s define the start and end dates for data grids and the file
 names.
@@ -49,7 +49,7 @@ ncdfFilename = tempfile(fileext='.nc')
 Next, let’s make the data grids over this period.
 
 ``` r
-fname = makeNetCDF_file(ncdfFilename = ncdfFilename,
+fname = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad'))
@@ -72,7 +72,7 @@ fname = makeNetCDF_file(ncdfFilename = ncdfFilename,
 #> precip        123      0
 #> vprp          123      0
 #> solarrad      123      0
-#> Total run time (DD:HH:MM:SS): 00:00:07:07
+#> Total run time (DD:HH:MM:SS): 00:00:07:36
 ```
 
 ## Load a catchment boundary
@@ -92,8 +92,8 @@ data("catchments")
 Here the daily area weighted average precipitation and PET is extracted
 across the two catchments. The data is extracted from the netCDF file
 *ncdfFilename* between the dates *extract.from* and *extract.to*. The
-other *AWAPer* variables *are* extracted because they are need for the
-calculation of Morton’s PET. Note the netCDF files must be in the
+other *BOMcatchr* variables *are* extracted because they are need for
+the calculation of Morton’s PET. Note the netCDF files must be in the
 working directory or the full file path must be given.
 
 Here Morton’s wet-environment areal evapotranspiration was estimated
@@ -101,7 +101,7 @@ Here Morton’s wet-environment areal evapotranspiration was estimated
 defined by setting the *ET.function* variable to *‘ET.MortonCRAE’*. The
 calculation of the areal wet environment PET is defined by setting
 Morton’s specific variable *ET.Mortons.est* to *‘wet areal ET’* (note,
-other options exist within *AWAPer* for both variables). Lastly,
+other options exist within *BOMcatchr* for both variables). Lastly,
 following [McMahon et al,
 (2013)](https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf),
 Morton’s PET is calculated at a monthly time step (not daily) to improve
@@ -121,7 +121,7 @@ anomalies (e.g. Tmin \> Tmax) during ET calculations is automatically
 changed from the default of to .
 
 ``` r
-climateData.daily = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.daily = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -234,7 +234,7 @@ vector of data and returns a single number should work.
 First let’s extract only precipitation.
 
 ``` r
-PrecipData.monthly = extractCatchmentData(ncdfFilename=ncdfFilename,
+PrecipData.monthly = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
                      vars = c('precip'),
@@ -270,7 +270,7 @@ sp::spplot(PrecipData.monthly,colInd, sp.layout = list(v),
 Next let’s extract all variables and calculate the PET and then map.
 
 ``` r
-metData.monthly = extractCatchmentData(ncdfFilename=ncdfFilename,
+metData.monthly = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -373,7 +373,7 @@ Next, the meteorological data and PET are derived using both the area
 weighted approach and centroids.
 
 ``` r
-metData.monthly.weighted = extractCatchmentData(ncdfFilename=ncdfFilename,
+metData.monthly.weighted = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -401,9 +401,9 @@ metData.monthly.weighted = extractCatchmentData(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:27
+#> Total run time (DD:HH:MM:SS): 00:00:00:26
 
-metData.monthly.centroid = extractCatchmentData(ncdfFilename=ncdfFilename,
+metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -430,7 +430,7 @@ metData.monthly.centroid = extractCatchmentData(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:40
+#> Total run time (DD:HH:MM:SS): 00:00:00:39
 ```
 
 Now let’s compare the two estimates of precipitation, PET and rainfall

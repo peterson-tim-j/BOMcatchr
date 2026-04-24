@@ -1,7 +1,7 @@
 # Make source data grids
 
 ``` r
-library(AWAPer)
+library(BOMcatchr)
 ```
 
 This example shows how to build the required data file and then update
@@ -17,10 +17,10 @@ are created for data between the dates *updateTo* and *updateTo*. If the
 latter two dates were not input then data would be downloaded from
 1/1/1900 to yesterday.
 
-Note, in practice users often run *makeNetCDF_file* once to build the
-netCDF data file that contain all variables over the entire record
-length (which requires ~5GB disk storage) and then use the netCDF grids
-for multiple projects, rather than re-building the netCDF grids for each
+Note, in practice users often run *build.grids* once to build the netCDF
+data file that contain all variables over the entire record length
+(which requires ~5GB disk storage) and then use the netCDF grids for
+multiple projects, rather than re-building the netCDF grids for each
 project.
 
 ``` r
@@ -43,7 +43,7 @@ maximum temperature. Below, this will be updated to include vapour
 pressure and solar radiation for all of Australia.
 
 ``` r
-ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdfFilename,
+ncdffile.name <- build.grids(ncdfFilename=ncdfFilename,
                 updateFrom=startDate, updateTo=endDate,
                 vars = c('precip','tmin','tmax'))
 #> ... Testing downloading of each variable.
@@ -61,7 +61,7 @@ ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdfFilename,
 #> precip       11      0
 #> tmin         11      0
 #> tmax         11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:21
+#> Total run time (DD:HH:MM:SS): 00:00:00:25
 ```
 
 Now let’s get a summary of the netCDF file that we’ve created. Note that
@@ -69,7 +69,7 @@ the output data.frame shows the expected variables over the expected
 date range.
 
 ``` r
-summary.df <- AWAPer::file.summary(ncdffile.name)
+summary.df <- BOMcatchr::grid.summary(ncdffile.name)
 summary.df
 #>        group   var.string       from         to time.step
 #> precip grid1 grid1/precip 2026-04-09 2026-04-19      days
@@ -85,9 +85,9 @@ summary.df
 
 Now that we’ve built the above file, the updating can be demonstrated.
 The BoM gridded data undergoes a detailed review and update process (see
-[https://www.bom.gov.au/climate/austmaps/about-rain-maps.shtml](https://peterson-tim-j.github.io/AWAPer/articles/here)
+[https://www.bom.gov.au/climate/austmaps/about-rain-maps.shtml](https://peterson-tim-j.github.io/BOMcatchr/articles/here)
 and
-[https://www.bom.gov.au/climate/austmaps/update-schedule.shtml](https://peterson-tim-j.github.io/AWAPer/articles/here)
+[https://www.bom.gov.au/climate/austmaps/update-schedule.shtml](https://peterson-tim-j.github.io/BOMcatchr/articles/here)
 ). Hence, the netCDF grids that one may have built some time ago may be
 require updating with revised BoM data.
 
@@ -97,7 +97,7 @@ is not defined. This will cause all variables in the original file to be
 updated. That said, individual variables can be updated.
 
 ``` r
-ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate)
 #> ... Testing downloading of each variable.
 #>     Testing precip grid data.
@@ -114,7 +114,7 @@ ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
 #> precip       11      0
 #> tmin         11      0
 #> tmax         11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:15
+#> Total run time (DD:HH:MM:SS): 00:00:00:17
 ```
 
 ## Add a variable to existing data grids
@@ -126,7 +126,7 @@ pressure data is updated. This feature can be used to update the data of
 a single variable as required.
 
 ``` r
-ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate,
                 vars = c('vprp'))
 #> ... Testing downloading of each variable.
@@ -150,7 +150,7 @@ Now let’s check that the file includes both the original three variable
 plus vapour pressure.
 
 ``` r
-summary.df <- AWAPer::file.summary(ncdffile.name)
+summary.df <- BOMcatchr::grid.summary(ncdffile.name)
 summary.df
 #>        group   var.string       from         to time.step
 #> precip grid1 grid1/precip 2026-04-09 2026-04-19      days
@@ -176,7 +176,7 @@ startDate <- startDate - 5
 ```
 
 ``` r
-ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
+ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate,
                 vars = c('solarrad'))
 #> ... Testing downloading of each variable.
@@ -198,14 +198,14 @@ ncdffile.name <- makeNetCDF_file(ncdfFilename=ncdffile.name,
 #> tmin           16      0
 #> tmax           16      0
 #> vprp           16      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:52
+#> Total run time (DD:HH:MM:SS): 00:00:00:53
 ```
 
 Now let’s check that the file includes both the prior four variables
 plus solar radiation.
 
 ``` r
-summary.df <- AWAPer::file.summary(ncdffile.name)
+summary.df <- BOMcatchr::grid.summary(ncdffile.name)
 summary.df
 #>          group     var.string       from         to time.step
 #> precip   grid1   grid1/precip 2026-04-04 2026-04-19      days
