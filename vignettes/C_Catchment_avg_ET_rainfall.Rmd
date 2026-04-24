@@ -16,7 +16,7 @@ options(tibble.print_min = 4L, tibble.print_max = 4L)
 ```
 
 ```{r setup}
-library(AWAPer, warn.conflicts = FALSE)
+library(BOMcatchr, warn.conflicts = FALSE)
 ```
 
 ## Load extra packages for the vignette
@@ -57,9 +57,9 @@ data("catchments")
 ```
 
 ## Extract daily precipitation and PET data
-Here the daily area weighted average precipitation and PET is extracted across the two catchments. The data is extracted from the netCDF file _ncdfFilename_ between the dates _extract.from_ and _extract.to_. The other _AWAPer_ variables *are* extracted because they are need for the calculation of Morton's PET. Note the netCDF files must be in the working directory or the full file path must be given.
+Here the daily area weighted average precipitation and PET is extracted across the two catchments. The data is extracted from the netCDF file _ncdfFilename_ between the dates _extract.from_ and _extract.to_. The other _BOMcatchr_ variables *are* extracted because they are need for the calculation of Morton's PET. Note the netCDF files must be in the working directory or the full file path must be given.
 
-Here Morton's wet-environment areal evapotranspiration was estimated (other options are available). The use of Morton's CREA formulation is defined by setting the _ET.function_ variable to _'ET.MortonCRAE'_. The calculation of the areal wet environment PET is defined by setting Morton's specific variable _ET.Mortons.est_ to _'wet areal ET'_ (note, other options exist within _AWAPer_ for both variables). Lastly, following [McMahon et al, (2013)](https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf), Morton's PET is calculated at a monthly time step (not daily) to improve its reliability. The monthly estimate is then interpolated to daily.
+Here Morton's wet-environment areal evapotranspiration was estimated (other options are available). The use of Morton's CREA formulation is defined by setting the _ET.function_ variable to _'ET.MortonCRAE'_. The calculation of the areal wet environment PET is defined by setting Morton's specific variable _ET.Mortons.est_ to _'wet areal ET'_ (note, other options exist within _BOMcatchr_ for both variables). Lastly, following [McMahon et al, (2013)](https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf), Morton's PET is calculated at a monthly time step (not daily) to improve its reliability. The monthly estimate is then interpolated to daily.
 
 The estimation of ET uses the _evapotranspiration_ package. It requires a set of constants, which are loaded as follows.
 ```{r}

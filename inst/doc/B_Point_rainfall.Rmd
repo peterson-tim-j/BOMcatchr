@@ -18,7 +18,7 @@ options(tibble.print_min = 4L, tibble.print_max = 4L)
 ```
 
 ```{r setup}
-library(AWAPer)
+library(BOMcatchr)
 ```
 This example shows how to build the required data files and then extract the daily rainfall at two sites. Here, one of the sites is at a rainfall gauge and the results are compared against observations.
 
@@ -31,7 +31,7 @@ dataFrom = as.Date("2010-01-01","%Y-%m-%d")
 dataTo = as.Date("2010-12-31","%Y-%m-%d")
 ```
 
-The netCDF file contains grids of daily rainfall for all of Australia and is used below to extract data at points of interest. Often users run _makeNetCDF_file_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _makeNetCDF_file_ is run with the the netCDF file name pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to yesterday.
+The netCDF file contains grids of daily rainfall for all of Australia and is used below to extract data at points of interest. Often users run _build.grids_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _build.grids_ is run with the the netCDF file name pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to yesterday.
 
 To start to create the grids, the file name for the netCDF grids needs to be defined. Here we'll just use a temporary file. You should change this to a non-temporary file name and folder.
 ```{r}
@@ -39,7 +39,7 @@ ncdfFilename = tempfile(fileext='.nc')
 ```
 Now with the inputs defined we can download the gridded data and build the netCDF file. Note, here _vars_ is set to only download daily precipitation.
 ```{r}
-fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
+fnames = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = dataFrom,
                          updateTo = dataTo,
                          vars = c('precip', 'precip.monthly'))
@@ -62,7 +62,7 @@ Now let's extract the daily precipitation at the two locations. The data is extr
 
 Note the netCDF file _ncdfFilename_ must be in the working directory or the full file path must be given.
 ```{r}
-extracted.data = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.data = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,
@@ -142,7 +142,7 @@ Now let's compare the gauge data at a monthly time step with the extracted month
 
 First, let's extract the daily data at a monthly scale
 ```{r}
-extracted.daily2monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.daily2monthly = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,
@@ -153,7 +153,7 @@ extracted.daily2monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
 ```
 Next let's extract the monthly data product.
 ```{r}
-extracted.monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.monthly = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,

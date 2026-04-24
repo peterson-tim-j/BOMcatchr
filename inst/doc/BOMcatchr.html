@@ -252,7 +252,7 @@ duration and time-step.</li>
 </div>
 <div id="build-netcdf-data" class="section level2">
 <h2>Build netCDF data</h2>
-<p>The netCDF data grids are created using the function <a href="https://peterson-tim-j.github.io/AWAPer/reference/build.grids.html">build.grids</a>.
+<p>The netCDF data grids are created using the function <a href="https://peterson-tim-j.github.io/BOMcatchr/reference/build.grids.html">build.grids</a>.
 This requires user input of the following:</p>
 <ol style="list-style-type: decimal">
 <li><em>ncdfFilename</em> to define where the netCDF file should be
@@ -270,12 +270,12 @@ the default date of two days ago to extract all available data.</li>
 to be input to the netCDF data grids. Setting any of them to <em>NA</em>
 causes that variable to not be included in the netCDF data grids.</li>
 </ol>
-<p>See <a href="https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.html">here</a>
+<p>See <a href="https://peterson-tim-j.github.io/BOMcatchr/articles/A_Make_data_grids.html">here</a>
 for an example of how to build your first netCDF data file.</p>
 </div>
 <div id="extract-weather-data" class="section level2">
 <h2>Extract weather data</h2>
-<p>Once the netCDF data grids are created, extract data using the <a href="https://peterson-tim-j.github.io/AWAPer/reference/extract.data.html">extract.data</a>
+<p>Once the netCDF data grids are created, extract data using the <a href="https://peterson-tim-j.github.io/BOMcatchr/reference/extract.data.html">extract.data</a>
 function. The essential user inputs are:</p>
 <ol style="list-style-type: decimal">
 <li><em>ncdfFilename </em> file name pointing to the netCDF file.</li>
@@ -289,19 +289,19 @@ the ellipsoid GRS 80, and the first column must be a unique ID.</li>
 time-step, the spatial and temporal aggregation (e.g. <em>mean</em>,
 <em>sum</em>, <em>min</em> or <em>max</em>), the meteorological
 variables required and the measure of evapotranspiration. For examples
-of time-series extractions see <a href="https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.html">here</a>
-and <a href="https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data">here</a>.
-For examples of spatial data extractions see <a href="https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet">here</a>).</p>
+of time-series extractions see <a href="https://peterson-tim-j.github.io/BOMcatchr/articles/B_Point_rainfall.html">here</a>
+and <a href="https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data">here</a>.
+For examples of spatial data extractions see <a href="https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet">here</a>).</p>
 </div>
 <div id="update-netcdf-data" class="section level2">
 <h2>Update netCDF data</h2>
 <p>Over time, the existing netCDF data can be updated using the function
-<a href="https://peterson-tim-j.github.io/AWAPer/reference/build.grids.html">build.grids</a>.
+<a href="https://peterson-tim-j.github.io/BOMcatchr/reference/build.grids.html">build.grids</a>.
 Specifically, when an existing netCDF file is input, then the function
 updates the data between <em>updateFrom</em> and <em>updateTo</em>.
 These dates are automatically adjusted to ensure there are not date gaps
 in the data grids. Also, any data outside this periuod is not modified.
-See <a href="https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.html#update-existing-data-grids">here</a>
+See <a href="https://peterson-tim-j.github.io/BOMcatchr/articles/A_Make_data_grids.html#update-existing-data-grids">here</a>
 for an exanmple.</p>
 </div>
 

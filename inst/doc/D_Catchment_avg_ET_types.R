@@ -3,7 +3,7 @@ knitr::opts_chunk$set(collapse = T, comment = "#>")
 options(tibble.print_min = 4L, tibble.print_max = 4L)
 
 ## ----setup--------------------------------------------------------------------
-library(AWAPer, warn.conflicts = FALSE)
+library(BOMcatchr, warn.conflicts = FALSE)
 
 ## -----------------------------------------------------------------------------
 date.from = as.Date("2010-01-01","%Y-%m-%d")
@@ -12,7 +12,7 @@ date.to = as.Date("2010-12-31","%Y-%m-%d")
 ncdfFilename = tempfile(fileext='.nc')
 
 ## -----------------------------------------------------------------------------
-makeNetCDF_file(ncdfFilename = ncdfFilename,
+build.grids(ncdfFilename = ncdfFilename,
                    updateFrom = date.from,
                    updateTo = date.to,
                    vars = c('precip','tmin', 'tmax',
@@ -25,7 +25,7 @@ data("catchments")
 data(constants,package='Evapotranspiration')
 
 ## -----------------------------------------------------------------------------
-climateData.ET.HargreavesSamani = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.HargreavesSamani = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 vars = c('tmax', 'tmin', 'et'),
@@ -35,7 +35,7 @@ climateData.ET.HargreavesSamani = extractCatchmentData(ncdfFilename= ncdfFilenam
                                 ET.timestep = 'daily',
                                 ET.constants= constants)
 
-climateData.ET.JensenHaise = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.JensenHaise = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 vars = c('tmax', 'tmin', 'solarrad', 'et'),
@@ -45,7 +45,7 @@ climateData.ET.JensenHaise = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 ET.timestep = 'daily',
                                 ET.constants= constants)
 
-climateData.ET.Makkink = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.Makkink = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 vars = c('tmax', 'tmin','solarrad', 'et'),
@@ -55,7 +55,7 @@ climateData.ET.Makkink = extractCatchmentData(ncdfFilename= ncdfFilename,
                                 ET.timestep = 'daily',
                                 ET.constants= constants)
 
-climateData.ET.McGuinnessBordne = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.McGuinnessBordne = extract.data(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
                                vars = c('tmax', 'tmin', 'et'),
@@ -65,7 +65,7 @@ climateData.ET.McGuinnessBordne = extractCatchmentData(ncdfFilename= ncdfFilenam
                                ET.timestep = 'daily',
                                ET.constants= constants)
 
-climateData.ET.MortonCRAE = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRAE = extract.data(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
                                vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -75,7 +75,7 @@ climateData.ET.MortonCRAE = extractCatchmentData(ncdfFilename= ncdfFilename,
                                ET.timestep = 'monthly',
                                ET.constants= constants)
 
-climateData.ET.MortonCRAE.potentialET = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRAE.potentialET = extract.data(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
                                extractTo= date.to,
                                vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -86,7 +86,7 @@ climateData.ET.MortonCRAE.potentialET = extractCatchmentData(ncdfFilename= ncdfF
                                ET.Mortons.est='potential ET',
                                ET.constants= constants)
 
-climateData.ET.MortonCRAE.wetarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRAE.wetarealET = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
                                 extractTo= date.to,
                                 vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -97,7 +97,7 @@ climateData.ET.MortonCRAE.wetarealET = extractCatchmentData(ncdfFilename= ncdfFi
                                 ET.Mortons.est='wet areal ET',
                                 ET.constants= constants)
 
-climateData.ET.MortonCRAE.actualarealET = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRAE.actualarealET = extract.data(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -108,7 +108,7 @@ climateData.ET.MortonCRAE.actualarealET = extractCatchmentData(ncdfFilename= ncd
                                  ET.Mortons.est='actual areal ET',
                                  ET.constants= constants)
 
-climateData.ET.MortonCRWE = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRWE = extract.data(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -119,7 +119,7 @@ climateData.ET.MortonCRWE = extractCatchmentData(ncdfFilename= ncdfFilename,
                                  ET.Mortons.est = 'potential ET',
                                  ET.constants= constants)
 
-climateData.ET.MortonCRWE.shallowLake = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.MortonCRWE.shallowLake = extract.data(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -130,7 +130,7 @@ climateData.ET.MortonCRWE.shallowLake = extractCatchmentData(ncdfFilename= ncdfF
                                  ET.Mortons.est = 'shallow lake ET',
                                  ET.constants= constants)
 
-climateData.ET.Turc = extractCatchmentData(ncdfFilename= ncdfFilename,
+climateData.ET.Turc = extract.data(ncdfFilename= ncdfFilename,
                                  extractFrom= date.from,
                                  extractTo= date.to,
                                  vars = c('tmax', 'tmin', 'solarrad', 'et'),

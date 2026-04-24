@@ -3,7 +3,7 @@ knitr::opts_chunk$set(collapse = T, comment = "#>")
 options(tibble.print_min = 4L, tibble.print_max = 4L)
 
 ## ----setup--------------------------------------------------------------------
-library(AWAPer)
+library(BOMcatchr)
 
 ## -----------------------------------------------------------------------------
 dataFrom = as.Date("2010-01-01","%Y-%m-%d")
@@ -13,7 +13,7 @@ dataTo = as.Date("2010-12-31","%Y-%m-%d")
 ncdfFilename = tempfile(fileext='.nc')
 
 ## -----------------------------------------------------------------------------
-fnames = makeNetCDF_file(ncdfFilename = ncdfFilename,
+fnames = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = dataFrom,
                          updateTo = dataTo,
                          vars = c('precip', 'precip.monthly'))
@@ -28,7 +28,7 @@ sp::coordinates(coordinates.data) <- ~Longitude + Latitude
 sp::proj4string(coordinates.data) = '+proj=longlat +ellps=GRS80 +no_defs'
 
 ## -----------------------------------------------------------------------------
-extracted.data = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.data = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,
@@ -86,7 +86,7 @@ plot(cumsum(xdata),
 abline(0,1, col='grey', lty=2)
 
 ## -----------------------------------------------------------------------------
-extracted.daily2monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.daily2monthly = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,
@@ -96,7 +96,7 @@ extracted.daily2monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
                                         ET.function='')
 
 ## -----------------------------------------------------------------------------
-extracted.monthly = extractCatchmentData(ncdfFilename = ncdfFilename,
+extracted.monthly = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coordinates.data,

@@ -15,7 +15,7 @@ options(tibble.print_min = 4L, tibble.print_max = 4L)
 ```
 
 ```{r setup}
-library(AWAPer, warn.conflicts = FALSE)
+library(BOMcatchr, warn.conflicts = FALSE)
 ```
 
 This example calculates and plot various estimates of evaportranspiration. Ten different estimates of area weighted evapotranspiration over one year at catchment 407214 (Victoria, Australia) are derived.

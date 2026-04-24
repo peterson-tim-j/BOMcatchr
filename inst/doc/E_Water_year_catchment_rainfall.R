@@ -3,7 +3,7 @@ knitr::opts_chunk$set(collapse = T, comment = "#>")
 options(tibble.print_min = 4L, tibble.print_max = 4L)
 
 ## ----setup--------------------------------------------------------------------
-library(AWAPer, warn.conflicts = FALSE)
+library(BOMcatchr, warn.conflicts = FALSE)
 
 ## -----------------------------------------------------------------------------
 date.from = as.Date("2010-01-01","%Y-%m-%d")
@@ -12,7 +12,7 @@ date.to = as.Date("2015-12-31","%Y-%m-%d")
 ncdfFilename = tempfile(fileext='.nc')
 
 ## -----------------------------------------------------------------------------
-fname = makeNetCDF_file(ncdfFilename = ncdfFilename,
+fname = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('precip', 'precip.RMSE', 'precip.monthly'))
@@ -21,7 +21,7 @@ fname = makeNetCDF_file(ncdfFilename = ncdfFilename,
 data("catchments")
 
 ## -----------------------------------------------------------------------------
-climateData.annual = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.annual = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('precip', 'precip.monthly'),
@@ -33,7 +33,7 @@ climateData.annual = extractCatchmentData(ncdfFilename=ncdfFilename,
 ## -----------------------------------------------------------------------------
 sqrd.sum <- function(x) {return(sum(x^2))}
 
-climateData.annual.err = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.annual.err = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('precip.RMSE'),
@@ -50,28 +50,38 @@ for (i in 1:length(catchments$CatchID)) {
 
   filt = climateData.annual$temporal.sum$Location.ID == catchments$CatchID[i]
 
-  # Get water year data from daily data
+  # Plot precipitation from monthly data
   tmp.date = climateData.annual$temporal.sum[filt,]
-  x.data = as.Date(ISOdate(tmp.date$year, tmp.date$month, tmp.date$day))
-  y.data = tmp.date$precip
-  tmp.date = climateData.annual.err$temporal.sqrd.sum[filt,]
-  y.data.low = y.data - 2*sqrt(tmp.date$precip.RMSE)
-  y.data.hi = y.data + 2*sqrt(tmp.date$precip.RMSE)
+  x.data = tmp.date$year
+  y.data = tmp.date$precip.monthly
 
   # Plot calendar year precipitation from daily data
   plot(x = x.data,
        y = y.data,
        type = "l",
-       col = "blue",
+       col = "red",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data.hi))),
+       ylim = c(0, ceiling(max(y.data) * 1.05)),
        ylab = "Precip. [mm/year]",
        xlab = "Calender year",
-       xaxs = "i",
+       xaxs = "r",
        bty = "l",
-       yaxs = "i",
+       yaxs = "r",
        main=paste('Catchment ID',catchments$CatchID[i]))
+
+  # Get water year data from daily data
+  tmp.date = climateData.annual$temporal.sum[filt,]
+  y.data = tmp.date$precip
+  tmp.date = climateData.annual.err$temporal.sqrd.sum[filt,]
+  y.data.low = y.data - 2*sqrt(tmp.date$precip.RMSE)
+  y.data.hi = y.data + 2*sqrt(tmp.date$precip.RMSE)
+
+  lines(x = x.data,
+       y = y.data,
+       type = "l",
+       col = "blue",
+       lwd = 1.2)
 
   # Add interpolation error bars for water years precipitation from daily data
   arrows(x0 = x.data,
@@ -82,15 +92,6 @@ for (i in 1:length(catchments$CatchID)) {
          code=3,
          length=0.06,
          col="black")
-
-  # Plot precipitation from monthly data
-  y.data = tmp.date$precip.monthly
-
-  lines(x = x.data,
-       y = y.data,
-       type = "l",
-       col = "red",
-       lwd = 1.2)
 
   # Add legend
   legend("bottomleft",
@@ -109,7 +110,7 @@ dates = seq.Date(date.from, date.to, by ='day')
 wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
 
 ## -----------------------------------------------------------------------------
-climateData.daily2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.daily2wateryear = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('precip'),
@@ -119,7 +120,7 @@ climateData.daily2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
                       spatial.function.name='var')
 
 ## -----------------------------------------------------------------------------
-climateData.daily2wateryear.err = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.daily2wateryear.err = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('precip.RMSE'),
@@ -133,7 +134,7 @@ dates = seq.Date(date.from, date.to, by ='month')
 wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
 
 ## -----------------------------------------------------------------------------
-climateData.month2wateryear = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.month2wateryear = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('precip.monthly'),
@@ -149,7 +150,7 @@ climateData.daily2wateryear$temporal.sum = climateData.daily2wateryear$temporal.
 filt = climateData.daily2wateryear.err$temporal.sqrd.sum$days.per.timestep >= 365
 climateData.daily2wateryear.err$temporal.sqrd.sum = climateData.daily2wateryear.err$temporal.sqrd.sum[filt, ]
 
-filt = climateData.month2wateryear$temporal.sum$days.per.timestep == 12
+filt = climateData.month2wateryear$temporal.sum$months.per.timestep == 12
 climateData.month2wateryear$temporal.sum = climateData.month2wateryear$temporal.sum[filt, ]
 
 
@@ -159,29 +160,40 @@ par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 # Loop through each catchment and plot the daily precipitation and PET.
 for (i in 1:length(catchments$CatchID)) {
 
+  # Water years precipitation from monthly data.
+  filt = climateData.month2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
+  tmp.date = climateData.month2wateryear$temporal.sum[filt,]
+  x.data = tmp.date$year
+  y.data = tmp.date$precip.monthly
+
+  plot(x = x.data,
+       y = y.data,
+       type = "l",
+       col = "red",
+       lwd = 1.2,
+       mgp = c(2, 0.5, 0),
+       ylim = c(0, ceiling(max(y.data) * 1.1)),
+       ylab = "Precip. [mm/year]",
+       xlab = "Water year (end year)",
+       xaxs = "r",
+       bty = "l",
+       yaxs = "r",
+       main=paste('Catchment ID',catchments$CatchID[i]))
+
   # Get water year data from daily data.
   filt = climateData.daily2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
   tmp.date = climateData.daily2wateryear$temporal.sum[filt,]
-  x.data = as.Date(ISOdate(tmp.date$year, tmp.date$month, tmp.date$day))
+  x.data = tmp.date$year
   y.data = tmp.date$precip
   tmp.date = climateData.daily2wateryear.err$temporal.sqrd.sum[filt,]
   y.data.low = y.data - 1.645 * sqrt(tmp.date$precip.RMSE)
   y.data.hi = y.data + 1.645 * sqrt(tmp.date$precip.RMSE)
 
-  # plot water years precipitation from daily data
-  plot(x = x.data,
+  lines(x = x.data,
        y = y.data,
        type = "l",
        col = "blue",
-       lwd = 1.2,
-       mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data.hi))),
-       ylab = "Precip. [mm/year]",
-       xlab = "Water year",
-       xaxs = "i",
-       bty = "l",
-       yaxs = "i",
-       main=paste('Catchment ID',catchments$CatchID[i]))
+       lwd = 1.2)
 
   # Add interpolation error bars for water years precipitation from daily data
   arrows(x0 = x.data,
@@ -191,19 +203,7 @@ for (i in 1:length(catchments$CatchID)) {
          angle=90,
          code=3,
          length=0.06,
-         col="lightblue")
-
-  # Water years precipitation from monthly data.
-  filt = climateData.month2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
-  tmp.date = climateData.month2wateryear$temporal.sum[filt,]
-  x.data = as.Date(ISOdate(tmp.date$year, tmp.date$month, tmp.date$day))
-  y.data = tmp.date$precip.monthly
-
-  lines(x = x.data,
-       y = y.data,
-       type = "l",
-       col = "red",
-       lwd = 1.2)
+         col="black")
 
   # Add legend
   legend("bottomleft",

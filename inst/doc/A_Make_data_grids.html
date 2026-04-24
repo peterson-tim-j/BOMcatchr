@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(AWAPer)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(BOMcatchr)</span></code></pre></div>
 <p>This example shows how to build the required data file and then
 update it.</p>
 <div id="make-netcdf-file" class="section level2">
@@ -352,11 +352,11 @@ file.</p>
 are created for data between the dates <em>updateTo</em> and
 <em>updateTo</em>. If the latter two dates were not input then data
 would be downloaded from 1/1/1900 to yesterday.</p>
-<p>Note, in practice users often run <em>makeNetCDF_file</em> once to
-build the netCDF data file that contain all variables over the entire
-record length (which requires ~5GB disk storage) and then use the netCDF
-grids for multiple projects, rather than re-building the netCDF grids
-for each project.</p>
+<p>Note, in practice users often run <em>build.grids</em> once to build
+the netCDF data file that contain all variables over the entire record
+length (which requires ~5GB disk storage) and then use the netCDF grids
+for multiple projects, rather than re-building the netCDF grids for each
+project.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>startDate <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="fu">Sys.Date</span>()<span class="sc">-</span><span class="dv">15</span>,<span class="st">&quot;%Y-%m-%d&quot;</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>endDate <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="fu">Sys.Date</span>()<span class="sc">-</span><span class="dv">5</span>,<span class="st">&quot;%Y-%m-%d&quot;</span>)</span></code></pre></div>
 <p>Next the file name for the netCDF grids need to be defined. Here
@@ -367,7 +367,7 @@ non-temporary file name and folder.</p>
 <p>The netCDF data file contains grids of daily rainfall, minimum and
 maximum temperature. Below, this will be updated to include vapour
 pressure and solar radiation for all of Australia.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">makeNetCDF_file</span>(<span class="at">ncdfFilename=</span>ncdfFilename,</span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">build.grids</span>(<span class="at">ncdfFilename=</span>ncdfFilename,</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                <span class="at">updateFrom=</span>startDate, <span class="at">updateTo=</span>endDate,</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip&#39;</span>,<span class="st">&#39;tmin&#39;</span>,<span class="st">&#39;tmax&#39;</span>))</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
@@ -377,7 +377,7 @@ pressure and solar radiation for all of Australia.</p>
 <span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
 <span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt;        - New variables to add: precip  tmin  tmax</span></span>
 <span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-04-06  to  2026-04-16</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-04-09  to  2026-04-19</span></span>
 <span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; Data construction FINISHED.</span></span>
 <span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
@@ -385,16 +385,16 @@ pressure and solar radiation for all of Australia.</p>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; precip       11      0</span></span>
 <span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; tmin         11      0</span></span>
 <span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; tmax         11      0</span></span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:38</span></span></code></pre></div>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:33</span></span></code></pre></div>
 <p>Now let’s get a summary of the netCDF file that we’ve created. Note
 that the output data.frame shows the expected variables over the
 expected date range.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>summary.df <span class="ot">&lt;-</span> AWAPer<span class="sc">::</span><span class="fu">file.summary</span>(ncdffile.name)</span>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>summary.df <span class="ot">&lt;-</span> BOMcatchr<span class="sc">::</span><span class="fu">grid.summary</span>(ncdffile.name)</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>summary.df</span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt;        group   var.string       from         to time.step</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; precip grid1 grid1/precip 2026-04-06 2026-04-16      days</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; tmin   grid1   grid1/tmin 2026-04-06 2026-04-16      days</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; tmax   grid1   grid1/tmax 2026-04-06 2026-04-16      days</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; precip grid1 grid1/precip 2026-04-09 2026-04-19      days</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; tmin   grid1   grid1/tmin 2026-04-09 2026-04-19      days</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; tmax   grid1   grid1/tmax 2026-04-09 2026-04-19      days</span></span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;                                    time.datum  units              ellipsoid.crs</span></span>
 <span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80</span></span>
 <span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span>
@@ -412,7 +412,7 @@ require updating with revised BoM data.</p>
 we’ll update the data between the dates defined prior. Also, note that
 is not defined. This will cause all variables in the original file to be
 updated. That said, individual variables can be updated.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">makeNetCDF_file</span>(<span class="at">ncdfFilename=</span>ncdffile.name,</span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">build.grids</span>(<span class="at">ncdfFilename=</span>ncdffile.name,</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                <span class="at">updateFrom=</span>startDate, <span class="at">updateTo=</span>endDate)</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;     Testing precip grid data.</span></span>
@@ -421,7 +421,7 @@ updated. That said, individual variables can be updated.</p>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
 <span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt;        - New variables to add: (none)</span></span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt;        - Existing variables to modify: precip  tmin  tmax</span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-04-06  to  2026-04-16</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-04-09  to  2026-04-19</span></span>
 <span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; Data construction FINISHED.</span></span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
@@ -429,7 +429,7 @@ updated. That said, individual variables can be updated.</p>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; precip       11      0</span></span>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; tmin         11      0</span></span>
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; tmax         11      0</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:36</span></span></code></pre></div>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:30</span></span></code></pre></div>
 </div>
 <div id="add-a-variable-to-existing-data-grids" class="section level2">
 <h2>Add a variable to existing data grids</h2>
@@ -438,7 +438,7 @@ Here the same date range will be used. Because the date range of the new
 variable equals the date range of the existing variables, only vapour
 pressure data is updated. This feature can be used to update the data of
 a single variable as required.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">makeNetCDF_file</span>(<span class="at">ncdfFilename=</span>ncdffile.name,</span>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">build.grids</span>(<span class="at">ncdfFilename=</span>ncdffile.name,</span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>                <span class="at">updateFrom=</span>startDate, <span class="at">updateTo=</span>endDate,</span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;vprp&#39;</span>))</span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
@@ -449,22 +449,22 @@ a single variable as required.</p>
 <span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
 <span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt;        - New variables to add: vprp</span></span>
 <span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-04-06  to  2026-04-16</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-04-09  to  2026-04-19</span></span>
 <span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; Data construction FINISHED.</span></span>
 <span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
 <span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt;      Imported Errors</span></span>
 <span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; vprp       11      0</span></span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:16</span></span></code></pre></div>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:13</span></span></code></pre></div>
 <p>Now let’s check that the file includes both the original three
 variable plus vapour pressure.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>summary.df <span class="ot">&lt;-</span> AWAPer<span class="sc">::</span><span class="fu">file.summary</span>(ncdffile.name)</span>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>summary.df <span class="ot">&lt;-</span> BOMcatchr<span class="sc">::</span><span class="fu">grid.summary</span>(ncdffile.name)</span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>summary.df</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt;        group   var.string       from         to time.step</span></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; precip grid1 grid1/precip 2026-04-06 2026-04-16      days</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; tmin   grid1   grid1/tmin 2026-04-06 2026-04-16      days</span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; tmax   grid1   grid1/tmax 2026-04-06 2026-04-16      days</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; vprp   grid1   grid1/vprp 2026-04-06 2026-04-16      days</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; precip grid1 grid1/precip 2026-04-09 2026-04-19      days</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; tmin   grid1   grid1/tmin 2026-04-09 2026-04-19      days</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; tmax   grid1   grid1/tmax 2026-04-09 2026-04-19      days</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; vprp   grid1   grid1/vprp 2026-04-09 2026-04-19      days</span></span>
 <span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt;                                    time.datum  units              ellipsoid.crs</span></span>
 <span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80</span></span>
 <span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span>
@@ -479,7 +479,7 @@ used. However, because the date range of all variables within the netCDF
 file must be equal, the date range of the other variables must also be
 updated.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>startDate <span class="ot">&lt;-</span> startDate <span class="sc">-</span> <span class="dv">5</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">makeNetCDF_file</span>(<span class="at">ncdfFilename=</span>ncdffile.name,</span>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">build.grids</span>(<span class="at">ncdfFilename=</span>ncdffile.name,</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>                <span class="at">updateFrom=</span>startDate, <span class="at">updateTo=</span>endDate,</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;solarrad&#39;</span>))</span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
@@ -491,7 +491,7 @@ updated.</p>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
 <span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;        - New variables to add: solarrad</span></span>
 <span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;        - Existing variables to modify: precip  tmin  tmax  vprp</span></span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-04-01  to  2026-04-16</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-04-04  to  2026-04-19</span></span>
 <span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; Data construction FINISHED.</span></span>
 <span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
@@ -501,17 +501,17 @@ updated.</p>
 <span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="co">#&gt; tmin           16      0</span></span>
 <span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="co">#&gt; tmax           16      0</span></span>
 <span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="co">#&gt; vprp           16      0</span></span>
-<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:29</span></span></code></pre></div>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:14</span></span></code></pre></div>
 <p>Now let’s check that the file includes both the prior four variables
 plus solar radiation.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>summary.df <span class="ot">&lt;-</span> AWAPer<span class="sc">::</span><span class="fu">file.summary</span>(ncdffile.name)</span>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>summary.df <span class="ot">&lt;-</span> BOMcatchr<span class="sc">::</span><span class="fu">grid.summary</span>(ncdffile.name)</span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>summary.df</span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt;          group     var.string       from         to time.step</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; precip   grid1   grid1/precip 2026-04-01 2026-04-16      days</span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; tmin     grid1     grid1/tmin 2026-04-01 2026-04-16      days</span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; tmax     grid1     grid1/tmax 2026-04-01 2026-04-16      days</span></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; vprp     grid1     grid1/vprp 2026-04-01 2026-04-16      days</span></span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; solarrad grid2 grid2/solarrad 2026-04-01 2026-04-16      days</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; precip   grid1   grid1/precip 2026-04-04 2026-04-19      days</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; tmin     grid1     grid1/tmin 2026-04-04 2026-04-19      days</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; tmax     grid1     grid1/tmax 2026-04-04 2026-04-19      days</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; vprp     grid1     grid1/vprp 2026-04-04 2026-04-19      days</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; solarrad grid2 grid2/solarrad 2026-04-04 2026-04-19      days</span></span>
 <span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt;                                      time.datum  units</span></span>
 <span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; precip   days since 1900-01-01 00:00:00.0 -0:00 mm/day</span></span>
 <span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; tmin     days since 1900-01-01 00:00:00.0 -0:00  deg_C</span></span>

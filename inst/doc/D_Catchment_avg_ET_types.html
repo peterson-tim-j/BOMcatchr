@@ -342,7 +342,7 @@ evapotranspiration</h1>
 
 
 
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(AWAPer, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(BOMcatchr, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <p>This example calculates and plot various estimates of
 evaportranspiration. Ten different estimates of area weighted
 evapotranspiration over one year at catchment 407214 (Victoria,
@@ -355,7 +355,7 @@ file names.</p>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>ncdfFilename <span class="ot">=</span> <span class="fu">tempfile</span>(<span class="at">fileext=</span><span class="st">&#39;.nc&#39;</span>)</span></code></pre></div>
 <p>Next, let’s make the data grids over this period.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">makeNetCDF_file</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">build.grids</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                   <span class="at">updateFrom =</span> date.from,</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                   <span class="at">updateTo =</span> date.to,</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                   <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip&#39;</span>,<span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;tmax&#39;</span>,</span>
@@ -379,8 +379,8 @@ file names.</p>
 <span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; tmax          365      0</span></span>
 <span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; vprp          365      0</span></span>
 <span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; solarrad      365      0</span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:10:44:39</span></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; [1] &quot;C:\\Users\\tpet0008\\AppData\\Local\\Temp\\RtmpusmHqe\\file159812cc475.nc&quot;</span></span></code></pre></div>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:30:52</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; [1] &quot;C:\\Users\\tpet0008\\AppData\\Local\\Temp\\RtmpUPUtAu\\file6adc3052253.nc&quot;</span></span></code></pre></div>
 <div id="load-a-catchment-boundary" class="section level2">
 <h2>Load a catchment boundary</h2>
 <p>Now that we have the meteorological data we can begin extracting data
@@ -399,7 +399,7 @@ requires a set of constants, which are loaded as follows.</p>
 <p>Next, all 11 ET measures are derived. For each measure, only the
 following commands change: <em>ET.function</em> , <em>ET.timestep</em>
 and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>climateData.ET.HargreavesSamani <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>climateData.ET.HargreavesSamani <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                                <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                                <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>                                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -426,7 +426,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
 <span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:28</span></span>
 <span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>climateData.ET.JensenHaise <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>climateData.ET.JensenHaise <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>                                <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a>                                <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a>                                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -453,7 +453,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
 <span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:51</span></span>
 <span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a></span>
-<span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a>climateData.ET.Makkink <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a>climateData.ET.Makkink <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-56"><a href="#cb6-56" tabindex="-1"></a>                                <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-57"><a href="#cb6-57" tabindex="-1"></a>                                <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-58"><a href="#cb6-58" tabindex="-1"></a>                                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>,<span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -478,9 +478,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-77"><a href="#cb6-77" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb6-78"><a href="#cb6-78" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-79"><a href="#cb6-79" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-80"><a href="#cb6-80" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:51</span></span>
+<span id="cb6-80"><a href="#cb6-80" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:52</span></span>
 <span id="cb6-81"><a href="#cb6-81" tabindex="-1"></a></span>
-<span id="cb6-82"><a href="#cb6-82" tabindex="-1"></a>climateData.ET.McGuinnessBordne <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-82"><a href="#cb6-82" tabindex="-1"></a>climateData.ET.McGuinnessBordne <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-83"><a href="#cb6-83" tabindex="-1"></a>                               <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-84"><a href="#cb6-84" tabindex="-1"></a>                               <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-85"><a href="#cb6-85" tabindex="-1"></a>                               <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -505,9 +505,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-104"><a href="#cb6-104" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb6-105"><a href="#cb6-105" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-106"><a href="#cb6-106" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-107"><a href="#cb6-107" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:27</span></span>
+<span id="cb6-107"><a href="#cb6-107" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:31</span></span>
 <span id="cb6-108"><a href="#cb6-108" tabindex="-1"></a></span>
-<span id="cb6-109"><a href="#cb6-109" tabindex="-1"></a>climateData.ET.MortonCRAE <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-109"><a href="#cb6-109" tabindex="-1"></a>climateData.ET.MortonCRAE <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-110"><a href="#cb6-110" tabindex="-1"></a>                               <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-111"><a href="#cb6-111" tabindex="-1"></a>                               <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-112"><a href="#cb6-112" tabindex="-1"></a>                               <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -532,9 +532,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-131"><a href="#cb6-131" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb6-132"><a href="#cb6-132" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-133"><a href="#cb6-133" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-134"><a href="#cb6-134" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:14</span></span>
+<span id="cb6-134"><a href="#cb6-134" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:17</span></span>
 <span id="cb6-135"><a href="#cb6-135" tabindex="-1"></a></span>
-<span id="cb6-136"><a href="#cb6-136" tabindex="-1"></a>climateData.ET.MortonCRAE.potentialET <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-136"><a href="#cb6-136" tabindex="-1"></a>climateData.ET.MortonCRAE.potentialET <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-137"><a href="#cb6-137" tabindex="-1"></a>                               <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-138"><a href="#cb6-138" tabindex="-1"></a>                               <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-139"><a href="#cb6-139" tabindex="-1"></a>                               <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -560,9 +560,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-159"><a href="#cb6-159" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb6-160"><a href="#cb6-160" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-161"><a href="#cb6-161" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-162"><a href="#cb6-162" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:15</span></span>
+<span id="cb6-162"><a href="#cb6-162" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:16</span></span>
 <span id="cb6-163"><a href="#cb6-163" tabindex="-1"></a></span>
-<span id="cb6-164"><a href="#cb6-164" tabindex="-1"></a>climateData.ET.MortonCRAE.wetarealET <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-164"><a href="#cb6-164" tabindex="-1"></a>climateData.ET.MortonCRAE.wetarealET <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-165"><a href="#cb6-165" tabindex="-1"></a>                                <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-166"><a href="#cb6-166" tabindex="-1"></a>                                <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-167"><a href="#cb6-167" tabindex="-1"></a>                                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -590,7 +590,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-189"><a href="#cb6-189" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
 <span id="cb6-190"><a href="#cb6-190" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:15</span></span>
 <span id="cb6-191"><a href="#cb6-191" tabindex="-1"></a></span>
-<span id="cb6-192"><a href="#cb6-192" tabindex="-1"></a>climateData.ET.MortonCRAE.actualarealET <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-192"><a href="#cb6-192" tabindex="-1"></a>climateData.ET.MortonCRAE.actualarealET <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-193"><a href="#cb6-193" tabindex="-1"></a>                                 <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-194"><a href="#cb6-194" tabindex="-1"></a>                                 <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-195"><a href="#cb6-195" tabindex="-1"></a>                                 <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -616,9 +616,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-215"><a href="#cb6-215" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb6-216"><a href="#cb6-216" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-217"><a href="#cb6-217" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-218"><a href="#cb6-218" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:17</span></span>
+<span id="cb6-218"><a href="#cb6-218" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:20</span></span>
 <span id="cb6-219"><a href="#cb6-219" tabindex="-1"></a></span>
-<span id="cb6-220"><a href="#cb6-220" tabindex="-1"></a>climateData.ET.MortonCRWE <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-220"><a href="#cb6-220" tabindex="-1"></a>climateData.ET.MortonCRWE <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-221"><a href="#cb6-221" tabindex="-1"></a>                                 <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-222"><a href="#cb6-222" tabindex="-1"></a>                                 <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-223"><a href="#cb6-223" tabindex="-1"></a>                                 <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -644,9 +644,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-243"><a href="#cb6-243" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb6-244"><a href="#cb6-244" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-245"><a href="#cb6-245" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-246"><a href="#cb6-246" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:15</span></span>
+<span id="cb6-246"><a href="#cb6-246" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:16</span></span>
 <span id="cb6-247"><a href="#cb6-247" tabindex="-1"></a></span>
-<span id="cb6-248"><a href="#cb6-248" tabindex="-1"></a>climateData.ET.MortonCRWE.shallowLake <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-248"><a href="#cb6-248" tabindex="-1"></a>climateData.ET.MortonCRWE.shallowLake <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-249"><a href="#cb6-249" tabindex="-1"></a>                                 <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-250"><a href="#cb6-250" tabindex="-1"></a>                                 <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-251"><a href="#cb6-251" tabindex="-1"></a>                                 <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -672,9 +672,9 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-271"><a href="#cb6-271" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb6-272"><a href="#cb6-272" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-273"><a href="#cb6-273" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-274"><a href="#cb6-274" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:19</span></span>
+<span id="cb6-274"><a href="#cb6-274" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:15</span></span>
 <span id="cb6-275"><a href="#cb6-275" tabindex="-1"></a></span>
-<span id="cb6-276"><a href="#cb6-276" tabindex="-1"></a>climateData.ET.Turc <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
+<span id="cb6-276"><a href="#cb6-276" tabindex="-1"></a>climateData.ET.Turc <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span> ncdfFilename,</span>
 <span id="cb6-277"><a href="#cb6-277" tabindex="-1"></a>                                 <span class="at">extractFrom=</span> date.from,</span>
 <span id="cb6-278"><a href="#cb6-278" tabindex="-1"></a>                                 <span class="at">extractTo=</span> date.to,</span>
 <span id="cb6-279"><a href="#cb6-279" tabindex="-1"></a>                                 <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
@@ -699,7 +699,7 @@ and <em>ET.Mortons.est</em> (when Morton’s estimate is derived).</p>
 <span id="cb6-298"><a href="#cb6-298" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb6-299"><a href="#cb6-299" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-300"><a href="#cb6-300" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-301"><a href="#cb6-301" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:54</span></span></code></pre></div>
+<span id="cb6-301"><a href="#cb6-301" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:51</span></span></code></pre></div>
 <p>Next each estimate is plotted over time.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>filt <span class="ot">=</span> climateData.ET.HargreavesSamani<span class="sc">$</span>temporal.mean<span class="sc">$</span>Location.ID<span class="sc">==</span><span class="dv">407214</span></span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">ISOdate</span>(climateData.ET.HargreavesSamani<span class="sc">$</span>temporal.mean<span class="sc">$</span>year,</span>

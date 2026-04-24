@@ -342,7 +342,7 @@ precipitation</h1>
 
 
 
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(AWAPer)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(BOMcatchr)</span></code></pre></div>
 <p>This example shows how to build the required data files and then
 extract the daily rainfall at two sites. Here, one of the sites is at a
 rainfall gauge and the results are compared against observations.</p>
@@ -359,13 +359,13 @@ would be downloaded from 1/1/1900 to yesterday.</p>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>dataTo <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="st">&quot;2010-12-31&quot;</span>,<span class="st">&quot;%Y-%m-%d&quot;</span>)</span></code></pre></div>
 <p>The netCDF file contains grids of daily rainfall for all of Australia
 and is used below to extract data at points of interest. Often users run
-<em>makeNetCDF_file</em> once to build netCDF data files that contain
-all variables over the entire record length (which requires ~5GB disk
+<em>build.grids</em> once to build netCDF data files that contain all
+variables over the entire record length (which requires ~5GB disk
 storage) and then use the netCDFs grids for multiple projects, rather
 than re-building the netCDF for each project. Also, if
-<em>makeNetCDF_file</em> is run with the the netCDF file name pointing
-to existing files and <em>updateFrom=NA</em> then the netCDF files will
-be updated to yesterday.</p>
+<em>build.grids</em> is run with the the netCDF file name pointing to
+existing files and <em>updateFrom=NA</em> then the netCDF files will be
+updated to yesterday.</p>
 <p>To start to create the grids, the file name for the netCDF grids
 needs to be defined. Here we’ll just use a temporary file. You should
 change this to a non-temporary file name and folder.</p>
@@ -373,7 +373,7 @@ change this to a non-temporary file name and folder.</p>
 <p>Now with the inputs defined we can download the gridded data and
 build the netCDF file. Note, here <em>vars</em> is set to only download
 daily precipitation.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>fnames <span class="ot">=</span> <span class="fu">makeNetCDF_file</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>fnames <span class="ot">=</span> <span class="fu">build.grids</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                         <span class="at">updateFrom =</span> dataFrom,</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                         <span class="at">updateTo =</span> dataTo,</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                         <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip&#39;</span>, <span class="st">&#39;precip.monthly&#39;</span>))</span>
@@ -390,7 +390,7 @@ daily precipitation.</p>
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt;                Imported Errors</span></span>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; precip              365      0</span></span>
 <span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; precip.monthly       12      0</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:05:59</span></span></code></pre></div>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:04:58</span></span></code></pre></div>
 </div>
 <div id="set-the-points-for-data-extraction" class="section level2">
 <h2>Set the points for data extraction</h2>
@@ -413,7 +413,7 @@ data is extracted from the netCDF file <em>ncdfFilename</em> and between
 the dates <em>extractFrom</em> and <em>extractTo</em>.</p>
 <p>Note the netCDF file <em>ncdfFilename</em> must be in the working
 directory or the full file path must be given.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>extracted.data <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>extracted.data <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                                        <span class="at">extractFrom =</span> dataFrom,</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                                        <span class="at">extractTo =</span> dataTo,</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>                                        <span class="at">locations =</span> coordinates.data,</span>
@@ -430,7 +430,7 @@ directory or the full file path must be given.</p>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:25</span></span></code></pre></div>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:26</span></span></code></pre></div>
 </div>
 <div id="plot-the-daily-precipitation-at-each-site" class="section level2">
 <h2>Plot the daily precipitation at each site</h2>
@@ -503,7 +503,7 @@ also at the centre.</p>
 extracted monthly data and aggregated daily data to a monthly time
 scale.</p>
 <p>First, let’s extract the daily data at a monthly scale</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>extracted.daily2monthly <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>extracted.daily2monthly <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>                                        <span class="at">extractFrom =</span> dataFrom,</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>                                        <span class="at">extractTo =</span> dataTo,</span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>                                        <span class="at">locations =</span> coordinates.data,</span>
@@ -521,9 +521,9 @@ scale.</p>
 <span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
 <span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:31</span></span></code></pre></div>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:24</span></span></code></pre></div>
 <p>Next let’s extract the monthly data product.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>extracted.monthly <span class="ot">=</span> <span class="fu">extractCatchmentData</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>extracted.monthly <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>                                        <span class="at">extractFrom =</span> dataFrom,</span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>                                        <span class="at">extractTo =</span> dataTo,</span>
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>                                        <span class="at">locations =</span> coordinates.data,</span>

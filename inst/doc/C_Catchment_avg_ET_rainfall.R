@@ -3,7 +3,7 @@ knitr::opts_chunk$set(collapse = T, comment = "#>")
 options(tibble.print_min = 4L, tibble.print_max = 4L)
 
 ## ----setup--------------------------------------------------------------------
-library(AWAPer, warn.conflicts = FALSE)
+library(BOMcatchr, warn.conflicts = FALSE)
 
 ## -----------------------------------------------------------------------------
 library(raster)
@@ -16,7 +16,7 @@ date.to = as.Date("2010-10-31","%Y-%m-%d")
 ncdfFilename = tempfile(fileext='.nc')
 
 ## -----------------------------------------------------------------------------
-fname = makeNetCDF_file(ncdfFilename = ncdfFilename,
+fname = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad'))
@@ -28,7 +28,7 @@ data("catchments")
 data(constants,package='Evapotranspiration')
 
 ## -----------------------------------------------------------------------------
-climateData.daily = extractCatchmentData(ncdfFilename=ncdfFilename,
+climateData.daily = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -97,7 +97,7 @@ yaxt = "n", bty = "l", yaxs = "i")
 }
 
 ## -----------------------------------------------------------------------------
-PrecipData.monthly = extractCatchmentData(ncdfFilename=ncdfFilename,
+PrecipData.monthly = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
                      vars = c('precip'),
@@ -113,7 +113,7 @@ sp::spplot(PrecipData.monthly,colInd, sp.layout = list(v),
         colorkey = list(title = "Precip (mm/month)"))
 
 ## -----------------------------------------------------------------------------
-metData.monthly = extractCatchmentData(ncdfFilename=ncdfFilename,
+metData.monthly = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -170,7 +170,7 @@ sp::coordinates(coordinates.data) <- ~Longitude + Latitude
 sp::proj4string(coordinates.data) = '+proj=longlat +ellps=GRS80 +no_defs'
 
 ## -----------------------------------------------------------------------------
-metData.monthly.weighted = extractCatchmentData(ncdfFilename=ncdfFilename,
+metData.monthly.weighted = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
@@ -183,7 +183,7 @@ metData.monthly.weighted = extractCatchmentData(ncdfFilename=ncdfFilename,
                      ET.Mortons.est='wet areal ET',
                      ET.constants= constants)
 
-metData.monthly.centroid = extractCatchmentData(ncdfFilename=ncdfFilename,
+metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
