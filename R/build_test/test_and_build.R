@@ -45,12 +45,12 @@ writeLines(lines, ".Rbuildignore")
 devtools::load_all()
 browseVignettes("BOMcatchr")
 
-# Build news.html
-pkgdown::build_news()
-
 # Move vignettes to inst/doc so that they're prebuilt.
 unlink('inst/doc', recursive = T)
 file.rename(from = 'doc/', to = 'inst/doc')
+
+# Build news.html
+pkgdown::build_news()
 
 # Update github.io page using pkgdown()
 usethis::use_pkgdown_github_pages()
