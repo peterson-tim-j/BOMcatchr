@@ -61,7 +61,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdfFilename,
 #> precip       11      0
 #> tmin         11      0
 #> tmax         11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:29
+#> Total run time (DD:HH:MM:SS): 00:00:00:21
 ```
 
 Now let’s get a summary of the netCDF file that we’ve created. Note that
@@ -114,7 +114,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
 #> precip       11      0
 #> tmin         11      0
 #> tmax         11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:16
+#> Total run time (DD:HH:MM:SS): 00:00:00:12
 ```
 
 ## Add a variable to existing data grids
@@ -143,7 +143,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
 #> Summary of time points successfully imported (and errors).
 #>      Imported Errors
 #> vprp       11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:11
+#> Total run time (DD:HH:MM:SS): 00:00:00:09
 ```
 
 Now let’s check that the file includes both the original three variable
@@ -198,7 +198,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
 #> tmin           16      0
 #> tmax           16      0
 #> vprp           16      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:56
+#> Total run time (DD:HH:MM:SS): 00:00:00:47
 ```
 
 Now let’s check that the file includes both the prior four variables
