@@ -10,7 +10,7 @@
 ^doc$
 ^Meta$
 ^BOMcatchr.pdf$
-^test_and_build.R$
+^R/build_test/.*
 ^NEWS.md$
 ^NEWS.html$
 ^vignettes$
