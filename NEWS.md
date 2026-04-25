@@ -1,8 +1,8 @@
-# BOMcatchr - 0.2.10
+# BOMcatchr 0.2.10
 
 * First release of renamed package to BOMcatchr
 
-# AWAPer 0.2.00
+# BOMcatchr 0.2.00
 
 * Final version of AWAPer before function names changed from that published in the paper.  
 
@@ -10,7 +10,7 @@
 - Water year functionality fixed and vignette added.
 - Documentation expanded to detail returned data.frames. 
 
-# AWAPer 0.1.60
+# BOMcatchr 0.1.60
 
 * Major improvements to robustness and the data sources handled.
 
@@ -21,7 +21,7 @@
 - Stronger error handling of input dates and ET settings.
 - Summary of build netcDF file now provided by file.summary() 
 
-# AWAPer 0.1.50
+# BOMcatchr 0.1.50
 
 * Functional again after being removed from CRAN because of BOM download issues! 🎉
 
