@@ -390,7 +390,7 @@ daily precipitation.</p>
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt;                Imported Errors</span></span>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; precip              365      0</span></span>
 <span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; precip.monthly       12      0</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:04:58</span></span></code></pre></div>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:05:11</span></span></code></pre></div>
 </div>
 <div id="set-the-points-for-data-extraction" class="section level2">
 <h2>Set the points for data extraction</h2>
@@ -430,7 +430,7 @@ directory or the full file path must be given.</p>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:26</span></span></code></pre></div>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:32</span></span></code></pre></div>
 </div>
 <div id="plot-the-daily-precipitation-at-each-site" class="section level2">
 <h2>Plot the daily precipitation at each site</h2>
@@ -521,7 +521,7 @@ scale.</p>
 <span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
 <span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:24</span></span></code></pre></div>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:31</span></span></code></pre></div>
 <p>Next let’s extract the monthly data product.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>extracted.monthly <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>                                        <span class="at">extractFrom =</span> dataFrom,</span>
@@ -558,8 +558,8 @@ extracted daily precipitation aggregated to monthly. It shows that the
 daily gridded data has a modest bias when aggregated to monthly (at
 least for 2010).</p>
 <p>The centre plot shows the monthly gauged precipitation vs the
-extracted monthly precipitation. It shows a clear bias at and above 100
-mm/month and the significant over-estimation of one month.</p>
+extracted monthly precipitation. It shows a slighter greater bias at and
+above 100 mm/month.</p>
 <p>The bottom plot show the extracted monthly precipitation vs the
 extracted daily precipitation aggregated to monthly. It shows that the
 daily aggregated precipitation estimates a slightly higher monthly

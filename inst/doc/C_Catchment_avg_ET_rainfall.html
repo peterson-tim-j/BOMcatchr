@@ -399,7 +399,7 @@ file names.</p>
 <span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; precip        123      0</span></span>
 <span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt; vprp          123      0</span></span>
 <span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; solarrad      123      0</span></span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:10:12</span></span></code></pre></div>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:11:46</span></span></code></pre></div>
 </div>
 <div id="load-a-catchment-boundary" class="section level2">
 <h2>Load a catchment boundary</h2>
@@ -466,7 +466,7 @@ changed from the default of to .</p>
 <span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:31</span></span></code></pre></div>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:55</span></span></code></pre></div>
 <p>Next time series of the extracted daily precipitation and PET for
 each catchment is plotted. The precipitation plots show both the area
 weighted estimate and the spatial variability on each day (as +/- one
@@ -560,7 +560,7 @@ number should work.</p>
 <span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; ... Backfilling dates prior to the start of observations</span></span>
 <span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:03</span></span></code></pre></div>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:07</span></span></code></pre></div>
 <p>The monthly total precipitation can then be mapped to show the
 spatial variability.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>v <span class="ot">=</span> <span class="fu">list</span>(<span class="st">&quot;sp.polygons&quot;</span>, catchments, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>,<span class="at">first=</span><span class="cn">FALSE</span>)</span>
@@ -598,7 +598,7 @@ map.</p>
 <span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:31</span></span></code></pre></div>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:56</span></span></code></pre></div>
 <p>The monthly total PET can then be mapped to show the spatial
 variability. The map below shows considerable spatial variability. Much
 of this variability would not emerges if only point PET at the catchment
@@ -680,7 +680,7 @@ weighted approach and centroids.</p>
 <span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:31</span></span>
+<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:57</span></span>
 <span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a></span>
 <span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a>metData.monthly.centroid <span class="ot">=</span> <span class="fu">extract.data</span>(<span class="at">ncdfFilename=</span>ncdfFilename,</span>
 <span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a>                     <span class="at">extractFrom=</span>date.from,</span>
@@ -709,11 +709,11 @@ weighted approach and centroids.</p>
 <span id="cb16-55"><a href="#cb16-55" tabindex="-1"></a><span class="co">#&gt; ... Calculate daily ET at each grid cell.</span></span>
 <span id="cb16-56"><a href="#cb16-56" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb16-57"><a href="#cb16-57" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb16-58"><a href="#cb16-58" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:48</span></span></code></pre></div>
+<span id="cb16-58"><a href="#cb16-58" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:25</span></span></code></pre></div>
 <p>Now let’s compare the two estimates of precipitation, PET and
 rainfall deficit. The right most plots below show the rainfall deficit.
-It shows that using centroid estimate introduces errors of up to 6
-mm/month error.</p>
+It shows that using centroid estimate introduces errors of 6 to 21
+mm/month.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>), <span class="at">mar =</span>  <span class="fu">c</span>(<span class="dv">5</span>, <span class="fl">7.5</span>, <span class="dv">4</span>, <span class="fl">2.7</span>) <span class="sc">+</span> <span class="fl">0.1</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a></span>
 <span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="co"># Loop through each catchment and plot the daily precipitation and PET.</span></span>
