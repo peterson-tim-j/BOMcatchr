@@ -223,7 +223,7 @@ for (i in 1:length(catchments$CatchID)) {
        col = "red",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data) * 1.1)),
+       ylim = c(0, ceiling(max(y.data) * 1.2)),
        ylab = "Precip. [mm/year]",
        xlab = "Water year (end year)",
        xaxs = "r",

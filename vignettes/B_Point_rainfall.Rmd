@@ -179,7 +179,7 @@ Now we can compare the extracted estimates of monthly precipitation with the gau
 
 The top plot below shows the monthly gauged precipitation vs the extracted daily precipitation aggregated to monthly. It shows that the daily gridded data has a modest bias when aggregated to monthly (at least for 2010).
 
-The centre plot shows the monthly gauged precipitation vs the extracted monthly precipitation. It shows a clear bias at and above 100 mm/month and the significant over-estimation of one month.
+The centre plot shows the monthly gauged precipitation vs the extracted monthly precipitation. It shows a slighter greater bias at and above 100 mm/month.
 
 The bottom plot show the extracted monthly precipitation vs the extracted daily precipitation aggregated to monthly. It shows that the daily aggregated precipitation estimates a slightly higher monthly precipitation.
 
