@@ -72,7 +72,7 @@ fname = build.grids(ncdfFilename = ncdfFilename,
 #> precip        123      0
 #> vprp          123      0
 #> solarrad      123      0
-#> Total run time (DD:HH:MM:SS): 00:00:07:55
+#> Total run time (DD:HH:MM:SS): 00:00:07:49
 ```
 
 ## Load a catchment boundary
@@ -150,7 +150,7 @@ climateData.daily = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:26
+#> Total run time (DD:HH:MM:SS): 00:00:00:27
 ```
 
 Next time series of the extracted daily precipitation and PET for each
@@ -298,7 +298,7 @@ metData.monthly = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:25
+#> Total run time (DD:HH:MM:SS): 00:00:00:27
 ```
 
 The monthly total PET can then be mapped to show the spatial
@@ -401,7 +401,7 @@ metData.monthly.weighted = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:25
+#> Total run time (DD:HH:MM:SS): 00:00:00:26
 
 metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
@@ -430,7 +430,7 @@ metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:38
+#> Total run time (DD:HH:MM:SS): 00:00:00:39
 ```
 
 Now let’s compare the two estimates of precipitation, PET and rainfall

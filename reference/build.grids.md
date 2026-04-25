@@ -113,7 +113,7 @@ for extracting catchment daily average and variance data.
 
 ``` r
 # The example shows how to build the netCDF data cubes.
-# For an additional example see \url{https://github.com/peterson-tim-j/BOMcatchr/blob/master/README.md}
+# For extra example see \url{https://github.com/peterson-tim-j/BOMcatchr/blob/master/README.md}
 #---------------------------------------
 
 # Set dates for building netCDFs and extracting data from 15 to 5 days ago.
@@ -134,13 +134,13 @@ file.names = build.grids(ncdfFilename=ncdfFilename,
 #> ... NetCDF file will be updated as follows:
 #>        - New variables to add: precip  
 #>        - Existing variables to modify: (none)
-#>        - Data will be updated from  2026-04-09  to  2026-04-19
+#>        - Data will be updated from  2026-04-10  to  2026-04-20
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).
 #>        Imported Errors
 #> precip       11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:08
+#> Total run time (DD:HH:MM:SS): 00:00:00:09
 
 # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 # the same file names but \code{updateFrom=NA}.
@@ -153,7 +153,7 @@ file.names = build.grids(ncdfFilename=ncdfFilename,
 #> ... NetCDF file will be updated as follows:
 #>        - New variables to add: (none)
 #>        - Existing variables to modify: precip  
-#>        - Data will be updated from  2026-04-09  to  2026-04-19
+#>        - Data will be updated from  2026-04-10  to  2026-04-20
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).

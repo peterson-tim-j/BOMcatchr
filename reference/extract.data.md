@@ -314,7 +314,7 @@ file.name = build.grids(ncdfFilename=ncdfFilename,
 #> Summary of time points successfully imported (and errors).
 #>        Imported Errors
 #> precip       14      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:10
+#> Total run time (DD:HH:MM:SS): 00:00:00:09
 
 # Load example catchment boundaries and remove all but the first.
 # Note, this is done only to speed up the example runtime.

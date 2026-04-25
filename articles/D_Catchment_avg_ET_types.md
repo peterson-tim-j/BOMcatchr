@@ -47,8 +47,8 @@ build.grids(ncdfFilename = ncdfFilename,
 #> tmax          365      0
 #> vprp          365      0
 #> solarrad      365      0
-#> Total run time (DD:HH:MM:SS): 00:00:21:59
-#> [1] "/tmp/RtmpwHWkZE/file2ed92174e4c.nc"
+#> Total run time (DD:HH:MM:SS): 00:00:22:16
+#> [1] "/tmp/Rtmpwxw0Qb/file2ff02628ca6e.nc"
 ```
 
 ## Load a catchment boundary
@@ -105,7 +105,7 @@ climateData.ET.HargreavesSamani = extract.data(ncdfFilename= ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:26
+#> Total run time (DD:HH:MM:SS): 00:00:00:27
 
 climateData.ET.JensenHaise = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
@@ -132,7 +132,7 @@ climateData.ET.JensenHaise = extract.data(ncdfFilename= ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:44
+#> Total run time (DD:HH:MM:SS): 00:00:00:45
 
 climateData.ET.Makkink = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
@@ -159,7 +159,7 @@ climateData.ET.Makkink = extract.data(ncdfFilename= ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:44
+#> Total run time (DD:HH:MM:SS): 00:00:00:45
 
 climateData.ET.McGuinnessBordne = extract.data(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
@@ -186,7 +186,7 @@ climateData.ET.McGuinnessBordne = extract.data(ncdfFilename= ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:22
+#> Total run time (DD:HH:MM:SS): 00:00:00:23
 
 climateData.ET.MortonCRAE = extract.data(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
@@ -213,7 +213,7 @@ climateData.ET.MortonCRAE = extract.data(ncdfFilename= ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:07
+#> Total run time (DD:HH:MM:SS): 00:00:01:08
 
 climateData.ET.MortonCRAE.potentialET = extract.data(ncdfFilename= ncdfFilename,
                                extractFrom= date.from,
@@ -241,7 +241,7 @@ climateData.ET.MortonCRAE.potentialET = extract.data(ncdfFilename= ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:07
+#> Total run time (DD:HH:MM:SS): 00:00:01:08
 
 climateData.ET.MortonCRAE.wetarealET = extract.data(ncdfFilename= ncdfFilename,
                                 extractFrom= date.from,
@@ -380,7 +380,7 @@ climateData.ET.Turc = extract.data(ncdfFilename= ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:43
+#> Total run time (DD:HH:MM:SS): 00:00:00:44
 ```
 
 Next each estimate is plotted over time.
