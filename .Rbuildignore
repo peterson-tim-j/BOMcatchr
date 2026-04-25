@@ -9,9 +9,9 @@
 ^pkgdown$
 ^doc$
 ^Meta$
-BOMcatchr.pdf
-test_and_build.R
-NEWS.md
-NEWS.html
+^BOMcatchr.pdf$
+^test_and_build.R$
+^NEWS.md$
+^NEWS.html$
 ^vignettes$
 ^vignettes/.*
