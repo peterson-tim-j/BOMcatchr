@@ -63,7 +63,7 @@ fnames = build.grids(ncdfFilename = ncdfFilename,
 #>                Imported Errors
 #> precip              365      0
 #> precip.monthly       12      0
-#> Total run time (DD:HH:MM:SS): 00:00:03:57
+#> Total run time (DD:HH:MM:SS): 00:00:04:17
 ```
 
 ## Set the points for data extraction
@@ -110,7 +110,7 @@ extracted.data = extract.data(ncdfFilename = ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:25
+#> Total run time (DD:HH:MM:SS): 00:00:00:24
 ```
 
 ## Plot the daily precipitation at each site
@@ -218,7 +218,7 @@ extracted.daily2monthly = extract.data(ncdfFilename = ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:21
+#> Total run time (DD:HH:MM:SS): 00:00:00:20
 ```
 
 Next let’s extract the monthly data product.

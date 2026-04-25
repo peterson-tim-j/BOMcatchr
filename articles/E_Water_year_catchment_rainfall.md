@@ -40,28 +40,28 @@ fname = build.grids(ncdfFilename = ncdfFilename,
 #>        - Data will be updated from  2010-01-01  to  2015-12-31
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpJOyrly/986091 2020-08-29 00:31', reason 'No such file or
+#> remove file '/tmp/RtmptNfOOm/986091 2020-08-29 00:31', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpJOyrly/976111 2020-08-29 00:32', reason 'No such file or
+#> remove file '/tmp/RtmptNfOOm/976111 2020-08-29 00:32', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpJOyrly/931641 2020-08-29 00:44', reason 'No such file or
+#> remove file '/tmp/RtmptNfOOm/931641 2020-08-29 00:44', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpJOyrly/924657 2020-08-29 00:58', reason 'No such file or
+#> remove file '/tmp/RtmptNfOOm/924657 2020-08-29 00:58', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpJOyrly/996250 2020-08-29 01:11', reason 'No such file or
+#> remove file '/tmp/RtmptNfOOm/996250 2020-08-29 01:11', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpJOyrly/973278 2020-08-29 01:12', reason 'No such file or
+#> remove file '/tmp/RtmptNfOOm/973278 2020-08-29 01:12', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpJOyrly/998987 2020-08-29 01:13', reason 'No such file or
+#> remove file '/tmp/RtmptNfOOm/998987 2020-08-29 01:13', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/RtmpJOyrly/944133 2020-08-29 01:24', reason 'No such file or
+#> remove file '/tmp/RtmptNfOOm/944133 2020-08-29 01:24', reason 'No such file or
 #> directory'
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).
@@ -69,7 +69,7 @@ fname = build.grids(ncdfFilename = ncdfFilename,
 #> precip             2191      0
 #> precip.RMSE        2191      0
 #> precip.monthly       72      0
-#> Total run time (DD:HH:MM:SS): 00:00:45:57
+#> Total run time (DD:HH:MM:SS): 00:00:47:10
 ```
 
 ## Load a catchment boundary
@@ -142,7 +142,7 @@ climateData.annual.err = extract.data(ncdfFilename=ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:55
+#> Total run time (DD:HH:MM:SS): 00:00:00:54
 ```
 
 ``` r
@@ -243,7 +243,7 @@ climateData.daily2wateryear = extract.data(ncdfFilename=ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:55
+#> Total run time (DD:HH:MM:SS): 00:00:00:56
 ```
 
 Now let’s estimate the uncertainty in the water year rainfall using the
