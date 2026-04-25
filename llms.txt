@@ -24,13 +24,15 @@ Some of the features include:
     variability in precipitation and potential evapotranspiration (see
     examples
     [here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet))
-3.  Ten measures of area weighted and point evapotranspiration (see
-    examples
+3.  Ten measures of evapotranspiration (see examples
     [here](https://peterson-tim-j.github.io/BOMcatchr/articles/D_Catchment_avg_ET_types.html))
     using the [Evaporation
     package](https://cran.r-project.org/web/packages/Evapotranspiration/index.html),
     implementing [McMahon et al,
     (2013)](https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf),
+4.  Water-year total rainfall with estimated rain gauge interpolation
+    error (see examples
+    [here](https://peterson-tim-j.github.io/BOMcatchr/articles/E_Water_year_catchment_rainfall.html))
 
 The meteorological data is sourced from Australian Bureau of Meteorology
 (BOM) ~5x5km gridded products (see

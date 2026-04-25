@@ -140,7 +140,7 @@ file.names = build.grids(ncdfFilename=ncdfFilename,
 #> Summary of time points successfully imported (and errors).
 #>        Imported Errors
 #> precip       11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:09
+#> Total run time (DD:HH:MM:SS): 00:00:00:08
 
 # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 # the same file names but \code{updateFrom=NA}.

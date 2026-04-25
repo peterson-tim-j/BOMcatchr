@@ -72,7 +72,7 @@ fname = build.grids(ncdfFilename = ncdfFilename,
 #> precip        123      0
 #> vprp          123      0
 #> solarrad      123      0
-#> Total run time (DD:HH:MM:SS): 00:00:07:49
+#> Total run time (DD:HH:MM:SS): 00:00:07:35
 ```
 
 ## Load a catchment boundary
@@ -150,7 +150,7 @@ climateData.daily = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:27
+#> Total run time (DD:HH:MM:SS): 00:00:00:28
 ```
 
 Next time series of the extracted daily precipitation and PET for each
@@ -401,7 +401,7 @@ metData.monthly.weighted = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:26
+#> Total run time (DD:HH:MM:SS): 00:00:00:27
 
 metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
@@ -430,13 +430,12 @@ metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:39
+#> Total run time (DD:HH:MM:SS): 00:00:00:41
 ```
 
 Now let’s compare the two estimates of precipitation, PET and rainfall
 deficit. The right most plots below show the rainfall deficit. It shows
-that using centroid estimate introduces errors of up to 6 mm/month
-error.
+that using centroid estimate introduces errors of 6 to 21 mm/month.
 
 ``` r
 par(mfrow=c(2,3), mar =  c(5, 7.5, 4, 2.7) + 0.1)

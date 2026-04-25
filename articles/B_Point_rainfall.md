@@ -63,7 +63,7 @@ fnames = build.grids(ncdfFilename = ncdfFilename,
 #>                Imported Errors
 #> precip              365      0
 #> precip.monthly       12      0
-#> Total run time (DD:HH:MM:SS): 00:00:03:54
+#> Total run time (DD:HH:MM:SS): 00:00:04:10
 ```
 
 ## Set the points for data extraction
@@ -110,7 +110,7 @@ extracted.data = extract.data(ncdfFilename = ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:24
+#> Total run time (DD:HH:MM:SS): 00:00:00:25
 ```
 
 ## Plot the daily precipitation at each site
@@ -218,7 +218,7 @@ extracted.daily2monthly = extract.data(ncdfFilename = ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:21
+#> Total run time (DD:HH:MM:SS): 00:00:00:22
 ```
 
 Next let’s extract the monthly data product.
@@ -267,8 +267,8 @@ daily gridded data has a modest bias when aggregated to monthly (at
 least for 2010).
 
 The centre plot shows the monthly gauged precipitation vs the extracted
-monthly precipitation. It shows a clear bias at and above 100 mm/month
-and the significant over-estimation of one month.
+monthly precipitation. It shows a slighter greater bias at and above 100
+mm/month.
 
 The bottom plot show the extracted monthly precipitation vs the
 extracted daily precipitation aggregated to monthly. It shows that the

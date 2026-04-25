@@ -42,7 +42,42 @@
       <small>Source: <a href="https://github.com/peterson-tim-j/BOMcatchr/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
-  </main></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.10" id="bomcatchr-0210">BOMcatchr 0.2.10<a class="anchor" aria-label="anchor" href="#bomcatchr-0210"></a></h2>
+<ul><li>First release of renamed package to BOMcatchr</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.00" id="bomcatchr-0200">BOMcatchr 0.2.00<a class="anchor" aria-label="anchor" href="#bomcatchr-0200"></a></h2>
+<ul><li><p>Final version of AWAPer before function names changed from that published in the paper.</p></li>
+<li><p>Improvements to robustness of data extraction made, eg. daily and monthly data extracted in one call.</p></li>
+<li><p>Water year functionality fixed and vignette added.</p></li>
+<li><p>Documentation expanded to detail returned data.frames.</p></li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.60" id="bomcatchr-0160">BOMcatchr 0.1.60<a class="anchor" aria-label="anchor" href="#bomcatchr-0160"></a></h2>
+<ul><li><p>Major improvements to robustness and the data sources handled.</p></li>
+<li><p>All data is now stored with one netCDF files. This is achieved using netCDF groups.</p></li>
+<li><p>All source data attributes (e.g. url, time step, spatial datum) are now no longer hard coded, but rather supplied by get.variableSource(). This allows updating for source data information without package changes.</p></li>
+<li><p>Monthly source precipitation grids now handled (see [here] (<a href="https://www.bom.gov.au/climate/austmaps/about-agcd-maps.shtml" class="external-link uri">https://www.bom.gov.au/climate/austmaps/about-agcd-maps.shtml</a>) for details of monthly gridded data).</p></li>
+<li><p>Vignettes extended to better evaluate results against rain gauge data and demonstrate the new features.<br></p></li>
+<li><p>Stronger error handling of input dates and ET settings.</p></li>
+<li><p>Summary of build netcDF file now provided by file.summary()</p></li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.50" id="bomcatchr-0150">BOMcatchr 0.1.50<a class="anchor" aria-label="anchor" href="#bomcatchr-0150"></a></h2>
+<ul><li><p>Functional again after being removed from CRAN because of BOM download issues! 🎉</p></li>
+<li><p><a href="https://peterson-tim-j.github.io/AWAPer/reference/extractCatchmentData.html" class="external-link">extractCatchmentData</a> function modified to no longer require download of a digital elevation model (DEM) when calculating ET. Instead the <a href="https://cran.r-project.org/web/packages/elevatr/index.html" class="external-link">elevatr</a> package is used to download elevations from an Amazon Web Service.</p></li>
+<li>
+<p>Vignette:</p>
+<ul><li><a href="https://peterson-tim-j.github.io/AWAPer/articles/AWAPer.html" class="external-link">Getting Started</a></li>
+<li><a href="https://peterson-tim-j.github.io/AWAPer/articles/A_Make_data_grids.html" class="external-link">Making and update data grids</a></li>
+<li><a href="https://peterson-tim-j.github.io/AWAPer/articles/B_Point_rainfall.html" class="external-link">Extracting time-series point data</a></li>
+<li><a href="https://peterson-tim-j.github.io/AWAPer/articles/C_Catchment_avg_ET_rainfall.html" class="external-link">Extracting time-series area weighted data</a></li>
+<li><a href="https://peterson-tim-j.github.io/AWAPer/articles/D_Catchment_avg_ET_types.html" class="external-link">Extracting time-series ET area weighted data</a></li>
+</ul></li>
+</ul></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
