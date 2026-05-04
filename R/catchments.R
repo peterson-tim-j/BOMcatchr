@@ -4,8 +4,16 @@
 #' Bet Bet Creek (ID 407220, Vic., Australia, see \url{http://www.bom.gov.au/water/hrs/#id=407220}).
 #'
 #' The catchments can be used to extract catchment average climate data usng \code{extract.data}
-#' @format SpatialPolygonDataFrame
+#' @return terra::SpatVector
 #' @seealso
 #' \code{\link{extract.data}} for extracting catchment average climate data.
-#' @usage data("catchments")
-"catchments"
+#' @export
+catchments <- function() {
+  path <- system.file("extdata", "catchments.gpkg", package = "BOMcatchr")
+
+  if (path == "") {
+    stop("Internal catchment boundary data file not found. Please reinstall the package.")
+  }
+
+  terra::vect(path)
+}
