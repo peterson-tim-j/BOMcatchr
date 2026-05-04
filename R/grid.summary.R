@@ -68,7 +68,7 @@ grid.summary <- function(ncfile) {
         date.from = as.Date(date.from, '%Y-%m-%d')
         date.to = as.Date(date.to, '%Y-%m-%d')
         grp.string = RNetCDF::grp.inq.nc(igrp)$name
-        var.string = paste(grp.string, '/', var.tmp$name, sep='' )
+        var.string = paste('/',grp.string, '/', var.tmp$name, sep='' )
 
         ellipsoid.crs = RNetCDF::att.get.nc(igrp, 'NC_GLOBAL', 'CRS')
 
