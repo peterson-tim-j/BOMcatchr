@@ -16,7 +16,7 @@ options(tibble.print_min = 4L, tibble.print_max = 4L)
 ```
 
 ```{r setup}
-library(BOMcatchr, warn.conflicts = FALSE)
+library(BOMcatchr)
 ```
 
 ## Make netCDF files
@@ -41,20 +41,20 @@ fname = build.grids(ncdfFilename = ncdfFilename,
 ## Load a catchment boundary
 Now that we have the meteorological data we can begin extracting data for two catchments. Here the catchment boundaries built into the package are used.
 ```{r}
-data("catchments")
+catch = catchments()
 ```
 ## Extract calendar year precipitation
 Next let's extract the calendar year area weighted total precipitation across the two catchments. The data is extracted between the dates _extract.from_ and _extract.to_. Because the output time step can be estimated from both the daily and monthly source data, both can be extracted at the same time.
 
 ```{r}
-climateData.annual = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.annual = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip', 'precip.monthly'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = 'annual',
-                      temporal.function.name='sum',
-                      spatial.function.name='var')
+                      temporal.function.name = 'sum',
+                      spatial.function.name = 'var')
 ```
 
 Now let's also estimate the uncertainty in the calender year rainfall using the root mean square interpolation error (RMSE). Specifically, we are assuming that the error is unbiased, which allows us to assume the RMSE equals the standard deviation. Taking the square of it gives us the variance, which we can sum over the water year. Once all of the calender year data is extracted, the total annual precipitation is plotted.
@@ -62,11 +62,11 @@ Now let's also estimate the uncertainty in the calender year rainfall using the 
 ```{r}
 sqrd.sum <- function(x) {return(sum(x^2))}
 
-climateData.annual.err = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.annual.err = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip.RMSE'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = 'annual',
                       temporal.function.name = sqrd.sum,
                       spatial.function.name = 'var')
@@ -148,24 +148,24 @@ wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(d
 ```
 
 ```{r}
-climateData.daily2wateryear = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.daily2wateryear = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = wateryear.ind,
-                      temporal.function.name='sum',
-                      spatial.function.name='var')
+                      temporal.function.name = 'sum',
+                      spatial.function.name = 'var')
 ```
 
 Now let's estimate the uncertainty in the water year rainfall using the root mean square interpolation error (RMSE).
 
 ```{r}
-climateData.daily2wateryear.err = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.daily2wateryear.err = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip.RMSE'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name = sqrd.sum,
                       spatial.function.name = 'var')
@@ -178,14 +178,14 @@ wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(d
 ```
 
 ```{r}
-climateData.month2wateryear = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.month2wateryear = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip.monthly'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = wateryear.ind,
-                      temporal.function.name='sum',
-                      spatial.function.name='var')
+                      temporal.function.name = 'sum',
+                      spatial.function.name = 'var')
 ```
 
 Before plotting the water year data, the time steps with less than a full water year of data are filtered out.
