@@ -10,8 +10,8 @@
 ^doc$
 ^Meta$
 BOMcatchr.pdf
-test_and_build.R
+^R/build_test/.*
+^R/build_test
 NEWS.md
 NEWS.html
-^vignettes$
-^vignettes/.*
+^data-raw$
