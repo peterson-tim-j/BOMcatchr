@@ -9,7 +9,7 @@ extract.data(
   extractFrom = as.Date("1900-01-01", "\%Y-\%m-\%d"),
   extractTo = as.Date(Sys.Date(), "\%Y-\%m-\%d"),
   vars = "",
-  locations = NULL,
+  locations = NA,
   temporal.timestep = "daily",
   temporal.function.name = "mean",
   spatial.function.name = "var",
@@ -93,7 +93,7 @@ When \code{locations} are polygons and \code{spatial.function.name} is not \code
 metrics named \code{catchmentTemporal.} with a suffix as defined by \code{temporal.function.name}). The second is the measure of spatial variability
 named \code{catchmentSpatial.} with a suffix as defined by \code{spatial.function.name}).
 
-When \code{locations} are polygons and \code{spatial.function.name} does equal \code{NA} or \code{""}, then the returned variable is a \code{sp::SpatialPixelsDataFrame} where the first column is the location/catchment IDs
+When \code{locations} are polygons and \code{spatial.function.name} does equal \code{NA} or \code{""}, then the returned variable is a \code{terra::vect} object where the first column is the location/catchment IDs
 and the latter columns are the results for each variable at each time point as defined by \code{temporal.timestep}.
 
 When \code{locations} are points, the returned variable is a data.frame containing daily climate data at each point.
@@ -140,7 +140,6 @@ Lastly, data is extracted for all time points and no temporal infilling is under
 \examples{
 # The example shows how to extract and save data.
 #---------------------------------------
-library(sp)
 
 # Set dates for building netCDFs and extracting data.
 # Note, to reduce runtime this is done only a fortnight (14 days).
@@ -161,8 +160,8 @@ file.name = build.grids(ncdfFilename=ncdfFilename,
 
 # Load example catchment boundaries and remove all but the first.
 # Note, this is done only to speed up the example runtime.
-data("catchments")
-catchments = catchments[1,]
+catch = catchments()
+catch = catch[1,]
 
 # Extract daily precip. data (not Tmin, Tmax, VPD, ET).
 # Note, the input "locations" can also be a file to a ESRI shape file.
@@ -170,7 +169,7 @@ climateData = extract.data(ncdfFilename=file.name,
               extractFrom=startDate,
               extractTo=endDate,
               vars = c('precip'),
-              locations=catchments,
+              locations=catch,
               temporal.timestep = 'daily')
 
 # Extract the daily catchment average data.
