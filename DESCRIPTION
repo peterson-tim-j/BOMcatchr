@@ -13,9 +13,7 @@ Imports:
     RNetCDF, 
     ncdf4,
     utils, 
-    raster, 
     sf, 
-    sp, 
     zoo, 
     methods, 
     xts, 
@@ -24,6 +22,7 @@ Imports:
     RCurl, 
     elevatr,
     progress,
+    terra
 Suggests: 
     knitr,
     rmarkdown,
