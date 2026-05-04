@@ -4,11 +4,11 @@
 \name{catchments}
 \alias{catchments}
 \title{Example catchment boundaries.}
-\format{
-SpatialPolygonDataFrame
-}
 \usage{
-data("catchments")
+catchments()
+}
+\value{
+terra::SpatVector
 }
 \description{
 Two example catchment boundaries as a SpatialPolygonsDataFrame. The catchments are Creswick Creek (ID 407214, Vic., Australia, see \url{http://www.bom.gov.au/water/hrs/#id=407214}) and
@@ -19,4 +19,3 @@ The catchments can be used to extract catchment average climate data usng \code{
 \seealso{
 \code{\link{extract.data}} for extracting catchment average climate data.
 }
-\keyword{datasets}
