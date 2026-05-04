@@ -58,7 +58,7 @@
 #' Note, NA values are not removed from the aggregation calculation. If this is required then consider writing your own function. The default is \code{mean}.
 #' @param spatial.function.name character string for the function name applied to estimate the daily spatial spread in each variable. If \code{NA} or \code{""} and \code{locations} is a polygon, then
 #' the spatial data is returned. The default is \code{var}.
-#' @param interp.method character string defining the method for interpolating the gridded data (see \code{raster::extract}). The options are: \code{'simple'}, \code{'bilinear'} and \code{''}. The default
+#' @param interp.method character string defining the method for interpolating the gridded data (see \code{terra::extract}). The options are: \code{'simple'}, \code{'bilinear'} and \code{''}. The default
 #' is \code{''}. This will set the interpolation to \code{'simple'} when \code{locations} is a polygon(s) and to \code{'bilinear'} when \code{locations} are points.
 #' @param missing.method three character vector for the settings to fill gaps in the source data. The three inputs control the following.
 #' # 1) the infilling of small holes in the source grids using focal(), which takes the mean of the non-NA surrounding grid cells. The user input controls the maximum hole size filled, in
@@ -90,7 +90,7 @@
 #' metrics named \code{catchmentTemporal.} with a suffix as defined by \code{temporal.function.name}). The second is the measure of spatial variability
 #' named \code{catchmentSpatial.} with a suffix as defined by \code{spatial.function.name}).
 #'
-#' When \code{locations} are polygons and \code{spatial.function.name} does equal \code{NA} or \code{""}, then the returned variable is a \code{sp::SpatialPixelsDataFrame} where the first column is the location/catchment IDs
+#' When \code{locations} are polygons and \code{spatial.function.name} does equal \code{NA} or \code{""}, then the returned variable is a \code{terra::vect} object where the first column is the location/catchment IDs
 #' and the latter columns are the results for each variable at each time point as defined by \code{temporal.timestep}.
 #'
 #' When \code{locations} are points, the returned variable is a data.frame containing daily climate data at each point.
@@ -101,7 +101,6 @@
 #' @examples
 #' # The example shows how to extract and save data.
 #' #---------------------------------------
-#' library(sp)
 #'
 #' # Set dates for building netCDFs and extracting data.
 #' # Note, to reduce runtime this is done only a fortnight (14 days).
@@ -122,8 +121,8 @@
 #'
 #' # Load example catchment boundaries and remove all but the first.
 #' # Note, this is done only to speed up the example runtime.
-#' data("catchments")
-#' catchments = catchments[1,]
+#' catch = catchments()
+#' catch = catch[1,]
 #'
 #' # Extract daily precip. data (not Tmin, Tmax, VPD, ET).
 #' # Note, the input "locations" can also be a file to a ESRI shape file.
@@ -131,7 +130,7 @@
 #'               extractFrom=startDate,
 #'               extractTo=endDate,
 #'               vars = c('precip'),
-#'               locations=catchments,
+#'               locations=catch,
 #'               temporal.timestep = 'daily')
 #'
 #' # Extract the daily catchment average data.
@@ -149,7 +148,7 @@ extract.data <- function(
     extractFrom = as.Date("1900-01-01","%Y-%m-%d"),
     extractTo  = as.Date(Sys.Date(),"%Y-%m-%d"),
     vars = '',
-    locations=NULL,
+    locations = NA,
     temporal.timestep = 'daily',
     temporal.function.name = 'mean',
     spatial.function.name = 'var',
@@ -171,8 +170,14 @@ extract.data <- function(
   if (!file.exists(ncdfFilename))
     stop(paste("The following ncdfFilename input data file could not be found:",ncdfFilename))
 
+  # Check variables to extract are input.
   if (!is.character(vars))
     stop('vars must be a character vector of variables names.')
+
+  # Check variables to extract are input.
+  if (all(is.na(locations)) ||
+     (is.character(locations) && nchar(locations)==0))
+    stop('locations must be input so that the sites to extract are defined.')
 
   # If vars is empty, then extract all variables in the file.
   if (length(vars)==1 && vars=='') {
@@ -358,21 +363,22 @@ extract.data <- function(
     # Drop z vector if included
     locations = sf::st_zm(locations, drop=T)
 
-    # Convert to sp spatial object
-    locations = methods::as(locations,'Spatial')
+    # Convert to terra:vect spatial object
+    locations = terra::vect(locations)
 
-  } else if (!methods::is(locations,"SpatialPolygonsDataFrame") && !methods::is(locations,"SpatialPointsDataFrame")) {
-    stop('The input for "locations" must be a file name to a shape file or a SpatialPolygonsDataFrame or a SpatialPointsDataFrame object.')
+  } else if (!methods::is(locations,"SpatVector")) {
+    stop('The input for "locations" must be a file name to a shape file or a terra::SpatVector object.')
   }
 
   # Check projection of locations
-  if (is.na(sp::proj4string(locations))) {
+  if (is.na(terra::crs(locations, proj=T))) {
     message('WARNING: The projection string of the locations is NA. Setting to +proj=longlat +ellps=GRS80.')
-    sp::proj4string(locations) = '+proj=longlat +ellps=GRS80'
+    terra::crs(locations) <- '+proj=longlat +ellps=GRS80'
   }
-  if (!grepl('+proj=longlat', sp::proj4string(locations)) || !grepl('+ellps=GRS80', sp::proj4string(locations))) {
+  if (!grepl('+proj=longlat', terra::crs(locations, proj=T)) ||
+      !grepl('+ellps=GRS80', terra::crs(locations, proj=T))) {
     message('WARNING: The projection string of the locations does not appear to be +proj=longlat +ellps=GRS80. Attempting to transform coordinates...')
-    locations = sp::spTransform(locations,sp::CRS('+proj=longlat +ellps=GRS80'))
+    locations = terra::project(locations, crs = '+proj=longlat +ellps=GRS80')
   }
 
   # Check each catchment or point has a unique (non-NA) ID. Note.
@@ -382,9 +388,9 @@ extract.data <- function(
     stop('The list of locations IDs (first column) is not unique. Please remove the duplicates')
 
   # Check if locations are points or a polygon.
-  islocationsPolygon=TRUE;
-  if (methods::is(locations,"SpatialPointsDataFrame")) {
-    islocationsPolygon=FALSE;
+  islocationsPolygon=FALSE
+  if (terra::is.polygons(locations)) {
+    islocationsPolygon=TRUE
   }
 
   # Check the interpolation method user inputs.
@@ -544,42 +550,49 @@ extract.data <- function(
     }
 
     # Get the netCDF layer for the base grid geometry.
-    grid.tmp = raster::raster(ncdfFilename,
-                              band = ind,
-                              varname = var.group.string,
-                              lvar = 3,
-                              crs = crs.vars[[base.var.name]])
+    grid.tmp <- terra::rast(ncdfFilename,
+                            subds = var.group.string,
+                            md=T,
+                            drivers="NETCDF")[[ind]]
+    terra::crs(grid.tmp) <- crs.vars[[base.var.name]]
 
     for (i in 1:length(locations)) {
         if (i%%10 ==0 ) {
           message(paste('   ... Building weights for catchment ', i,' of ',length(locations)));
-          raster::removeTmpFiles(h=0)
+          terra::tmpFiles(remove = TRUE, old = TRUE)
         }
 
         # Extract the weights for grid cells within the locations polygon.
-        # Note, the AWAP raster grid is cropped to the extent of the catchment polygon.
+        # Note, the raster grid is cropped to the extent of the catchment polygon.
         # This was undertaken to improve the run time performance but more importantly to overcome an error
         # thrown by raster::rasterize when the raster is large (see https://github.com/rspatial/raster/issues/192).
         # This solution should work when the locations polygon is not very large (e.g. not a reasonable fraction of the
-        # Australian land mass)
-        w = raster::rasterize(x=locations[i,],
-                              y=raster::crop(grid.tmp, locations[i,], snap='out'),
-                              fun='last',
-                              getCover=T)
+        # Australian land mass). NOTE 2: Feature included after converting from raster:: to terra:: for to aid
+        # performance.
+        w <- terra::rasterize(
+          x = locations[i, ],
+          y = terra::crop(grid.tmp, locations[i, ], snap = "out"),
+          fun = "last",
+          cover = TRUE
+        )
 
         # Extract the mask values (i.e. fraction of each grid cell within the polygon.
-        w2 = raster::getValues(w);
-        filt = w2>0
-        wLongLat = sp::coordinates(w)[filt,]
-        w=w[filt]
+        w.vals <- terra::values(w, mat = FALSE)
+        w.LongLat = terra::crds(w, na.rm= F)
+        filt = is.finite(w.vals) & w.vals>0
+        w.vals = w.vals[filt]
+        w.LongLat = w.LongLat[filt, ]
 
         # Normalise the weights
-        w = w/sum(w);
+        w.vals = w.vals/sum(w.vals);
 
         # Add to data set of all locations
-        point.weights$w = c(point.weights$w, w)
-        point.weights$lookup[i,] = c(1,length(w))
-        point.weights$coords = rbind(point.weights$coords, wLongLat)
+        point.weights$w = c(point.weights$w, w.vals)
+        point.weights$lookup[i,] = c(1,length(w.vals))
+        point.weights$coords = rbind(point.weights$coords, w.LongLat)
+
+        # Clean up
+        rm('w', 'w.vals', 'w.LongLat', 'filt')
     }
   } else {
     # Set points to extract to each grid geometry
@@ -587,10 +600,10 @@ extract.data <- function(
     point.weights$w = rep(1,length(locations))
     point.weights$lookup = cbind(as.matrix( seq(1,length(locations),by=1) ),
                                      as.matrix( seq(1,length(locations),by=1) ))
-    point.weights$coords = cbind(as.numeric(sp::coordinates(locations)[,1]),
-                                 as.numeric(sp::coordinates(locations)[,2]))
+    point.weights$coords = cbind(as.numeric(terra::crds(locations)[,1]),
+                                 as.numeric(terra::crds(locations)[,2]))
   }
-  raster::removeTmpFiles(h=0)
+  terra::tmpFiles(remove = TRUE, old = TRUE)
 
   if (getET) {
     message('... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).')
@@ -599,7 +612,7 @@ extract.data <- function(
     if (!curl::has_internet())
       stop('No internet connection appears available to get elevation data. Check connection.')
 
-    crsAUS = sp::CRS("+proj=longlat +ellps=GRS80")
+    crsAUS = sf::st_crs("+proj=longlat +ellps=GRS80")
     DEMpoints = elevatr::get_elev_point(locations=data.frame(x=point.weights$coords[,1],
                                                              y=point.weights$coords[,2]),
                                         prj = crsAUS,
@@ -647,18 +660,21 @@ extract.data <- function(
     # Initialise matrix foe extracted data
     data.brick[[ivar]] = matrix(NA, nrow = ntimepoints2Extract, ncol = nrow(point.weights$coords))
 
+    # Open connection to netCDF variable and set CRS
+    r <- terra::rast(ncdfFilename, subds = var.group.string[[ivar]], md=T)
+    terra::crs(r) <- crs.vars[[ivar]]
+
     # Loop through each ind time point of variable and get data
     for (j in 1:ntimepoints2Extract){
 
       # Extract data for each variable
-      data.brick[[ivar]][j,] = get.nc.data( varname = var.group.string[[ivar]],
-                                    crs.string = crs.vars[[ivar]],
+      data.brick[[ivar]][j,] = get.nc.data( rast.conn = r,
+                                    varname = var.group.string[[ivar]],
                                     interp.method = interp.method.vars[[ivar]],
-                                    fname = ncdfFilename,
                                     band = ind[j],
                                     coords = point.weights$coords,
                                     do.infill =T,
-                                    ext = raster::extent(locations),
+                                    ext = terra::ext(locations),
                                     interpMax = missing.method[1])
 
       # Update progress bar
@@ -710,7 +726,7 @@ extract.data <- function(
     ntimepoints2Extract = length(timepoints2Extract)
 
     # Setup progress bar
-    message('... Calculate daily ET at each grid cell.')
+    message('... Calculating daily ET at each grid cell.')
     for (i in 1:nlocations) {
 
         # Get indexes to grid cells of current location, i
@@ -870,7 +886,7 @@ extract.data <- function(
   nTimeSteps = length(timesteps)
 
   # Get unique location IDs
-  locations.ID = unique(locations@data[,1])
+  locations.ID = unique(terra::values(locations)[,1])
 
 
   # Do the aggregation by looping though each catchment and
@@ -997,8 +1013,10 @@ extract.data <- function(
       # Convert data to  a spatial grid (SpatialPixelsDataFrame)
       gridCoords = data.frame(Long=point.weights$coords[,1], Lat=point.weights$coords[,2])
       catchmentAvg = cbind.data.frame(gridCoords,  catchmentAvg)
-      sp::coordinates(catchmentAvg) <- ~Long+Lat
-      sp::gridded(catchmentAvg) <- T
+      #sp::coordinates(catchmentAvg) <- ~Long+Lat
+      #sp::gridded(catchmentAvg) <- T
+      catchmentAvg = terra::rast(x = catchmentAvg,
+                                 crs =terra::crs(locations, proj=T))
     }
   }
 
@@ -1016,30 +1034,30 @@ extract.data <- function(
 #--------------------------------------------
 
 # Define function to extract netCDF data.
-get.nc.data = function( varname, crs.string, interp.method, fname, band, coords, do.infill, ext, interpMax) {
+get.nc.data = function( rast.conn , varname, interp.method, band, coords, do.infill, ext, interpMax) {
 
-  # Get raster fromncdf file
-  r <- raster::raster(fname, band=band, varname=varname, lvar=3, crs=crs.string)
+  # Get raster fromn terra::rast obj
+  r <- rast.conn[[band]]
 
   # Do infilling of NAs. Generally only included for gaos in solar radiation.
   if (do.infill) {
     # crop to extent
-    r <- raster::crop(r, ext, snap='out')
+    r <- terra::crop(r, ext, snap = "out")
 
     # Infill NA values of grid by taking the local average. Only do so
     # if there are some finite values. The maximum area of NAs that is
     # infilled is defined by interpMax. That is a value of 3 infills a
     # 3x3 cell area.
-    if (any(is.finite(raster::values(r)))) {
+    if (any(is.finite(terra::values(r)))) {
       i = 0
-      while (any(is.na(raster::values(r))) && i<=interpMax) {
-        r <- raster::focal(r, w=matrix(1,3,3), fun=mean, na.rm=TRUE, NAonly=TRUE)
+      while (any(is.na(terra::values(r))) && i<=interpMax) {
+        r <- terra::focal(r, w=matrix(1,3,3), fun=mean, na.rm=TRUE, na.policy='only')
         i = i +1
       }
     }
   }
 
-  return(raster::extract(r, coords, method=interp.method))
+  return(terra::extract(r, coords, method=interp.method)[[1]])
 }
 
 # Define time aggregation function.
