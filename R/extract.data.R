@@ -691,15 +691,26 @@ extract.data <- function(
   # 1. A few grid cells: infill using raster:focal moving average. These are handled within get.nc.data().
   # 2. Entire day missing: linear interpolation over time when only a 1-2 days are missing.
   # 3. Prior to first obs: Apply the average for each day from the observational record within the dates extracted.
+  message('... Infilling data gaps by interpolating over time, then back-filling.')
+  num.NAs <- function(x){sum(is.na(x))}
+  infill.summary.df = data.frame(pre.filled = rep(NA, nvars),
+                                 post.time.interpolated = rep(NA, nvars),
+                                 post.backfilling = rep(NA, nvars),
+                                 row.names = vars
+                                 )
+  infill.summary.df$pre.filled = sapply(data.brick, num.NAs)
 
   if (missing.method[2] != '') {
-    message('... Linearly interpolating gaps')
+    message('   ... Linearly interpolating gaps.')
     data.brick = mapply(do.interpolation,
                         data.brick,
                         time.points = timepoints2Extract,
                         MoreArgs = list(method=missing.method[2]),
                         SIMPLIFY = F
     )
+    infill.summary.df$post.time.interpolated = sapply(data.brick, num.NAs)
+  } else {
+    message('   ... Skipping linear interpolation of gaps.')
   }
 
   if (missing.method[3] != '') {
@@ -710,12 +721,21 @@ extract.data <- function(
                         MoreArgs = list(fn=missing.method[3]),
                         SIMPLIFY = F
     )
+    infill.summary.df$post.backfilling = sapply(data.brick, num.NAs)
+  } else {
+    message('   ... Skipping backfilling dates prior to the start of observations.')
   }
+  message('    Summary of NAs initially, and after each step.')
+  print(infill.summary.df)
 
   # Calculate ET at each grid cell and time point.
   # NOTE, va is divided by 10 to go from hPa to Kpa
   nlocations = length(locations)
   if (getET) {
+
+    # Check no NAs remain in input data
+    if (sum(infill.summary.df$post.backfilling)>0)
+      stop('ET cannot be calculated when NAs remain in data. Try reducing the extractFrom date to allow interpolation of time gaps.')
 
     # Get strings to each netcdf group and variable
     precip.str = vars.extract.summary['precip',]$var.string
