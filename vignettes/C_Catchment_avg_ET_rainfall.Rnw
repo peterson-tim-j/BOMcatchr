@@ -19,14 +19,6 @@ options(tibble.print_min = 4L, tibble.print_max = 4L)
 library(BOMcatchr)
 ```
 
-## Load extra packages for the vignette
-The mapping of the results below requires the following packages.
-
-```{r}
-library(raster)
-library(sp)
-```
-
 ## Make netCDF files
 The first step is to create the netCDF file of the gridded data. Here grids are created for daily precipitation, daily minimum temperature, daily maximum temperature, daily vapour pressure deficit, daily solar radiation and only between the dates _update.from_ and _update.to_. Importantly, the file (and those downloaded) are created in the working directory.
 
@@ -184,35 +176,60 @@ PrecipData.monthly = extract.data(ncdfFilename=ncdfFilename,
                      temporal.timestep = 'monthly',
                      temporal.function.name = 'sum')
 ```
-The monthly total precipitation can then be mapped to show the spatial variability.
+The monthly total precipitation can then be mapped to show the spatial variability. Before mapping, let's add a function to map a panel of maps and for the maps to have a common colour bar.
+```{r}
+panel.maps <- function(r, v, plot.labels, colourbar.label='') {
+
+  n.plots = terra::nlyr(r)
+  n.plotrows = ceiling(n.plots/2)
+  layout(
+    matrix(c(1:n.plots, n.plots+1, n.plots+1),
+           nrow = n.plotrows+1, byrow = TRUE),
+    heights = c( rep(0.9/n.plotrows, n.plotrows), 0.1)
+  )
+
+  zlim <- range(terra::values(r), na.rm = TRUE)
+  n_colors <- 100
+  pal = hcl.colors(n_colors, "viridis")
+
+  for (i in 1:n.plots) {
+    terra::plot(r[[i]],
+               zlim = zlim,
+               main = plot.labels[i],
+               loc.main = 'topright',
+               box=T,
+               legend = FALSE)
+    terra::plot(v, add = TRUE, border = "red", lwd = 2)
+  }
+
+  color_matrix = matrix(1:n_colors,
+                        nrow = n_colors,
+                        ncol = 1)
+  par(mar = c(3, 1, 1, 1))
+  image(x = seq(zlim[1], zlim[2], length.out = n_colors + 1),
+        y    = c(0, 1),
+        z    = color_matrix,
+        col  = pal,
+        axes = FALSE,
+        xlab = "",
+        ylab = ""
+    )
+
+    axis(1, at = pretty(seq(zlim[1], zlim[2], length.out = 5)), las = 1)
+    mtext(colourbar.label, side = 1, line = 2, cex = 0.9)
+}
+
+```
+Now let's call the function to map the monthly rainfall.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 6
 map.labels = gsub( 'precip_', '',names(PrecipData.monthly[[2:5]]))
 map.labels = gsub( '_', '-',map.labels)
 
-layout(matrix(c(1,2,3,4,5), nrow=2, byrow=TRUE),
-       widths = c(1, 1, 0.3))
-
 plot.data = PrecipData.monthly[[-1]]
-zlim <- range(values(plot.data), na.rm = TRUE)
 
-for (i in 1:nlyr(plot.data)) {
-  plot(plot.data[[i]],
-       main = map.labels,
-       loc.main = 'topright',
-       box=T,
-       legend = FALSE)
-  plot(catch, add = TRUE, border = "red", lwd = 2)
-}
-
-par(mar = c(5, 2, 5, 4))  # adjust margins for legend panel
-
-plot(plot.data[[1]],
-     zlim = zlim,
-     legend.only = TRUE,
-     col = hcl.colors(100, "viridis"))
-
+panel.maps(plot.data, catch, map.labels, "Precip. (mm/month)")
 ```
 
 Next let's extract all variables and calculate the PET and then map.
@@ -236,18 +253,16 @@ The monthly total PET can then be mapped to show the spatial variability. The ma
 #| fig.width = 8,
 #| fig.height = 6
 colInd = which(startsWith(names(metData.monthly), "et_"))
-terra::panel(metData.monthly[[colind]],
-             main = map.labels,
-             loc.main = 'topright',
-             box=T,
-             plg=list(title="PET (mm/month)"))
+plot.data = metData.monthly[[colInd]]
+
+panel.maps(plot.data, catch, map.labels, "PET (mm/month)")
 ```
 
 Now that we have maps of the rainfall and PET, we can calculate and map the monthly rainfall deficit.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 6
-colnames.all = naes(metData.monthly)
+colnames.all = names(metData.monthly)
 colInd.P = which(startsWith(colnames.all, "precip_"))
 colInd.PET = which(startsWith(colnames.all, "et_"))
 
@@ -260,11 +275,9 @@ for (i in 1:length(colInd.P)) {
 }
 
 colInd = which(startsWith(names(metData.monthly), "Deficit_mm_"))
-terra::panel(metData.monthly[[colind]],
-             main = map.labels,
-             loc.main = 'topright',
-             box=T,
-             plg=list(title="P-PET (mm/month)"))
+plot.data = metData.monthly[[colInd]]
+
+panel.maps(plot.data, catch, map.labels, "P - PET (mm/month)")
 ```
 
 ## Point versus area weighted rainfall deficit
@@ -301,7 +314,7 @@ metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
                      ET.constants =  constants)
 ```
 
-Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduces errors of up to 6 mm/month error.
+Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduced errors of 8 - 21  mm/month.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 6
