@@ -460,6 +460,12 @@ build.grids <- function(
                           c('Long', 'Lat', 'Time'),
                           deflate = compressionLevel)
 
+      RNetCDF::var.def.nc(grp,
+                          paste0(ivar,'.sourceDate'),
+                          'NC_UINT',
+                          c('Time'),
+                          deflate = compressionLevel)
+
       # Add variable attributes
       RNetCDF::att.put.nc(grp,
                           ivar,
@@ -628,7 +634,17 @@ build.grids <- function(
                             start=c(1, 1, ind),
                             count = c(gridgeo[ivar,]$nCols, gridgeo[ivar,]$nRows, 1),
                             na.mode=1)
+
+        # Record the source date of the data added to the ncdf
+        RNetCDF::var.put.nc(igrp,
+                            paste0(ivar,'.sourceDate'),
+                            as.integer(format(Sys.Date(), "%Y%m%d")),
+                            start=ind,
+                            count = 1,
+                            na.mode=1)
+
         buildSummary.df[ivar,]$Imported = buildSummary.df[ivar,]$Imported + 1
+
       } else {
         buildSummary.df[ivar,]$Errors = buildSummary.df[ivar,]$Errors + 1
       }
