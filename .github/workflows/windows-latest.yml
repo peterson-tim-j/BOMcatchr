@@ -5,4 +5,4 @@ jobs:
   windows-latest-build:
     uses: ./.github/workflows/main.yml
     with:
-      os: windows-latest
+      os: windows-2025-vs2026
