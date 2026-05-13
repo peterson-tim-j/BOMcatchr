@@ -1,6 +1,7 @@
 # Extract daily area weighted PET and precipitation
 
 ``` r
+
 library(BOMcatchr, warn.conflicts = FALSE)
 ```
 
@@ -9,6 +10,7 @@ library(BOMcatchr, warn.conflicts = FALSE)
 The mapping of the results below requires the following packages.
 
 ``` r
+
 library(raster)
 #> Loading required package: sp
 library(sp)
@@ -40,6 +42,7 @@ First, let’s define the start and end dates for data grids and the file
 names.
 
 ``` r
+
 date.from = as.Date("2010-07-01","%Y-%m-%d")
 date.to = as.Date("2010-10-31","%Y-%m-%d")
 
@@ -49,6 +52,7 @@ ncdfFilename = tempfile(fileext='.nc')
 Next, let’s make the data grids over this period.
 
 ``` r
+
 fname = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
@@ -72,7 +76,7 @@ fname = build.grids(ncdfFilename = ncdfFilename,
 #> precip        123      0
 #> vprp          123      0
 #> solarrad      123      0
-#> Total run time (DD:HH:MM:SS): 00:00:06:22
+#> Total run time (DD:HH:MM:SS): 00:00:07:55
 ```
 
 ## Load a catchment boundary
@@ -84,6 +88,7 @@ imported into R. Here the data is imported into the *catchments*
 variable.
 
 ``` r
+
 data("catchments")
 ```
 
@@ -111,6 +116,7 @@ The estimation of ET uses the *evapotranspiration* package. It requires
 a set of constants, which are loaded as follows.
 
 ``` r
+
 data(constants,package='Evapotranspiration')
 ```
 
@@ -121,6 +127,7 @@ anomalies (e.g. Tmin \> Tmax) during ET calculations is automatically
 changed from the default of to .
 
 ``` r
+
 climateData.daily = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
@@ -150,7 +157,7 @@ climateData.daily = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:27
+#> Total run time (DD:HH:MM:SS): 00:00:00:25
 ```
 
 Next time series of the extracted daily precipitation and PET for each
@@ -159,6 +166,7 @@ weighted estimate and the spatial variability on each day (as +/- one
 standard deviation).
 
 ``` r
+
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
@@ -234,6 +242,7 @@ vector of data and returns a single number should work.
 First let’s extract only precipitation.
 
 ``` r
+
 PrecipData.monthly = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
@@ -259,6 +268,7 @@ The monthly total precipitation can then be mapped to show the spatial
 variability.
 
 ``` r
+
 v = list("sp.polygons", catchments, col = "red",first=FALSE)
 colInd = which(startsWith(colnames(PrecipData.monthly@data), "precip_"))
 sp::spplot(PrecipData.monthly,colInd, sp.layout = list(v),
@@ -270,6 +280,7 @@ sp::spplot(PrecipData.monthly,colInd, sp.layout = list(v),
 Next let’s extract all variables and calculate the PET and then map.
 
 ``` r
+
 metData.monthly = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
@@ -298,7 +309,7 @@ metData.monthly = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:26
+#> Total run time (DD:HH:MM:SS): 00:00:00:24
 ```
 
 The monthly total PET can then be mapped to show the spatial
@@ -307,6 +318,7 @@ of this variability would not emerges if only point PET at the catchment
 centroid was used.
 
 ``` r
+
 colInd = which(startsWith(colnames(metData.monthly@data), "et_"))
 sp::spplot(metData.monthly,colInd, sp.layout = list(v),
   colorkey = list(title = "PET (mm/month)"))
@@ -318,6 +330,7 @@ Now that we have maps of the rainfall and PET, we can calculate and map
 the monthly rainfall deficit.
 
 ``` r
+
 colnames.all = colnames(metData.monthly@data)
 colInd.P = which(startsWith(colnames.all, "precip_"))
 colInd.PET = which(startsWith(colnames.all, "et_"))
@@ -345,6 +358,7 @@ point estimates at the centtoid of each catchment.
 First, the centroids are estimated using the simple bounds box method.
 
 ``` r
+
 centroid = matrix(0,2,2)
 
 extn = extent(catchments[1,])
@@ -360,6 +374,7 @@ Then, the coordinates are converted to a spatial object and set
 projection to GDA94.
 
 ``` r
+
 coordinates.data = data.frame( ID = catchments$CatchID,
                                Longitude = centroid[,1],
                                Latitude =  centroid[,2])
@@ -373,6 +388,7 @@ Next, the meteorological data and PET are derived using both the area
 weighted approach and centroids.
 
 ``` r
+
 metData.monthly.weighted = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
@@ -401,7 +417,7 @@ metData.monthly.weighted = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:26
+#> Total run time (DD:HH:MM:SS): 00:00:00:24
 
 metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
@@ -430,7 +446,7 @@ metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
 #> ... Calculate daily ET at each grid cell.
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:39
+#> Total run time (DD:HH:MM:SS): 00:00:00:37
 ```
 
 Now let’s compare the two estimates of precipitation, PET and rainfall
@@ -438,6 +454,7 @@ deficit. The right most plots below show the rainfall deficit. It shows
 that using centroid estimate introduces errors of 6 to 21 mm/month.
 
 ``` r
+
 par(mfrow=c(2,3), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.

@@ -1,6 +1,7 @@
 # Make source data grids
 
 ``` r
+
 library(BOMcatchr)
 ```
 
@@ -24,6 +25,7 @@ multiple projects, rather than re-building the netCDF grids for each
 project.
 
 ``` r
+
 startDate <- as.Date(Sys.Date()-15,"%Y-%m-%d")
 endDate <- as.Date(Sys.Date()-5,"%Y-%m-%d")
 ```
@@ -33,6 +35,7 @@ just use a temporary file. You should change this to a non-temporary
 file name and folder.
 
 ``` r
+
 ncdfFilename <- tempfile(fileext='.nc')
 ```
 
@@ -43,6 +46,7 @@ maximum temperature. Below, this will be updated to include vapour
 pressure and solar radiation for all of Australia.
 
 ``` r
+
 ncdffile.name <- build.grids(ncdfFilename=ncdfFilename,
                 updateFrom=startDate, updateTo=endDate,
                 vars = c('precip','tmin','tmax'))
@@ -53,7 +57,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdfFilename,
 #> ... NetCDF file will be updated as follows:
 #>        - New variables to add: precip  tmin  tmax
 #>        - Existing variables to modify: (none)
-#>        - Data will be updated from  2026-04-10  to  2026-04-20
+#>        - Data will be updated from  2026-04-27  to  2026-05-07
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).
@@ -61,7 +65,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdfFilename,
 #> precip       11      0
 #> tmin         11      0
 #> tmax         11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:21
+#> Total run time (DD:HH:MM:SS): 00:00:00:27
 ```
 
 Now let’s get a summary of the netCDF file that we’ve created. Note that
@@ -69,12 +73,13 @@ the output data.frame shows the expected variables over the expected
 date range.
 
 ``` r
+
 summary.df <- BOMcatchr::grid.summary(ncdffile.name)
 summary.df
 #>        group   var.string       from         to time.step
-#> precip grid1 grid1/precip 2026-04-10 2026-04-20      days
-#> tmin   grid1   grid1/tmin 2026-04-10 2026-04-20      days
-#> tmax   grid1   grid1/tmax 2026-04-10 2026-04-20      days
+#> precip grid1 grid1/precip 2026-04-27 2026-05-07      days
+#> tmin   grid1   grid1/tmin 2026-04-27 2026-05-07      days
+#> tmax   grid1   grid1/tmax 2026-04-27 2026-05-07      days
 #>                                    time.datum  units              ellipsoid.crs
 #> precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80
 #> tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80
@@ -97,6 +102,7 @@ is not defined. This will cause all variables in the original file to be
 updated. That said, individual variables can be updated.
 
 ``` r
+
 ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate)
 #> ... Testing downloading of each variable.
@@ -106,7 +112,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
 #> ... NetCDF file will be updated as follows:
 #>        - New variables to add: (none)
 #>        - Existing variables to modify: precip  tmin  tmax
-#>        - Data will be updated from  2026-04-10  to  2026-04-20
+#>        - Data will be updated from  2026-04-27  to  2026-05-07
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).
@@ -114,7 +120,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
 #> precip       11      0
 #> tmin         11      0
 #> tmax         11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:12
+#> Total run time (DD:HH:MM:SS): 00:00:00:14
 ```
 
 ## Add a variable to existing data grids
@@ -126,6 +132,7 @@ pressure data is updated. This feature can be used to update the data of
 a single variable as required.
 
 ``` r
+
 ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate,
                 vars = c('vprp'))
@@ -137,26 +144,27 @@ ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
 #> ... NetCDF file will be updated as follows:
 #>        - New variables to add: vprp
 #>        - Existing variables to modify: (none)
-#>        - Data will be updated from  2026-04-10  to  2026-04-20
+#>        - Data will be updated from  2026-04-27  to  2026-05-07
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).
 #>      Imported Errors
 #> vprp       11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:09
+#> Total run time (DD:HH:MM:SS): 00:00:00:11
 ```
 
 Now let’s check that the file includes both the original three variable
 plus vapour pressure.
 
 ``` r
+
 summary.df <- BOMcatchr::grid.summary(ncdffile.name)
 summary.df
 #>        group   var.string       from         to time.step
-#> precip grid1 grid1/precip 2026-04-10 2026-04-20      days
-#> tmin   grid1   grid1/tmin 2026-04-10 2026-04-20      days
-#> tmax   grid1   grid1/tmax 2026-04-10 2026-04-20      days
-#> vprp   grid1   grid1/vprp 2026-04-10 2026-04-20      days
+#> precip grid1 grid1/precip 2026-04-27 2026-05-07      days
+#> tmin   grid1   grid1/tmin 2026-04-27 2026-05-07      days
+#> tmax   grid1   grid1/tmax 2026-04-27 2026-05-07      days
+#> vprp   grid1   grid1/vprp 2026-04-27 2026-05-07      days
 #>                                    time.datum  units              ellipsoid.crs
 #> precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80
 #> tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80
@@ -172,10 +180,12 @@ must be equal, the date range of the other variables must also be
 updated.
 
 ``` r
+
 startDate <- startDate - 5
 ```
 
 ``` r
+
 ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate,
                 vars = c('solarrad'))
@@ -188,7 +198,7 @@ ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
 #> ... NetCDF file will be updated as follows:
 #>        - New variables to add: solarrad
 #>        - Existing variables to modify: precip  tmin  tmax  vprp
-#>        - Data will be updated from  2026-04-05  to  2026-04-20
+#>        - Data will be updated from  2026-04-22  to  2026-05-07
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).
@@ -198,21 +208,22 @@ ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
 #> tmin           16      0
 #> tmax           16      0
 #> vprp           16      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:47
+#> Total run time (DD:HH:MM:SS): 00:00:00:55
 ```
 
 Now let’s check that the file includes both the prior four variables
 plus solar radiation.
 
 ``` r
+
 summary.df <- BOMcatchr::grid.summary(ncdffile.name)
 summary.df
 #>          group     var.string       from         to time.step
-#> precip   grid1   grid1/precip 2026-04-05 2026-04-20      days
-#> tmin     grid1     grid1/tmin 2026-04-05 2026-04-20      days
-#> tmax     grid1     grid1/tmax 2026-04-05 2026-04-20      days
-#> vprp     grid1     grid1/vprp 2026-04-05 2026-04-20      days
-#> solarrad grid2 grid2/solarrad 2026-04-05 2026-04-20      days
+#> precip   grid1   grid1/precip 2026-04-22 2026-05-07      days
+#> tmin     grid1     grid1/tmin 2026-04-22 2026-05-07      days
+#> tmax     grid1     grid1/tmax 2026-04-22 2026-05-07      days
+#> vprp     grid1     grid1/vprp 2026-04-22 2026-05-07      days
+#> solarrad grid2 grid2/solarrad 2026-04-22 2026-05-07      days
 #>                                      time.datum  units
 #> precip   days since 1900-01-01 00:00:00.0 -0:00 mm/day
 #> tmin     days since 1900-01-01 00:00:00.0 -0:00  deg_C

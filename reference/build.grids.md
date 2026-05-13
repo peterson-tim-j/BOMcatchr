@@ -134,13 +134,13 @@ file.names = build.grids(ncdfFilename=ncdfFilename,
 #> ... NetCDF file will be updated as follows:
 #>        - New variables to add: precip  
 #>        - Existing variables to modify: (none)
-#>        - Data will be updated from  2026-04-10  to  2026-04-20
+#>        - Data will be updated from  2026-04-27  to  2026-05-07
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).
 #>        Imported Errors
 #> precip       11      0
-#> Total run time (DD:HH:MM:SS): 00:00:00:06
+#> Total run time (DD:HH:MM:SS): 00:00:00:07
 
 # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 # the same file names but \code{updateFrom=NA}.
@@ -153,7 +153,7 @@ file.names = build.grids(ncdfFilename=ncdfFilename,
 #> ... NetCDF file will be updated as follows:
 #>        - New variables to add: (none)
 #>        - Existing variables to modify: precip  
-#>        - Data will be updated from  2026-04-10  to  2026-04-20
+#>        - Data will be updated from  2026-04-27  to  2026-05-07
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).

@@ -56,12 +56,14 @@ The package will soon be submitted to the R library (i.e. CRAN). In the
 meantime, you can install it from github using the following R command:
 
 ``` r
+
 remotes::install_github("peterson-tim-j/BOMcatchr")
 ```
 
 Once installed, browse the package examples using the R-command:
 
 ``` r
+
 browseVignettes("BOMcatchr")
 ```
 

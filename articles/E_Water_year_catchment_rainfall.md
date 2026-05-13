@@ -1,6 +1,7 @@
 # Extract water year area weighted precipitation
 
 ``` r
+
 library(BOMcatchr, warn.conflicts = FALSE)
 ```
 
@@ -15,6 +16,7 @@ First, let’s define the start and end dates for data grids and the file
 names.
 
 ``` r
+
 date.from = as.Date("2010-01-01","%Y-%m-%d")
 date.to = as.Date("2015-12-31","%Y-%m-%d")
 
@@ -26,6 +28,7 @@ mean square interpolation error (RMSE) gridded data is not provided the
 Bureau of Meteorology and is therefore not able to be used below.
 
 ``` r
+
 fname = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
@@ -40,28 +43,28 @@ fname = build.grids(ncdfFilename = ncdfFilename,
 #>        - Data will be updated from  2010-01-01  to  2015-12-31
 #> ... Downloading data for each variable and importing to netcdf file:
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/Rtmpex5dQn/986091 2020-08-29 00:31', reason 'No such file or
+#> remove file '/tmp/RtmpyseCca/986091 2020-08-29 00:31', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/Rtmpex5dQn/976111 2020-08-29 00:32', reason 'No such file or
+#> remove file '/tmp/RtmpyseCca/976111 2020-08-29 00:32', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/Rtmpex5dQn/931641 2020-08-29 00:44', reason 'No such file or
+#> remove file '/tmp/RtmpyseCca/931641 2020-08-29 00:44', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/Rtmpex5dQn/924657 2020-08-29 00:58', reason 'No such file or
+#> remove file '/tmp/RtmpyseCca/924657 2020-08-29 00:58', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/Rtmpex5dQn/996250 2020-08-29 01:11', reason 'No such file or
+#> remove file '/tmp/RtmpyseCca/996250 2020-08-29 01:11', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/Rtmpex5dQn/973278 2020-08-29 01:12', reason 'No such file or
+#> remove file '/tmp/RtmpyseCca/973278 2020-08-29 01:12', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/Rtmpex5dQn/998987 2020-08-29 01:13', reason 'No such file or
+#> remove file '/tmp/RtmpyseCca/998987 2020-08-29 01:13', reason 'No such file or
 #> directory'
 #> Warning in file.remove(file.path(workingFolder, zip.fnames[!ind])): cannot
-#> remove file '/tmp/Rtmpex5dQn/944133 2020-08-29 01:24', reason 'No such file or
+#> remove file '/tmp/RtmpyseCca/944133 2020-08-29 01:24', reason 'No such file or
 #> directory'
 #> Data construction FINISHED.
 #> Summary of time points successfully imported (and errors).
@@ -69,7 +72,7 @@ fname = build.grids(ncdfFilename = ncdfFilename,
 #> precip             2191      0
 #> precip.RMSE        2191      0
 #> precip.monthly       72      0
-#> Total run time (DD:HH:MM:SS): 00:00:37:47
+#> Total run time (DD:HH:MM:SS): 00:00:47:48
 ```
 
 ## Load a catchment boundary
@@ -79,6 +82,7 @@ for two catchments. Here the catchment boundaries built into the package
 are used.
 
 ``` r
+
 data("catchments")
 ```
 
@@ -91,6 +95,7 @@ estimated from both the daily and monthly source data, both can be
 extracted at the same time.
 
 ``` r
+
 climateData.annual = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
@@ -111,7 +116,7 @@ climateData.annual = extract.data(ncdfFilename=ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:01:06
+#> Total run time (DD:HH:MM:SS): 00:00:01:05
 ```
 
 Now let’s also estimate the uncertainty in the calender year rainfall
@@ -122,6 +127,7 @@ variance, which we can sum over the water year. Once all of the calender
 year data is extracted, the total annual precipitation is plotted.
 
 ``` r
+
 sqrd.sum <- function(x) {return(sum(x^2))}
 
 climateData.annual.err = extract.data(ncdfFilename=ncdfFilename,
@@ -142,10 +148,11 @@ climateData.annual.err = extract.data(ncdfFilename=ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:57
+#> Total run time (DD:HH:MM:SS): 00:00:00:52
 ```
 
 ``` r
+
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
@@ -220,11 +227,13 @@ approach can be used to extract data over other time steps, such as
 seasonal.
 
 ``` r
+
 dates = seq.Date(date.from, date.to, by ='day')
 wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
 ```
 
 ``` r
+
 climateData.daily2wateryear = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
@@ -243,13 +252,14 @@ climateData.daily2wateryear = extract.data(ncdfFilename=ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:55
+#> Total run time (DD:HH:MM:SS): 00:00:00:53
 ```
 
 Now let’s estimate the uncertainty in the water year rainfall using the
 root mean square interpolation error (RMSE).
 
 ``` r
+
 climateData.daily2wateryear.err = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
@@ -268,18 +278,20 @@ climateData.daily2wateryear.err = extract.data(ncdfFilename=ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:55
+#> Total run time (DD:HH:MM:SS): 00:00:00:53
 ```
 
 Finally, let’s also extract the water year using the monthly gridded
 precipitation data.
 
 ``` r
+
 dates = seq.Date(date.from, date.to, by ='month')
 wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
 ```
 
 ``` r
+
 climateData.month2wateryear = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
@@ -305,6 +317,7 @@ Before plotting the water year data, the time steps with less than a
 full water year of data are filtered out.
 
 ``` r
+
 filt = climateData.daily2wateryear$temporal.sum$days.per.timestep >= 365
 climateData.daily2wateryear$temporal.sum = climateData.daily2wateryear$temporal.sum[filt, ]
 
@@ -323,6 +336,7 @@ The red line shows the the water year total rainfall calculated from the
 monthly data.
 
 ``` r
+
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.

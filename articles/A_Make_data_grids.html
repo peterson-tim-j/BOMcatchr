@@ -116,7 +116,7 @@ pressure and solar radiation for all of Australia.</p>
 <span><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
 <span><span class="co">#&gt;        - New variables to add: precip  tmin  tmax</span></span>
 <span><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
-<span><span class="co">#&gt;        - Data will be updated from  2026-04-10  to  2026-04-20</span></span>
+<span><span class="co">#&gt;        - Data will be updated from  2026-04-27  to  2026-05-07</span></span>
 <span><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span><span class="co">#&gt; Data construction FINISHED.</span></span>
 <span><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
@@ -124,7 +124,7 @@ pressure and solar radiation for all of Australia.</p>
 <span><span class="co">#&gt; precip       11      0</span></span>
 <span><span class="co">#&gt; tmin         11      0</span></span>
 <span><span class="co">#&gt; tmax         11      0</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:21</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:27</span></span></code></pre></div>
 <p>Now let’s get a summary of the netCDF file that we’ve created. Note
 that the output data.frame shows the expected variables over the
 expected date range.</p>
@@ -132,9 +132,9 @@ expected date range.</p>
 <code class="sourceCode R"><span><span class="va">summary.df</span> <span class="op">&lt;-</span> <span class="fu">BOMcatchr</span><span class="fu">::</span><span class="fu"><a href="../reference/grid.summary.html">grid.summary</a></span><span class="op">(</span><span class="va">ncdffile.name</span><span class="op">)</span></span>
 <span><span class="va">summary.df</span></span>
 <span><span class="co">#&gt;        group   var.string       from         to time.step</span></span>
-<span><span class="co">#&gt; precip grid1 grid1/precip 2026-04-10 2026-04-20      days</span></span>
-<span><span class="co">#&gt; tmin   grid1   grid1/tmin 2026-04-10 2026-04-20      days</span></span>
-<span><span class="co">#&gt; tmax   grid1   grid1/tmax 2026-04-10 2026-04-20      days</span></span>
+<span><span class="co">#&gt; precip grid1 grid1/precip 2026-04-27 2026-05-07      days</span></span>
+<span><span class="co">#&gt; tmin   grid1   grid1/tmin 2026-04-27 2026-05-07      days</span></span>
+<span><span class="co">#&gt; tmax   grid1   grid1/tmax 2026-04-27 2026-05-07      days</span></span>
 <span><span class="co">#&gt;                                    time.datum  units              ellipsoid.crs</span></span>
 <span><span class="co">#&gt; precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80</span></span>
 <span><span class="co">#&gt; tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span>
@@ -163,7 +163,7 @@ updated. That said, individual variables can be updated.</p>
 <span><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
 <span><span class="co">#&gt;        - New variables to add: (none)</span></span>
 <span><span class="co">#&gt;        - Existing variables to modify: precip  tmin  tmax</span></span>
-<span><span class="co">#&gt;        - Data will be updated from  2026-04-10  to  2026-04-20</span></span>
+<span><span class="co">#&gt;        - Data will be updated from  2026-04-27  to  2026-05-07</span></span>
 <span><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span><span class="co">#&gt; Data construction FINISHED.</span></span>
 <span><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
@@ -171,7 +171,7 @@ updated. That said, individual variables can be updated.</p>
 <span><span class="co">#&gt; precip       11      0</span></span>
 <span><span class="co">#&gt; tmin         11      0</span></span>
 <span><span class="co">#&gt; tmax         11      0</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:12</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:14</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="add-a-variable-to-existing-data-grids">Add a variable to existing data grids<a class="anchor" aria-label="anchor" href="#add-a-variable-to-existing-data-grids"></a>
@@ -193,23 +193,23 @@ a single variable as required.</p>
 <span><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
 <span><span class="co">#&gt;        - New variables to add: vprp</span></span>
 <span><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
-<span><span class="co">#&gt;        - Data will be updated from  2026-04-10  to  2026-04-20</span></span>
+<span><span class="co">#&gt;        - Data will be updated from  2026-04-27  to  2026-05-07</span></span>
 <span><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span><span class="co">#&gt; Data construction FINISHED.</span></span>
 <span><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
 <span><span class="co">#&gt;      Imported Errors</span></span>
 <span><span class="co">#&gt; vprp       11      0</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:09</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:11</span></span></code></pre></div>
 <p>Now let’s check that the file includes both the original three
 variable plus vapour pressure.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">summary.df</span> <span class="op">&lt;-</span> <span class="fu">BOMcatchr</span><span class="fu">::</span><span class="fu"><a href="../reference/grid.summary.html">grid.summary</a></span><span class="op">(</span><span class="va">ncdffile.name</span><span class="op">)</span></span>
 <span><span class="va">summary.df</span></span>
 <span><span class="co">#&gt;        group   var.string       from         to time.step</span></span>
-<span><span class="co">#&gt; precip grid1 grid1/precip 2026-04-10 2026-04-20      days</span></span>
-<span><span class="co">#&gt; tmin   grid1   grid1/tmin 2026-04-10 2026-04-20      days</span></span>
-<span><span class="co">#&gt; tmax   grid1   grid1/tmax 2026-04-10 2026-04-20      days</span></span>
-<span><span class="co">#&gt; vprp   grid1   grid1/vprp 2026-04-10 2026-04-20      days</span></span>
+<span><span class="co">#&gt; precip grid1 grid1/precip 2026-04-27 2026-05-07      days</span></span>
+<span><span class="co">#&gt; tmin   grid1   grid1/tmin 2026-04-27 2026-05-07      days</span></span>
+<span><span class="co">#&gt; tmax   grid1   grid1/tmax 2026-04-27 2026-05-07      days</span></span>
+<span><span class="co">#&gt; vprp   grid1   grid1/vprp 2026-04-27 2026-05-07      days</span></span>
 <span><span class="co">#&gt;                                    time.datum  units              ellipsoid.crs</span></span>
 <span><span class="co">#&gt; precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80</span></span>
 <span><span class="co">#&gt; tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span>
@@ -239,7 +239,7 @@ updated.</p>
 <span><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
 <span><span class="co">#&gt;        - New variables to add: solarrad</span></span>
 <span><span class="co">#&gt;        - Existing variables to modify: precip  tmin  tmax  vprp</span></span>
-<span><span class="co">#&gt;        - Data will be updated from  2026-04-05  to  2026-04-20</span></span>
+<span><span class="co">#&gt;        - Data will be updated from  2026-04-22  to  2026-05-07</span></span>
 <span><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
 <span><span class="co">#&gt; Data construction FINISHED.</span></span>
 <span><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
@@ -249,18 +249,18 @@ updated.</p>
 <span><span class="co">#&gt; tmin           16      0</span></span>
 <span><span class="co">#&gt; tmax           16      0</span></span>
 <span><span class="co">#&gt; vprp           16      0</span></span>
-<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:47</span></span></code></pre></div>
+<span><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:55</span></span></code></pre></div>
 <p>Now let’s check that the file includes both the prior four variables
 plus solar radiation.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">summary.df</span> <span class="op">&lt;-</span> <span class="fu">BOMcatchr</span><span class="fu">::</span><span class="fu"><a href="../reference/grid.summary.html">grid.summary</a></span><span class="op">(</span><span class="va">ncdffile.name</span><span class="op">)</span></span>
 <span><span class="va">summary.df</span></span>
 <span><span class="co">#&gt;          group     var.string       from         to time.step</span></span>
-<span><span class="co">#&gt; precip   grid1   grid1/precip 2026-04-05 2026-04-20      days</span></span>
-<span><span class="co">#&gt; tmin     grid1     grid1/tmin 2026-04-05 2026-04-20      days</span></span>
-<span><span class="co">#&gt; tmax     grid1     grid1/tmax 2026-04-05 2026-04-20      days</span></span>
-<span><span class="co">#&gt; vprp     grid1     grid1/vprp 2026-04-05 2026-04-20      days</span></span>
-<span><span class="co">#&gt; solarrad grid2 grid2/solarrad 2026-04-05 2026-04-20      days</span></span>
+<span><span class="co">#&gt; precip   grid1   grid1/precip 2026-04-22 2026-05-07      days</span></span>
+<span><span class="co">#&gt; tmin     grid1     grid1/tmin 2026-04-22 2026-05-07      days</span></span>
+<span><span class="co">#&gt; tmax     grid1     grid1/tmax 2026-04-22 2026-05-07      days</span></span>
+<span><span class="co">#&gt; vprp     grid1     grid1/vprp 2026-04-22 2026-05-07      days</span></span>
+<span><span class="co">#&gt; solarrad grid2 grid2/solarrad 2026-04-22 2026-05-07      days</span></span>
 <span><span class="co">#&gt;                                      time.datum  units</span></span>
 <span><span class="co">#&gt; precip   days since 1900-01-01 00:00:00.0 -0:00 mm/day</span></span>
 <span><span class="co">#&gt; tmin     days since 1900-01-01 00:00:00.0 -0:00  deg_C</span></span>

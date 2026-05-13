@@ -1,6 +1,7 @@
 # Extract daily and monthly point precipitation
 
 ``` r
+
 library(BOMcatchr)
 ```
 
@@ -20,6 +21,7 @@ Here the data is only downloaded between the dates *dataFrom* and
 downloaded from 1/1/1900 to yesterday.
 
 ``` r
+
 dataFrom = as.Date("2010-01-01","%Y-%m-%d")
 dataTo = as.Date("2010-12-31","%Y-%m-%d")
 ```
@@ -38,6 +40,7 @@ to be defined. Here we’ll just use a temporary file. You should change
 this to a non-temporary file name and folder.
 
 ``` r
+
 ncdfFilename = tempfile(fileext='.nc')
 ```
 
@@ -46,6 +49,7 @@ the netCDF file. Note, here *vars* is set to only download daily
 precipitation.
 
 ``` r
+
 fnames = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = dataFrom,
                          updateTo = dataTo,
@@ -63,7 +67,7 @@ fnames = build.grids(ncdfFilename = ncdfFilename,
 #>                Imported Errors
 #> precip              365      0
 #> precip.monthly       12      0
-#> Total run time (DD:HH:MM:SS): 00:00:03:17
+#> Total run time (DD:HH:MM:SS): 00:00:04:20
 ```
 
 ## Set the points for data extraction
@@ -74,6 +78,7 @@ the coordinates are defined and then they’re convert to a spatial object
 and set projection to GDA94.
 
 ``` r
+
 coordinates.data = data.frame( ID =c('Bore-10084446','Rain-63005'),
                                Longitude = c(153.551875, 149.5559),
                                Latitude =  c(-28.517974,-33.4289))
@@ -93,6 +98,7 @@ Note the netCDF file *ncdfFilename* must be in the working directory or
 the full file path must be given.
 
 ``` r
+
 extracted.data = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
@@ -118,6 +124,7 @@ extracted.data = extract.data(ncdfFilename = ncdfFilename,
 Now let’s plot time series of the extracted daily precipitation.
 
 ``` r
+
 par(mfrow = c(2, 1))
 site.names = c('Bore-10084446','Rain-63005')
 for (i in 1:nrow(coordinates.data)){
@@ -145,6 +152,7 @@ the following observed precipitation for 2010 (from gauge_63005),
 sourced from the Australian Bureau of Meteorology.
 
 ``` r
+
 data('raingauge')
 ```
 
@@ -160,6 +168,7 @@ at the centre of the grid cell and the location to be extracted is not
 also at the centre.
 
 ``` r
+
 par(mfrow = c(1, 2))
 
 filt = extracted.data$Location.ID=='Rain-63005'
@@ -200,6 +209,7 @@ scale.
 First, let’s extract the daily data at a monthly scale
 
 ``` r
+
 extracted.daily2monthly = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
@@ -218,12 +228,13 @@ extracted.daily2monthly = extract.data(ncdfFilename = ncdfFilename,
 #> ... Backfilling dates prior to the start of observations
 #> ... Calculating area weighted results at required time-step.
 #> Data extraction FINISHED.
-#> Total run time (DD:HH:MM:SS): 00:00:00:21
+#> Total run time (DD:HH:MM:SS): 00:00:00:20
 ```
 
 Next let’s extract the monthly data product.
 
 ``` r
+
 extracted.monthly = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
@@ -247,6 +258,7 @@ extracted.monthly = extract.data(ncdfFilename = ncdfFilename,
 Now let’s aggregate the daily observed data to a monthly sum.
 
 ``` r
+
 
 dates = as.Date(ISOdate( raingauge$Year,
                          raingauge$Month,
@@ -276,6 +288,7 @@ daily aggregated precipitation estimates a slightly higher monthly
 precipitation.
 
 ``` r
+
 par(mfrow = c(3, 1))
 
 filt1 = extracted.daily2monthly$Location.ID=='Rain-63005'
