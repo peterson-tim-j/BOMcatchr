@@ -15,6 +15,9 @@
 #'  \item{\code{data.file.format} : string for file extension to the file required within the downloaded file.}
 #'  \item{\code{ncdf.name} : string for the name of the variable once input to the package netCDF file.}
 #'  \item{\code{ellipsoid.crs} : string for Coordinate Reference System (CRS) for the gridded data ellipsoid.}
+#'  \item{update.days} : string for the update schedule of the source data from \url{https://www.bom.gov.au/climate/austmaps/update-schedule.shtml}.
+#'  Each listed item in the string is the number of days after which the BoM update a data grid. That is, when the data for a given date is, say,
+#'  7 days old then the BoM may update the data for that day. This field is used to identify netCDF time points requiring update to the latest data.
 #' }
 #'
 #' @examples
@@ -33,6 +36,7 @@ grid.sources <- function() {
                         data.file.format = rep('', nvars),
                         ncdf.name = rep('', nvars),
                         ellipsoid.crs = rep('', nvars),
+                        update.days = rep('', nvars),
                         row.names = vars)
 
   var.data['tmax',] <- c(  'Max daily temperature',
@@ -42,7 +46,8 @@ grid.sources <- function() {
                            'grid.Z',
                            'grid',
                            'tmax',
-                           '+proj=longlat +ellps=GRS80')
+                           '+proj=longlat +ellps=GRS80',
+                           '3, 7, 10, 90')
 
   var.data['tmin',] <- c(  'Min daily temperature',
                            'deg_C',
@@ -51,7 +56,8 @@ grid.sources <- function() {
                            'grid.Z',
                            'grid',
                            'tmin',
-                           '+proj=longlat +ellps=GRS80')
+                           '+proj=longlat +ellps=GRS80',
+                           '3, 7, 10, 90')
 
   var.data['precip',] <- c('Total daily precipitation',
                            'mm/day',
@@ -60,7 +66,8 @@ grid.sources <- function() {
                            'grid.Z',
                            'grid',
                            'precip',
-                           '+proj=longlat +ellps=GRS80')
+                           '+proj=longlat +ellps=GRS80',
+                           '7, 10, 20, 30, 40, 180')
 
   var.data['precip.RMSE',] <- c('Root mean square error of daily precipitation estimate',
                            'mm/day',
@@ -69,7 +76,8 @@ grid.sources <- function() {
                            'grid.Z',
                            'grid',
                            'precip.rmse',
-                           '+proj=longlat +ellps=GRS80')
+                           '+proj=longlat +ellps=GRS80',
+                           '7, 10, 20, 30, 40, 180')
 
   var.data['precip.monthly',] <- c('Total monthly precipitation',
                            'mm/month',
@@ -78,7 +86,8 @@ grid.sources <- function() {
                            'grid.zip',
                            'txt',
                            'precip.monthly',
-                           '+proj=longlat +ellps=GRS80')
+                           '+proj=longlat +ellps=GRS80',
+                           '')
 
   var.data['vprp',] <- c(  '3pm daily vapour pressure',
                            'hpa',
@@ -87,7 +96,8 @@ grid.sources <- function() {
                            'grid.Z',
                            'grid',
                            'vprp',
-                           '+proj=longlat +ellps=GRS80')
+                           '+proj=longlat +ellps=GRS80',
+                           '90')
 
   var.data['solarrad',] <- c(  'Total daily solar radiation',
                            'MJ/m^2',
@@ -96,7 +106,8 @@ grid.sources <- function() {
                            'grid.Z',
                            'grid',
                            'solarrad',
-                           '+proj=longlat +ellps=GRS80')
+                           '+proj=longlat +ellps=GRS80',
+                           '')
 
   return(var.data)
 

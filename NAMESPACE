@@ -3,5 +3,6 @@
 export(build.grids)
 export(catchments)
 export(extract.data)
+export(grid.ages)
 export(grid.sources)
 export(grid.summary)
