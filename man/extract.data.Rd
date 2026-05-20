@@ -52,7 +52,7 @@ Note, NA values are not removed from the aggregation calculation. If this is req
 \item{spatial.function.name}{character string for the function name applied to estimate the daily spatial spread in each variable. If \code{NA} or \code{""} and \code{locations} is a polygon, then
 the spatial data is returned. The default is \code{var}.}
 
-\item{interp.method}{character string defining the method for interpolating the gridded data (see \code{raster::extract}). The options are: \code{'simple'}, \code{'bilinear'} and \code{''}. The default
+\item{interp.method}{character string defining the method for interpolating the gridded data (see \code{terra::extract}). The options are: \code{'simple'}, \code{'bilinear'} and \code{''}. The default
 is \code{''}. This will set the interpolation to \code{'simple'} when \code{locations} is a polygon(s) and to \code{'bilinear'} when \code{locations} are points.}
 
 \item{missing.method}{three character vector for the settings to fill gaps in the source data. The three inputs control the following.

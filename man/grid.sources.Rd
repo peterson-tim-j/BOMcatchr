@@ -17,6 +17,9 @@ data.frame of the source data location and properties required by the package:
  \item{\code{data.file.format} : string for file extension to the file required within the downloaded file.}
  \item{\code{ncdf.name} : string for the name of the variable once input to the package netCDF file.}
  \item{\code{ellipsoid.crs} : string for Coordinate Reference System (CRS) for the gridded data ellipsoid.}
+ \item{update.days} : string for the update schedule of the source data from \url{https://www.bom.gov.au/climate/austmaps/update-schedule.shtml}.
+ Each listed item in the string is the number of days after which the BoM update a data grid. That is, when the data for a given date is, say,
+ 7 days old then the BoM may update the data for that day. This field is used to identify netCDF time points requiring update to the latest data.
 }
 }
 \description{
