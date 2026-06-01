@@ -202,19 +202,6 @@ build.grids <- function(
   }
   if (!is.na(updateFrom) && updateFrom >= updateTo)
     stop('The update dates are invalid. updateFrom must be prior to updateTo')
-
-  if ( any(vars.all[vars.2modify,]$time.step == 'months')) {
-    # Check sufficient number of months for monthly data
-    if (as.numeric(format(updateFrom, "%Y")) == as.numeric(format(updateTo, "%Y")) &&
-        as.numeric(format(updateFrom, "%m")) == as.numeric(format(updateTo, "%m")) )
-      stop('The inputs updateFrom and updateTo must span more than one month when monthly time step date is being handled.')
-
-    # Check if updateTo is past the last complete month
-    if (updateTo > (as.Date(format( Sys.Date(),"%Y-%m-01"),'%Y-%m-%d')-1) )
-      stop('The input updateTo must be the final day in a month when when monthly time step date is being handled.')
-
-
-  }
   #----------------
 
 
@@ -520,23 +507,47 @@ build.grids <- function(
   updateFrom = max(as.Date('1900-01-01','%Y-%m-%d'), updateFrom)
   updateTo = min(as.Date(Sys.Date(),'%Y-%m-%d'), updateTo)
 
+  message('... Checking updateFrom and updateTo dates:')
+
+  # Adjust updateTo to the end of current month, else end of last month.
+  use.MonthlyData = F
+  if ( any(vars.all[vars.2modify,]$time.step == 'months')) {
+    use.MonthlyData = T
+    if (updateTo != get.endOfMonth(updateTo) || get.endOfMonth(updateTo)  > Sys.Date() ) {
+      updateTo = get.endOfMonth(updateTo)
+      if (updateTo  > Sys.Date())
+        updateTo = get.endOfLastMonth(updateTo)
+
+      message('       - updateTo adjusted to the end of the month and less than today (given using monthly data).')
+    }
+  }
+
+
   # If the earliest and latest dates from existing data differ, then
   # change updateFrom and updateTo
   if (any(updateFrom > vars.summary[vars.2update,]$from)) {
     updateFrom = min(vars.summary[vars.2update,]$from)
-    message('... updateFrom reduced to ensure all variables have the same start date.')
+    message('       - updateFrom reduced to ensure all variables have the same start date.')
   }
   if (any(updateTo < vars.summary[vars.2update,]$from)) {
     updateTo = min(vars.summary[vars.2update,]$from)
-    message('... updateTo increased to ensure no time gaps for any variables.')
+    message('       - updateTo increased to ensure no time gaps for any variables.')
   }
   if (any(updateTo > vars.summary[vars.2update,]$to)) {
     updateTo = max(vars.summary[vars.2update,]$to)
-    message('... updateTo increased to ensure all variables have the same end date.')
+    message('       - updateTo increased to ensure all variables have the same end date.')
   }
   if (any(updateFrom > vars.summary[vars.2update,]$to)) {
     updateFrom = min(vars.summary[vars.2update,]$to)
-    message('... updateFrom reduced to ensure no time gaps for any variables.')
+    message('       - updateFrom reduced to ensure no time gaps for any variables.')
+  }
+
+  # Check duration is sufficient for monthly data.
+  if (use.MonthlyData) {
+    # Check sufficient number of months for monthly data
+    if (as.numeric(format(updateFrom, "%Y")) == as.numeric(format(updateTo, "%Y")) &&
+        as.numeric(format(updateFrom, "%m")) == as.numeric(format(updateTo, "%m")) )
+      stop('The input updateFrom and updateTo must span more than one month when monthly time step date is being handled.')
   }
 
   # Filter vars.2update. If the input vars exists in the netCDF and the data range
