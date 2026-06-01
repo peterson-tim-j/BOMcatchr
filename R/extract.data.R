@@ -1230,6 +1230,18 @@ get.ncdf.date.index <- function(date.datum, date.target, ncdf.start=NA, ncdf.end
 
 }
 
+get.endOfMonth <- function(dates) {
+  return(
+    as.Date(paste(format(dates,'%Y'), as.numeric(format(dates,'%m'))+1,'01', sep='-')) - 1
+  )
+}
+
+get.endOfLastMonth <- function(dates) {
+  return(
+    as.Date(paste(format(dates,'%Y'), as.numeric(format(dates,'%m')),'01', sep='-')) - 1
+  )
+}
+
 get.ncdf.dates <- function(date.from, date.to, date.time.step) {
 
   # Convert date.from and date.to to the last day of the time step.
@@ -1240,17 +1252,17 @@ get.ncdf.dates <- function(date.from, date.to, date.time.step) {
 
   date.to = switch(date.time.step,
                    days = date.to,
-                   months = as.Date(paste(format(date.to,'%Y'), as.numeric(format(date.to,'%m'))+1,'01', sep='-')) - 1
+                   months = get.endOfMonth(date.to)
                    )
 
-  # Build sequence of dates as required tiem step
+  # Build sequence of dates as required timw step
   date.target = switch(date.time.step,
                        days   = seq( from=date.from, to=date.to, by="day"),
                        months = seq( from=date.from, to=date.to, by="month"))
 
   # Shift dates to the end of the month.
   if (date.time.step == 'months')
-    date.target = as.Date(paste(format(date.target,'%Y'), as.numeric(format(date.target,'%m'))+1,'01', sep='-')) - 1
+    date.target = get.endOfMonth(date.target)
 
   # Filter to be less than today
   filt = date.target <= (Sys.Date() - 1)
