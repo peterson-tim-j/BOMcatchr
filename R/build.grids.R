@@ -145,6 +145,11 @@ build.grids <- function(
     grid.prior = vars.prior.summary$group
     vars.prior = row.names(vars.prior.summary)
 
+    # Check existing grid has some data in it, else stop
+    if (all(vars.prior.summary$from == as.Date('0000-01-01')) &&
+        all(vars.prior.summary$to == as.Date('9999-12-31')))
+      stop('The input netCDF file is empty. Delete file and rebuild new netCDF file.')
+
     # Get new variables to add to netCDF file
     ind.vars2add = !(vars %in% vars.prior)
     vars.2add = vars[ind.vars2add]
