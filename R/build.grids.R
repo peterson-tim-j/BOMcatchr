@@ -507,7 +507,7 @@ build.grids <- function(
   updateFrom = max(as.Date('1900-01-01','%Y-%m-%d'), updateFrom)
   updateTo = min(as.Date(Sys.Date(),'%Y-%m-%d'), updateTo)
 
-  message('... Checking updateFrom and updateTo dates:')
+  message('... Checking updateFrom and updateTo dates.')
 
   # Adjust updateTo to the end of current month, else end of last month.
   use.MonthlyData = F
