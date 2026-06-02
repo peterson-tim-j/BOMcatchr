@@ -22,7 +22,7 @@ Imports:
     RCurl, 
     elevatr,
     progress,
-    terra
+    terra (>= 1.9)
 Suggests: 
     knitr,
     rmarkdown,
