@@ -8,7 +8,7 @@ grid.ages(
   ncfile,
   data.src = grid.sources(),
   silent = F,
-  plot.ages = F,
+  plot.sourcedate = F,
   today = Sys.Date()
 )
 }
@@ -19,7 +19,7 @@ grid.ages(
 
 \item{silent}{is a logical for silencing console outputs. Default is \code{F}.}
 
-\item{plot.ages}{is a logical for plotting the variable updates required. Default is \code{F}.}
+\item{plot.sourcedate}{is a logical for plotting the date that the data for each time point was downloaded. Default is \code{F}.}
 
 \item{today}{is today's date. Default is \code{Sys.Date()}. This input is only provided
 to demonstrate the function within the vignettes.}
