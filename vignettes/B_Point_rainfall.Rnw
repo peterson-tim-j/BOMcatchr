@@ -46,7 +46,7 @@ fnames = build.grids(ncdfFilename = ncdfFilename,
 ```
 
 ## Set the points for data extraction
-with the data grids built, let's set two data points to extract data at. The locations are at a groundwater bore and one rainfall gauge. Below, the coordinates are defined and then they're convert to a terra spatial vector object and the projection set to GDA94.
+With the data grids built, let's set two data points to extract data at. The locations are at a groundwater bore and one rainfall gauge. Below, the coordinates are defined and then they're convert to a terra spatial vector object and the projection set to GDA94.
 ```{r}
 coordinates.data = data.frame( ID =c('Bore-10084446','Rain-63005'),
                                Longitude = c(153.551875, 149.5559),
