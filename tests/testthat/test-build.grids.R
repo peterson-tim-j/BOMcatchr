@@ -39,6 +39,17 @@ test_that("netCDF grid can be created",
       expect_true(is.data.frame(summary.df))
       expect_shape(summary.df, dim = c(7, 8))
 
+      # Test grid ages can be calculated and plotted
+      expect_no_error(
+        {
+          summary.ages <- grid.ages(ncdfFilename, today = Sys.Date()+12, plot.sourcedate = T)
+        }
+      )
+
+      # summary.ages is a list of expected length
+      expect_true(is.list(summary.ages))
+      expect_length(summary.ages, nrow(summary.df))
+
       # Update netcDF grids and expect no errors
       expect_no_error(
         {
