@@ -680,6 +680,10 @@ extract.data <- function(
       # Update progress bar
       pbar$tick()
     }
+
+    # clear memory
+    rm(r)
+    gc(verbose = F)
   }
 
   # The source data can have the following types of gaps:
@@ -1231,15 +1235,27 @@ get.ncdf.date.index <- function(date.datum, date.target, ncdf.start=NA, ncdf.end
 }
 
 get.endOfMonth <- function(dates) {
-  return(
-    as.Date(paste(format(dates,'%Y'), as.numeric(format(dates,'%m'))+1,'01', sep='-')) - 1
-  )
+  for (i in 1:length(dates)) {
+    idate = dates[i]
+    imonth = as.numeric(format(idate,'%m'))
+    if (imonth<12)
+      dates[i] = as.Date(paste(format(idate,'%Y'), imonth+1,'01', sep='-')) - 1
+    else
+      dates[i] = as.Date(paste(format(idate,'%Y'), '12','31', sep='-'))
+  }
+  return(dates)
 }
 
 get.endOfLastMonth <- function(dates) {
-  return(
-    as.Date(paste(format(dates,'%Y'), as.numeric(format(dates,'%m')),'01', sep='-')) - 1
-  )
+  for (i in 1:length(dates)) {
+    idate = dates[i]
+    imonth = as.numeric(format(idate,'%m'))
+    if (imonth>1)
+      dates[i] = as.Date(paste(format(idate,'%Y'), imonth,'01', sep='-')) - 1
+    else
+      dates[i] = as.Date(paste(format(idate,'%Y'), '01','31', sep='-'))
+  }
+  return(dates)
 }
 
 get.ncdf.dates <- function(date.from, date.to, date.time.step) {
