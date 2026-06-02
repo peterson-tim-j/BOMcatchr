@@ -25,19 +25,19 @@ This example shows how to build the required data files and then extract the dai
 ## Make netCDF file
 The first step is to create the netCDF files. Here the netCDF file is created and only for daily and monthly precipitation data. Note, the monthly precipitation product can slightly differ from the monthly sum of the daily precipitation product. See \url{https://www.bom.gov.au/climate/austmaps/about-rain-maps.shtml} for details.
 
-Here the data is only downloaded between the dates _dataFrom_ and _dataTo_. If the latter two dates were not input then data would be downloaded from 1/1/1900 to yesterday.
+Here the data is only downloaded between the dates \code{dataFrom} and \code{dataTo}. If the latter two dates were not input then data would be downloaded from 1/1/1900 to yesterday.
 ```{r}
 dataFrom = as.Date("2010-01-01","%Y-%m-%d")
 dataTo = as.Date("2010-12-31","%Y-%m-%d")
 ```
 
-The netCDF file contains grids of daily rainfall for all of Australia and is used below to extract data at points of interest. Often users run _build.grids_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _build.grids_ is run with the the netCDF file name pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to yesterday.
+The netCDF file contains grids of daily rainfall for all of Australia and is used below to extract data at points of interest. Often users run \code{build.grids} once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if \code{build.grids} is run with the the netCDF file name pointing to existing files and \code{updateFrom=NA} then the netCDF files will be updated to yesterday.
 
 To start to create the grids, the file name for the netCDF grids needs to be defined. Here we'll just use a temporary file. You should change this to a non-temporary file name and folder.
 ```{r}
 ncdfFilename = tempfile(fileext='.nc')
 ```
-Now with the inputs defined we can download the gridded data and build the netCDF file. Note, here _vars_ is set to only download daily precipitation.
+Now with the inputs defined we can download the gridded data and build the netCDF file. Note, here \code{vars} is set to only download daily precipitation.
 ```{r}
 fnames = build.grids(ncdfFilename = ncdfFilename,
                          updateFrom = dataFrom,
@@ -58,9 +58,9 @@ terra::crs(coordinates.data) <- terra::crs('+proj=longlat +ellps=GRS80 +no_defs'
 ```
 
 ## Extract daily precipitation data
-Now let's extract the daily precipitation at the two locations. The data is extracted from the netCDF file _ncdfFilename_ and between the dates _extractFrom_ and _extractTo_.
+Now let's extract the daily precipitation at the two locations. The data is extracted from the netCDF file \code{ncdfFilename} and between the dates \code{extractFrom} and \code{extractTo}.
 
-Note the netCDF file _ncdfFilename_ must be in the working directory or the full file path must be given.
+Note the netCDF file \code{ncdfFilename} must be in the working directory or the full file path must be given.
 ```{r}
 extracted.data = extract.data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,

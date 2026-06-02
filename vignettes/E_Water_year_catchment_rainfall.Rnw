@@ -20,7 +20,7 @@ library(BOMcatchr)
 ```
 
 ## Make netCDF files
-The first step is to create the netCDF file. Here grids are build for monthly precipitation, daily precipitation and the daily root measure square error (RMSE) from the interpolation of the rain gauge data - and only between the dates _update.from_ and _update.to_.
+The first step is to create the netCDF file. Here grids are build for monthly precipitation, daily precipitation and the daily root measure square error (RMSE) from the interpolation of the rain gauge data - and only between the dates \code{update.from} and \code{update.to}.
 
 First, let's define the start and end dates for data grids and the file names.
 
@@ -44,7 +44,7 @@ Now that we have the meteorological data we can begin extracting data for two ca
 catch = catchments()
 ```
 ## Extract calendar year precipitation
-Next let's extract the calendar year area weighted total precipitation across the two catchments. The data is extracted between the dates _extract.from_ and _extract.to_. Because the output time step can be estimated from both the daily and monthly source data, both can be extracted at the same time.
+Next let's extract the calendar year area weighted total precipitation across the two catchments. The data is extracted between the dates \code{extract.from} and \code{extract.to}. Because the output time step can be estimated from both the daily and monthly source data, both can be extracted at the same time.
 
 ```{r}
 climateData.annual = extract.data(ncdfFilename = ncdfFilename,
