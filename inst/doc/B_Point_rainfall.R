@@ -23,9 +23,9 @@ coordinates.data = data.frame( ID =c('Bore-10084446','Rain-63005'),
                                Longitude = c(153.551875, 149.5559),
                                Latitude =  c(-28.517974,-33.4289))
 
-sp::coordinates(coordinates.data) <- ~Longitude + Latitude
+coordinates.data = terra::vect(coordinates.data)
 
-sp::proj4string(coordinates.data) = '+proj=longlat +ellps=GRS80 +no_defs'
+terra::crs(coordinates.data) <- terra::crs('+proj=longlat +ellps=GRS80 +no_defs')
 
 ## -----------------------------------------------------------------------------
 extracted.data = extract.data(ncdfFilename = ncdfFilename,

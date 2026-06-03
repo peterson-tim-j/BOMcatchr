@@ -16,11 +16,11 @@ options(tibble.print_min = 4L, tibble.print_max = 4L)
 ```
 
 ```{r setup}
-library(BOMcatchr, warn.conflicts = FALSE)
+library(BOMcatchr)
 ```
 
 ## Make netCDF files
-The first step is to create the netCDF file. Here grids are build for monthly precipitation, daily precipitation and the daily root measure square error (RMSE) from the interpolation of the rain gauge data - and only between the dates _update.from_ and _update.to_.
+The first step is to create the netCDF file. Here grids are build for monthly precipitation, daily precipitation and the daily root measure square error (RMSE) from the interpolation of the rain gauge data - and only between the dates \code{update.from} and \code{update.to}.
 
 First, let's define the start and end dates for data grids and the file names.
 
@@ -41,20 +41,20 @@ fname = build.grids(ncdfFilename = ncdfFilename,
 ## Load a catchment boundary
 Now that we have the meteorological data we can begin extracting data for two catchments. Here the catchment boundaries built into the package are used.
 ```{r}
-data("catchments")
+catch = catchments()
 ```
 ## Extract calendar year precipitation
-Next let's extract the calendar year area weighted total precipitation across the two catchments. The data is extracted between the dates _extract.from_ and _extract.to_. Because the output time step can be estimated from both the daily and monthly source data, both can be extracted at the same time.
+Next let's extract the calendar year area weighted total precipitation across the two catchments. The data is extracted between the dates \code{extract.from} and \code{extract.to}. Because the output time step can be estimated from both the daily and monthly source data, both can be extracted at the same time.
 
 ```{r}
-climateData.annual = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.annual = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip', 'precip.monthly'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = 'annual',
-                      temporal.function.name='sum',
-                      spatial.function.name='var')
+                      temporal.function.name = 'sum',
+                      spatial.function.name = 'var')
 ```
 
 Now let's also estimate the uncertainty in the calender year rainfall using the root mean square interpolation error (RMSE). Specifically, we are assuming that the error is unbiased, which allows us to assume the RMSE equals the standard deviation. Taking the square of it gives us the variance, which we can sum over the water year. Once all of the calender year data is extracted, the total annual precipitation is plotted.
@@ -62,11 +62,11 @@ Now let's also estimate the uncertainty in the calender year rainfall using the 
 ```{r}
 sqrd.sum <- function(x) {return(sum(x^2))}
 
-climateData.annual.err = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.annual.err = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip.RMSE'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = 'annual',
                       temporal.function.name = sqrd.sum,
                       spatial.function.name = 'var')
@@ -79,9 +79,9 @@ climateData.annual.err = extract.data(ncdfFilename=ncdfFilename,
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catchments$CatchID)) {
+for (i in 1:length(catch$CatchID)) {
 
-  filt = climateData.annual$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = climateData.annual$temporal.sum$Location.ID == catch$CatchID[i]
 
   # Plot precipitation from monthly data
   tmp.date = climateData.annual$temporal.sum[filt,]
@@ -95,13 +95,13 @@ for (i in 1:length(catchments$CatchID)) {
        col = "red",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data) * 1.05)),
+       ylim = c(0, ceiling(max(y.data) * 1.2)),
        ylab = "Precip. [mm/year]",
        xlab = "Calender year",
        xaxs = "r",
        bty = "l",
        yaxs = "r",
-       main=paste('Catchment ID',catchments$CatchID[i]))
+       main=paste('Catchment ID',catch$CatchID[i]))
 
   # Get water year data from daily data
   tmp.date = climateData.annual$temporal.sum[filt,]
@@ -148,24 +148,24 @@ wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(d
 ```
 
 ```{r}
-climateData.daily2wateryear = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.daily2wateryear = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = wateryear.ind,
-                      temporal.function.name='sum',
-                      spatial.function.name='var')
+                      temporal.function.name = 'sum',
+                      spatial.function.name = 'var')
 ```
 
 Now let's estimate the uncertainty in the water year rainfall using the root mean square interpolation error (RMSE).
 
 ```{r}
-climateData.daily2wateryear.err = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.daily2wateryear.err = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip.RMSE'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name = sqrd.sum,
                       spatial.function.name = 'var')
@@ -178,14 +178,14 @@ wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(d
 ```
 
 ```{r}
-climateData.month2wateryear = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.month2wateryear = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip.monthly'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = wateryear.ind,
-                      temporal.function.name='sum',
-                      spatial.function.name='var')
+                      temporal.function.name = 'sum',
+                      spatial.function.name = 'var')
 ```
 
 Before plotting the water year data, the time steps with less than a full water year of data are filtered out.
@@ -209,10 +209,10 @@ Now let's compare the two estimates of water year precipitation at the two catch
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catchments$CatchID)) {
+for (i in 1:length(catch$CatchID)) {
 
   # Water years precipitation from monthly data.
-  filt = climateData.month2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = climateData.month2wateryear$temporal.sum$Location.ID == catch$CatchID[i]
   tmp.date = climateData.month2wateryear$temporal.sum[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip.monthly
@@ -223,16 +223,16 @@ for (i in 1:length(catchments$CatchID)) {
        col = "red",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data) * 1.1)),
+       ylim = c(0, ceiling(max(y.data) * 1.2)),
        ylab = "Precip. [mm/year]",
        xlab = "Water year (end year)",
        xaxs = "r",
        bty = "l",
        yaxs = "r",
-       main=paste('Catchment ID',catchments$CatchID[i]))
+       main=paste('Catchment ID',catch$CatchID[i]))
 
   # Get water year data from daily data.
-  filt = climateData.daily2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = climateData.daily2wateryear$temporal.sum$Location.ID == catch$CatchID[i]
   tmp.date = climateData.daily2wateryear$temporal.sum[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip

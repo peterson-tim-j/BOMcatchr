@@ -3,7 +3,7 @@ knitr::opts_chunk$set(collapse = T, comment = "#>")
 options(tibble.print_min = 4L, tibble.print_max = 4L)
 
 ## ----setup--------------------------------------------------------------------
-library(BOMcatchr, warn.conflicts = FALSE)
+library(BOMcatchr)
 
 ## -----------------------------------------------------------------------------
 date.from = as.Date("2010-01-01","%Y-%m-%d")
@@ -18,26 +18,26 @@ fname = build.grids(ncdfFilename = ncdfFilename,
                          vars = c('precip', 'precip.RMSE', 'precip.monthly'))
 
 ## -----------------------------------------------------------------------------
-data("catchments")
+catch = catchments()
 
 ## -----------------------------------------------------------------------------
-climateData.annual = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.annual = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip', 'precip.monthly'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = 'annual',
-                      temporal.function.name='sum',
-                      spatial.function.name='var')
+                      temporal.function.name = 'sum',
+                      spatial.function.name = 'var')
 
 ## -----------------------------------------------------------------------------
 sqrd.sum <- function(x) {return(sum(x^2))}
 
-climateData.annual.err = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.annual.err = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip.RMSE'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = 'annual',
                       temporal.function.name = sqrd.sum,
                       spatial.function.name = 'var')
@@ -46,9 +46,9 @@ climateData.annual.err = extract.data(ncdfFilename=ncdfFilename,
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catchments$CatchID)) {
+for (i in 1:length(catch$CatchID)) {
 
-  filt = climateData.annual$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = climateData.annual$temporal.sum$Location.ID == catch$CatchID[i]
 
   # Plot precipitation from monthly data
   tmp.date = climateData.annual$temporal.sum[filt,]
@@ -62,13 +62,13 @@ for (i in 1:length(catchments$CatchID)) {
        col = "red",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data) * 1.05)),
+       ylim = c(0, ceiling(max(y.data) * 1.2)),
        ylab = "Precip. [mm/year]",
        xlab = "Calender year",
        xaxs = "r",
        bty = "l",
        yaxs = "r",
-       main=paste('Catchment ID',catchments$CatchID[i]))
+       main=paste('Catchment ID',catch$CatchID[i]))
 
   # Get water year data from daily data
   tmp.date = climateData.annual$temporal.sum[filt,]
@@ -110,21 +110,21 @@ dates = seq.Date(date.from, date.to, by ='day')
 wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
 
 ## -----------------------------------------------------------------------------
-climateData.daily2wateryear = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.daily2wateryear = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = wateryear.ind,
-                      temporal.function.name='sum',
-                      spatial.function.name='var')
+                      temporal.function.name = 'sum',
+                      spatial.function.name = 'var')
 
 ## -----------------------------------------------------------------------------
-climateData.daily2wateryear.err = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.daily2wateryear.err = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip.RMSE'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name = sqrd.sum,
                       spatial.function.name = 'var')
@@ -134,14 +134,14 @@ dates = seq.Date(date.from, date.to, by ='month')
 wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
 
 ## -----------------------------------------------------------------------------
-climateData.month2wateryear = extract.data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
+climateData.month2wateryear = extract.data(ncdfFilename = ncdfFilename,
+                      extractFrom = date.from,
+                      extractTo = date.to,
                       vars = c('precip.monthly'),
-                      locations=catchments,
+                      locations = catch,
                       temporal.timestep = wateryear.ind,
-                      temporal.function.name='sum',
-                      spatial.function.name='var')
+                      temporal.function.name = 'sum',
+                      spatial.function.name = 'var')
 
 ## -----------------------------------------------------------------------------
 filt = climateData.daily2wateryear$temporal.sum$days.per.timestep >= 365
@@ -158,10 +158,10 @@ climateData.month2wateryear$temporal.sum = climateData.month2wateryear$temporal.
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catchments$CatchID)) {
+for (i in 1:length(catch$CatchID)) {
 
   # Water years precipitation from monthly data.
-  filt = climateData.month2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = climateData.month2wateryear$temporal.sum$Location.ID == catch$CatchID[i]
   tmp.date = climateData.month2wateryear$temporal.sum[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip.monthly
@@ -172,16 +172,16 @@ for (i in 1:length(catchments$CatchID)) {
        col = "red",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data) * 1.1)),
+       ylim = c(0, ceiling(max(y.data) * 1.2)),
        ylab = "Precip. [mm/year]",
        xlab = "Water year (end year)",
        xaxs = "r",
        bty = "l",
        yaxs = "r",
-       main=paste('Catchment ID',catchments$CatchID[i]))
+       main=paste('Catchment ID',catch$CatchID[i]))
 
   # Get water year data from daily data.
-  filt = climateData.daily2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = climateData.daily2wateryear$temporal.sum$Location.ID == catch$CatchID[i]
   tmp.date = climateData.daily2wateryear$temporal.sum[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip

@@ -22,6 +22,9 @@ summary.df <- BOMcatchr::grid.summary(ncdffile.name)
 summary.df
 
 ## -----------------------------------------------------------------------------
+summary.ages <- BOMcatchr::grid.ages(ncdffile.name, today = Sys.Date()+12, plot.sourcedate = T)
+
+## -----------------------------------------------------------------------------
 ncdffile.name <- build.grids(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate)
 

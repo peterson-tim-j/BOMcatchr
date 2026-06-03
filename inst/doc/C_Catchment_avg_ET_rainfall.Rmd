@@ -16,23 +16,15 @@ options(tibble.print_min = 4L, tibble.print_max = 4L)
 ```
 
 ```{r setup}
-library(BOMcatchr, warn.conflicts = FALSE)
-```
-
-## Load extra packages for the vignette
-The mapping of the results below requires the following packages.
-
-```{r}
-library(raster)
-library(sp)
+library(BOMcatchr)
 ```
 
 ## Make netCDF files
-The first step is to create the netCDF file of the gridded data. Here grids are created for daily precipitation, daily minimum temperature, daily maximum temperature, daily vapour pressure deficit, daily solar radiation and only between the dates _update.from_ and _update.to_. Importantly, the file (and those downloaded) are created in the working directory.
+The first step is to create the netCDF file of the gridded data. Here grids are created for daily precipitation, daily minimum temperature, daily maximum temperature, daily vapour pressure deficit, daily solar radiation and only between the dates \code{update.from} and \code{update.to}. Importantly, the file (and those downloaded) are created in the working directory.
 
 If the latter two dates were not input then data would be downloaded from 1/1/1900 to two days ago. The netCDF file contains grids of the daily data for all of Australia and is used below to extract data within the catchment boundaries of interest.
 
-Often users run _build.grids_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _build.grids_ is run with the the netCDF file name pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to two days ago.
+Often users run \code{build.grids} once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if \code{build.grids} is run with the the netCDF file name pointing to existing files and \code{updateFrom=NA} then the netCDF files will be updated to two days ago.
 
 First, let's define the start and end dates for data grids and the file names.
 
@@ -51,15 +43,15 @@ fname = build.grids(ncdfFilename = ncdfFilename,
                          vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad'))
 ```
 ## Load a catchment boundary
-Now that we have the meteorological data we can begin extracting data for two catchments. Here the catchment boundaries built into the package are used. However, shape files of polygons can easily be used once imported into R. Here the data is imported into the _catchments_ variable.
+Now that we have the meteorological data we can begin extracting data for two catchments. Here the catchment boundaries built into the package are used. However, shape files of polygons can easily be used once imported into R. Here the data is imported into the \code{catch} variable.
 ```{r}
-data("catchments")
+catch = catchments()
 ```
 
 ## Extract daily precipitation and PET data
-Here the daily area weighted average precipitation and PET is extracted across the two catchments. The data is extracted from the netCDF file _ncdfFilename_ between the dates _extract.from_ and _extract.to_. The other _BOMcatchr_ variables *are* extracted because they are need for the calculation of Morton's PET. Note the netCDF files must be in the working directory or the full file path must be given.
+Here the daily area weighted average precipitation and PET is extracted across the two catchments. The data is extracted from the netCDF file \code{ncdfFilename} between the dates \code{extract.from} and \code{extract.to}. The other _BOMcatchr_ variables *are* extracted because they are need for the calculation of Morton's PET. Note the netCDF files must be in the working directory or the full file path must be given.
 
-Here Morton's wet-environment areal evapotranspiration was estimated (other options are available). The use of Morton's CREA formulation is defined by setting the _ET.function_ variable to _'ET.MortonCRAE'_. The calculation of the areal wet environment PET is defined by setting Morton's specific variable _ET.Mortons.est_ to _'wet areal ET'_ (note, other options exist within _BOMcatchr_ for both variables). Lastly, following [McMahon et al, (2013)](https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf), Morton's PET is calculated at a monthly time step (not daily) to improve its reliability. The monthly estimate is then interpolated to daily.
+Here Morton's wet-environment areal evapotranspiration was estimated (other options are available). The use of Morton's CREA formulation is defined by setting the _ET.function_ variable to \code{'ET.MortonCRAE'}. The calculation of the areal wet environment PET is defined by setting Morton's specific variable \code{ET.Mortons.est} to \code{'wet areal ET'} (note, other options exist within _BOMcatchr_ for both variables). Lastly, following [McMahon et al, (2013)](https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf), Morton's PET is calculated at a monthly time step (not daily) to improve its reliability. The monthly estimate is then interpolated to daily.
 
 The estimation of ET uses the _evapotranspiration_ package. It requires a set of constants, which are loaded as follows.
 ```{r}
@@ -72,7 +64,7 @@ climateData.daily = extract.data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
                       vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
-                      locations=catchments,
+                      locations=catch,
                       temporal.timestep = 'daily',
                       temporal.function.name='sum',
                       spatial.function.name='var',
@@ -89,9 +81,9 @@ Next time series of the extracted daily precipitation and PET for each catchment
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catchments$CatchID)) {
+for (i in 1:length(catch$CatchID)) {
 
-  filt = climateData.daily$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = climateData.daily$temporal.sum$Location.ID == catch$CatchID[i]
 
   # Convert year, month and day columns from extractions to a date.
   climateData.daily.date = as.Date(paste0(climateData.daily$temporal.sum$year[filt], "-",
@@ -107,10 +99,18 @@ for (i in 1:length(catchments$CatchID)) {
   # Precipitation
   plot(climateData.daily.date,
         climateData.daily$temporal.sum$precip[filt],
-        type = "h", col = "#e31a1c", lwd = 3, mgp = c(2, 0.5, 0),
-        main=paste('Catchment ID',catchments$CatchID[i]),
-        ylim = c(0, 80), ylab = "", xlab = "2010", xaxs = "i",
-yaxt = "n", bty = "l", yaxs = "i")
+        type = "h",
+        col = "#e31a1c",
+        lwd = 3,
+        mgp = c(2, 0.5, 0),
+        main=paste('Catchment ID',catch$CatchID[i]),
+        ylim = c(0, 80),
+        ylab = "",
+        xlab = "2010",
+        xaxs = "i",
+        yaxt = "n",
+        bty = "l",
+        yaxs = "i")
 
   axis(side = 2, mgp = c(2, 0.5, 0), line = 0.5, at = seq(from = 0, to = 80, by = 20),
         labels = c("0", "20", "40", "60", "80mm"), col = "#e31a1c", col.axis = "#e31a1c")
@@ -127,17 +127,33 @@ yaxt = "n", bty = "l", yaxs = "i")
 
   # Plot evap data.
   par(new = TRUE)
-  plot(climateData.daily.date, climateData.daily$temporal.sum$et[filt],
-      col = "#bc80bd", lwd = 2, ylab = "", ylim = c(0, 4), lty = 1,
-      xlab = "", xaxs = "i", yaxt = "n", xaxt = "n", type = "l", bty = "n", yaxs = "i")
+  plot(climateData.daily.date,
+       climateData.daily$temporal.sum$et[filt],
+       col = "#bc80bd",
+       lwd = 2,
+       ylab = "",
+       ylim = c(0, 4),
+       lty = 1,
+       xlab = "",
+       xaxs = "i",
+       yaxt = "n",
+       xaxt = "n",
+       type = "l",
+       bty = "n",
+       yaxs = "i")
 
   axis(side = 2, line = 2.3, mgp = c(2, 0.5, 0), labels = c("0", "1", "2", "3", "4mm"),
       at = seq(from = 0, to = 4, by = 1), col = "#bc80bd", col.axis = "#bc80bd")
 
-  legend("topleft", cex = 0.8, lwd = 2, bty = "n", inset = c(0.01, -0.01),
-      lty = c(1, 1), pch = c(NA, NA),
-      col = c("#e31a1c",  "#bc80bd"),
-      legend = c("Precipitation (bars +/- one standard dev.)", "Morton CRAE PET"), xpd = NA)
+  legend("topleft",
+         cex = 0.8,
+         lwd = 2,
+         bty = "n",
+         inset = c(0.01, -0.01),
+         lty = c(1, 1),
+         pch = c(NA, NA),
+         col = c("#e31a1c",  "#bc80bd"),
+         legend = c("Precipitation (bars +/- one standard dev.)", "Morton CRAE PET"), xpd = NA)
 }
 ```
 
@@ -146,28 +162,74 @@ The meteorological spatial data can also be extracted at the required timescale.
 
 To extract the spatial data, and not some statistic of the spatial data such as the sum, the variable _spatial.function.name_ is set to _''_.
 
-To extract the monthly totals, _temporal.timestep_ is set to _'monthly'_  and _temporal.function.name_ to _'sum'_. For the former, the options are _daily_, _weekly_, _monthly_, _quarterly_ and _annual_. For the latter, any built-in function or user-defined function that accepts a single vector of data and returns a single number should work.
+To extract the monthly totals, \code{temporal.timestep} is set to \code{'monthly'}  and \code{temporal.function.name} to \code{'sum'}. For the former, the options are _daily_, _weekly_, _monthly_, _quarterly_ and _annual_. For the latter, any built-in function or user-defined function that accepts a single vector of data and returns a single number should work.
 
 First let's extract only precipitation.
 
 ```{r}
 PrecipData.monthly = extract.data(ncdfFilename=ncdfFilename,
-                     extractFrom=date.from,
-                     extractTo=date.to,
+                     extractFrom = date.from,
+                     extractTo = date.to,
                      vars = c('precip'),
-                     locations=catchments,
+                     locations=catch,
                      spatial.function.name = '',
                      temporal.timestep = 'monthly',
                      temporal.function.name = 'sum')
 ```
-The monthly total precipitation can then be mapped to show the spatial variability.
+The monthly total precipitation can then be mapped to show the spatial variability. Before mapping, let's add a function to map a panel of maps and for the maps to have a common colour bar.
+```{r}
+panel.maps <- function(r, v, plot.labels, colourbar.label='') {
+
+  n.plots = terra::nlyr(r)
+  n.plotrows = ceiling(n.plots/2)
+  layout(
+    matrix(c(1:n.plots, n.plots+1, n.plots+1),
+           nrow = n.plotrows+1, byrow = TRUE),
+    heights = c( rep(0.9/n.plotrows, n.plotrows), 0.1)
+  )
+
+  zlim <- range(terra::values(r), na.rm = TRUE)
+  n_colors <- 100
+  pal = hcl.colors(n_colors, "viridis")
+
+  for (i in 1:n.plots) {
+    terra::plot(r[[i]],
+               zlim = zlim,
+               main = plot.labels[i],
+               loc.main = 'topright',
+               box=T,
+               legend = FALSE)
+    terra::plot(v, add = TRUE, border = "red", lwd = 2)
+  }
+
+  color_matrix = matrix(1:n_colors,
+                        nrow = n_colors,
+                        ncol = 1)
+  par(mar = c(3, 1, 1, 1))
+  image(x = seq(zlim[1], zlim[2], length.out = n_colors + 1),
+        y    = c(0, 1),
+        z    = color_matrix,
+        col  = pal,
+        axes = FALSE,
+        xlab = "",
+        ylab = ""
+    )
+
+    axis(1, at = pretty(seq(zlim[1], zlim[2], length.out = 5)), las = 1)
+    mtext(colourbar.label, side = 1, line = 2, cex = 0.9)
+}
+
+```
+Now let's call the function to map the monthly rainfall.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 6
-v = list("sp.polygons", catchments, col = "red",first=FALSE)
-colInd = which(startsWith(colnames(PrecipData.monthly@data), "precip_"))
-sp::spplot(PrecipData.monthly,colInd, sp.layout = list(v),
-        colorkey = list(title = "Precip (mm/month)"))
+map.labels = gsub( 'precip_', '',names(PrecipData.monthly[[2:5]]))
+map.labels = gsub( '_', '-',map.labels)
+
+plot.data = PrecipData.monthly[[-1]]
+
+panel.maps(plot.data, catch, map.labels, "Precip. (mm/month)")
 ```
 
 Next let's extract all variables and calculate the PET and then map.
@@ -177,7 +239,7 @@ metData.monthly = extract.data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
-                     locations=catchments,
+                     locations=catch,
                      spatial.function.name = '',
                      temporal.timestep = 'monthly',
                      temporal.function.name = 'sum',
@@ -190,16 +252,17 @@ The monthly total PET can then be mapped to show the spatial variability. The ma
 ```{r}
 #| fig.width = 8,
 #| fig.height = 6
-colInd = which(startsWith(colnames(metData.monthly@data), "et_"))
-sp::spplot(metData.monthly,colInd, sp.layout = list(v),
-  colorkey = list(title = "PET (mm/month)"))
+colInd = which(startsWith(names(metData.monthly), "et_"))
+plot.data = metData.monthly[[colInd]]
+
+panel.maps(plot.data, catch, map.labels, "PET (mm/month)")
 ```
 
 Now that we have maps of the rainfall and PET, we can calculate and map the monthly rainfall deficit.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 6
-colnames.all = colnames(metData.monthly@data)
+colnames.all = names(metData.monthly)
 colInd.P = which(startsWith(colnames.all, "precip_"))
 colInd.PET = which(startsWith(colnames.all, "et_"))
 
@@ -211,76 +274,56 @@ for (i in 1:length(colInd.P)) {
   metData.monthly[[colname.tmp]] = metData.monthly[[ind.P]] - metData.monthly[[ind.PET]]
 }
 
-colInd = which(startsWith(colnames(metData.monthly@data), "Deficit_mm_"))
-sp::spplot(metData.monthly,colInd, sp.layout = list(v),
-  colorkey = list(title = "Rainfall deficit, P - PET (mm/month)"))
+colInd = which(startsWith(names(metData.monthly), "Deficit_mm_"))
+plot.data = metData.monthly[[colInd]]
+
+panel.maps(plot.data, catch, map.labels, "P - PET (mm/month)")
 ```
 
 ## Point versus area weighted rainfall deficit
-Here area weighted catchment rainfall deficit estimates are compared to point estimates at the centtoid of each catchment.
-
-First, the centroids are estimated using the simple bounds box method.
+Here area weighted catchment rainfall deficit estimates are compared to point estimates at the centroid of each catchment. First, the centroids are estimated.
 
 ```{r}
-centroid = matrix(0,2,2)
-
-extn = extent(catchments[1,])
-centroid[1,1] = extn@xmin + (extn@xmax - extn@xmin)/2
-centroid[1,2] = extn@ymin + (extn@ymax - extn@ymin)/2
-
-extn = extent(catchments[2,])
-centroid[2,1] = extn@xmin + (extn@xmax - extn@xmin)/2
-centroid[2,2] = extn@ymin + (extn@ymax - extn@ymin)/2
-
-```
-Then, the coordinates are converted to a spatial object and set projection to GDA94.
-```{r}
-coordinates.data = data.frame( ID = catchments$CatchID,
-                               Longitude = centroid[,1],
-                               Latitude =  centroid[,2])
-
-sp::coordinates(coordinates.data) <- ~Longitude + Latitude
-
-sp::proj4string(coordinates.data) = '+proj=longlat +ellps=GRS80 +no_defs'
+centroid = terra::centroids(catch)
 ```
 Next, the meteorological data and PET are derived using both the area weighted approach and centroids.
 ```{r}
 metData.monthly.weighted = extract.data(ncdfFilename=ncdfFilename,
-                     extractFrom=date.from,
+                     extractFrom = date.from,
                      extractTo=date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
-                     locations=catchments,
+                     locations = catch,
                      spatial.function.name = 'sum',
                      temporal.timestep = 'monthly',
                      temporal.function.name = 'sum',
-                     ET.function='ET.MortonCRAE',
+                     ET.function = 'ET.MortonCRAE',
                      ET.timestep = 'monthly',
-                     ET.Mortons.est='wet areal ET',
-                     ET.constants= constants)
+                     ET.Mortons.est = 'wet areal ET',
+                     ET.constants =  constants)
 
 metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
-                     extractFrom=date.from,
-                     extractTo=date.to,
+                     extractFrom = date.from,
+                     extractTo = date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
-                     locations=coordinates.data,
+                     locations = centroid,
                      temporal.timestep = 'monthly',
                      temporal.function.name = 'sum',
                      ET.function='ET.MortonCRAE',
                      ET.timestep = 'monthly',
-                     ET.Mortons.est='wet areal ET',
-                     ET.constants= constants)
+                     ET.Mortons.est = 'wet areal ET',
+                     ET.constants =  constants)
 ```
 
-Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduces errors of up to 6 mm/month error.
+Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduced errors of 8 - 21  mm/month.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 6
 par(mfrow=c(2,3), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catchments$CatchID)) {
+for (i in 1:length(catch$CatchID)) {
 
-  filt = metData.monthly.weighted$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = metData.monthly.weighted$temporal.sum$Location.ID == catch$CatchID[i]
 
   # Convert year, month and day columns from extractions to a date.
   metData.date = as.Date(paste0(metData.monthly.weighted$temporal.sum$year[filt], "-",
@@ -322,7 +365,7 @@ for (i in 1:length(catchments$CatchID)) {
        col = "#e31a1c",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       main=paste('Catchment ID',catchments$CatchID[i]),
+       main=paste('Catchment ID',catch$CatchID[i]),
        ylim = c(0, 120),
        ylab = "PET [mm/month]",
        xlab = "2010", xaxs = "i",
