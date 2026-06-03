@@ -79,9 +79,9 @@ climateData.annual.err = extract.data(ncdfFilename = ncdfFilename,
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catchments$CatchID)) {
+for (i in 1:length(catch$CatchID)) {
 
-  filt = climateData.annual$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = climateData.annual$temporal.sum$Location.ID == catch$CatchID[i]
 
   # Plot precipitation from monthly data
   tmp.date = climateData.annual$temporal.sum[filt,]
@@ -95,13 +95,13 @@ for (i in 1:length(catchments$CatchID)) {
        col = "red",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data) * 1.05)),
+       ylim = c(0, ceiling(max(y.data) * 1.2)),
        ylab = "Precip. [mm/year]",
        xlab = "Calender year",
        xaxs = "r",
        bty = "l",
        yaxs = "r",
-       main=paste('Catchment ID',catchments$CatchID[i]))
+       main=paste('Catchment ID',catch$CatchID[i]))
 
   # Get water year data from daily data
   tmp.date = climateData.annual$temporal.sum[filt,]
@@ -209,10 +209,10 @@ Now let's compare the two estimates of water year precipitation at the two catch
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catchments$CatchID)) {
+for (i in 1:length(catch$CatchID)) {
 
   # Water years precipitation from monthly data.
-  filt = climateData.month2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = climateData.month2wateryear$temporal.sum$Location.ID == catch$CatchID[i]
   tmp.date = climateData.month2wateryear$temporal.sum[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip.monthly
@@ -223,16 +223,16 @@ for (i in 1:length(catchments$CatchID)) {
        col = "red",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, ceiling(max(y.data) * 1.1)),
+       ylim = c(0, ceiling(max(y.data) * 1.2)),
        ylab = "Precip. [mm/year]",
        xlab = "Water year (end year)",
        xaxs = "r",
        bty = "l",
        yaxs = "r",
-       main=paste('Catchment ID',catchments$CatchID[i]))
+       main=paste('Catchment ID',catch$CatchID[i]))
 
   # Get water year data from daily data.
-  filt = climateData.daily2wateryear$temporal.sum$Location.ID == catchments$CatchID[i]
+  filt = climateData.daily2wateryear$temporal.sum$Location.ID == catch$CatchID[i]
   tmp.date = climateData.daily2wateryear$temporal.sum[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip
