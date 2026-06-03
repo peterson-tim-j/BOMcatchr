@@ -54,7 +54,7 @@ The estimation of ET uses the _evapotranspiration_ package. It requires a set of
 data(constants,package='Evapotranspiration')
 ```
 
-Next, all 11 ET measures are derived. For each measure, only the following commands change: _ET.function_ , _ET.timestep_ and _ET.Mortons.est_ (when Morton's estimate is derived).
+Next, all 11 ET measures are derived. For each measure, only the following commands change: \code{ET.function} , \code{ET.timestep} and \code{ET.Mortons.est} (when Morton's estimate is derived).
 ```{R}
 climateData.ET.HargreavesSamani = extract.data(ncdfFilename = ncdfFilename,
                                 extractFrom = date.from,

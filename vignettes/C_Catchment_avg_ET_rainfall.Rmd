@@ -20,11 +20,11 @@ library(BOMcatchr)
 ```
 
 ## Make netCDF files
-The first step is to create the netCDF file of the gridded data. Here grids are created for daily precipitation, daily minimum temperature, daily maximum temperature, daily vapour pressure deficit, daily solar radiation and only between the dates _update.from_ and _update.to_. Importantly, the file (and those downloaded) are created in the working directory.
+The first step is to create the netCDF file of the gridded data. Here grids are created for daily precipitation, daily minimum temperature, daily maximum temperature, daily vapour pressure deficit, daily solar radiation and only between the dates \code{update.from} and \code{update.to}. Importantly, the file (and those downloaded) are created in the working directory.
 
 If the latter two dates were not input then data would be downloaded from 1/1/1900 to two days ago. The netCDF file contains grids of the daily data for all of Australia and is used below to extract data within the catchment boundaries of interest.
 
-Often users run _build.grids_ once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if _build.grids_ is run with the the netCDF file name pointing to existing files and _updateFrom=NA_ then the netCDF files will be updated to two days ago.
+Often users run \code{build.grids} once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if \code{build.grids} is run with the the netCDF file name pointing to existing files and \code{updateFrom=NA} then the netCDF files will be updated to two days ago.
 
 First, let's define the start and end dates for data grids and the file names.
 
@@ -43,15 +43,15 @@ fname = build.grids(ncdfFilename = ncdfFilename,
                          vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad'))
 ```
 ## Load a catchment boundary
-Now that we have the meteorological data we can begin extracting data for two catchments. Here the catchment boundaries built into the package are used. However, shape files of polygons can easily be used once imported into R. Here the data is imported into the _catch_ variable.
+Now that we have the meteorological data we can begin extracting data for two catchments. Here the catchment boundaries built into the package are used. However, shape files of polygons can easily be used once imported into R. Here the data is imported into the \code{catch} variable.
 ```{r}
 catch = catchments()
 ```
 
 ## Extract daily precipitation and PET data
-Here the daily area weighted average precipitation and PET is extracted across the two catchments. The data is extracted from the netCDF file _ncdfFilename_ between the dates _extract.from_ and _extract.to_. The other _BOMcatchr_ variables *are* extracted because they are need for the calculation of Morton's PET. Note the netCDF files must be in the working directory or the full file path must be given.
+Here the daily area weighted average precipitation and PET is extracted across the two catchments. The data is extracted from the netCDF file \code{ncdfFilename} between the dates \code{extract.from} and \code{extract.to}. The other _BOMcatchr_ variables *are* extracted because they are need for the calculation of Morton's PET. Note the netCDF files must be in the working directory or the full file path must be given.
 
-Here Morton's wet-environment areal evapotranspiration was estimated (other options are available). The use of Morton's CREA formulation is defined by setting the _ET.function_ variable to _'ET.MortonCRAE'_. The calculation of the areal wet environment PET is defined by setting Morton's specific variable _ET.Mortons.est_ to _'wet areal ET'_ (note, other options exist within _BOMcatchr_ for both variables). Lastly, following [McMahon et al, (2013)](https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf), Morton's PET is calculated at a monthly time step (not daily) to improve its reliability. The monthly estimate is then interpolated to daily.
+Here Morton's wet-environment areal evapotranspiration was estimated (other options are available). The use of Morton's CREA formulation is defined by setting the _ET.function_ variable to \code{'ET.MortonCRAE'}. The calculation of the areal wet environment PET is defined by setting Morton's specific variable \code{ET.Mortons.est} to \code{'wet areal ET'} (note, other options exist within _BOMcatchr_ for both variables). Lastly, following [McMahon et al, (2013)](https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf), Morton's PET is calculated at a monthly time step (not daily) to improve its reliability. The monthly estimate is then interpolated to daily.
 
 The estimation of ET uses the _evapotranspiration_ package. It requires a set of constants, which are loaded as follows.
 ```{r}
@@ -162,7 +162,7 @@ The meteorological spatial data can also be extracted at the required timescale.
 
 To extract the spatial data, and not some statistic of the spatial data such as the sum, the variable _spatial.function.name_ is set to _''_.
 
-To extract the monthly totals, _temporal.timestep_ is set to _'monthly'_  and _temporal.function.name_ to _'sum'_. For the former, the options are _daily_, _weekly_, _monthly_, _quarterly_ and _annual_. For the latter, any built-in function or user-defined function that accepts a single vector of data and returns a single number should work.
+To extract the monthly totals, \code{temporal.timestep} is set to \code{'monthly'}  and \code{temporal.function.name} to \code{'sum'}. For the former, the options are _daily_, _weekly_, _monthly_, _quarterly_ and _annual_. For the latter, any built-in function or user-defined function that accepts a single vector of data and returns a single number should work.
 
 First let's extract only precipitation.
 
