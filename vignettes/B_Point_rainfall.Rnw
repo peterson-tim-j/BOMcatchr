@@ -1,5 +1,5 @@
 ---
-title: "Extract daily and monthly point precipitation"
+title: "Point daily and monthly precipitation"
 description: >
   This vignette shows how to build the netCDF data file and then extract the
   point daily and monthly precipitation data at a few locations over a user
@@ -7,7 +7,7 @@ description: >
   at a daily and monthly time step.
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Extract daily and monthly point precipitation}
+  %\VignetteIndexEntry{Point daily and monthly precipitation}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
@@ -52,9 +52,8 @@ coordinates.data = data.frame( ID =c('Bore-10084446','Rain-63005'),
                                Longitude = c(153.551875, 149.5559),
                                Latitude =  c(-28.517974,-33.4289))
 
-coordinates.data = terra::vect(coordinates.data)
-
-terra::crs(coordinates.data) <- terra::crs('+proj=longlat +ellps=GRS80 +no_defs')
+coordinates.data = terra::vect(coordinates.data,
+                               crs = '+proj=longlat +ellps=GRS80 +no_defs')
 ```
 
 ## Extract daily precipitation data

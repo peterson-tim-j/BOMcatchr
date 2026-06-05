@@ -1,11 +1,11 @@
 ---
-title: "Extract water year area weighted precipitation"
+title: "Water year area precipitation and error estimates"
 description: >
   This vignette shows how to build the netCDF data file and then
   extract user defined water year area weighted precipitation data for a catchment.
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Extract water year area weighted precipitation}
+  %\VignetteIndexEntry{Water year area precipitation and error estimates}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
