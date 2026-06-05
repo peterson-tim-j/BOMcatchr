@@ -20,7 +20,7 @@ grid.read <- function(file.name, ivar.file.ext, only.header, nRows, nCols, noDat
     ind = which(tools::file_ext(zip.fname) == ivar.file.ext)
     zip.fname = zip.fname[ind]
 
-    con <- utils::unzip(file.name, file = zip.fname)
+    con <-unz(file.name, zip.fname)
 
   } else {
     stop(paste0('The following source data file format cannot be handled:',f.extn,'\n',
