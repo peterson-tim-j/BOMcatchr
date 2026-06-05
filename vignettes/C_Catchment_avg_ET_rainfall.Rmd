@@ -1,11 +1,11 @@
 ---
-title: "Extract daily area weighted PET and precipitation"
+title: "Area weighted PET and precipitation and maps"
 description: >
   This vignette shows how to build the netCDF data file and then
   extract the area weighted PET and precipitation data for a catchment over a user defined period. The errors introduced from not using area weighted methods (e.g centroid) are then demonstrated.
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Extract daily area weighted PET and precipitation}
+  %\VignetteIndexEntry{Area weighted PET and precipitation and maps}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
@@ -24,7 +24,7 @@ The first step is to create the netCDF file of the gridded data. Here grids are 
 
 If the latter two dates were not input then data would be downloaded from 1/1/1900 to two days ago. The netCDF file contains grids of the daily data for all of Australia and is used below to extract data within the catchment boundaries of interest.
 
-Often users run \code{build.grids} once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if \code{build.grids} is run with the the netCDF file name pointing to existing files and \code{updateFrom=NA} then the netCDF files will be updated to two days ago.
+Often users run \code{grid.build} once to build netCDF data files that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDFs grids for multiple projects, rather than re-building the netCDF for each project. Also, if \code{grid.build} is run with the the netCDF file name pointing to existing files and \code{updateFrom=NA} then the netCDF files will be updated to two days ago.
 
 First, let's define the start and end dates for data grids and the file names.
 
@@ -37,7 +37,7 @@ ncdfFilename = tempfile(fileext='.nc')
 
 Next, let's make the data grids over this period.
 ```{r}
-fname = build.grids(ncdfFilename = ncdfFilename,
+fname = grid.build(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad'))

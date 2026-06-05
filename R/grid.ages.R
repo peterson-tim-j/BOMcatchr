@@ -5,8 +5,8 @@
 #' This function compares the download date of data within an existing netCDF file
 #' and compares them against the BoM schedule of data updates (provided (see
 #' \code{\link{grid.sources}}),
-#' @param ncfile file name of the netCDF data file built by the package function \code{\link{build.grids()}}.
-#' @param data.src is a data.frame of the source grid information. Default is from \code{grid.sources()}.
+#' @param ncfile file name of the netCDF data file built by the package function \code{\link{grid.build}}.
+#' @param data.src is a data.frame of the source grid information. Default is from \code{\link{grid.sources}}.
 #' @param silent is a logical for silencing console outputs. Default is \code{F}.
 #' @param plot.sourcedate is a logical for plotting the date that the data for each time point was downloaded. Default is \code{F}.
 #' @param today is today's date. Default is \code{Sys.Date()}. This input is only provided

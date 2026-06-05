@@ -13,9 +13,9 @@ grid.ages(
 )
 }
 \arguments{
-\item{ncfile}{file name of the netCDF data file built by the package function \code{\link{build.grids()}}.}
+\item{ncfile}{file name of the netCDF data file built by the package function \code{\link{grid.build}}.}
 
-\item{data.src}{is a data.frame of the source grid information. Default is from \code{grid.sources()}.}
+\item{data.src}{is a data.frame of the source grid information. Default is from \code{\link{grid.sources}}.}
 
 \item{silent}{is a logical for silencing console outputs. Default is \code{F}.}
 

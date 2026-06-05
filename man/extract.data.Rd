@@ -153,7 +153,7 @@ ncdfFilename = tempfile(fileext='.nc')
 # Only precip data is to be added to the netCDF files.
 # This is because the URLs for the other variables are set to zero.
 \donttest{
-file.name = build.grids(ncdfFilename=ncdfFilename,
+file.name = grid.build(ncdfFilename=ncdfFilename,
              updateFrom=startDate,
              updateTo=endDate,
              vars = c('precip'))
@@ -183,5 +183,5 @@ unlink(ncdfFilename)
 }
 }
 \seealso{
-\code{\link{build.grids}} for building the NetCDF files of daily climate data.
+\code{\link{grid.build}} for building the NetCDF files of daily climate data.
 }

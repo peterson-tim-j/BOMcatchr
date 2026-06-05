@@ -96,7 +96,7 @@
 #' When \code{locations} are points, the returned variable is a data.frame containing daily climate data at each point.
 #'
 #' @seealso
-#' \code{\link{build.grids}} for building the NetCDF files of daily climate data.
+#' \code{\link{grid.build}} for building the NetCDF files of daily climate data.
 #'
 #' @examples
 #' # The example shows how to extract and save data.
@@ -114,7 +114,7 @@
 #' # Only precip data is to be added to the netCDF files.
 #' # This is because the URLs for the other variables are set to zero.
 #' \donttest{
-#' file.name = build.grids(ncdfFilename=ncdfFilename,
+#' file.name = grid.build(ncdfFilename=ncdfFilename,
 #'              updateFrom=startDate,
 #'              updateTo=endDate,
 #'              vars = c('precip'))
@@ -468,12 +468,12 @@ extract.data <- function(
   if (extractFrom < ncdf.dataFrom) {
     message('    WARNING: The extraction start date is prior to the existing data start date.');
     message('             Dates are adjusted accordingly.');
-    message('             Consider extending the existing date range using build.grids()');
+    message('             Consider extending the existing date range using grid.build()');
   }
   if (extractTo > ncdf.dataTo) {
     message('    WARNING: The extraction end date is after to the existing data end date.');
     message('             Dates are adjusted accordingly.');
-    message('             Consider extending the existing date range using build.grids()');
+    message('             Consider extending the existing date range using grid.build()');
   }
 
   # Limit the extraction time points to the data range

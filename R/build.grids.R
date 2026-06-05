@@ -1,8 +1,8 @@
 #' Build a netCDF file of climate data.
 #'
-#' \code{build.grids} builds one netCDF file containing Australian climate data.
+#' \code{grid.build} builds one netCDF file containing Australian climate data.
 #'
-#' build.grids creates one netCDF file of daily climate data.
+#' grid.build creates one netCDF file of daily climate data.
 #'
 #' @details
 #' One netCDF file is created than contains precipitation, minimum
@@ -61,21 +61,21 @@
 #'
 #' \donttest{
 #' # Build netCDF grids for daily precipitation and only over the defined time period.
-#' file.names = build.grids(ncdfFilename=ncdfFilename,
+#' file.names = grid.build(ncdfFilename=ncdfFilename,
 #'              updateFrom=startDate,
 #'              updateTo=endDate,
 #'              vars = c('precip'))
 #'
 #' # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 #' # the same file names but \code{updateFrom=NA}.
-#' file.names = build.grids(ncdfFilename=ncdfFilename,
+#' file.names = grid.build(ncdfFilename=ncdfFilename,
 #'              updateFrom=NA)
 #'
 #'  # Remove temp. file
 #'  unlink(ncdfFilename)
 #' }
 #' @export
-build.grids <- function(
+grid.build <- function(
   ncdfFilename=file.path(getwd(),'AWAP.nc'),
   updateFrom = as.Date("1900-01-01","%Y-%m-%d"),
   updateTo  = as.Date(Sys.Date()-2,"%Y-%m-%d"),

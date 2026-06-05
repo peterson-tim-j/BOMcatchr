@@ -1,10 +1,10 @@
 ---
-title: "Extract various measures of evapotranspiration"
+title: "Area weighted evapotranspiration measures"
 description: >
   This vignette shows how to estimate various measures of the area weighted evapotranspiration.
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Extract various measures of evapotranspiration}
+  %\VignetteIndexEntry{Area weighted evapotranspiration measures}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
