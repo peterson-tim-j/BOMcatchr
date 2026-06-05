@@ -1074,7 +1074,7 @@ get.nc.data = function( rast.conn , varname, interp.method, band, coords, do.inf
     # 3x3 cell area.
     if (any(is.finite(terra::values(r)))) {
       i = 0
-      while (any(is.na(terra::values(r))) && i<=interpMax) {
+      while (any(is.na(terra::values(r))) && i<interpMax) {
         r <- terra::focal(r, w=matrix(1,3,3), fun=mean, na.rm=TRUE, na.policy='only')
         i = i +1
       }
