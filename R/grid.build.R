@@ -89,7 +89,7 @@ grid.build <- function(
 
   # Check file name is a string
   if (!is.character(ncdfFilename))
-    stop('ncdfFilename is invalid. It must be a character string for the file name.')
+    pretty.stop('ncdfFilename is invalid. It must be a character string for the file name.')
 
   # Get workingFolder
   workingFolder = dirname(ncdfFilename)
@@ -100,22 +100,22 @@ grid.build <- function(
   if (file.exists(ncdfFilename)) {
     # check write access to existing netcdf file
     if (file.access(ncdfFilename, mode = 2) != 0)
-      stop('ncdfFilename cannot be written to. Check folder.')
+      pretty.stop('ncdfFilename cannot be written to. Check folder.')
   } else {
     # Get path for new netcdF file
     if (dirname(ncdfFilename) == '.') {
       if (file.access(workingFolder, mode=2) != 0)
-        stop('ncdfFilename cannot be written to the working directory. Check the working directory.')
+        pretty.stop('ncdfFilename cannot be written to the working directory. Check the working directory.')
     } else {
       if (file.access(dirname(ncdfFilename), mode=2) != 0)
-        stop('ncdfFilename cannot be written to the file directory. Check the fle name and path.')
+        pretty.stop('ncdfFilename cannot be written to the file directory. Check the fle name and path.')
     }
   }
 
   # Check the input vars list
   #----------------
   if (!is.character(vars))
-    stop('vars must be a character vector of variables names.')
+    pretty.stop('vars must be a character vector of variables names.')
 
   # If vars is empty, then set the defaults.
   if (length(vars)==1 && vars=='') {
@@ -129,9 +129,9 @@ grid.build <- function(
   vars.all = grid.sources()
   vars.all.names = rownames(vars.all)
   if (length(vars)==0)
-    stop('The input data variable names,  vars, must be input.')
+    pretty.stop('The input data variable names,  vars, must be input.')
   if ( !all(unique(vars) %in% vars.all.names))
-    stop(paste('The input vars contain unhandled variable names. The available inputs vars are:',
+    pretty.stop(paste('The input vars contain unhandled variable names. The available inputs vars are:',
                paste(vars.all.names, collapse = ', ')))
 
   # Set number of variables
@@ -148,7 +148,7 @@ grid.build <- function(
     # Check existing grid has some data in it, else stop
     if (all(vars.prior.summary$from == as.Date('0000-01-01')) &&
         all(vars.prior.summary$to == as.Date('9999-12-31')))
-      stop('The input netCDF file is empty. Delete file and rebuild new netCDF file.')
+      pretty.stop('The input netCDF file is empty. Delete file and rebuild new netCDF file.')
 
     # Get new variables to add to netCDF file
     ind.vars2add = !(vars %in% vars.prior)
@@ -176,10 +176,10 @@ grid.build <- function(
   # Check the compression level is NA or an integer b/w 1 and 9
   if (is.numeric(compressionLevel)) {
     if (compressionLevel<1 || compressionLevel>9) {
-      stop('compressionLevel input must be NA or an integer between 1 and 9')
+      pretty.stop('compressionLevel input must be NA or an integer between 1 and 9')
     }
   } else if (!is.na(compressionLevel))  {
-    stop('compressionLevel input must be NA or an integer between 1 and 9')
+    pretty.stop('compressionLevel input must be NA or an integer between 1 and 9')
   }
 
   # Check input dates and convert and check input time dates
@@ -189,19 +189,19 @@ grid.build <- function(
   } else if (is.character(updateFrom)) {
     updateFrom = as.Date(updateFrom,'%Y-%m-%d')
     if (is.na(updateFrom))
-      stop('The input updateFrom appears to be an implausible date. Please check.')
+      pretty.stop('The input updateFrom appears to be an implausible date. Please check.')
   }
   if (is.na(updateTo) || nchar(updateTo)==0) {
     updateTo = as.Date(Sys.Date()-2,"%Y-%m-%d")
   } else if (is.character(updateTo)) {
     updateTo = as.Date(updateTo,'%Y-%m-%d')
     if (is.na(updateTo))
-      stop('The input updateTo appears to be an implausible date. Please check.')
+      pretty.stop('The input updateTo appears to be an implausible date. Please check.')
   } else if (methods::is(updateTo,"Date")) {
     updateTo = min(c(as.Date(Sys.Date()-1,"%Y-%m-%d"),updateTo));
   }
   if (!is.na(updateFrom) && updateFrom >= updateTo)
-    stop('The update dates are invalid. updateFrom must be prior to updateTo')
+    pretty.stop('The update dates are invalid. updateFrom must be prior to updateTo')
   #----------------
 
 
@@ -211,7 +211,7 @@ grid.build <- function(
 
   # Test internet connection
   if (!curl::has_internet())
-    stop('No internet connection appears available. Check connection.')
+    pretty.stop('No internet connection appears available. Check connection.')
 
   # Test downloading of required data and get grid geometry.
   filedate_str = '20000101'
@@ -546,7 +546,7 @@ grid.build <- function(
     # Check sufficient number of months for monthly data
     if (as.numeric(format(updateFrom, "%Y")) == as.numeric(format(updateTo, "%Y")) &&
         as.numeric(format(updateFrom, "%m")) == as.numeric(format(updateTo, "%m")) )
-      stop('The input updateFrom and updateTo must span more than one month when monthly time step date is being handled.')
+      pretty.stop('The input updateFrom and updateTo must span more than one month when monthly time step date is being handled.')
   }
 
   # Filter vars.2update. If the input vars exists in the netCDF and the data range
@@ -568,7 +568,7 @@ grid.build <- function(
   nvars.2modify = length(vars.2modify)
 
   if (difftime(updateTo, updateFrom, units="days") <1)
-      stop('The update dates are less than 1 day. Check the inputs dates are as YYYY-MM-DD')
+      pretty.stop('The update dates are less than 1 day. Check the inputs dates are as YYYY-MM-DD')
 
   # Give summary of data changes
   message('... NetCDF file will be updated as follows:')
