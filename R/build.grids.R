@@ -226,19 +226,18 @@ build.grids <- function(
   message('... Testing downloading of each variable.')
   for (ivar in vars.2modify) {
     message(paste('    Testing',ivar,'grid data.'))
-    destFile <- download.ASCII.file(vars.all[ivar,]$data.URL,
-                                    vars.all[ivar,]$data.file.extension,
-                                    vars.all[ivar,]$data.file.format,
-                                    vars.all[ivar,]$time.step,
-                                    ivar,
-                                    workingFolder,
-                                    filedate_str)
+    destFile <- grid.download(vars.all[ivar,]$data.URL,
+                              vars.all[ivar,]$data.file.extension,
+                              vars.all[ivar,]$data.file.format,
+                              vars.all[ivar,]$time.step,
+                              ivar,
+                              workingFolder,
+                              filedate_str)
 
-    # Get the grid geometry of the non solar data
-    headerData <- get.ASCII.file.header(destFile$file.name,
-                                        vars.all[ivar,]$data.file.format,
-                                        workingFolder,
-                                        remove.file=T)
+    # Get the grid geometry
+    headerData <- grid.read(destFile$file.name,
+                            vars.all[ivar,]$data.file.format,
+                            only.header=T)
     gridgeo[ivar,]$nCols  <- headerData$nCols
     gridgeo[ivar,]$nRows  <- headerData$nRows
     gridgeo[ivar,]$SWLong <- headerData$SWLong
@@ -398,7 +397,7 @@ build.grids <- function(
                           'Long',
                           vals)
 
-      vals= grid.dims[[i]]$lat
+      vals= rev(grid.dims[[i]]$lat)
       ndimvals = length(vals)
       RNetCDF::dim.def.nc(grp, 'Lat',
                           dimlength = ndimvals,
@@ -623,20 +622,23 @@ build.grids <- function(
 
       # Download data
       var.failed = 1
-      destFile <- download.ASCII.file(ivar.url,
-                                              ivar.url.ext,
-                                              ivar.file.ext,
-                                              ivar.timetep,
-                                              ivar,
-                                              workingFolder,
-                                              datestring)
+      destFile <- grid.download(ivar.url,
+                                ivar.url.ext,
+                                ivar.file.ext,
+                                ivar.timetep,
+                                ivar,
+                                workingFolder,
+                                datestring)
 
       # Read in grid and add to netCDF file
       if (destFile$didFail == 0 && file.exists(destFile$file.name)) {
 
-        grid.tmp <- readin.ASCII.file(destFile$file.name,
-                                              gridgeo[ivar,]$nRows,
-                                              noData=gridgeo[ivar,]$nodata)
+        grid.tmp <- grid.read(destFile$file.name,
+                              ivar.file.ext,
+                              only.header=F,
+                              gridgeo[ivar,]$nRows,
+                              gridgeo[ivar,]$nCols,
+                              noData=gridgeo[ivar,]$nodata)
 
         # Find index to the date to update within the net CDF grid
         # Get index to required netCDF layers
@@ -646,7 +648,7 @@ build.grids <- function(
         # Put new grid in netCDF
         RNetCDF::var.put.nc(igrp,
                             ivar,
-                            grid.tmp,
+                            t(grid.tmp),
                             start=c(1, 1, ind),
                             count = c(gridgeo[ivar,]$nCols, gridgeo[ivar,]$nRows, 1),
                             na.mode=1)
