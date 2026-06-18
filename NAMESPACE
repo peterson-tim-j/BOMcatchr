@@ -2,6 +2,7 @@
 
 export(catchments)
 export(extract.data)
+export(extract.layer)
 export(grid.ages)
 export(grid.build)
 export(grid.sources)

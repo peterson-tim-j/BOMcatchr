@@ -1,0 +1,92 @@
+#'
+#' Extract netCDF layer of one variable at one date.
+#'
+#' @description
+#' extract.layer extracts the AWAP climate data for one date and one variable. This is
+#' low level function is unlikely to be of use to a user.
+#'
+#' @param ncdfFilename is a full file name (as string) to the netCDF file.
+#' @param extract.date is a date string specifying the date for data extraction..
+#' @param var is a character string one one variable to extract. The options are \code{c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')}.
+#'
+#' @return
+#' \code{terra::vect} object.
+#'
+#' @seealso
+#' \code{\link{grid.build}} for building the NetCDF files of daily climate data.
+#'
+#' @export
+extract.layer <- function(
+    ncdfFilename = NA,
+    ncdf.cond = NA,
+    extract.date = NA,
+    var = NA,
+    vars.summary = NA) {
+
+  # Check date.
+  if (class(extract.date) != 'Date') {
+    if (is.character(extract.date)) {
+      dateExtract = as.Date(extract.date,"%Y-%m-%d")
+    } else
+      pretty.stop('Input date must a character string or a Date class object.')
+  }
+
+  if (!is.data.frame(vars.summary)) {
+    if (file.exists(ncdfFilename))
+      vars.summary <- grid.summary(ncdfFilename)
+    else
+      pretty.stop('When vars.summary is not input, then ncdfFilename must be input.')
+  }
+
+  if (!is.character(var))
+    pretty.stop('Input var must a character string.')
+
+  if (length(var)>1)
+    pretty.stop('Input var must a single character string.')
+
+  if (!(var %in% rownames(vars.summary)))
+    pretty.stop('Input var must a variable name already in the provided netCDf file.')
+
+  # Get index to the required date.
+  ind = get.ncdf.date.index(vars.summary[var,]$time.datum, extract.date)
+
+  # Get netCDF path to the variable.
+  var.grid <- vars.summary[var,]$group
+
+  # Open connection to netcdf file - if not provided.
+  do.ncclose = F
+  if (is.na(ncdf.cond) || class(ncdf.cond)!='NetCDF') {
+    if (file.exists(ncdfFilename)) {
+      ncdf.cond <- RNetCDF::open.nc(ncdfFilename)
+      do.ncclose = T
+    } else
+      pretty.stop('The input file string is not to an existing netCDF file.')
+  }
+
+  # Get connection to the required group.
+  grp = RNetCDF::grp.inq.nc(ncdf.cond, grpname = var.grid)$self
+
+  # Get CRS for map variable.
+  grp.crs = RNetCDF::att.get.nc(grp,
+                                variable = 'NC_GLOBAL',
+                                attribute = "CRS")
+
+  # Get dimension data for map and build extent obj.
+  x = RNetCDF::var.get.nc(grp, 'Long')
+  y = RNetCDF::var.get.nc(grp, 'Lat')
+  ext = terra::ext(x = c(min(x), max(x), min(y), max(y)))
+
+  # Read in one netcDF layer.
+  r = RNetCDF::var.get.nc(grp,
+                          var,
+                          start=c(1, 1, ind),
+                          count = c(length(x), length(y), 1),
+                          na.mode=1)
+
+  # Close connetion
+  if (do.ncclose)
+    RNetCDF::close.nc(ncout)
+
+  # Convert matric to rast and return.
+  return( terra::rast(t(r), crs = grp.crs, ext = ext))
+}
