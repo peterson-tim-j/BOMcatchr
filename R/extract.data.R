@@ -234,7 +234,7 @@ extract.data <- function(
     pretty.stop('The dates to extract produce a zero vector of dates of zero length. Check the inputs dates are as YYYY-MM-DD.')
 
   # Check time step
-  temporal.timestep.options = c('daily','weekly','monthly','quarterly','annual', 'period')
+  temporal.timestep.options = agg.options()$temporal.timestep    # Get list of available time
   temporal.timestep.index = numeric()
   if (!is.character(temporal.timestep)) {
     if (!is.integer(temporal.timestep))
@@ -248,7 +248,7 @@ extract.data <- function(
     temporal.timestep = 'period'
 
   } else if (!any(which(temporal.timestep.options == temporal.timestep))) {
-    pretty.stop('temporal.timestep must be daily, weekly, monthly, quarterly or annual or an integer vector.')
+    pretty.stop('temporal.timestep must be one of the options listed by agg.options()$temporal.timestep.')
   }
 
   # Check time step is appropriate for monthly source data - if to be extracted
@@ -256,18 +256,28 @@ extract.data <- function(
        any(vars.extract.summary$time.step == 'months'))
     pretty.stop('When data to be extracted is of a monthly timestep, the temporal.timestep can only be monthly, quarterly or annual or an integer vector.')
 
-  # Check temporal analysis function is valid.
-  data.junk = t(as.matrix(stats::runif(100, 0.0, 1.0)*100))
-  result = tryCatch({
-      apply(data.junk, 1,FUN=temporal.function.name)
-    }, warning = function(w) {
-      message(paste("Warning temporal.function.name produced the following",w))
-    }, error = function(e) {
-      pretty.stop(paste('temporal.function.name produced an error when applied using test data:',e))
-    }, finally = {
-      rm(data.junk)
+  # Check if temporal.function.name is a univariate descriptive statistic.
+  base.agg.funs = agg.options()$temporal.function.name    # Get list of available functions
+  if (is.function(temporal.function.name)) {
+    FUN.outer = temporal.function.name
+    FUN.inner = NA
+  } else if (temporal.function.name %in% base.agg.funs) {
+    FUN.outer = temporal.function.name
+    FUN.inner = NA
+  } else {
+    # Does function include the base function names eg anon.sum?
+    pattern <- paste(base.agg.funs, collapse = "|")
+    if ( grepl(pattern, temporal.function.name)) {
+      FUN.outer = gsub(pattern, '', temporal.function.name)
+      FUN.outer = gsub('\\.', '', FUN.outer)
+
+      FUN.inner = gsub(FUN.outer, '', temporal.function.name)
+      FUN.inner = gsub('\\.', '', FUN.inner)
+    } else {
+      FUN.outer = temporal.function.name
+      FUN.inner = NA
     }
-  )
+  }
 
   # Check ET inputs
   if (getET) {
@@ -440,21 +450,6 @@ extract.data <- function(
         do.spatial.analysis = F
   }
 
-  if (do.spatial.analysis) {
-    # Check spatial analysis funcion is valid.
-    data.junk = t(as.matrix(stats::runif(100, 0.0, 1.0)*100))
-    result = tryCatch({
-      apply(data.junk, 1,FUN=spatial.function.name)
-    }, warning = function(w) {
-      message(paste("Warning spatial.function.name produced the following",w))
-    }, error = function(e) {
-      pretty.stop(paste('spatial.function.name produced an error when applied using test data:',e))
-    }, finally = {
-      rm(data.junk)
-    }
-    )
-  }
-
   # Get netCDF geometry
   ncdf.dataFrom = max(vars.extract.summary$from)
   ncdf.dataTo = min(vars.extract.summary$to)
@@ -497,6 +492,53 @@ extract.data <- function(
         ET.abnormal_method = "neighbouring average"
       }
     }
+  }
+
+  # Check temporal analysis function is valid.
+  message('... Testing aggregation functions:')
+
+  message('   ... Testing temporal aggregation')
+  if (!exists(FUN.outer, mode='function'))
+    pretty.stop(paste('The following temporal.function.name does not seem to exist:',FUN.outer))
+  if (!is.na(FUN.inner) && !exists(FUN.inner, mode='function'))
+    pretty.stop(paste('The following temporal.function.name does not seem to exist:',FUN.inner))
+  for (itime.step in vars.extract.summary$time.step) {
+    result = tryCatch({
+      x = do.TemporalAggregation(data=NA,
+                                 time.from = extractFrom,
+                                 time.to = extractTo,
+                                 time.step.in = itime.step,
+                                 time.step.out = temporal.timestep,
+                                 FUN.outer = FUN.outer,
+                                 FUN.inner = FUN.inner,
+                                 ind = temporal.timestep.index)
+
+    }, warning = function(w) {
+      message(paste("Warning temporal.function.name produced the following",w))
+    }, error = function(e) {
+      pretty.stop(paste('temporal.function.name produced an error when applied using a time step of',
+                        itime.step,' and test data:',e))
+    }
+    )
+  }
+  if (do.spatial.analysis) {
+    message('   ... Testing spatial aggregation')
+
+    if (!exists(spatial.function.name, mode='function'))
+      pretty.stop(paste('The following spatial.function.name does not seem to exist:',spatial.function.name))
+
+    # Check spatial analysis function is valid.
+    data.junk = t(as.matrix(stats::runif(100, 0.0, 1.0)*100))
+    result = tryCatch({
+      apply(data.junk, 1,FUN=spatial.function.name)
+    }, warning = function(w) {
+      message(paste("Warning spatial.function.name produced the following",w))
+    }, error = function(e) {
+      pretty.stop(paste('spatial.function.name produced an error when applied using test data:',e))
+    }, finally = {
+      rm(data.junk)
+    }
+    )
   }
 
   message('Starting data extraction:')
@@ -656,22 +698,25 @@ extract.data <- function(
       format = paste("    ",ivar,": :current of :total  [:bar] :percent in :elapsed",sep=''),
       total = ntimepoints2Extract, clear = FALSE, width= 80)
 
-
     # Initialise matrix foe extracted data
     data.brick[[ivar]] = matrix(NA, nrow = ntimepoints2Extract, ncol = nrow(point.weights$coords))
 
-    # Open connection to netCDF variable and set CRS
-    r <- terra::rast(ncdfFilename, subds = var.group.string[[ivar]], md=T)
-    terra::crs(r) <- crs.vars[[ivar]]
+    # Open connection to netCDF file
+    ncout <- RNetCDF::open.nc(ncdfFilename)
 
     # Loop through each ind time point of variable and get data
     for (j in 1:ntimepoints2Extract){
 
+      # Read netCDF layer
+      r <- extract.layer(ncdf.cond = ncout,
+                         extract.date = timepoints2Extract[[ivar]][j],
+                         var = ivar,
+                         vars.summary = vars.extract.summary[ivar,]
+                         )
+
       # Extract data for each variable
-      data.brick[[ivar]][j,] = get.nc.data( rast.conn = r,
-                                    varname = var.group.string[[ivar]],
+      data.brick[[ivar]][j,] = get.nc.data(r = r,
                                     interp.method = interp.method.vars[[ivar]],
-                                    band = ind[j],
                                     coords = point.weights$coords,
                                     do.infill =T,
                                     ext = terra::ext(locations),
@@ -684,6 +729,9 @@ extract.data <- function(
     # clear memory
     rm(r)
     gc(verbose = F)
+
+    # close connection
+    RNetCDF::close.nc(ncout)
   }
 
   # The source data can have the following types of gaps:
@@ -895,7 +943,8 @@ extract.data <- function(
                              time.from = extractFrom,
                              time.to = extractTo,
                              time.step.out = temporal.timestep,
-                             fn = 'sum',
+                             FUN.outer = 'sum',
+                             FUN.inner = NA,
                              ind = temporal.timestep.index),
                            SIMPLIFY = F)
 
@@ -932,7 +981,8 @@ extract.data <- function(
                                   time.from = extractFrom,
                                   time.to = extractTo,
                                   time.step.out = temporal.timestep,
-                                  fn = temporal.function.name,
+                                  FUN.outer = FUN.outer,
+                                  FUN.inner = FUN.inner,
                                   ind = temporal.timestep.index),
                                 SIMPLIFY = F)
 
@@ -1054,37 +1104,7 @@ extract.data <- function(
   return(catchmentAvg)
 }
 
-# Internal functions for apply() calls above
-#--------------------------------------------
-
-# Define function to extract netCDF data.
-get.nc.data = function( rast.conn , varname, interp.method, band, coords, do.infill, ext, interpMax) {
-
-  # Get raster fromn terra::rast obj
-  r <- rast.conn[[band]]
-
-  # Do infilling of NAs. Generally only included for gaos in solar radiation.
-  if (do.infill) {
-    # crop to extent
-    r <- terra::crop(r, ext, snap = "out")
-
-    # Infill NA values of grid by taking the local average. Only do so
-    # if there are some finite values. The maximum area of NAs that is
-    # infilled is defined by interpMax. That is a value of 3 infills a
-    # 3x3 cell area.
-    if (any(is.finite(terra::values(r)))) {
-      i = 0
-      while (any(is.na(terra::values(r))) && i<interpMax) {
-        r <- terra::focal(r, w=matrix(1,3,3), fun=mean, na.rm=TRUE, na.policy='only')
-        i = i +1
-      }
-    }
-  }
-
-  return(terra::extract(r, coords, method=interp.method)[[1]])
-}
-
-# Define time aggregation function.
+# Time aggregation internal function
 do.TemporalAggregation = function( data=NA,
                                    location.ID,
                                    location.lookup,
@@ -1092,16 +1112,17 @@ do.TemporalAggregation = function( data=NA,
                                    time.to,
                                    time.step.in,
                                    time.step.out,
-                                   fn,
-                                   ind) {
+                                   FUN.outer,
+                                   FUN.inner,
+                                   ind=NA) {
 
   # Build dates vector here because variables can have a daily
   # or monthly time step.
   dates <-
     switch(time.step.in,
-      days =  seq( time.from, by='day', to=time.to),
-      months =  seq( time.from, by='month', to=time.to),
-      years =  seq( time.from, by='year', to=time.to)
+           days =  seq( time.from, by='day', to=time.to),
+           months =  seq( time.from, by='month', to=time.to),
+           years =  seq( time.from, by='year', to=time.to)
     )
 
   # If data is NA then build a vector of ones for length of dates.
@@ -1115,18 +1136,54 @@ do.TemporalAggregation = function( data=NA,
     data.xts = xts::as.xts(data[, cell.index], order.by=dates)
   }
 
-  # Aggregate using user defined time step and function
-  data.xts <-
-    switch(time.step.out,
-      daily = data.xts,
-      weekly = xts::apply.weekly(data.xts, apply, 2, fn),
-      monthly = xts::apply.monthly(data.xts, apply, 2, fn),
-      quarterly = xts::apply.quarterly(data.xts, apply, 2, fn),
-      annual = xts::apply.yearly(data.xts, apply, 2, fn),
-      period = xts::period.apply(data.xts, INDEX=ind, apply, 2, fn),
-    )
+  # Aggregate over time using user defined time step and function
+  if (is.function(FUN.outer)) {
+
+    fn.nargs = length(formals(FUN.outer))
+
+    if (fn.nargs==1)
+      data.xts <- agg.by(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.outer)
+    else if (is.na(FUN.inner) && fn.nargs<4)
+      data.xts <- do.call(FUN.outer, list(x = data.xts, by = time.step.out, ind=ind))
+    else
+      data.xts <- do.call(FUN.outer, list(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.inner))
+
+  } else if (!is.na(FUN.inner)) {
+    data.xts <- do.call(FUN.outer, list(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.inner))
+  } else {
+    data.xts <- agg.by(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.outer)
+  }
+
   return(data.xts)
 }
+
+# Internal functions for apply() calls above
+#--------------------------------------------
+
+# Define function to extract netCDF data.
+get.nc.data = function(r, interp.method, coords, do.infill, ext, interpMax) {
+
+  # Do infilling of NAs. Generally only included for gaos in solar radiation.
+  if (do.infill) {
+    # crop to extent
+    r <- terra::crop(r, ext, snap = "out")
+
+    # Infill NA values of grid by taking the local average. Only do so
+    # if there are some finite values. The maximum area of NAs that is
+    # infilled is defined by interpMax. That is a value of 3 infills a
+    # 3x3 cell area.
+    if (terra::global(r, fun = "anynotNA")[,1]) {
+      i = 0
+      while (terra::global(r, fun = "anyNA")[,1] && i<interpMax) {
+        r <- terra::focal(r, w=matrix(1,3,3), fun=mean, na.rm=TRUE, na.policy='only')
+        i = i +1
+      }
+    }
+  }
+
+  return(terra::extract(r, coords, method=interp.method)[[1]])
+}
+
 
 # Define spatial averaging function
 do.SpatialAggregation = function(data,
@@ -1257,6 +1314,39 @@ get.endOfLastMonth <- function(dates) {
   }
   return(dates)
 }
+
+get.endOfSeason.ind <- function(dates, season) {
+  season.end.month = switch(season,
+                            summer = 2,
+                            autumn = 5,
+                            winter = 8,
+                            spring = 11,
+                            wet = 9,
+                            dry = 4
+                          )
+  date.as.month = as.numeric(format(dates,'%m'))
+  dates.end.season = unique(get.endOfMonth(dates[which( date.as.month == season.end.month)]))
+  ind.end.season = dates %in% dates.end.season
+  return(ind.end.season)
+}
+
+get.Dates2Seaons <- function(dates) {
+  ind2seasons = c(get.endOfSeason(dates,'summer'),
+                  get.endOfSeason(dates,'autumn'),
+                  get.endOfSeason(dates,'winter'),
+                  get.endOfSeason(dates,'spring')
+                  )
+  ind2seasons = sort(ind2seasons, decreasing = F)
+  return(ind2seasons)
+}
+get.Dates2TropicSeaons <- function(dates) {
+  ind2seasons = c(get.endOfSeason(dates,'dry'),
+                  get.endOfSeason(dates,'wet')
+                )
+  ind2seasons = sort(ind2seasons, decreasing = F)
+  return(ind2seasons)
+}
+
 
 get.ncdf.dates <- function(date.from, date.to, date.time.step) {
 
