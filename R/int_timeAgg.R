@@ -1,6 +1,13 @@
 # Time aggregation internal functions
 #-------------------------------------------
 
+agg.options <- function() {
+  opt = list( temporal.timestep = c('daily','weekly','monthly','quarterly', 'seasonal', 'wetdry_seasonal','tropical_seasonal', 'annual', 'period') ,
+              temporal.function.name = c('sum', 'mean', 'min', 'max', 'median', 'sd', 'var', 'IQR'),
+              spatial.function.name = c() )
+  return(opt)
+}
+
 do.TemporalAggregation = function( data=NA,
                                    location.ID,
                                    location.lookup,
@@ -53,25 +60,18 @@ do.TemporalAggregation = function( data=NA,
   return(data.xts)
 }
 
-agg.options <- function() {
-  opt = list( temporal.timestep = c('daily','weekly','monthly','quarterly', 'seasonal', 'wetdry.seasonal','tropical.seasonal', 'annual', 'period') ,
-              temporal.function.name = c('sum', 'mean', 'min', 'max', 'median', 'sd', 'var', 'IQR'),
-              spatial.function.name = c() )
-  return(opt)
-}
-
 # Aggregate source time step (daily or monthly) to user defined time step
 agg.by <- function(x, by, ind, FUN = 'sum') {
   x.agg <-
     switch(by,
            daily = x,
-           weekly = xts::apply.weekly(x, apply, 2, FUN),
-           monthly = xts::apply.monthly(x, apply, 2, FUN),
-           quarterly = xts::apply.quarterly(x, apply, 2, FUN),
-           annual = xts::apply.yearly(x, apply, 2, FUN),
-           seasonal = xts::period.apply(x, INDEX=by.season(x)$ind, apply, 2, FUN),
-           wetdry.seasonal = xts::period.apply(x, INDEX=by.wetdrySeason(x)$ind, apply, 2, FUN),
-           tropical.seasonal = xts::period.apply(x, INDEX=by.tropicalSeason(x)$ind, apply, 2, FUN),
+           weekly            = xts::apply.weekly(x, apply, 2, FUN),
+           monthly           = xts::apply.monthly(x, apply, 2, FUN),
+           quarterly         = xts::apply.quarterly(x, apply, 2, FUN),
+           annual            = xts::apply.yearly(x, apply, 2, FUN),
+           seasonal          = xts::period.apply(x, INDEX = by_season(x, 'seasonal', end.of.season = T)$ind          , apply, 2, FUN),
+           wetdry_seasonal   = xts::period.apply(x, INDEX = by_season(x, 'wetdry_seasonal', end.of.season = T)$ind  , apply, 2, FUN),
+           tropical_seasonal = xts::period.apply(x, INDEX = by_season(x, 'tropical_seasonal', end.of.season = T)$ind, apply, 2, FUN),
            period = xts::period.apply(x, INDEX=ind, apply, 2, FUN),
     )
   return(x.agg)
@@ -82,29 +82,40 @@ annom <- function(x, by, ind, FUN) {
   # Aggregate using user defined time step and function
   x.agg <- agg.by(x, by = by, ind, FUN = FUN)
 
+  # Get timestep lalels for agg data
+  dates = zoo::index(x.agg)
+  x.agg.fmt <- switch(by,
+                      daily             = format(dates, "%j"),
+                      weekly            = format(dates, '%V'),
+                      monthly           = format(dates, "%m"),
+                      quarterly         = format(dates, '%q'),
+                      seasonal          = by_season(dates, 'seasonal', end.of.season = F)$lbl,
+                      wetdry_seasonal   = by_season(dates, 'wetdry_seasonal', end.of.season = F)$lbl,
+                      tropical_seasonal = by_season(dates, 'tropical_seasonal', end.of.season = F)$lbl,
+                      annual = 'year',
+                      period = 'period'
+  )
+
   # Get zoo index to each within year time step
-  x.agg.avg <-
-    switch(by,
-           daily = aggregate(x.agg, by=format(zoo::index(x.agg), "%j"), mean),
-           weekly = aggregate(x.agg, by=format(zoo::index(x.agg),'%V'), mean),
-           monthly = aggregate(x.agg, by=format(zoo::index(x.agg), "%m"), mean),
-           quarterly = aggregate(x.agg, by=format(zoo::as.yearqtr(zoo::index(t)),'%q'), mean),
-           seasonal = xts::period.apply(x, INDEX=by.season(x)$lbl, apply, 2, FUN),
-           tropical.seasonal = xts::period.apply(x, INDEX=by.tropicalSeason(x)$lbl, apply, 2, FUN),
-           annual = mean(x.agg),
-           period = mean(x.agg)
-    )
+  x.agg.avg <- aggregate(x.agg, by=x.agg.fmt, mean)
+  x.agg.avg.df = data.frame(avg = zoo::coredata(x.agg.avg), row.names = zoo::index(x.agg.avg))
+
+  # M<ake df of zoo agg data and timestep labels
+  x.agg.df = data.frame(agg = zoo::coredata(x.agg), lbl = x.agg.fmt)
+
+  # Map seasonal means to all agg dates and bind
+  x.agg.avg.df = x.agg.avg.df[x.agg.df$lbl,]
 
   # Calc residual
-  x = x.agg - x.agg.avg
-
-  return(x)
+  x.agg.df[,'lbl'] <- NULL
+  zoo::coredata(x.agg) <- as.matrix(x.agg.df - x.agg.avg.df)
+  return(x.agg)
 }
 
 cumannom <- function(x, by, ind, FUN) {
   x = annom(x, by, ind, FUN)
 
-  return(cumsum(x))
+  return(apply(x,2, cumsum))
 
 }
 
@@ -153,68 +164,36 @@ get.endOfLastMonth <- function(dates) {
   return(dates)
 }
 
-get.Season <- function(dates, season) {
-  season.end.month = switch(season,
-                            summer = 2,
-                            autumn = 5,
-                            winter = 8,
-                            spring = 11,
-                            wet = 9,
-                            dry = 4
-  )
+by_season <- function(dates, season, end.of.season = T) {
+  season.month = switch(season,
+                        seasonal = data.frame(lbl = c('summer', 'summer', 'autumn', 'winter', 'spring'),
+                                              from = c(12, 0, 3, 6, 9),
+                                              to = c(Inf, 2, 5, 8,11)),
+                        wetdry_seasonal = data.frame(lbl = c('dry', 'dry', 'wet'),
+                                                     from = c(12, 0, 6),
+                                                     to = c(Inf, 5, 11)),
+                        tropical_seasonal = data.frame(lbl = c('dry', 'wet', 'wet'),
+                                                       from = c(5, 10, 0),
+                                                       to = c(9, Inf, 4))
+                        )
+
+  if ('zoo' %in% class(dates))
+    dates = zoo::index(dates)
+
   date.as.month = as.numeric(format(dates,'%m'))
+  dates = data.frame(dates, lbl=NA, ind = 1:length(dates))
+  for (i in 1:nrow(season.month)) {
+    ind = date.as.month >= season.month$from[i] & date.as.month <= season.month$to[i]
+    dates[ind,'lbl'] = season.month$lbl[i]
+  }
 
-  # If daily, get end date of month, else assume input data is monthly,
-  if (all(diff(dates)==1))
-    dates.end.season = unique(get.endOfMonth(dates[which( date.as.month == season.end.month)]))
-  else
-    dates.end.season = dates[which( date.as.month == season.end.month)]
-
-  # Get index to end of season dates.
-  season.ind = which(dates %in% dates.end.season)
-
-  # Combine all seasons
-  season = data.frame(dates = dates[season.ind],
-                      ind = season.ind,
-                      lbl = season
-  )
-
-  return(season)
+  if (end.of.season) {
+    ind = rle(dates$lbl)$lengths
+    ind = cumsum(ind)
+    dates = dates[ind,]
+  }
+  return(dates)
 }
-
-by.season <- function(dates) {
-
-  dates = zoo::index(dates)
-
-  seasons = rbind(get.Season(dates,'summer'),
-                  get.Season(dates,'autumn'),
-                  get.Season(dates,'winter'),
-                  get.Season(dates,'spring')
-  )
-  seasons = seasons[order(seasons$dates),]
-  return(seasons)
-}
-by.wetdrySeason <- function(dates) {
-
-  dates = zoo::index(dates)
-
-  seasons = rbind(get.Season(dates,'autumn'),
-                  get.Season(dates,'spring')
-  )
-  seasons = seasons[order(seasons$dates),]
-  return(seasons)
-}
-by.tropicalSeason <- function(dates) {
-
-  dates = zoo::index(dates)
-
-  seasons = c(get.Season(dates,'dry'),
-              get.Season(dates,'wet')
-  )
-  seasons = seasons[order(seasons$dates),]
-  return(seasons)
-}
-
 
 get.ncdf.dates <- function(date.from, date.to, date.time.step) {
 
