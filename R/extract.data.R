@@ -517,7 +517,7 @@ extract.data <- function(
       message(paste("Warning temporal.function.name produced the following",w))
     }, error = function(e) {
       pretty.stop(paste('temporal.function.name produced an error when applied using a time step of',
-                        itime.step,' and test data:',e))
+                        itime.step,'and test data:',e))
     }
     )
   }
