@@ -3,8 +3,9 @@
 
 agg.options <- function() {
   opt = list( temporal.timestep = c('daily','weekly','monthly','quarterly', 'seasonal', 'wetdry_seasonal','tropical_seasonal', 'annual', 'period') ,
-              temporal.function.name = c('sum', 'mean', 'min', 'max', 'median', 'sd', 'var', 'IQR'),
-              spatial.function.name = c() )
+              temporal.function.outer = c('annom', 'cumannom'),
+              temporal.function.inner = c('sum', 'mean', 'min', 'max', 'median', 'sd', 'var', 'IQR'),
+              spatial.function = c() )
   return(opt)
 }
 
@@ -93,22 +94,31 @@ annom <- function(x, by, ind, FUN) {
                       wetdry_seasonal   = by_season(dates, 'wetdry_seasonal', end.of.season = F)$lbl,
                       tropical_seasonal = by_season(dates, 'tropical_seasonal', end.of.season = F)$lbl,
                       annual = 'year',
-                      period = 'period'
+                      period = 'year'
   )
 
   # Get zoo index to each within year time step
-  x.agg.avg <- aggregate(x.agg, by=x.agg.fmt, mean)
-  x.agg.avg.df = data.frame(avg = zoo::coredata(x.agg.avg), row.names = zoo::index(x.agg.avg))
+  if (by == 'year' || by == 'period') {
+    x.agg.avg <- colMeans(x.agg)
+    x.agg.avg <- matrix(x.agg.avg, nrow = nrow(x.agg), ncol = length(x.agg.avg), byrow = TRUE)
 
-  # M<ake df of zoo agg data and timestep labels
-  x.agg.df = data.frame(agg = zoo::coredata(x.agg), lbl = x.agg.fmt)
+    # Calc residual
+    zoo::coredata(x.agg) <- x.agg - x.agg.avg
 
-  # Map seasonal means to all agg dates and bind
-  x.agg.avg.df = x.agg.avg.df[x.agg.df$lbl,]
+  } else {
+    x.agg.avg <- aggregate(x.agg, by=x.agg.fmt, mean)
+    x.agg.avg.df = data.frame(avg = zoo::coredata(x.agg.avg), row.names = zoo::index(x.agg.avg))
 
-  # Calc residual
-  x.agg.df[,'lbl'] <- NULL
-  zoo::coredata(x.agg) <- as.matrix(x.agg.df - x.agg.avg.df)
+    # M<ake df of zoo agg data and timestep labels
+    x.agg.df = data.frame(agg = zoo::coredata(x.agg), lbl = x.agg.fmt)
+
+    # Map seasonal means to all agg dates and bind
+    x.agg.avg.df = x.agg.avg.df[x.agg.df$lbl,]
+
+    # Calc residual
+    x.agg.df[,'lbl'] <- NULL
+    zoo::coredata(x.agg) <- as.matrix(x.agg.df - x.agg.avg.df)
+  }
   return(x.agg)
 }
 
