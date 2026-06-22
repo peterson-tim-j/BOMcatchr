@@ -257,22 +257,29 @@ extract.data <- function(
     pretty.stop('When data to be extracted is of a monthly timestep, the temporal.timestep can only be monthly, quarterly or annual or an integer vector.')
 
   # Check if temporal.function.name is a univariate descriptive statistic.
-  base.agg.funs = agg.options()$temporal.function.name    # Get list of available functions
+  base.agg.fun.outer = agg.options()$temporal.function.outer    # Get list of available functions
+  base.agg.fun.inner = agg.options()$temporal.function.inner
   if (is.function(temporal.function.name)) {
     FUN.outer = temporal.function.name
     FUN.inner = NA
-  } else if (temporal.function.name %in% base.agg.funs) {
+  } else if (temporal.function.name %in% base.agg.fun.inner) {
     FUN.outer = temporal.function.name
     FUN.inner = NA
   } else {
     # Does function include the base function names eg anon.sum?
-    pattern <- paste(base.agg.funs, collapse = "|")
+    pattern <- paste(base.agg.fun.outer, collapse = "|")
     if ( grepl(pattern, temporal.function.name)) {
-      FUN.outer = gsub(pattern, '', temporal.function.name)
-      FUN.outer = gsub('\\.', '', FUN.outer)
+
+      matches <- regexpr(pattern, temporal.function.name)
+      FUN.outer = regmatches(temporal.function.name, matches)
 
       FUN.inner = gsub(FUN.outer, '', temporal.function.name)
       FUN.inner = gsub('\\.', '', FUN.inner)
+      if (!(FUN.inner %in% base.agg.fun.inner) || nchar(FUN.inner)==0)
+        pretty.stop(paste('When the temporal function starts with one of the following functions,',
+                          'it must be followed by a primitive function like mean, min, max etc:',
+                          base.agg.fun.outer))
+
     } else {
       FUN.outer = temporal.function.name
       FUN.inner = NA
@@ -495,13 +502,54 @@ extract.data <- function(
   }
 
   # Check temporal analysis function is valid.
+  message('Setting up data extraction:')
   message('... Testing aggregation functions:')
 
   message('   ... Testing temporal aggregation')
-  if (!exists(FUN.outer, mode='function'))
-    pretty.stop(paste('The following temporal.function.name does not seem to exist:',FUN.outer))
-  if (!is.na(FUN.inner) && !exists(FUN.inner, mode='function'))
-    pretty.stop(paste('The following temporal.function.name does not seem to exist:',FUN.inner))
+  FUN.out_isValid = F
+  if (is.character(FUN.outer) && FUN.outer %in% agg.options()$temporal.function.outer)
+    FUN.out_isValid = T
+  else {
+
+    tryCatch({
+      FUN.out_isValid = is.function(FUN.outer)
+    },
+    error = function(e) {message('... is.functionis false')}
+    )
+
+    tryCatch({
+      FUN.out_isValid = exists(FUN.outer, mode='function')
+    },
+    error = function(e) {message('... exists() is false')}
+    )
+
+    if (!FUN.out_isValid)
+      pretty.stop(paste('The following temporal.function.name does not seem to exist:',FUN.outer))
+  }
+  FUN.inner_isValid = F
+  if (!is.na(FUN.inner)) {
+    if (is.character(FUN.inner) && FUN.inner %in% agg.options()$temporal.function.inner)
+      FUN.inner_isValid = T
+    else {
+
+      tryCatch({
+        FUN.inner_isValid = is.function(FUN.inner)
+      },
+      error = function(e) {message('... is.functionis false')}
+      )
+
+      tryCatch({
+        FUN.inner_isValid = exists(FUN.inner, mode='function')
+      },
+      error = function(e) {message('... exists() is false')}
+      )
+
+      if (!FUN.inner_isValid)
+        pretty.stop(paste('The following temporal.function.name does not seem to exist:',FUN.inner))
+    }
+  }
+
+  # Test functions ny calling
   for (itime.step in vars.extract.summary$time.step) {
     result = tryCatch({
       x = do.TemporalAggregation(data=NA,
@@ -541,8 +589,6 @@ extract.data <- function(
     )
   }
 
-  message('Starting data extraction:')
-
   # Build a matrix of catchment weights, lat longs, and a look up table for each catchment.
   message('... Building catchment weights for each grid.')
 
@@ -575,11 +621,11 @@ extract.data <- function(
     var.group.string = vars.extract.summary[ind,]$var.string[1]
     base.var.grid = vars.extract.summary[ind,]$group
 
-    # Get index to required netCDF layers
-    ind = get.ncdf.date.index(vars.extract.summary[ind,]$time.datum,
-                              extractTo,
-                              vars.extract.summary[ind,]$from,
-                              vars.extract.summary[ind,]$to)
+    # # Get index to required netCDF layers
+    # ind = get.ncdf.date.index(vars.extract.summary[ind,]$time.datum,
+    #                           extractTo,
+    #                           vars.extract.summary[ind,]$from,
+    #                           vars.extract.summary[ind,]$to)
 
     # For variables not on the same grid geometry as the base.variable,
     # the extraction location is converted from the input option ('simple'
@@ -592,11 +638,20 @@ extract.data <- function(
     }
 
     # Get the netCDF layer for the base grid geometry.
-    grid.tmp <- terra::rast(ncdfFilename,
-                            subds = var.group.string,
-                            md=T,
-                            drivers="NETCDF")[[ind]]
-    terra::crs(grid.tmp) <- crs.vars[[base.var.name]]
+    # Read netCDF layer
+    ncout <- RNetCDF::open.nc(ncdfFilename)
+    r <- extract.layer(ncdf.cond = ncout,
+                       extract.date = extractTo,
+                       var = base.var.name,
+                       vars.summary = vars.extract.summary[ind,]
+    )
+    RNetCDF::close.nc(ncout)
+
+    # grid.tmp <- terra::rast(ncdfFilename,
+    #                         subds = var.group.string,
+    #                         md=T,
+    #                         drivers="NETCDF")[[ind]]
+    # terra::crs(grid.tmp) <- crs.vars[[base.var.name]]
 
     for (i in 1:length(locations)) {
         if (i%%10 ==0 ) {
@@ -613,7 +668,7 @@ extract.data <- function(
         # performance.
         w <- terra::rasterize(
           x = locations[i, ],
-          y = terra::crop(grid.tmp, locations[i, ], snap = "out"),
+          y = terra::crop(r, locations[i, ], snap = "out"),
           fun = "last",
           cover = TRUE
         )
@@ -645,7 +700,7 @@ extract.data <- function(
     point.weights$coords = cbind(as.numeric(terra::crds(locations)[,1]),
                                  as.numeric(terra::crds(locations)[,2]))
   }
-  terra::tmpFiles(remove = TRUE, old = TRUE)
+  #terra::tmpFiles(remove = TRUE, old = TRUE)
 
   if (getET) {
     message('... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).')
@@ -665,7 +720,7 @@ extract.data <- function(
     }
   }
 
-  message('... Starting to extract data across all variable and locations:')
+  message('Starting data extraction across all variable and locations:')
 
   # Initialise output list variable of extracted data
   data.brick = vector('list', nvars)
