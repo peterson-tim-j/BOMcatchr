@@ -52,10 +52,10 @@ do.TemporalAggregation = function( data=NA,
     else
       data.xts <- do.call(FUN.outer, list(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.inner))
 
-  } else if (!is.na(FUN.inner)) {
+  } else if (!is.na(FUN.outer)) {
     data.xts <- do.call(FUN.outer, list(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.inner))
   } else {
-    data.xts <- agg.by(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.outer)
+    data.xts <- agg.by(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.inner)
   }
 
   return(data.xts)
