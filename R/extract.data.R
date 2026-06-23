@@ -7,8 +7,8 @@
 #'
 #' @details
 #' Daily data is extracted and can be aggregated to a weekly, monthly, quarterly, annual or a user-defined timestep using a user-defined function
-#' (e.g. sum, mean, min, max as defined by \code{temporal.function.name}). The temporally aggregated data at each grid cell is then used to derive the spatial
-#' mean or the spatial variance (or any other function as defined by \code{spatial.function.name}).
+#' (e.g. sum, mean, min, max as defined by \code{temporal.fn.outer}). The temporally aggregated data at each grid cell is then used to derive the spatial
+#' mean or the spatial variance (or any other function as defined by \code{spatial.fn}).
 #'
 #' The calculation of the spatial mean uses the fraction of each AWAP grid cell within the catchment polygon.
 #' The variance calculation (or user defined function) does not use the fraction of the grid cell and returns NA if there are <2 grid cells in the catchment boundary.
@@ -20,7 +20,7 @@
 #' and end dates are input by the user.
 #'
 #' The ET can be calculated using one of eight methods at a user defined calculation time-step; that is the \code{ET.timestep} defines the
-#' time step at which the estimates are derived and differs from the output timestep as defined by \code{temporal.function.name}). When \code{ET.timestep} is monthly or annual then
+#' time step at which the estimates are derived and differs from the output timestep as defined by \code{temporal.fn.outer}). When \code{ET.timestep} is monthly or annual then
 #' the ET estimate is linearly interpolated to a daily time step (using zoo:na.spline()) and then constrained to >=0. In calculating ET, the input data
 #' is pre-processed using Evapotranspiration::ReadInputs() such that missing days, missing entries and abnormal values are interpolated
 #' (by default) with the former two interpolated using the "DoY average", i.e. replacement with same day-of-the-year average. Additionally, when AWAP solar
@@ -54,9 +54,13 @@
 #' already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS 80, and the first column must be a unique ID.
 #' @param temporal.timestep character string for the time step of the output data. The options are \code{daily}, \code{weekly}, \code{monthly}, \code{quarterly},
 #' \code{annual}  or a user-defined index for, say, water-years (see \code{xts::period.apply}). The default is \code{daily}.
-#' @param temporal.function.name character string for the function name applied to aggregate the daily data to \code{temporal.timestep}.
-#' Note, NA values are not removed from the aggregation calculation. If this is required then consider writing your own function. The default is \code{mean}.
-#' @param spatial.function.name character string for the function name applied to estimate the daily spatial spread in each variable. If \code{NA} or \code{""} and \code{locations} is a polygon, then
+#' @param temporal.fn.outer character string or function object for complex aggregation of the raw daily or monthly source data to \code{temporal.timestep}. The function is
+#' applied after the aggregation of the raw data using the \code{temporal.fn.inner} function. This feature allows calculation of, say, the anomaly in the seasonal mean
+#' precipitation. The options are \code{'annom'}, \code{'cumannom'} or a user-defined function. The default is \code{NA}, resulting in no such calculations.
+#' @param temporal.fn.inner character string or function object for the aggregation of the raw daily or monthly source data and before more complex calculations
+#' defined by the \code{temporal.fn.outer} function. The options are \code{'sum'}, \code{'mean'}, \code{'min'}, \code{'max'}, \code{'median'}, \code{'sd'}, \code{'var'}, \code{'IQR'} or a
+#' user defined function requiring input of only a vector of values. The default is \code{mean}.
+#' @param spatial.fn character string for the function name applied to estimate the daily spatial spread in each variable. If \code{NA} or \code{""} and \code{locations} is a polygon, then
 #' the spatial data is returned. The default is \code{var}.
 #' @param interp.method character string defining the method for interpolating the gridded data (see \code{terra::extract}). The options are: \code{'simple'}, \code{'bilinear'} and \code{''}. The default
 #' is \code{''}. This will set the interpolation to \code{'simple'} when \code{locations} is a polygon(s) and to \code{'bilinear'} when \code{locations} are points.
@@ -86,11 +90,11 @@
 #' @param ET.constants list of constants from Evapotranspiration package required for ET calculations. To get the data use the command \code{data(constants)}. Default is \code{list()}.
 #'
 #' @return
-#' When \code{locations} are polygons and \code{spatial.function.name} is not \code{NA} or \code{""}, then the returned variable is a list variable containing two data.frames. The first is the areal aggregated climate
-#' metrics named \code{catchmentTemporal.} with a suffix as defined by \code{temporal.function.name}). The second is the measure of spatial variability
-#' named \code{catchmentSpatial.} with a suffix as defined by \code{spatial.function.name}).
+#' When \code{locations} are polygons and \code{spatial.fn} is not \code{NA} or \code{""}, then the returned variable is a list variable containing two data.frames. The first is the areal aggregated climate
+#' metrics named \code{catchmentTemporal.} with a suffix as defined by \code{temporal.fn.outer}). The second is the measure of spatial variability
+#' named \code{catchmentSpatial.} with a suffix as defined by \code{spatial.fn}).
 #'
-#' When \code{locations} are polygons and \code{spatial.function.name} does equal \code{NA} or \code{""}, then the returned variable is a \code{terra::vect} object where the first column is the location/catchment IDs
+#' When \code{locations} are polygons and \code{spatial.fn} does equal \code{NA} or \code{""}, then the returned variable is a \code{terra::vect} object where the first column is the location/catchment IDs
 #' and the latter columns are the results for each variable at each time point as defined by \code{temporal.timestep}.
 #'
 #' When \code{locations} are points, the returned variable is a data.frame containing daily climate data at each point.
@@ -150,8 +154,9 @@ extract.data <- function(
     vars = '',
     locations = NA,
     temporal.timestep = 'daily',
-    temporal.function.name = 'mean',
-    spatial.function.name = 'var',
+    temporal.fn.outer = NA,
+    temporal.fn.inner = 'mean',
+    spatial.fn = 'var',
     interp.method = '',
     missing.method = c('5', 'linear', 'mean'),
     ET.function = 'ET.MortonCRAE',
@@ -256,35 +261,46 @@ extract.data <- function(
        any(vars.extract.summary$time.step == 'months'))
     pretty.stop('When data to be extracted is of a monthly timestep, the temporal.timestep can only be monthly, quarterly or annual or an integer vector.')
 
-  # Check if temporal.function.name is a univariate descriptive statistic.
+  # Check if temporal.fns are appropropriate
   base.agg.fun.outer = agg.options()$temporal.function.outer    # Get list of available functions
   base.agg.fun.inner = agg.options()$temporal.function.inner
-  if (is.function(temporal.function.name)) {
-    FUN.outer = temporal.function.name
-    FUN.inner = NA
-  } else if (temporal.function.name %in% base.agg.fun.inner) {
-    FUN.outer = temporal.function.name
-    FUN.inner = NA
-  } else {
-    # Does function include the base function names eg anon.sum?
-    pattern <- paste(base.agg.fun.outer, collapse = "|")
-    if ( grepl(pattern, temporal.function.name)) {
+  if (!is.character(temporal.fn.outer) &&
+      !is.function(temporal.fn.outer)  &&
+      !is.na(temporal.fn.outer))
+    pretty.stop(paste('The input temporal.fn.outer must be a character string to a package built-in function',
+                      'a user-defined function of NA'))
+  if (is.character(temporal.fn.outer) && !any(temporal.fn.outer %in% base.agg.fun.outer))
+    pretty.stop('When temporal.fn.outer is a character string, is must be one of recognised package built-in functions.')
+  if (!is.character(temporal.fn.outer) &&
+      !is.function(temporal.fn.outer)  &&
+      !is.na(temporal.fn.outer))
+    pretty.stop(paste('The input temporal.fn.outer must be a character string or a package built-in functions',
+                      'or a user-defined function or NA.'))
+  if (is.character(temporal.fn.outer) && !any(temporal.fn.outer %in% base.agg.fun.outer))
+    pretty.stop('When temporal.fn.outer is a character string, is must be one of recognised package built-in functions.')
 
-      matches <- regexpr(pattern, temporal.function.name)
-      FUN.outer = regmatches(temporal.function.name, matches)
+  if (!is.character(temporal.fn.inner) &&
+      !is.function(temporal.fn.inner)  &&
+      !is.na(temporal.fn.inner))
+    pretty.stop(paste('The input temporal.fn.inner must be a character string or a package built-in function',
+                      'or a user-defined function or NA'))
+  if (is.character(temporal.fn.inner) && !any(base.agg.fun.inner %in% temporal.fn.inner))
+    pretty.stop('When temporal.fn.inner is a character string, is must be one of recognised package built-in functions.')
 
-      FUN.inner = gsub(FUN.outer, '', temporal.function.name)
-      FUN.inner = gsub('\\.', '', FUN.inner)
-      if (!(FUN.inner %in% base.agg.fun.inner) || nchar(FUN.inner)==0)
-        pretty.stop(paste('When the temporal function starts with one of the following functions,',
-                          'it must be followed by a primitive function like mean, min, max etc:',
-                          base.agg.fun.outer))
+  if (!is.function(temporal.fn.outer) && is.na(temporal.fn.outer) &&
+      !is.function(temporal.fn.inner) && is.na(temporal.fn.inner))
+    pretty.stop('Both inputs temporal.fn.outer and temporal.fn.inner cannot be NA.')
 
-    } else {
-      FUN.outer = temporal.function.name
-      FUN.inner = NA
-    }
-  }
+  if (is.character(temporal.fn.outer) && nchar(temporal.fn.outer)==0)
+    pretty.stop('When input temporal.fn.outer is a character string, it cannot be empty.')
+
+  if (is.character(temporal.fn.inner) && nchar(temporal.fn.inner)==0)
+    pretty.stop('When input temporal.fn.inner is a character string, it cannot be empty.')
+
+  if ( is.character(temporal.fn.outer) && any(temporal.fn.outer %in% base.agg.fun.outer) &&
+      !is.function(temporal.fn.inner) && is.na(temporal.fn.inner))
+    pretty.stop(paste('When temporal.fn.outer is a character string for a recognised package built-in function,',
+                      'temporal.fn.inner cannot be NA.'))
 
   # Check ET inputs
   if (getET) {
@@ -453,7 +469,7 @@ extract.data <- function(
   do.spatial.analysis=F
   if (islocationsPolygon) {
     do.spatial.analysis=T
-    if (is.na(spatial.function.name) || (is.character(spatial.function.name) && spatial.function.name==''))
+    if (is.na(spatial.fn) || (is.character(spatial.fn) && spatial.fn==''))
         do.spatial.analysis = F
   }
 
@@ -506,50 +522,6 @@ extract.data <- function(
   message('... Testing aggregation functions:')
 
   message('   ... Testing temporal aggregation')
-  FUN.out_isValid = F
-  if (is.character(FUN.outer) && FUN.outer %in% agg.options()$temporal.function.outer)
-    FUN.out_isValid = T
-  else {
-
-    tryCatch({
-      FUN.out_isValid = is.function(FUN.outer)
-    },
-    error = function(e) {message('... is.functionis false')}
-    )
-
-    tryCatch({
-      FUN.out_isValid = exists(FUN.outer, mode='function')
-    },
-    error = function(e) {message('... exists() is false')}
-    )
-
-    if (!FUN.out_isValid)
-      pretty.stop(paste('The following temporal.function.name does not seem to exist:',FUN.outer))
-  }
-  FUN.inner_isValid = F
-  if (!is.na(FUN.inner)) {
-    if (is.character(FUN.inner) && FUN.inner %in% agg.options()$temporal.function.inner)
-      FUN.inner_isValid = T
-    else {
-
-      tryCatch({
-        FUN.inner_isValid = is.function(FUN.inner)
-      },
-      error = function(e) {message('... is.functionis false')}
-      )
-
-      tryCatch({
-        FUN.inner_isValid = exists(FUN.inner, mode='function')
-      },
-      error = function(e) {message('... exists() is false')}
-      )
-
-      if (!FUN.inner_isValid)
-        pretty.stop(paste('The following temporal.function.name does not seem to exist:',FUN.inner))
-    }
-  }
-
-  # Test functions ny calling
   for (itime.step in vars.extract.summary$time.step) {
     result = tryCatch({
       x = do.TemporalAggregation(data=NA,
@@ -557,14 +529,14 @@ extract.data <- function(
                                  time.to = extractTo,
                                  time.step.in = itime.step,
                                  time.step.out = temporal.timestep,
-                                 FUN.outer = FUN.outer,
-                                 FUN.inner = FUN.inner,
+                                 FUN.outer = temporal.fn.outer,
+                                 FUN.inner = temporal.fn.inner,
                                  ind = temporal.timestep.index)
 
     }, warning = function(w) {
-      message(paste("Warning temporal.function.name produced the following",w))
+      message(paste("Warning temporal.fn.outer produced the following",w))
     }, error = function(e) {
-      pretty.stop(paste('temporal.function.name produced an error when applied using a time step of',
+      pretty.stop(paste('temporal.fn.outer produced an error when applied using a time step of',
                         itime.step,'and test data:',e))
     }
     )
@@ -572,17 +544,17 @@ extract.data <- function(
   if (do.spatial.analysis) {
     message('   ... Testing spatial aggregation')
 
-    if (!exists(spatial.function.name, mode='function'))
-      pretty.stop(paste('The following spatial.function.name does not seem to exist:',spatial.function.name))
+    if (!exists(spatial.fn, mode='function'))
+      pretty.stop(paste('The following spatial.fn does not seem to exist:',spatial.fn))
 
     # Check spatial analysis function is valid.
     data.junk = t(as.matrix(stats::runif(100, 0.0, 1.0)*100))
     result = tryCatch({
-      apply(data.junk, 1,FUN=spatial.function.name)
+      apply(data.junk, 1,FUN=spatial.fn)
     }, warning = function(w) {
-      message(paste("Warning spatial.function.name produced the following",w))
+      message(paste("Warning spatial.fn produced the following",w))
     }, error = function(e) {
-      pretty.stop(paste('spatial.function.name produced an error when applied using test data:',e))
+      pretty.stop(paste('spatial.fn produced an error when applied using test data:',e))
     }, finally = {
       rm(data.junk)
     }
@@ -998,8 +970,8 @@ extract.data <- function(
                              time.from = extractFrom,
                              time.to = extractTo,
                              time.step.out = temporal.timestep,
-                             FUN.outer = 'sum',
-                             FUN.inner = NA,
+                             FUN.outer = NA,
+                             FUN.inner = 'sum',
                              ind = temporal.timestep.index),
                            SIMPLIFY = F)
 
@@ -1036,8 +1008,8 @@ extract.data <- function(
                                   time.from = extractFrom,
                                   time.to = extractTo,
                                   time.step.out = temporal.timestep,
-                                  FUN.outer = FUN.outer,
-                                  FUN.inner = FUN.inner,
+                                  FUN.outer = temporal.fn.outer,
+                                  FUN.inner = temporal.fn.inner,
                                   ind = temporal.timestep.index),
                                 SIMPLIFY = F)
 
@@ -1073,7 +1045,7 @@ extract.data <- function(
       catchmentVarTmp = cbind(catchmentVarTmp,
                                 sapply(data.brick.timaAgg,
                                        do.SpatialStatistic,
-                                       fn = spatial.function.name)
+                                       fn = spatial.fn)
                                 )
     } else if (islocationsPolygon) {
       # Do not undertake spatial aggregation.
@@ -1132,12 +1104,12 @@ extract.data <- function(
   if (islocationsPolygon) {
     if (do.spatial.analysis) {
       # Get function name as a char
-      if (is.function(temporal.function.name))
-        temporal.function.name = as.character(substitute(temporal.function.name))
+      if (is.function(temporal.fn.outer))
+        temporal.fn.outer = as.character(substitute(temporal.fn.outer))
 
       # Build output list
       catchmentAvg = list(catchmentAvg, catchmentVar)
-      names(catchmentAvg) = c(paste('temporal.',temporal.function.name,sep=''), paste('spatial.',spatial.function.name,sep=''))
+      names(catchmentAvg) = c(paste('temporal.',temporal.fn.outer,sep=''), paste('spatial.',spatial.fn,sep=''))
     } else {
       # Convert data to  a spatial grid (SpatialPixelsDataFrame)
       gridCoords = data.frame(Long=point.weights$coords[,1], Lat=point.weights$coords[,2])
