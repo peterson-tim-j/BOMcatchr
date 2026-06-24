@@ -1103,19 +1103,30 @@ extract.data <- function(
   # Handle spatially averaged vs gridded values within catchment polygon.
   if (islocationsPolygon) {
     if (do.spatial.analysis) {
-      # Get function name as a char
+
+      # Build char names for output list items
       if (is.function(temporal.fn.outer))
         temporal.fn.outer = as.character(substitute(temporal.fn.outer))
+      if (is.function(temporal.fn.inner))
+        temporal.fn.inner = as.character(substitute(temporal.fn.inner))
+      if (!is.na(temporal.fn.outer) && is.na(temporal.fn.inner))
+        temporal.lbl = temporal.fn.outer
+      if (is.na(temporal.fn.outer) && !is.na(temporal.fn.inner))
+        temporal.lbl = temporal.fn.inner
+      if (!is.na(temporal.fn.outer) && !is.na(temporal.fn.inner))
+        temporal.lbl = paste0(temporal.fn.outer,'_',temporal.fn.inner)
+      temporal.lbl = paste('temporal_',temporal.lbl,sep='')
 
-      # Build output list
+      spatial.lbl = paste('spatial_',spatial.fn,sep='')
+
+      # Build output list for spatially averaged polygon data
       catchmentAvg = list(catchmentAvg, catchmentVar)
-      names(catchmentAvg) = c(paste('temporal.',temporal.fn.outer,sep=''), paste('spatial.',spatial.fn,sep=''))
+      names(catchmentAvg) = c(temporal.lbl, spatial.lbl)
+
     } else {
-      # Convert data to  a spatial grid (SpatialPixelsDataFrame)
+      # Preserve spatial data and convert to a spatial grid (SpatialPixelsDataFrame)
       gridCoords = data.frame(Long=point.weights$coords[,1], Lat=point.weights$coords[,2])
       catchmentAvg = cbind.data.frame(gridCoords,  catchmentAvg)
-      #sp::coordinates(catchmentAvg) <- ~Long+Lat
-      #sp::gridded(catchmentAvg) <- T
       catchmentAvg = terra::rast(x = catchmentAvg,
                                  crs =terra::crs(locations, proj=T))
     }
