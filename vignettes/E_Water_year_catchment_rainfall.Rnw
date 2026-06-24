@@ -54,14 +54,14 @@ climateData.annual = extract.data(ncdfFilename = ncdfFilename,
                       vars = c('precip', 'precip.monthly'),
                       locations = catch,
                       temporal.timestep = 'annual',
-                      temporal.function.name = 'sum',
-                      spatial.function.name = 'var')
+                      temporal.fn.inner = 'sum',
+                      spatial.fn = 'var')
 ```
 
 Now let's also estimate the uncertainty in the calender year rainfall using the root mean square interpolation error (RMSE). Specifically, we are assuming that the error is unbiased, which allows us to assume the RMSE equals the standard deviation. Taking the square of it gives us the variance, which we can sum over the water year. Once all of the calender year data is extracted, the total annual precipitation is plotted.
 
 ```{r}
-sqrd.sum <- function(x) {return(sum(x^2))}
+sqrd_sum <- function(x) {return(sum(x^2))}
 
 climateData.annual.err = extract.data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
@@ -69,8 +69,8 @@ climateData.annual.err = extract.data(ncdfFilename = ncdfFilename,
                       vars = c('precip.RMSE'),
                       locations = catch,
                       temporal.timestep = 'annual',
-                      temporal.function.name = sqrd.sum,
-                      spatial.function.name = 'var')
+                      temporal.fn.inner = sqrd_sum,
+                      spatial.fn = 'var')
 ```
 
 ```{r}
@@ -79,13 +79,13 @@ climateData.annual.err = extract.data(ncdfFilename = ncdfFilename,
 
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
-# Loop through each catchment and plot the daily precipitation and PET.
+# Loop through each catchment and plot the precipitation.
 for (i in 1:length(catch$CatchID)) {
 
-  filt = climateData.annual$temporal.sum$Location.ID == catch$CatchID[i]
+  filt = climateData.annual$temporal_sum$Location.ID == catch$CatchID[i]
 
   # Plot precipitation from monthly data
-  tmp.date = climateData.annual$temporal.sum[filt,]
+  tmp.date = climateData.annual$temporal_sum[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip.monthly
 
@@ -105,9 +105,9 @@ for (i in 1:length(catch$CatchID)) {
        main=paste('Catchment ID',catch$CatchID[i]))
 
   # Get water year data from daily data
-  tmp.date = climateData.annual$temporal.sum[filt,]
+  tmp.date = climateData.annual$temporal_sum[filt,]
   y.data = tmp.date$precip
-  tmp.date = climateData.annual.err$temporal.sqrd.sum[filt,]
+  tmp.date = climateData.annual.err$temporal_sqrd_sum[filt,]
   y.data.low = y.data - 2*sqrt(tmp.date$precip.RMSE)
   y.data.hi = y.data + 2*sqrt(tmp.date$precip.RMSE)
 
@@ -117,7 +117,7 @@ for (i in 1:length(catch$CatchID)) {
        col = "blue",
        lwd = 1.2)
 
-  # Add interpolation error bars for water years precipitation from daily data
+  # Add interpolation error bars for precipitation from daily data
   arrows(x0 = x.data,
          y0 = y.data.low,
          x1 = x.data,
@@ -155,8 +155,8 @@ climateData.daily2wateryear = extract.data(ncdfFilename = ncdfFilename,
                       vars = c('precip'),
                       locations = catch,
                       temporal.timestep = wateryear.ind,
-                      temporal.function.name = 'sum',
-                      spatial.function.name = 'var')
+                      temporal.fn.inner = 'sum',
+                      spatial.fn = 'var')
 ```
 
 Now let's estimate the uncertainty in the water year rainfall using the root mean square interpolation error (RMSE).
@@ -168,8 +168,8 @@ climateData.daily2wateryear.err = extract.data(ncdfFilename = ncdfFilename,
                       vars = c('precip.RMSE'),
                       locations = catch,
                       temporal.timestep = wateryear.ind,
-                      temporal.function.name = sqrd.sum,
-                      spatial.function.name = 'var')
+                      temporal.fn.inner = sqrd_sum,
+                      spatial.fn = 'var')
 ```
 Finally, let's also extract the water year using the monthly gridded precipitation data.
 
@@ -185,20 +185,20 @@ climateData.month2wateryear = extract.data(ncdfFilename = ncdfFilename,
                       vars = c('precip.monthly'),
                       locations = catch,
                       temporal.timestep = wateryear.ind,
-                      temporal.function.name = 'sum',
-                      spatial.function.name = 'var')
+                      temporal.fn.inner = 'sum',
+                      spatial.fn = 'var')
 ```
 
 Before plotting the water year data, the time steps with less than a full water year of data are filtered out.
 ```{r}
-filt = climateData.daily2wateryear$temporal.sum$days.per.timestep >= 365
-climateData.daily2wateryear$temporal.sum = climateData.daily2wateryear$temporal.sum[filt, ]
+filt = climateData.daily2wateryear$temporal_sum$days.per.timestep >= 365
+climateData.daily2wateryear$temporal_sum = climateData.daily2wateryear$temporal_sum[filt, ]
 
-filt = climateData.daily2wateryear.err$temporal.sqrd.sum$days.per.timestep >= 365
-climateData.daily2wateryear.err$temporal.sqrd.sum = climateData.daily2wateryear.err$temporal.sqrd.sum[filt, ]
+filt = climateData.daily2wateryear.err$temporal_sqrd_sum$days.per.timestep >= 365
+climateData.daily2wateryear.err$temporal_sqrd_sum = climateData.daily2wateryear.err$temporal_sqrd_sum[filt, ]
 
-filt = climateData.month2wateryear$temporal.sum$months.per.timestep == 12
-climateData.month2wateryear$temporal.sum = climateData.month2wateryear$temporal.sum[filt, ]
+filt = climateData.month2wateryear$temporal_sum$months.per.timestep == 12
+climateData.month2wateryear$temporal_sum = climateData.month2wateryear$temporal_sum[filt, ]
 
 ```
 
@@ -213,8 +213,8 @@ par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 for (i in 1:length(catch$CatchID)) {
 
   # Water years precipitation from monthly data.
-  filt = climateData.month2wateryear$temporal.sum$Location.ID == catch$CatchID[i]
-  tmp.date = climateData.month2wateryear$temporal.sum[filt,]
+  filt = climateData.month2wateryear$temporal_sum$Location.ID == catch$CatchID[i]
+  tmp.date = climateData.month2wateryear$temporal_sum[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip.monthly
 
@@ -233,11 +233,11 @@ for (i in 1:length(catch$CatchID)) {
        main=paste('Catchment ID',catch$CatchID[i]))
 
   # Get water year data from daily data.
-  filt = climateData.daily2wateryear$temporal.sum$Location.ID == catch$CatchID[i]
-  tmp.date = climateData.daily2wateryear$temporal.sum[filt,]
+  filt = climateData.daily2wateryear$temporal_sum$Location.ID == catch$CatchID[i]
+  tmp.date = climateData.daily2wateryear$temporal_sum[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip
-  tmp.date = climateData.daily2wateryear.err$temporal.sqrd.sum[filt,]
+  tmp.date = climateData.daily2wateryear.err$temporal_sqrd_sum[filt,]
   y.data.low = y.data - 1.645 * sqrt(tmp.date$precip.RMSE)
   y.data.hi = y.data + 1.645 * sqrt(tmp.date$precip.RMSE)
 
@@ -271,7 +271,7 @@ for (i in 1:length(catch$CatchID)) {
 ```
 
 ## Calculate the seasonal cumulative rainfall anomaly
-Multiple more advanced measures can also be derived. To demonstrate, here the area weighted seasonal rainfall anomaly is calculated using both the daily and monthly data. To achieve this only two changes are required. The input \code{temporal.timestep} is changed to \code{'seasonal'} and the temporal function \code{temporal.function.name} is changed. In the first example, the later function is changed to \code{'annom.mean'}. This calculates the seasonal anomaly where the within season data is the mean of the time-step. Many other options are also available such as \code{'annom.sum'}, \code{'annom.min'}, \code{'annom.max'}, \code{'annom.median'}, \code{'annom.var'}.
+Multiple more advanced measures can also be derived. To demonstrate, here the area weighted seasonal rainfall anomaly is calculated using both the daily and monthly data. To achieve this only two changes are required. The input \code{temporal.timestep} is changed to \code{'seasonal'} and the temporal function \code{temporal.fn.inner} is changed. In the first example, the later function is changed to \code{'annom.mean'}. This calculates the seasonal anomaly where the within season data is the mean of the time-step. Many other options are also available such as \code{'annom.sum'}, \code{'annom.min'}, \code{'annom.max'}, \code{'annom.median'}, \code{'annom.var'}.
 
 ```{r}
 annom.seaonal = extract.data(ncdfFilename = ncdfFilename,
@@ -280,8 +280,9 @@ annom.seaonal = extract.data(ncdfFilename = ncdfFilename,
                       vars = c('precip', 'precip.monthly'),
                       locations = catch,
                       temporal.timestep = 'seasonal',
-                      temporal.function.name = 'annom.mean',
-                      spatial.function.name = 'var')
+                      temporal.fn.outer = 'annom',
+                      temporal.fn.inner = 'mean',
+                      spatial.fn = 'var')
 ```
 Now let's also calculate the the area weighted seasonal cumulative rainfall anomaly. Note, like the anomaly calculation, many other functions are available for the within-seasonal calculation.
 
@@ -292,23 +293,24 @@ cumannom.seaonal = extract.data(ncdfFilename = ncdfFilename,
                       vars = c('precip', 'precip.monthly'),
                       locations = catch,
                       temporal.timestep = 'seasonal',
-                      temporal.function.name = 'cumannom.mean',
-                      spatial.function.name = 'var')
+                      temporal.fn.outer = 'cumannom',
+                      temporal.fn.inner = 'mean',
+                      spatial.fn = 'var')
 ```
 
-Now let's compare the two estimates the precipitation anomaly and cumularive anomaly at the two catchments. The blue line shows that calculated from the daily data and the red line shows that calculated from the monthly data.
+Now let's compare the two estimates the precipitation anomaly and cumulative anomaly at the two catchments. The blue line shows that calculated from the daily data and the red line shows that calculated from the monthly data.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 6
 
-par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
+par(mfrow=c(2,2), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
 for (i in 1:length(catch$CatchID)) {
 
   # Water years precipitation from monthly data.
-  filt = annom.seaonal$annom.mean$Location.ID == catch$CatchID[i]
-  tmp.date = annom.seaonal$annom.mean[filt,]
+  filt = annom.seaonal$temporal_annom_mean$Location.ID == catch$CatchID[i]
+  tmp.date = annom.seaonal$temporal_annom_mean[filt,]
   x.data = as.Date(paste0(tmp.date$year,'-',
                           tmp.date$month,'-',
                           tmp.date$day))
@@ -335,7 +337,7 @@ for (i in 1:length(catch$CatchID)) {
        col = "blue",
        lwd = 1.2)
 
-  tmp.date = cumannom.seaonal$annom.mean[filt,]
+  tmp.date = cumannom.seaonal$temporal_cumannom_mean[filt,]
   y.data = tmp.date$precip.monthly
   plot(x = x.data,
        y = y.data,
