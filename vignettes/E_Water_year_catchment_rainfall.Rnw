@@ -48,7 +48,7 @@ catch = catchments()
 Next let's extract the calendar year area weighted total precipitation across the two catchments. The data is extracted between the dates \code{extract.from} and \code{extract.to}. Because the output time step can be estimated from both the daily and monthly source data, both can be extracted at the same time.
 
 ```{r}
-climateData.annual = extract.data(ncdfFilename = ncdfFilename,
+climateData.annual = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
                       vars = c('precip', 'precip.monthly'),
@@ -63,7 +63,7 @@ Now let's also estimate the uncertainty in the calender year rainfall using the 
 ```{r}
 sqrd_sum <- function(x) {return(sum(x^2))}
 
-climateData.annual.err = extract.data(ncdfFilename = ncdfFilename,
+climateData.annual.err = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
                       vars = c('precip.RMSE'),
@@ -149,7 +149,7 @@ wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(d
 ```
 
 ```{r}
-climateData.daily2wateryear = extract.data(ncdfFilename = ncdfFilename,
+climateData.daily2wateryear = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
                       vars = c('precip'),
@@ -162,7 +162,7 @@ climateData.daily2wateryear = extract.data(ncdfFilename = ncdfFilename,
 Now let's estimate the uncertainty in the water year rainfall using the root mean square interpolation error (RMSE).
 
 ```{r}
-climateData.daily2wateryear.err = extract.data(ncdfFilename = ncdfFilename,
+climateData.daily2wateryear.err = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
                       vars = c('precip.RMSE'),
@@ -179,7 +179,7 @@ wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(d
 ```
 
 ```{r}
-climateData.month2wateryear = extract.data(ncdfFilename = ncdfFilename,
+climateData.month2wateryear = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
                       vars = c('precip.monthly'),
@@ -274,7 +274,7 @@ for (i in 1:length(catch$CatchID)) {
 Multiple more advanced measures can also be derived. To demonstrate, here the area weighted seasonal rainfall anomaly is calculated using both the daily and monthly data. To achieve this only two changes are required. The input \code{temporal.timestep} is changed to \code{'seasonal'} and the temporal function \code{temporal.fn.inner} is changed. In the first example, the later function is changed to \code{'annom.mean'}. This calculates the seasonal anomaly where the within season data is the mean of the time-step. Many other options are also available such as \code{'annom.sum'}, \code{'annom.min'}, \code{'annom.max'}, \code{'annom.median'}, \code{'annom.var'}.
 
 ```{r}
-annom.seaonal = extract.data(ncdfFilename = ncdfFilename,
+annom.seaonal = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
                       vars = c('precip', 'precip.monthly'),
@@ -287,7 +287,7 @@ annom.seaonal = extract.data(ncdfFilename = ncdfFilename,
 Now let's also calculate the the area weighted seasonal cumulative rainfall anomaly. Note, like the anomaly calculation, many other functions are available for the within-seasonal calculation.
 
 ```{r}
-cumannom.seaonal = extract.data(ncdfFilename = ncdfFilename,
+cumannom.seaonal = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
                       vars = c('precip', 'precip.monthly'),
