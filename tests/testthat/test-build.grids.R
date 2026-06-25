@@ -13,7 +13,7 @@ test_that("netCDF grid can be created",
           ncdfFilename = tempfile(fileext = '.nc')
 
           # Build netCDF grids for all data but only over the defined time period.
-          ncdfFilename= grid.build(ncdfFilename=ncdfFilename,
+          ncdfFilename= grid_build(ncdfFilename=ncdfFilename,
                                        updateFrom=startDate, updateTo=endDate)
         },
         message='Testing creaion of netCDF grids.'
@@ -28,7 +28,7 @@ test_that("netCDF grid can be created",
       # Test the netcdf files can be opened.
       expect_no_error(
         {
-          summary.df <- BOMcatchr::grid.summary(ncdfFilename)
+          summary.df <- BOMcatchr::grid_summary(ncdfFilename)
 
           summary.df
         },
@@ -42,7 +42,7 @@ test_that("netCDF grid can be created",
       # Test grid ages can be calculated and plotted
       expect_no_error(
         {
-          summary.ages <- grid.ages(ncdfFilename, today = Sys.Date()+12, plot.sourcedate = T)
+          summary.ages <- grid_ages(ncdfFilename, today = Sys.Date()+12, plot.sourcedate = T)
         }
       )
 
@@ -55,7 +55,7 @@ test_that("netCDF grid can be created",
         {
           endDate = startDate
           startDate = as.Date(format( Sys.Date()-93,"%Y-%m-01"),'%Y-%m-%d')
-          ncdfFilename = grid.build(ncdfFilename=ncdfFilename,
+          ncdfFilename = grid_build(ncdfFilename=ncdfFilename,
                           updateFrom=startDate, updateTo=endDate)
         },
         message='Testing updating of netCDF grids by two days prior'
@@ -64,7 +64,7 @@ test_that("netCDF grid can be created",
       # Test the netcdf files can be opened.
       expect_no_error(
         {
-          summary.df <- BOMcatchr::grid.summary(ncdfFilename)
+          summary.df <- BOMcatchr::grid_summary(ncdfFilename)
         },
         message='Testing opening of netCDF grids and reading summary info.'
       )

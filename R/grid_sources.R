@@ -1,6 +1,6 @@
 #' Source data URLs and attributes.
 #'
-#' \code{grid.sources} get available variables, units and URLs to BoM gridded data.
+#' \code{grid_sources} get available variables, units and URLs to BoM gridded data.
 #'
 #' This function returns a list of available variables, unit, time step and URLs used to download the meteorological data.
 #'
@@ -21,10 +21,10 @@
 #' }
 #'
 #' @examples
-#' vars = grid.sources()
+#' vars = grid_sources()
 #'
 #' @export
-grid.sources <- function() {
+grid_sources <- function() {
 
   vars = c('tmax', 'tmin', 'precip', 'precip.RMSE', 'precip.monthly', 'vprp', 'solarrad')
   nvars = length(vars)

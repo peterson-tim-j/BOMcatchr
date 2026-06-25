@@ -6,13 +6,14 @@
 #' A list variable of the file name and succes/failure flag.
 #'
 #' @keywords internal
+#' @noRd
 grid.download <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.timestep, data.type.label,  workingFolder, datestring) {
 
   if (!is.character(url.string))
-    pretty.stop(paste('The input URL for',data.type.label,'must be a URL string.'))
+    pretty_stop(paste('The input URL for',data.type.label,'must be a URL string.'))
 
   if (!startsWith(url.string,'https://'))
-    pretty.stop(paste('The input URL string for',data.type.label,'must start "with https://" '))
+    pretty_stop(paste('The input URL string for',data.type.label,'must start "with https://" '))
 
   if (ivar.timestep == 'days') {
     sdate = datestring
@@ -24,7 +25,7 @@ grid.download <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.timeste
     sdate = format( as.Date(datestring,'%Y%m%d'),"%Y0101")
     edate = format(as.Date(datestring,'%Y%m%d') ,"%Y1231")
   } else {
-    pretty.stop(paste('Unknown source data time step:',ivar.timestep))
+    pretty_stop(paste('Unknown source data time step:',ivar.timestep))
   }
 
   # Build URL
@@ -59,7 +60,7 @@ grid.download <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.timeste
 #' List of header information or a matrix of the grid data.
 #'
 #' @keywords internal
-#'
+#' @noRd
 grid.read <- function(file.name, ivar.file.ext, only.header, nRows, nCols, noData) {
 
   # Get file connection to .Z and .zip compressed files
@@ -75,8 +76,8 @@ grid.read <- function(file.name, ivar.file.ext, only.header, nRows, nCols, noDat
     con <-unz(file.name, zip.fname)
 
   } else {
-    pretty.stop(paste0('The following source data file format cannot be handled:',f.extn,'\n',
-                       'Check input source data format within grid.sources().'))
+    pretty_stop(paste0('The following source data file format cannot be handled:',f.extn,'\n',
+                       'Check input source data format within grid_sources().'))
   }
 
   # Only get file header data
@@ -109,4 +110,10 @@ grid.read <- function(file.name, ivar.file.ext, only.header, nRows, nCols, noDat
 
     return(grd)
   }
+}
+
+
+# Helper function to import ncdf4. Required by raster() package
+ignore_unused_imports <- function(fname) {
+  ncdf4::nc_version()
 }

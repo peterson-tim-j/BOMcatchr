@@ -1,12 +1,12 @@
 #' Age of netCDF data and updates required.
 #'
-#' \code{grid.ages} age of the netCDF date and which time points likely have BoM updates.
+#' \code{grid_ages} age of the netCDF date and which time points likely have BoM updates.
 #'
 #' This function compares the download date of data within an existing netCDF file
 #' and compares them against the BoM schedule of data updates (provided (see
-#' \code{\link{grid.sources}}),
-#' @param ncfile file name of the netCDF data file built by the package function \code{\link{grid.build}}.
-#' @param data.src is a data.frame of the source grid information. Default is from \code{\link{grid.sources}}.
+#' \code{\link{grid_sources}}),
+#' @param ncfile file name of the netCDF data file built by the package function \code{\link{grid_build}}.
+#' @param data.src is a data.frame of the source grid information. Default is from \code{\link{grid_sources}}.
 #' @param silent is a logical for silencing console outputs. Default is \code{F}.
 #' @param plot.sourcedate is a logical for plotting the date that the data for each time point was downloaded. Default is \code{F}.
 #' @param today is today's date. Default is \code{Sys.Date()}. This input is only provided
@@ -21,16 +21,16 @@
 #'  \item{\code{1 < age <= 7 } : logical if \code{Source.age} is greater than the left threshold and less than or equal to right duration threshold.}
 #'  \item{\code{age <= 7 } : logical if \code{Source.age} is less than or equal to the maximum duration threshold.}
 #' }
-#' @seealso \code{\link{grid.sources}} for update threshold data.
+#' @seealso \code{\link{grid_sources}} for update threshold data.
 #' @export
-grid.ages <- function(ncfile,
-                      data.src = grid.sources(),
+grid_ages <- function(ncfile,
+                      data.src = grid_sources(),
                       silent = F,
                       plot.sourcedate = F,
                       today = Sys.Date()) {
 
   # Get summary of existing data
-  data.existing = grid.summary(ncfile)
+  data.existing = grid_summary(ncfile)
 
   # open netcdf file
   ncout <- RNetCDF::open.nc(ncfile, write=F)

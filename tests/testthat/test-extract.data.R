@@ -14,7 +14,7 @@ test_that("netCDF grid can be created",
           ncdfFilename = tempfile(fileext = '.nc')
 
           # Build netCDF grids for all data but only over the defined time period.
-          file.names = grid.build(ncdfFilename=ncdfFilename,
+          file.names = grid_build(ncdfFilename=ncdfFilename,
                                    updateFrom=startDate,
                                    updateTo=endDate)
         },
@@ -27,7 +27,7 @@ test_that("netCDF grid can be created",
           catch <- catchments()
 
           # Extract catchment average monthly data P for Bet Bet Creek.
-          climateData.P= extract.data(ncdfFilename=ncdfFilename,
+          climateData.P= extract_data(ncdfFilename=ncdfFilename,
                                               extractFrom=startDate,
                                               extractTo=endDate,
                                               locations=catch,
@@ -50,7 +50,7 @@ test_that("netCDF grid can be created",
 
           # Extract catchment average data for Bet Bet Creek with
           # the Mortons CRAE estimate of potential ET.
-          climateData.P_PET= extract.data(ncdfFilename=ncdfFilename,
+          climateData.P_PET= extract_data(ncdfFilename=ncdfFilename,
                                                   extractFrom=startDate,
                                                   extractTo=endDate,
                                                   locations=catch,
@@ -83,7 +83,7 @@ test_that("netCDF grid can be created",
           centroid = terra::centroids(catch)
 
           # Extract point monthly data P for Bet Bet Creek.
-          climateData.P= extract.data(ncdfFilename=ncdfFilename,
+          climateData.P= extract_data(ncdfFilename=ncdfFilename,
                                       extractFrom=startDate,
                                       extractTo=endDate,
                                       locations=centroid,
@@ -98,7 +98,7 @@ test_that("netCDF grid can be created",
       expect_no_error(
         {
           # Extract point monthly data P for Bet Bet Creek.
-          climateData.P= extract.data(ncdfFilename=ncdfFilename,
+          climateData.P= extract_data(ncdfFilename=ncdfFilename,
                                       extractFrom=startDate,
                                       extractTo=endDate,
                                       locations=catch,

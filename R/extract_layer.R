@@ -2,7 +2,7 @@
 #' Extract netCDF layer of one variable at one date.
 #'
 #' @description
-#' extract.layer extracts the AWAP climate data for one date and one variable. This is
+#' extract_layer extracts the AWAP climate data for one date and one variable. This is
 #' low level function is unlikely to be of use to a user.
 #'
 #' @param ncdfFilename is a full file name (as string) to the netCDF file.
@@ -13,10 +13,10 @@
 #' \code{terra::vect} object.
 #'
 #' @seealso
-#' \code{\link{grid.build}} for building the NetCDF files of daily climate data.
+#' \code{\link{grid_build}} for building the NetCDF files of daily climate data.
 #'
 #' @export
-extract.layer <- function(
+extract_layer <- function(
     ncdfFilename = NA,
     ncdf.cond = NA,
     extract.date = NA,
@@ -28,24 +28,24 @@ extract.layer <- function(
     if (is.character(extract.date)) {
       dateExtract = as.Date(extract.date,"%Y-%m-%d")
     } else
-      pretty.stop('Input date must a character string or a Date class object.')
+      pretty_stop('Input date must a character string or a Date class object.')
   }
 
   if (!is.data.frame(vars.summary)) {
     if (file.exists(ncdfFilename))
-      vars.summary <- grid.summary(ncdfFilename)
+      vars.summary <- grid_summary(ncdfFilename)
     else
-      pretty.stop('When vars.summary is not input, then ncdfFilename must be input.')
+      pretty_stop('When vars.summary is not input, then ncdfFilename must be input.')
   }
 
   if (!is.character(var))
-    pretty.stop('Input var must a character string.')
+    pretty_stop('Input var must a character string.')
 
   if (length(var)>1)
-    pretty.stop('Input var must a single character string.')
+    pretty_stop('Input var must a single character string.')
 
   if (!(var %in% rownames(vars.summary)))
-    pretty.stop('Input var must a variable name already in the provided netCDf file.')
+    pretty_stop('Input var must a variable name already in the provided netCDf file.')
 
   # Get index to the required date.
   ind = get.ncdf.date.index(vars.summary[var,]$time.datum, extract.date)
@@ -60,7 +60,7 @@ extract.layer <- function(
       ncdf.cond <- RNetCDF::open.nc(ncdfFilename)
       do.ncclose = T
     } else
-      pretty.stop('The input file string is not to an existing netCDF file.')
+      pretty_stop('The input file string is not to an existing netCDF file.')
   }
 
   # Get connection to the required group.
