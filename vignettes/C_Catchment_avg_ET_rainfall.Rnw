@@ -66,8 +66,8 @@ climateData.daily = extract.data(ncdfFilename=ncdfFilename,
                       vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                       locations=catch,
                       temporal.timestep = 'daily',
-                      temporal.function.name='sum',
-                      spatial.function.name='var',
+                      temporal.fn.inner ='sum',
+                      spatial.fn = 'var',
                       ET.function='ET.MortonCRAE',
                       ET.timestep = 'monthly',
                       ET.Mortons.est='wet areal ET',
@@ -83,22 +83,22 @@ par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 # Loop through each catchment and plot the daily precipitation and PET.
 for (i in 1:length(catch$CatchID)) {
 
-  filt = climateData.daily$temporal.sum$Location.ID == catch$CatchID[i]
+  filt = climateData.daily$temporal_sum$Location.ID == catch$CatchID[i]
 
   # Convert year, month and day columns from extractions to a date.
-  climateData.daily.date = as.Date(paste0(climateData.daily$temporal.sum$year[filt], "-",
-                           climateData.daily$temporal.sum$month[filt], "-",
-                           climateData.daily$temporal.sum$day[filt]))
+  climateData.daily.date = as.Date(paste0(climateData.daily$temporal_sum$year[filt], "-",
+                           climateData.daily$temporal_sum$month[filt], "-",
+                           climateData.daily$temporal_sum$day[filt]))
 
 
   # Plot precipitation and standard deviation against observations
   # ---------------------------------------------------------
-  max.y = max(climateData.daily$temporal.sum$precip[filt] +
+  max.y = max(climateData.daily$temporal_sum$precip[filt] +
         sqrt(climateData.daily$spatial.var$precip[filt]))
 
   # Precipitation
   plot(climateData.daily.date,
-        climateData.daily$temporal.sum$precip[filt],
+        climateData.daily$temporal_sum$precip[filt],
         type = "h",
         col = "#e31a1c",
         lwd = 3,
@@ -118,9 +118,9 @@ for (i in 1:length(catch$CatchID)) {
   # Standard deviation
   for (j in 1:length(climateData.daily.date)) {
     x.plot = rep(climateData.daily.date[j], 2)
-    y.plot = c(climateData.daily$temporal.sum$precip[filt][j] +
+    y.plot = c(climateData.daily$temporal_sum$precip[filt][j] +
         sqrt(climateData.daily$spatial.var$precip[filt][j]),
-        climateData.daily$temporal.sum$precip[filt][j] -
+        climateData.daily$temporal_sum$precip[filt][j] -
         sqrt(climateData.daily$spatial.var$precip[filt][j]))
     lines(x.plot, y.plot, col = "black", lwd = 1.2)
   }
@@ -128,7 +128,7 @@ for (i in 1:length(catch$CatchID)) {
   # Plot evap data.
   par(new = TRUE)
   plot(climateData.daily.date,
-       climateData.daily$temporal.sum$et[filt],
+       climateData.daily$temporal_sum$et[filt],
        col = "#bc80bd",
        lwd = 2,
        ylab = "",
@@ -174,7 +174,7 @@ PrecipData.monthly = extract.data(ncdfFilename=ncdfFilename,
                      locations=catch,
                      spatial.function.name = '',
                      temporal.timestep = 'monthly',
-                     temporal.function.name = 'sum')
+                     temporal.fn.inner = 'sum')
 ```
 The monthly total precipitation can then be mapped to show the spatial variability. Before mapping, let's add a function to map a panel of maps and for the maps to have a common colour bar.
 ```{r}
@@ -240,9 +240,9 @@ metData.monthly = extract.data(ncdfFilename=ncdfFilename,
                      extractTo=date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                      locations=catch,
-                     spatial.function.name = '',
+                     spatial.fn = '',
                      temporal.timestep = 'monthly',
-                     temporal.function.name = 'sum',
+                     temporal.fn.inner = 'sum',
                      ET.function = 'ET.MortonCRAE',
                      ET.timestep = 'monthly',
                      ET.Mortons.est='wet areal ET',
@@ -293,9 +293,9 @@ metData.monthly.weighted = extract.data(ncdfFilename=ncdfFilename,
                      extractTo=date.to,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                      locations = catch,
-                     spatial.function.name = 'sum',
+                     spatial.fn = 'var',
                      temporal.timestep = 'monthly',
-                     temporal.function.name = 'sum',
+                     temporal.fn.inner = 'sum',
                      ET.function = 'ET.MortonCRAE',
                      ET.timestep = 'monthly',
                      ET.Mortons.est = 'wet areal ET',
@@ -307,7 +307,7 @@ metData.monthly.centroid = extract.data(ncdfFilename=ncdfFilename,
                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                      locations = centroid,
                      temporal.timestep = 'monthly',
-                     temporal.function.name = 'sum',
+                     temporal.fn.inner = 'sum',
                      ET.function='ET.MortonCRAE',
                      ET.timestep = 'monthly',
                      ET.Mortons.est = 'wet areal ET',
@@ -323,16 +323,16 @@ par(mfrow=c(2,3), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 # Loop through each catchment and plot the daily precipitation and PET.
 for (i in 1:length(catch$CatchID)) {
 
-  filt = metData.monthly.weighted$temporal.sum$Location.ID == catch$CatchID[i]
+  filt = metData.monthly.weighted$temporal_sum$Location.ID == catch$CatchID[i]
 
   # Convert year, month and day columns from extractions to a date.
-  metData.date = as.Date(paste0(metData.monthly.weighted$temporal.sum$year[filt], "-",
-       metData.monthly.weighted$temporal.sum$month[filt], "-",
-       metData.monthly.weighted$temporal.sum$day[filt]))
+  metData.date = as.Date(paste0(metData.monthly.weighted$temporal_sum$year[filt], "-",
+       metData.monthly.weighted$temporal_sum$month[filt], "-",
+       metData.monthly.weighted$temporal_sum$day[filt]))
 
   # Precipitation
   plot(x = metData.date,
-       y = metData.monthly.weighted$temporal.sum$precip[filt],
+       y = metData.monthly.weighted$temporal_sum$precip[filt],
        type = "l",
        col = "#e31a1c",
        lwd = 1.2,
@@ -360,7 +360,7 @@ for (i in 1:length(catch$CatchID)) {
 
   # PET
   plot(x = metData.date,
-       y = metData.monthly.weighted$temporal.sum$et[filt],
+       y = metData.monthly.weighted$temporal_sum$et[filt],
        type = "l",
        col = "#e31a1c",
        lwd = 1.2,
@@ -376,8 +376,8 @@ for (i in 1:length(catch$CatchID)) {
         col = "#bc80bd", lwd = 1.2)
 
   # Deficit
-  precip.deficit.weighted =  metData.monthly.weighted$temporal.sum$precip[filt] -
-                             metData.monthly.weighted$temporal.sum$et[filt]
+  precip.deficit.weighted =  metData.monthly.weighted$temporal_sum$precip[filt] -
+                             metData.monthly.weighted$temporal_sum$et[filt]
 
   plot(x = metData.date,
        y = precip.deficit.weighted,

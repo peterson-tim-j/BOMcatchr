@@ -150,7 +150,7 @@ extracted.daily2monthly = extract.data(ncdfFilename = ncdfFilename,
                                         locations = coordinates.data,
                                         vars = c('precip'),
                                         temporal.timestep = 'monthly',
-                                        temporal.function.name = 'sum',
+                                        temporal.fn.inner = 'sum',
                                         ET.function='')
 ```
 Next let's extract the monthly data product.
