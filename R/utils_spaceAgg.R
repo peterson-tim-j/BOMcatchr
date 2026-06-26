@@ -1,5 +1,5 @@
 # Define spatial averaging function
-do.SpatialAggregation = function(data,
+.do_spatial_aggregation = function(data,
                                  location.lookup,
                                  w,
                                  location.ID) {
@@ -10,6 +10,6 @@ do.SpatialAggregation = function(data,
 }
 
 # Define spatial averaging function
-do.SpatialStatistic = function( data, fn) {
+.do_spatial_statistic = function( data, fn) {
   return( apply(data, 1, fn, na.rm=TRUE) )
 }

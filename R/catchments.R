@@ -12,7 +12,7 @@ catchments <- function() {
   path <- system.file("extdata", "catchments.gpkg", package = "BOMcatchr")
 
   if (path == "") {
-    pretty_stop("Internal catchment boundary data file not found. Please reinstall the package.")
+    .pretty_stop("Internal catchment boundary data file not found. Please reinstall the package.")
   }
 
   terra::vect(path)

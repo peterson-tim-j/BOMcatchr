@@ -28,27 +28,27 @@ extract_layer <- function(
     if (is.character(extract.date)) {
       dateExtract = as.Date(extract.date,"%Y-%m-%d")
     } else
-      pretty_stop('Input date must a character string or a Date class object.')
+      .pretty_stop('Input date must a character string or a Date class object.')
   }
 
   if (!is.data.frame(vars.summary)) {
     if (file.exists(ncdfFilename))
       vars.summary <- grid_summary(ncdfFilename)
     else
-      pretty_stop('When vars.summary is not input, then ncdfFilename must be input.')
+      .pretty_stop('When vars.summary is not input, then ncdfFilename must be input.')
   }
 
   if (!is.character(var))
-    pretty_stop('Input var must a character string.')
+    .pretty_stop('Input var must a character string.')
 
   if (length(var)>1)
-    pretty_stop('Input var must a single character string.')
+    .pretty_stop('Input var must a single character string.')
 
   if (!(var %in% rownames(vars.summary)))
-    pretty_stop('Input var must a variable name already in the provided netCDf file.')
+    .pretty_stop('Input var must a variable name already in the provided netCDf file.')
 
   # Get index to the required date.
-  ind = get.ncdf.date.index(vars.summary[var,]$time.datum, extract.date)
+  ind = .get_ncdf_date_index(vars.summary[var,]$time.datum, extract.date)
 
   # Get netCDF path to the variable.
   var.grid <- vars.summary[var,]$group
@@ -60,7 +60,7 @@ extract_layer <- function(
       ncdf.cond <- RNetCDF::open.nc(ncdfFilename)
       do.ncclose = T
     } else
-      pretty_stop('The input file string is not to an existing netCDF file.')
+      .pretty_stop('The input file string is not to an existing netCDF file.')
   }
 
   # Get connection to the required group.

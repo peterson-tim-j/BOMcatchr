@@ -41,11 +41,11 @@ grid_ages <- function(ncfile,
   for (ivar in rownames(data.existing)) {
 
     # Build vector of data dates and get netCDF index to the dates
-    data.timepoints = get.ncdf.dates(data.existing[ivar,]$from,
+    data.timepoints = .get_ncdf_dates(data.existing[ivar,]$from,
                                      data.existing[ivar,]$to,
                                      data.existing[ivar,]$time.step)
 
-    data.ind = get.ncdf.date.index(data.existing[ivar,]$time.datum,
+    data.ind = .get_ncdf_date_index(data.existing[ivar,]$time.datum,
                                    data.timepoints,
                                    ncdf.start = data.existing[ivar,]$from,
                                    ncdf.end = data.existing[ivar,]$to)

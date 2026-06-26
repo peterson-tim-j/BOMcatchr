@@ -173,16 +173,16 @@ extract_data <- function(
 
   # Check ncdfFilename file exist
   if (!file.exists(ncdfFilename))
-    pretty_stop(paste("The following ncdfFilename input data file could not be found:",ncdfFilename))
+    .pretty_stop(paste("The following ncdfFilename input data file could not be found:",ncdfFilename))
 
   # Check variables to extract are input.
   if (!is.character(vars))
-    pretty_stop('vars must be a character vector of variables names.')
+    .pretty_stop('vars must be a character vector of variables names.')
 
   # Check variables to extract are input.
   if (all(is.na(locations)) ||
      (is.character(locations) && nchar(locations)==0))
-    pretty_stop('locations must be input so that the sites to extract are defined.')
+    .pretty_stop('locations must be input so that the sites to extract are defined.')
 
   # If vars is empty, then extract all variables in the file.
   if (length(vars)==1 && vars=='') {
@@ -203,7 +203,7 @@ extract_data <- function(
   vars.prior.summary <- grid_summary(ncdfFilename)
   vars.prior = row.names(vars.prior.summary)
   if (any(!(vars %in% vars.prior))) {
-    pretty_stop('The netCDF file does not contain data for the requested variables. Update the netCDF grid and try again.')
+    .pretty_stop('The netCDF file does not contain data for the requested variables. Update the netCDF grid and try again.')
   }
   nvars = length(vars)
 
@@ -222,130 +222,130 @@ extract_data <- function(
   if (is.character(extractFrom)) {
     extractFrom = as.Date(extractFrom,'%Y-%m-%d')
     if (is.na(extractFrom))
-      pretty_stop('The input extractFrom appears to be an implausible date. Please check.')
+      .pretty_stop('The input extractFrom appears to be an implausible date. Please check.')
   }
   if (is.character(extractTo)) {
     extractTo = as.Date(extractTo,'%Y-%m-%d')
     if (is.na(extractTo))
-      pretty_stop('The input extractTo appears to be an implausible date. Please check.')
+      .pretty_stop('The input extractTo appears to be an implausible date. Please check.')
   }
 
   if (extractFrom >= extractTo)
-    pretty_stop('The extract dates are invalid. extractFrom must be prior to extractTo.')
+    .pretty_stop('The extract dates are invalid. extractFrom must be prior to extractTo.')
   if (extractTo > as.Date(Sys.Date()-1,"%Y-%m-%d"))
-    pretty_stop('The extractTo date must be prior to today.')
+    .pretty_stop('The extractTo date must be prior to today.')
   timepoints2Extract = seq( as.Date(extractFrom,'%Y-%m-%d'), by="day", to=as.Date(extractTo,'%Y-%m-%d'))
   if (length(timepoints2Extract)==0)
-    pretty_stop('The dates to extract produce a zero vector of dates of zero length. Check the inputs dates are as YYYY-MM-DD.')
+    .pretty_stop('The dates to extract produce a zero vector of dates of zero length. Check the inputs dates are as YYYY-MM-DD.')
 
   # Check time step
-  temporal.timestep.options = agg.options()$temporal.timestep    # Get list of available time
+  temporal.timestep.options = .time_agg_options()$temporal.timestep    # Get list of available time
   temporal.timestep.index = numeric()
   if (!is.character(temporal.timestep)) {
     if (!is.integer(temporal.timestep))
-      pretty_stop('temporal.timestep must be a character string or an integer vector.')
+      .pretty_stop('temporal.timestep must be a character string or an integer vector.')
 
     if (any(temporal.timestep<0) || any(temporal.timestep > length(timepoints2Extract)))
-      pretty_stop(paste('temporal.timestep must be a character string or an integer vector with values >0 and <= the maximum days of data extracted (ie',
+      .pretty_stop(paste('temporal.timestep must be a character string or an integer vector with values >0 and <= the maximum days of data extracted (ie',
                  length(timepoints2Extract),')'))
 
     temporal.timestep.index = temporal.timestep
     temporal.timestep = 'period'
 
   } else if (!any(which(temporal.timestep.options == temporal.timestep))) {
-    pretty_stop('temporal.timestep must be one of the options listed by agg.options()$temporal.timestep.')
+    .pretty_stop('temporal.timestep must be one of the options listed by .time_agg_options()$temporal.timestep.')
   }
 
   # Check time step is appropriate for monthly source data - if to be extracted
   if  (any(which(temporal.timestep == c('daily','weekly') )) &
        any(vars.extract.summary$time.step == 'months'))
-    pretty_stop('When data to be extracted is of a monthly timestep, the temporal.timestep can only be monthly, quarterly or annual or an integer vector.')
+    .pretty_stop('When data to be extracted is of a monthly timestep, the temporal.timestep can only be monthly, quarterly or annual or an integer vector.')
 
   # Check if temporal.fns are appropropriate
-  base.agg.fun.outer = agg.options()$temporal.function.outer    # Get list of available functions
-  base.agg.fun.inner = agg.options()$temporal.function.inner
+  base.agg.fun.outer = .time_agg_options()$temporal.function.outer    # Get list of available functions
+  base.agg.fun.inner = .time_agg_options()$temporal.function.inner
   if (!is.character(temporal.fn.outer) &&
       !is.function(temporal.fn.outer)  &&
       !is.na(temporal.fn.outer))
-    pretty_stop(paste('The input temporal.fn.outer must be a character string to a package built-in function',
+    .pretty_stop(paste('The input temporal.fn.outer must be a character string to a package built-in function',
                       'a user-defined function of NA'))
   if (is.character(temporal.fn.outer) && !any(temporal.fn.outer %in% base.agg.fun.outer))
-    pretty_stop('When temporal.fn.outer is a character string, is must be one of recognised package built-in functions.')
+    .pretty_stop('When temporal.fn.outer is a character string, is must be one of recognised package built-in functions.')
   if (!is.character(temporal.fn.outer) &&
       !is.function(temporal.fn.outer)  &&
       !is.na(temporal.fn.outer))
-    pretty_stop(paste('The input temporal.fn.outer must be a character string or a package built-in functions',
+    .pretty_stop(paste('The input temporal.fn.outer must be a character string or a package built-in functions',
                       'or a user-defined function or NA.'))
   if (is.character(temporal.fn.outer) && !any(temporal.fn.outer %in% base.agg.fun.outer))
-    pretty_stop('When temporal.fn.outer is a character string, is must be one of recognised package built-in functions.')
+    .pretty_stop('When temporal.fn.outer is a character string, is must be one of recognised package built-in functions.')
 
   if (!is.character(temporal.fn.inner) &&
       !is.function(temporal.fn.inner)  &&
       !is.na(temporal.fn.inner))
-    pretty_stop(paste('The input temporal.fn.inner must be a character string or a package built-in function',
+    .pretty_stop(paste('The input temporal.fn.inner must be a character string or a package built-in function',
                       'or a user-defined function or NA'))
   if (is.character(temporal.fn.inner) && !any(base.agg.fun.inner %in% temporal.fn.inner))
-    pretty_stop('When temporal.fn.inner is a character string, is must be one of recognised package built-in functions.')
+    .pretty_stop('When temporal.fn.inner is a character string, is must be one of recognised package built-in functions.')
 
   if (!is.function(temporal.fn.outer) && is.na(temporal.fn.outer) &&
       !is.function(temporal.fn.inner) && is.na(temporal.fn.inner))
-    pretty_stop('Both inputs temporal.fn.outer and temporal.fn.inner cannot be NA.')
+    .pretty_stop('Both inputs temporal.fn.outer and temporal.fn.inner cannot be NA.')
 
   if (is.character(temporal.fn.outer) && nchar(temporal.fn.outer)==0)
-    pretty_stop('When input temporal.fn.outer is a character string, it cannot be empty.')
+    .pretty_stop('When input temporal.fn.outer is a character string, it cannot be empty.')
 
   if (is.character(temporal.fn.inner) && nchar(temporal.fn.inner)==0)
-    pretty_stop('When input temporal.fn.inner is a character string, it cannot be empty.')
+    .pretty_stop('When input temporal.fn.inner is a character string, it cannot be empty.')
 
   if ( is.character(temporal.fn.outer) && any(temporal.fn.outer %in% base.agg.fun.outer) &&
       !is.function(temporal.fn.inner) && is.na(temporal.fn.inner))
-    pretty_stop(paste('When temporal.fn.outer is a character string for a recognised package built-in function,',
+    .pretty_stop(paste('When temporal.fn.outer is a character string for a recognised package built-in function,',
                       'temporal.fn.inner cannot be NA.'))
 
   # Check ET inputs
   if (getET) {
     if (!exists('ET.constants'))
-      pretty_stop('ET.constants must be input when getET = TRUE. Use the command: data(constants)')
+      .pretty_stop('ET.constants must be input when getET = TRUE. Use the command: data(constants)')
 
     if (!is.list(ET.constants))
-      pretty_stop('ET.constants must be a list variable when getET = TRUE. Use the command: data(constants)')
+      .pretty_stop('ET.constants must be a list variable when getET = TRUE. Use the command: data(constants)')
 
     if (length(ET.constants)==0)
-      pretty_stop('ET.constants must be a list variable when getET = TRUE. Using the command: data(constants)')
+      .pretty_stop('ET.constants must be a list variable when getET = TRUE. Using the command: data(constants)')
 
     # Check the ET function is one of the acceptable forms
     ET.function.all =c('ET.Abtew', 'ET.HargreavesSamani', 'ET.JensenHaise','ET.Makkink', 'ET.McGuinnessBordne','ET.MortonCRAE' , 'ET.MortonCRWE','ET.Turc')
     if (!any(ET.function == ET.function.all)) {
-      pretty_stop(paste('The ET.function must be one of the following:',ET.function.all))
+      .pretty_stop(paste('The ET.function must be one of the following:',ET.function.all))
     }
 
     # Check the ET function is one of the acceptable forms
     ET.timestep.all =c('daily', 'monthly', 'annual')
     if (!any(ET.timestep == ET.timestep.all)) {
-      pretty_stop(paste('The ET.timestep must be one of the following:',ET.timestep.all))
+      .pretty_stop(paste('The ET.timestep must be one of the following:',ET.timestep.all))
     }
 
     # Check that extractFrom and extractTo span more than one ET timestep
     if (ET.timestep == 'monthly') {
       if (zoo::as.yearmon(timepoints2Extract[1]) == zoo::as.yearmon(timepoints2Extract[length(timepoints2Extract)]))
-        pretty_stop('When the ET.timestep is monthly, the extraction dates must span more than one month.')
+        .pretty_stop('When the ET.timestep is monthly, the extraction dates must span more than one month.')
     }
     if (ET.timestep == 'annual') {
       if (format(timepoints2Extract[1],'%Y') == format(timepoints2Extract[length(timepoints2Extract)],'%Y'))
-        pretty_stop('When the ET.timestep is annual, the extraction dates must span more than one year.')
+        .pretty_stop('When the ET.timestep is annual, the extraction dates must span more than one year.')
     }
 
     # Check the appropriate time step is used.
     if ( (ET.function == 'ET.MortonCRAE' || ET.function == 'ET.MortonCRWE') && ET.timestep=='daily' ) {
-      pretty_stop('The ET.timstep must be monthly or annual when using ET.MortonCRAE or ET.MortonCRWE')
+      .pretty_stop('The ET.timstep must be monthly or annual when using ET.MortonCRAE or ET.MortonCRWE')
     }
 
     # Check the appropriate Mortons type is specified.
     if ( ET.function == 'ET.MortonCRAE' && !(ET.Mortons.est %in% c('potential ET', 'wet areal ET', 'actual areal ET'))) {
-      pretty_stop('The ET.Mortons.est for Mortons CREA must be: potential ET, wet areal ET or actual areal ET.')
+      .pretty_stop('The ET.Mortons.est for Mortons CREA must be: potential ET, wet areal ET or actual areal ET.')
     }
     if ( ET.function == 'ET.MortonCRWE' && !(ET.Mortons.est %in% c('potential ET', 'shallow lake ET'))) {
-      pretty_stop('The ET.Mortons.est for Mortons CRWE must be: potential ET or shallow lake ET.')
+      .pretty_stop('The ET.Mortons.est for Mortons CRWE must be: potential ET or shallow lake ET.')
     }
 
     # Build a data from of the inputs required for each ET function.
@@ -369,26 +369,26 @@ extract_data <- function(
 
     # Check if all required inputs are to be extracted for type of ET
     if (ET.inputdata.filt$Tmin[1] && !('tmin' %in% vars))
-      pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: tmin')
+      .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: tmin')
     if (ET.inputdata.filt$Tmax[1] && !('tmax' %in% vars))
-      pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: tmax')
+      .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: tmax')
     if (ET.inputdata.filt$va[1] && !('vprp' %in% vars))
-      pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: vprp')
+      .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: vprp')
     if (ET.inputdata.filt$Precip[1] && !('precip' %in% vars))
-      pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: precip')
+      .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: precip')
     if (ET.inputdata.filt$Rs[1] && !('solarrad' %in% vars))
-        pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: solarrad')
+        .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: solarrad')
     if (!is.numeric(ET.DEM.res))
-      pretty_stop('ET.DEM.res must be a numeric value between 1 anf 15.')
+      .pretty_stop('ET.DEM.res must be a numeric value between 1 anf 15.')
 
     if (ET.DEM.res < 1 || ET.DEM.res>15)
-      pretty_stop('ET.DEM.res must be a numeric value between 1 anf 15.')
+      .pretty_stop('ET.DEM.res must be a numeric value between 1 anf 15.')
   }
 
   # Open file with polygons
   if (is.character(locations)) {
     if (!file.exists(locations))
-      pretty_stop(paste('The following input file for the locations could not be found:',locations))
+      .pretty_stop(paste('The following input file for the locations could not be found:',locations))
 
     # Read in polygons
     locations <- sf::st_read(locations)
@@ -400,7 +400,7 @@ extract_data <- function(
     locations = terra::vect(locations)
 
   } else if (!methods::is(locations,"SpatVector")) {
-    pretty_stop('The input for "locations" must be a file name to a shape file or a terra::SpatVector object.')
+    .pretty_stop('The input for "locations" must be a file name to a shape file or a terra::SpatVector object.')
   }
 
   # Check projection of locations
@@ -416,9 +416,9 @@ extract_data <- function(
 
   # Check each catchment or point has a unique (non-NA) ID. Note.
   if (any(is.na(locations[[1]])))
-    pretty_stop('The list of locations IDs (first column) contains NAs. Please remove these or rename')
+    .pretty_stop('The list of locations IDs (first column) contains NAs. Please remove these or rename')
   if ( length(unique(locations[[1]])) != length(locations[[1]]) )
-    pretty_stop('The list of locations IDs (first column) is not unique. Please remove the duplicates')
+    .pretty_stop('The list of locations IDs (first column) is not unique. Please remove the duplicates')
 
   # Check if locations are points or a polygon.
   islocationsPolygon=FALSE
@@ -428,7 +428,7 @@ extract_data <- function(
 
   # Check the interpolation method user inputs.
   if (interp.method!='' && interp.method!='simple' && interp.method!='bilinear') {
-    pretty_stop('The input for "interp.method" must either "simple" or "bilinear" or "".')
+    .pretty_stop('The input for "interp.method" must either "simple" or "bilinear" or "".')
   }
   if (interp.method=='') {
     if (islocationsPolygon) {
@@ -443,27 +443,27 @@ extract_data <- function(
   # Check infilling user inputs.
   missing.method.interpOptions = c('', 'constant','linear', 'fmm', 'periodic', 'natural', 'monoH.FC', 'hyman')
   if (!is.character(missing.method) || length(missing.method)!=3)
-    pretty_stop('missing.method must be a string vector of length 3')
+    .pretty_stop('missing.method must be a string vector of length 3')
   if (is.na(missing.method[1]) || as.numeric(missing.method[1])<0)
-    pretty_stop('missing.method element 1 must be a number (as a string) >=0.')
+    .pretty_stop('missing.method element 1 must be a number (as a string) >=0.')
   if (!any(missing.method.interpOptions == missing.method[2]))
-    pretty_stop('missing.method element 2 must be one of the specified interpolation options or "".')
+    .pretty_stop('missing.method element 2 must be one of the specified interpolation options or "".')
   if (is.na(missing.method[3]) || !is.character(missing.method[3]))
-    pretty_stop('missing.method element 3 must be a function name as a string.')
+    .pretty_stop('missing.method element 3 must be a function name as a string.')
   if (missing.method[3] != '') {
     gapsfunction <- get(missing.method[3])
     gapsfunction.data <- stats::runif(10,-10,10)
     simpleError('Gap infill function failed test using input of runif(10,-10,10). Check the missing.method element 3 function.',
                 gapsfunction(gapsfunction.data))
     if (!is.numeric(gapsfunction(gapsfunction.data)) && length(gapsfunction(gapsfunction.data))!=1)
-      pretty_stop('Gap infill function failed test using input of runif(10,-10,10). Check that the missing.method element 3 function returns a scaler number.')
+      .pretty_stop('Gap infill function failed test using input of runif(10,-10,10). Check that the missing.method element 3 function returns a scaler number.')
     rm('gapsfunction')
     rm('gapsfunction.data')
   }
 
   # If gap filling it turned off, then ET cannot be calculated.
   if ( missing.method[2] == '' && getET)
-    pretty_stop('ET cannot be calculated when gap interpolation is off. Change missing.method[2] to an accepted method other than "".')
+    .pretty_stop('ET cannot be calculated when gap interpolation is off. Change missing.method[2] to an accepted method other than "".')
 
   # Check if the spatial data should be returned or analysed.
   do.spatial.analysis=F
@@ -499,7 +499,7 @@ extract_data <- function(
   extractTo = min(c(extractTo, ncdf.dataTo))
 
   if (extractTo < extractFrom) {
-    pretty_stop('extractTo date is less than the extractFrom date.')
+    .pretty_stop('extractTo date is less than the extractFrom date.')
   }
 
   message(paste('    Data will be extracted from ',format.Date(extractFrom,'%Y-%m-%d'),' to ', format.Date(extractTo,'%Y-%m-%d'),' at ',length(locations),' locations '));
@@ -524,7 +524,7 @@ extract_data <- function(
   message('   ... Testing temporal aggregation')
   for (itime.step in vars.extract.summary$time.step) {
     result = tryCatch({
-      x = do.TemporalAggregation(data=NA,
+      x = .do_temporal_aggregation(data=NA,
                                  time.from = extractFrom,
                                  time.to = extractTo,
                                  time.step.in = itime.step,
@@ -536,7 +536,7 @@ extract_data <- function(
     }, warning = function(w) {
       message(paste("Warning temporal.fn.outer produced the following",w))
     }, error = function(e) {
-      pretty_stop(paste('temporal.fn.outer produced an error when applied using a time step of',
+      .pretty_stop(paste('temporal.fn.outer produced an error when applied using a time step of',
                         itime.step,'and test data:',e))
     }
     )
@@ -545,7 +545,7 @@ extract_data <- function(
     message('   ... Testing spatial aggregation')
 
     if (!exists(spatial.fn, mode='function'))
-      pretty_stop(paste('The following spatial.fn does not seem to exist:',spatial.fn))
+      .pretty_stop(paste('The following spatial.fn does not seem to exist:',spatial.fn))
 
     # Check spatial analysis function is valid.
     data.junk = t(as.matrix(stats::runif(100, 0.0, 1.0)*100))
@@ -554,7 +554,7 @@ extract_data <- function(
     }, warning = function(w) {
       message(paste("Warning spatial.fn produced the following",w))
     }, error = function(e) {
-      pretty_stop(paste('spatial.fn produced an error when applied using test data:',e))
+      .pretty_stop(paste('spatial.fn produced an error when applied using test data:',e))
     }, finally = {
       rm(data.junk)
     }
@@ -594,7 +594,7 @@ extract_data <- function(
     base.var.grid = vars.extract.summary[ind,]$group
 
     # # Get index to required netCDF layers
-    # ind = get.ncdf.date.index(vars.extract.summary[ind,]$time.datum,
+    # ind = .get_ncdf_date_index(vars.extract.summary[ind,]$time.datum,
     #                           extractTo,
     #                           vars.extract.summary[ind,]$from,
     #                           vars.extract.summary[ind,]$to)
@@ -679,7 +679,7 @@ extract_data <- function(
 
     # Test internet connection
     if (!curl::has_internet())
-      pretty_stop('No internet connection appears available to get elevation data. Check connection.')
+      .pretty_stop('No internet connection appears available to get elevation data. Check connection.')
 
     crsAUS = sf::st_crs("+proj=longlat +ellps=GRS80")
     DEMpoints = elevatr::get_elev_point(locations=data.frame(x=point.weights$coords[,1],
@@ -711,10 +711,10 @@ extract_data <- function(
   for (ivar in vars) {
 
     # Recalculate the time points to extract.
-    timepoints2Extract[[ivar]] = get.ncdf.dates(extractFrom, extractTo, vars.extract.summary[ivar,]$time.step)
+    timepoints2Extract[[ivar]] = .get_ncdf_dates(extractFrom, extractTo, vars.extract.summary[ivar,]$time.step)
 
     # Get index to required netCDF layers
-    ind = get.ncdf.date.index(vars.extract.summary[ivar,]$time.datum,
+    ind = .get_ncdf_date_index(vars.extract.summary[ivar,]$time.datum,
                               timepoints2Extract[[ivar]],
                               vars.extract.summary[ivar,]$from,
                               vars.extract.summary[ivar,]$to)
@@ -742,7 +742,7 @@ extract_data <- function(
                          )
 
       # Extract data for each variable
-      data.brick[[ivar]][j,] = get.nc.data(r = r,
+      data.brick[[ivar]][j,] = .extract_point_data(r = r,
                                     interp.method = interp.method.vars[[ivar]],
                                     coords = point.weights$coords,
                                     do.infill =T,
@@ -767,7 +767,7 @@ extract_data <- function(
   # 3. Date of gap is prior to the given observation type starting (eg solar radiation starts from 1/1/1990)
   #
   # Below outlines how each type of gap is handled.
-  # 1. A few grid cells: infill using raster:focal moving average. These are handled within get.nc.data().
+  # 1. A few grid cells: infill using raster:focal moving average. These are handled within .extract_point_data().
   # 2. Entire day missing: linear interpolation over time when only a 1-2 days are missing.
   # 3. Prior to first obs: Apply the average for each day from the observational record within the dates extracted.
   message('... Infilling data gaps by interpolating over time, then back-filling.')
@@ -781,7 +781,7 @@ extract_data <- function(
 
   if (missing.method[2] != '') {
     message('   ... Linearly interpolating gaps.')
-    data.brick = mapply(do.interpolation,
+    data.brick = mapply(.do_interpolation,
                         data.brick,
                         time.points = timepoints2Extract,
                         MoreArgs = list(method=missing.method[2]),
@@ -794,7 +794,7 @@ extract_data <- function(
 
   if (missing.method[3] != '') {
     message('... Backfilling dates prior to the start of observations')
-    data.brick = mapply(do.backfilling,
+    data.brick = mapply(.do_backfilling,
                         data.brick,
                         time.points=timepoints2Extract,
                         MoreArgs = list(fn=missing.method[3]),
@@ -814,7 +814,7 @@ extract_data <- function(
 
     # Check no NAs remain in input data
     if (sum(infill.summary.df$post.backfilling)>0)
-      pretty_stop('ET cannot be calculated when NAs remain in data. Try reducing the extractFrom date to allow interpolation of time gaps.')
+      .pretty_stop('ET cannot be calculated when NAs remain in data. Try reducing the extractFrom date to allow interpolation of time gaps.')
 
     # Get strings to each netcdf group and variable
     precip.str = vars.extract.summary['precip',]$var.string
@@ -963,7 +963,7 @@ extract_data <- function(
 
   # Get the number of time steps for each variable. This is reported to allow the user to
   # easily see when a timestep is, say, shorter than other time steps (eg ends before the week).
-  nTimestepsPerOutputStep = mapply(do.TemporalAggregation,
+  nTimestepsPerOutputStep = mapply(.do_temporal_aggregation,
                            data = NA,
                            time.step.in = unique(vars.timesteps),
                            MoreArgs = list(
@@ -999,7 +999,7 @@ extract_data <- function(
     data.brick.timaAgg = vector('list', nvars)
     names(data.brick.timaAgg) = vars
 
-    data.brick.timaAgg = mapply(do.TemporalAggregation,
+    data.brick.timaAgg = mapply(.do_temporal_aggregation,
                                 data = data.brick,
                                 time.step.in = vars.timesteps,
                                 MoreArgs = list(
@@ -1032,7 +1032,7 @@ extract_data <- function(
 
       # Call the spatial averaging function
       catchmentAvgTmp = cbind(catchmentAvgTmp,
-                              mapply(do.SpatialAggregation,
+                              mapply(.do_spatial_aggregation,
                                      data.brick.timaAgg,
                                      MoreArgs =
                                        list(point.weights$lookup,
@@ -1044,7 +1044,7 @@ extract_data <- function(
       # Call spatial variability function (e.g. spatial variance)
       catchmentVarTmp = cbind(catchmentVarTmp,
                                 sapply(data.brick.timaAgg,
-                                       do.SpatialStatistic,
+                                       .do_spatial_statistic,
                                        fn = spatial.fn)
                                 )
     } else if (islocationsPolygon) {
@@ -1140,36 +1140,4 @@ extract_data <- function(
                     3600, x %% 3600 %/% 60,  x %% 60 %/% 1))
 
   return(catchmentAvg)
-}
-
-# Internal functions for apply() calls above
-#--------------------------------------------
-
-# Define function to extract netCDF data.
-get.nc.data = function(r, interp.method, coords, do.infill, ext, interpMax) {
-
-  # Do infilling of NAs. Generally only included for gaos in solar radiation.
-  if (do.infill) {
-    # crop to extent
-    r <- terra::crop(r, ext, snap = "out")
-
-    # Infill NA values of grid by taking the local average. Only do so
-    # if there are some finite values. The maximum area of NAs that is
-    # infilled is defined by interpMax. That is a value of 3 infills a
-    # 3x3 cell area.
-    if (terra::global(r, fun = "anynotNA")[,1]) {
-      i = 0
-      while (terra::global(r, fun = "anyNA")[,1] && i<interpMax) {
-        r <- terra::focal(r, w=matrix(1,3,3), fun=mean, na.rm=TRUE, na.policy='only')
-        i = i +1
-      }
-    }
-  }
-
-  return(terra::extract(r, coords, method=interp.method)[[1]])
-}
-
-
-pretty_stop <- function(str) {
-  stop(str, call. = FALSE)
 }

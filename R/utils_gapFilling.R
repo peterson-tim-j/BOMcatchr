@@ -1,5 +1,5 @@
 # Interpolate gaps in observed period of data
-do.interpolation = function(data, time.points, method) {
+.do_interpolation = function(data, time.points, method) {
   for (j in 1:ncol(data)) {
     filt = is.na(data[,j])
     x = 1:length(time.points)
@@ -26,7 +26,7 @@ do.interpolation = function(data, time.points, method) {
 }
 
 # beck fill dates prior to the start of the record
-do.backfilling <- function(data, time.points, fn) {
+.do_backfilling <- function(data, time.points, fn) {
 
   # Get number of grid cells to est
   npoints = ncol(data)

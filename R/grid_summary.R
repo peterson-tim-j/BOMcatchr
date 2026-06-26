@@ -23,10 +23,10 @@
 grid_summary <- function(ncfile) {
 
   if (!is.character(ncfile))
-    pretty_stop('ncdfFilename is invalid. It must be a character string for the file name.')
+    .pretty_stop('ncdfFilename is invalid. It must be a character string for the file name.')
 
   if (!file.exists(ncfile))
-    pretty_stop('ncdfFilename does not exists. It must first be built before a summary can be given.')
+    .pretty_stop('ncdfFilename does not exists. It must first be built before a summary can be given.')
 
   # open netcdf file
   ncout <- RNetCDF::open.nc(ncfile, write=F)

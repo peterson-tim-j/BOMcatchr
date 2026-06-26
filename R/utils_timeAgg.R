@@ -1,7 +1,7 @@
 # Time aggregation internal functions
 #-------------------------------------------
 
-agg.options <- function() {
+.time_agg_options <- function() {
   opt = list( temporal.timestep = c('daily','weekly','monthly','quarterly', 'seasonal', 'wetdry_seasonal','tropical_seasonal', 'annual', 'period') ,
               temporal.function.outer = c('annom', 'cumannom'),
               temporal.function.inner = c('sum', 'mean', 'min', 'max', 'median', 'sd', 'var', 'IQR'),
@@ -9,7 +9,7 @@ agg.options <- function() {
   return(opt)
 }
 
-do.TemporalAggregation = function( data=NA,
+.do_temporal_aggregation = function( data=NA,
                                    location.ID,
                                    location.lookup,
                                    time.from,
@@ -46,7 +46,7 @@ do.TemporalAggregation = function( data=NA,
     fn.nargs = length(formals(FUN.outer))
 
     if (fn.nargs==1)
-      data.xts <- agg.by(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.outer)
+      data.xts <- .time_agg_by(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.outer)
     else if (is.na(FUN.inner) && fn.nargs<4)
       data.xts <- do.call(FUN.outer, list(x = data.xts, by = time.step.out, ind=ind))
     else
@@ -55,14 +55,14 @@ do.TemporalAggregation = function( data=NA,
   } else if (!is.na(FUN.outer)) {
     data.xts <- do.call(FUN.outer, list(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.inner))
   } else {
-    data.xts <- agg.by(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.inner)
+    data.xts <- .time_agg_by(x = data.xts, by = time.step.out, ind=ind, FUN = FUN.inner)
   }
 
   return(data.xts)
 }
 
 # Aggregate source time step (daily or monthly) to user defined time step
-agg.by <- function(x, by, ind, FUN = 'sum') {
+.time_agg_by <- function(x, by, ind, FUN = 'sum') {
   x.agg <-
     switch(by,
            daily = x,
@@ -70,9 +70,9 @@ agg.by <- function(x, by, ind, FUN = 'sum') {
            monthly           = xts::apply.monthly(x, apply, 2, FUN),
            quarterly         = xts::apply.quarterly(x, apply, 2, FUN),
            annual            = xts::apply.yearly(x, apply, 2, FUN),
-           seasonal          = xts::period.apply(x, INDEX = by_season(x, 'seasonal', end.of.season = T)$ind          , apply, 2, FUN),
-           wetdry_seasonal   = xts::period.apply(x, INDEX = by_season(x, 'wetdry_seasonal', end.of.season = T)$ind  , apply, 2, FUN),
-           tropical_seasonal = xts::period.apply(x, INDEX = by_season(x, 'tropical_seasonal', end.of.season = T)$ind, apply, 2, FUN),
+           seasonal          = xts::period.apply(x, INDEX = .by_season(x, 'seasonal', end.of.season = T)$ind          , apply, 2, FUN),
+           wetdry_seasonal   = xts::period.apply(x, INDEX = .by_season(x, 'wetdry_seasonal', end.of.season = T)$ind  , apply, 2, FUN),
+           tropical_seasonal = xts::period.apply(x, INDEX = .by_season(x, 'tropical_seasonal', end.of.season = T)$ind, apply, 2, FUN),
            period = xts::period.apply(x, INDEX=ind, apply, 2, FUN),
     )
   return(x.agg)
@@ -81,7 +81,7 @@ agg.by <- function(x, by, ind, FUN = 'sum') {
 annom <- function(x, by, ind, FUN) {
 
   # Aggregate using user defined time step and function
-  x.agg <- agg.by(x, by = by, ind, FUN = FUN)
+  x.agg <- .time_agg_by(x, by = by, ind, FUN = FUN)
 
   # Get timestep lalels for agg data
   dates = zoo::index(x.agg)
@@ -90,9 +90,9 @@ annom <- function(x, by, ind, FUN) {
                       weekly            = format(dates, '%V'),
                       monthly           = format(dates, "%m"),
                       quarterly         = format(dates, '%q'),
-                      seasonal          = by_season(dates, 'seasonal', end.of.season = F)$lbl,
-                      wetdry_seasonal   = by_season(dates, 'wetdry_seasonal', end.of.season = F)$lbl,
-                      tropical_seasonal = by_season(dates, 'tropical_seasonal', end.of.season = F)$lbl,
+                      seasonal          = .by_season(dates, 'seasonal', end.of.season = F)$lbl,
+                      wetdry_seasonal   = .by_season(dates, 'wetdry_seasonal', end.of.season = F)$lbl,
+                      tropical_seasonal = .by_season(dates, 'tropical_seasonal', end.of.season = F)$lbl,
                       annual = 'year',
                       period = 'year'
   )
@@ -130,7 +130,7 @@ cumannom <- function(x, by, ind, FUN) {
 }
 
 # Get time index from netCDF grid
-get.ncdf.date.index <- function(date.datum, date.target, ncdf.start=NA, ncdf.end=NA) {
+.get_ncdf_date_index <- function(date.datum, date.target, ncdf.start=NA, ncdf.end=NA) {
 
   date.target = format(date.target, '%Y-%m-%d 00:00:00')
   ind = floor(RNetCDF::utinvcal.nc(date.datum, date.target))+1
@@ -150,7 +150,7 @@ get.ncdf.date.index <- function(date.datum, date.target, ncdf.start=NA, ncdf.end
 
 }
 
-get.endOfMonth <- function(dates) {
+.get_end_of_month <- function(dates) {
   for (i in 1:length(dates)) {
     idate = dates[i]
     imonth = as.numeric(format(idate,'%m'))
@@ -162,7 +162,7 @@ get.endOfMonth <- function(dates) {
   return(dates)
 }
 
-get.endOfLastMonth <- function(dates) {
+.get_end_of_last_month <- function(dates) {
   for (i in 1:length(dates)) {
     idate = dates[i]
     imonth = as.numeric(format(idate,'%m'))
@@ -174,7 +174,7 @@ get.endOfLastMonth <- function(dates) {
   return(dates)
 }
 
-by_season <- function(dates, season, end.of.season = T) {
+.by_season <- function(dates, season, end.of.season = T) {
   season.month = switch(season,
                         seasonal = data.frame(lbl = c('summer', 'summer', 'autumn', 'winter', 'spring'),
                                               from = c(12, 0, 3, 6, 9),
@@ -205,7 +205,7 @@ by_season <- function(dates, season, end.of.season = T) {
   return(dates)
 }
 
-get.ncdf.dates <- function(date.from, date.to, date.time.step) {
+.get_ncdf_dates <- function(date.from, date.to, date.time.step) {
 
   # Convert date.from and date.to to the last day of the time step.
   date.from = switch(date.time.step,
@@ -215,7 +215,7 @@ get.ncdf.dates <- function(date.from, date.to, date.time.step) {
 
   date.to = switch(date.time.step,
                    days = date.to,
-                   months = get.endOfMonth(date.to)
+                   months = .get_end_of_month(date.to)
   )
 
   # Build sequence of dates as required timw step
@@ -225,7 +225,7 @@ get.ncdf.dates <- function(date.from, date.to, date.time.step) {
 
   # Shift dates to the end of the month.
   if (date.time.step == 'months')
-    date.target = get.endOfMonth(date.target)
+    date.target = .get_end_of_month(date.target)
 
   # Filter to be less than today
   filt = date.target <= (Sys.Date() - 1)

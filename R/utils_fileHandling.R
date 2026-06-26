@@ -1,4 +1,4 @@
-#' \code{grid.download} downloads grid data.
+#' \code{.grid_download} downloads grid data.
 #'
 #' This is an internal function. It downloads an ARCMAP ASCII grid file from a URL.
 #'
@@ -7,13 +7,13 @@
 #'
 #' @keywords internal
 #' @noRd
-grid.download <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.timestep, data.type.label,  workingFolder, datestring) {
+.grid_download <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.timestep, data.type.label,  workingFolder, datestring) {
 
   if (!is.character(url.string))
-    pretty_stop(paste('The input URL for',data.type.label,'must be a URL string.'))
+    .pretty_stop(paste('The input URL for',data.type.label,'must be a URL string.'))
 
   if (!startsWith(url.string,'https://'))
-    pretty_stop(paste('The input URL string for',data.type.label,'must start "with https://" '))
+    .pretty_stop(paste('The input URL string for',data.type.label,'must start "with https://" '))
 
   if (ivar.timestep == 'days') {
     sdate = datestring
@@ -25,7 +25,7 @@ grid.download <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.timeste
     sdate = format( as.Date(datestring,'%Y%m%d'),"%Y0101")
     edate = format(as.Date(datestring,'%Y%m%d') ,"%Y1231")
   } else {
-    pretty_stop(paste('Unknown source data time step:',ivar.timestep))
+    .pretty_stop(paste('Unknown source data time step:',ivar.timestep))
   }
 
   # Build URL
@@ -51,7 +51,7 @@ grid.download <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.timeste
   return(list(file.name=des.file.name, didFail=didFail))
 }
 
-#' \code{grid.read} reads in header or grid data.
+#' \code{.grid_read} reads in header or grid data.
 #'
 #' This is an internal function. It reads the downloaded boM compressed file and gets the
 #' header info or the grid data (assumes an ARCMAP ASCII grid format).
@@ -61,7 +61,7 @@ grid.download <- function (url.string, ivar.url.ext, ivar.file.ext, ivar.timeste
 #'
 #' @keywords internal
 #' @noRd
-grid.read <- function(file.name, ivar.file.ext, only.header, nRows, nCols, noData) {
+.grid_read <- function(file.name, ivar.file.ext, only.header, nRows, nCols, noData) {
 
   # Get file connection to .Z and .zip compressed files
   f.extn = tools::file_ext(file.name)
@@ -76,7 +76,7 @@ grid.read <- function(file.name, ivar.file.ext, only.header, nRows, nCols, noDat
     con <-unz(file.name, zip.fname)
 
   } else {
-    pretty_stop(paste0('The following source data file format cannot be handled:',f.extn,'\n',
+    .pretty_stop(paste0('The following source data file format cannot be handled:',f.extn,'\n',
                        'Check input source data format within grid_sources().'))
   }
 
@@ -114,6 +114,34 @@ grid.read <- function(file.name, ivar.file.ext, only.header, nRows, nCols, noDat
 
 
 # Helper function to import ncdf4. Required by raster() package
-ignore_unused_imports <- function(fname) {
+.ignore_unused_imports <- function(fname) {
   ncdf4::nc_version()
+}
+
+# Extract point data from ras grid
+.extract_point_data = function(r, interp.method, coords, do.infill, ext, interpMax) {
+
+  # Do infilling of NAs. Generally only included for gaos in solar radiation.
+  if (do.infill) {
+    # crop to extent
+    r <- terra::crop(r, ext, snap = "out")
+
+    # Infill NA values of grid by taking the local average. Only do so
+    # if there are some finite values. The maximum area of NAs that is
+    # infilled is defined by interpMax. That is a value of 3 infills a
+    # 3x3 cell area.
+    if (terra::global(r, fun = "anynotNA")[,1]) {
+      i = 0
+      while (terra::global(r, fun = "anyNA")[,1] && i<interpMax) {
+        r <- terra::focal(r, w=matrix(1,3,3), fun=mean, na.rm=TRUE, na.policy='only')
+        i = i +1
+      }
+    }
+  }
+
+  return(terra::extract(r, coords, method=interp.method)[[1]])
+}
+
+.pretty_stop <- function(str) {
+  stop(str, call. = FALSE)
 }
