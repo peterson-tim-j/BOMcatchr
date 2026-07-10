@@ -82,10 +82,10 @@ par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 # Loop through each catchment and plot the precipitation.
 for (i in 1:length(catch$CatchID)) {
 
-  filt = climateData.annual$temporal_sum$Location.ID == catch$CatchID[i]
+  filt = climateData.annual$temporal$Location.ID == catch$CatchID[i]
 
   # Plot precipitation from monthly data
-  tmp.date = climateData.annual$temporal_sum[filt,]
+  tmp.date = climateData.annual$temporal[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip.monthly
 
@@ -105,9 +105,9 @@ for (i in 1:length(catch$CatchID)) {
        main=paste('Catchment ID',catch$CatchID[i]))
 
   # Get water year data from daily data
-  tmp.date = climateData.annual$temporal_sum[filt,]
+  tmp.date = climateData.annual$temporal[filt,]
   y.data = tmp.date$precip
-  tmp.date = climateData.annual.err$temporal_sqrd_sum[filt,]
+  tmp.date = climateData.annual.err$temporal[filt,]
   y.data.low = y.data - 2*sqrt(tmp.date$precip.RMSE)
   y.data.hi = y.data + 2*sqrt(tmp.date$precip.RMSE)
 
@@ -191,14 +191,14 @@ climateData.month2wateryear = extract_data(ncdfFilename = ncdfFilename,
 
 Before plotting the water year data, the time steps with less than a full water year of data are filtered out.
 ```{r}
-filt = climateData.daily2wateryear$temporal_sum$days.per.timestep >= 365
-climateData.daily2wateryear$temporal_sum = climateData.daily2wateryear$temporal_sum[filt, ]
+filt = climateData.daily2wateryear$temporal$days.per.timestep >= 365
+climateData.daily2wateryear$temporal = climateData.daily2wateryear$temporal[filt, ]
 
-filt = climateData.daily2wateryear.err$temporal_sqrd_sum$days.per.timestep >= 365
-climateData.daily2wateryear.err$temporal_sqrd_sum = climateData.daily2wateryear.err$temporal_sqrd_sum[filt, ]
+filt = climateData.daily2wateryear.err$temporal$days.per.timestep >= 365
+climateData.daily2wateryear.err$temporal = climateData.daily2wateryear.err$temporal[filt, ]
 
-filt = climateData.month2wateryear$temporal_sum$months.per.timestep == 12
-climateData.month2wateryear$temporal_sum = climateData.month2wateryear$temporal_sum[filt, ]
+filt = climateData.month2wateryear$temporal$months.per.timestep == 12
+climateData.month2wateryear$temporal = climateData.month2wateryear$temporal[filt, ]
 
 ```
 
@@ -213,8 +213,8 @@ par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 for (i in 1:length(catch$CatchID)) {
 
   # Water years precipitation from monthly data.
-  filt = climateData.month2wateryear$temporal_sum$Location.ID == catch$CatchID[i]
-  tmp.date = climateData.month2wateryear$temporal_sum[filt,]
+  filt = climateData.month2wateryear$temporal$Location.ID == catch$CatchID[i]
+  tmp.date = climateData.month2wateryear$temporal[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip.monthly
 
@@ -233,11 +233,11 @@ for (i in 1:length(catch$CatchID)) {
        main=paste('Catchment ID',catch$CatchID[i]))
 
   # Get water year data from daily data.
-  filt = climateData.daily2wateryear$temporal_sum$Location.ID == catch$CatchID[i]
-  tmp.date = climateData.daily2wateryear$temporal_sum[filt,]
+  filt = climateData.daily2wateryear$temporal$Location.ID == catch$CatchID[i]
+  tmp.date = climateData.daily2wateryear$temporal[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip
-  tmp.date = climateData.daily2wateryear.err$temporal_sqrd_sum[filt,]
+  tmp.date = climateData.daily2wateryear.err$temporal[filt,]
   y.data.low = y.data - 1.645 * sqrt(tmp.date$precip.RMSE)
   y.data.hi = y.data + 1.645 * sqrt(tmp.date$precip.RMSE)
 
@@ -309,8 +309,8 @@ par(mfrow=c(2,2), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 for (i in 1:length(catch$CatchID)) {
 
   # Water years precipitation from monthly data.
-  filt = annom.seaonal$temporal_annom_mean$Location.ID == catch$CatchID[i]
-  tmp.date = annom.seaonal$temporal_annom_mean[filt,]
+  filt = annom.seaonal$temporal$Location.ID == catch$CatchID[i]
+  tmp.date = annom.seaonal$temporal[filt,]
   x.data = as.Date(paste0(tmp.date$year,'-',
                           tmp.date$month,'-',
                           tmp.date$day))
@@ -337,7 +337,7 @@ for (i in 1:length(catch$CatchID)) {
        col = "blue",
        lwd = 1.2)
 
-  tmp.date = cumannom.seaonal$temporal_cumannom_mean[filt,]
+  tmp.date = cumannom.seaonal$temporal[filt,]
   y.data = tmp.date$precip.monthly
   plot(x = x.data,
        y = y.data,

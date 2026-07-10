@@ -83,22 +83,22 @@ par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 # Loop through each catchment and plot the daily precipitation and PET.
 for (i in 1:length(catch$CatchID)) {
 
-  filt = climateData.daily$temporal_sum$Location.ID == catch$CatchID[i]
+  filt = climateData.daily$temporal$Location.ID == catch$CatchID[i]
 
   # Convert year, month and day columns from extractions to a date.
-  climateData.daily.date = as.Date(paste0(climateData.daily$temporal_sum$year[filt], "-",
-                           climateData.daily$temporal_sum$month[filt], "-",
-                           climateData.daily$temporal_sum$day[filt]))
+  climateData.daily.date = as.Date(paste0(climateData.daily$temporal$year[filt], "-",
+                           climateData.daily$temporal$month[filt], "-",
+                           climateData.daily$temporal$day[filt]))
 
 
   # Plot precipitation and standard deviation against observations
   # ---------------------------------------------------------
-  max.y = max(climateData.daily$temporal_sum$precip[filt] +
-        sqrt(climateData.daily$spatial.var$precip[filt]))
+  max.y = max(climateData.daily$temporal$precip[filt] +
+        sqrt(climateData.daily$spatial$precip[filt]))
 
   # Precipitation
   plot(climateData.daily.date,
-        climateData.daily$temporal_sum$precip[filt],
+        climateData.daily$temporal$precip[filt],
         type = "h",
         col = "#e31a1c",
         lwd = 3,
@@ -118,17 +118,17 @@ for (i in 1:length(catch$CatchID)) {
   # Standard deviation
   for (j in 1:length(climateData.daily.date)) {
     x.plot = rep(climateData.daily.date[j], 2)
-    y.plot = c(climateData.daily$temporal_sum$precip[filt][j] +
-        sqrt(climateData.daily$spatial.var$precip[filt][j]),
-        climateData.daily$temporal_sum$precip[filt][j] -
-        sqrt(climateData.daily$spatial.var$precip[filt][j]))
+    y.plot = c(climateData.daily$temporal$precip[filt][j] +
+        sqrt(climateData.daily$spatial$precip[filt][j]),
+        climateData.daily$temporal$precip[filt][j] -
+        sqrt(climateData.daily$spatial$precip[filt][j]))
     lines(x.plot, y.plot, col = "black", lwd = 1.2)
   }
 
   # Plot evap data.
   par(new = TRUE)
   plot(climateData.daily.date,
-       climateData.daily$temporal_sum$et[filt],
+       climateData.daily$temporal$et[filt],
        col = "#bc80bd",
        lwd = 2,
        ylab = "",
@@ -323,16 +323,16 @@ par(mfrow=c(2,3), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 # Loop through each catchment and plot the daily precipitation and PET.
 for (i in 1:length(catch$CatchID)) {
 
-  filt = metData.monthly.weighted$temporal_sum$Location.ID == catch$CatchID[i]
+  filt = metData.monthly.weighted$temporal$Location.ID == catch$CatchID[i]
 
   # Convert year, month and day columns from extractions to a date.
-  metData.date = as.Date(paste0(metData.monthly.weighted$temporal_sum$year[filt], "-",
-       metData.monthly.weighted$temporal_sum$month[filt], "-",
-       metData.monthly.weighted$temporal_sum$day[filt]))
+  metData.date = as.Date(paste0(metData.monthly.weighted$temporal$year[filt], "-",
+       metData.monthly.weighted$temporal$month[filt], "-",
+       metData.monthly.weighted$temporal$day[filt]))
 
   # Precipitation
   plot(x = metData.date,
-       y = metData.monthly.weighted$temporal_sum$precip[filt],
+       y = metData.monthly.weighted$temporal$precip[filt],
        type = "l",
        col = "#e31a1c",
        lwd = 1.2,
@@ -360,7 +360,7 @@ for (i in 1:length(catch$CatchID)) {
 
   # PET
   plot(x = metData.date,
-       y = metData.monthly.weighted$temporal_sum$et[filt],
+       y = metData.monthly.weighted$temporal$et[filt],
        type = "l",
        col = "#e31a1c",
        lwd = 1.2,
@@ -376,8 +376,8 @@ for (i in 1:length(catch$CatchID)) {
         col = "#bc80bd", lwd = 1.2)
 
   # Deficit
-  precip.deficit.weighted =  metData.monthly.weighted$temporal_sum$precip[filt] -
-                             metData.monthly.weighted$temporal_sum$et[filt]
+  precip.deficit.weighted =  metData.monthly.weighted$temporal$precip[filt] -
+                             metData.monthly.weighted$temporal$et[filt]
 
   plot(x = metData.date,
        y = precip.deficit.weighted,

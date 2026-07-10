@@ -46,17 +46,14 @@ fnames = grid_build(ncdfFilename = ncdfFilename,
 ```
 
 ## Set the points for data extraction
-With the data grids built, let's set two data points to extract data at. The locations are at a groundwater bore and one rainfall gauge. Below, the coordinates are defined and then they're convert to a terra spatial vector object and the projection set to GDA94.
+With the data grids built, let's load for the coordinates for the four example weather gauges and then convert them to a terra spatial vector object and the projection set to GDA94.
 ```{r}
-coordinates.data = data.frame( ID =c('Bore-10084446','Rain-63005'),
-                               Longitude = c(153.551875, 149.5559),
-                               Latitude =  c(-28.517974,-33.4289)
-                               )
+data("weather_gauge_loc")
 
-coordinates.data = terra::vect(coordinates.data,
-                               crs = '+proj=longlat +ellps=GRS80 +no_defs',
-                               geom = c("Longitude", "Latitude")
-                               )
+coords = terra::vect(weather_gauge_loc,
+                     crs = '+proj=longlat +ellps=GRS80 +no_defs',
+                     geom = c("longitude", "latitude")
+                     )
 ```
 
 ## Extract daily precipitation data
@@ -67,7 +64,7 @@ Note the netCDF file \code{ncdfFilename} must be in the working directory or the
 extracted.data = extract_data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
-                                        locations = coordinates.data,
+                                        locations = coords,
                                         vars = c('precip'),
                                         ET.function='')
 ```
@@ -81,8 +78,8 @@ Now let's plot time series of the extracted daily precipitation.
 
 par(mfrow = c(2, 1))
 site.names = c('Bore-10084446','Rain-63005')
-for (i in 1:nrow(coordinates.data)){
-  filt = extracted.data$Location.ID == coordinates.data$ID[i]
+for (i in 1:nrow(coords)){
+  filt = extracted.data$Location.ID == coords$site_ID[i]
 
   data2plot = extracted.data$precip[filt]
   dates = ISOdate(extracted.data$year[filt],
@@ -147,7 +144,7 @@ First, let's extract the daily data at a monthly scale
 extracted.daily2monthly = extract_data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
-                                        locations = coordinates.data,
+                                        locations = coords,
                                         vars = c('precip'),
                                         temporal.timestep = 'monthly',
                                         temporal.fn.inner = 'sum',
@@ -158,7 +155,7 @@ Next let's extract the monthly data product.
 extracted.monthly = extract_data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
-                                        locations = coordinates.data,
+                                        locations = coords,
                                         vars = c('precip.monthly'),
                                         temporal.timestep = 'monthly',
                                         ET.function='')
