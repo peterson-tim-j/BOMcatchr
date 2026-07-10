@@ -91,8 +91,8 @@
 #'
 #' @return
 #' When \code{locations} are polygons and \code{spatial.fn} is not \code{NA} or \code{""}, then the returned variable is a list variable containing two data.frames. The first is the areal aggregated climate
-#' metrics named \code{catchmentTemporal.} with a suffix as defined by \code{temporal.fn.outer}). The second is the measure of spatial variability
-#' named \code{catchmentSpatial.} with a suffix as defined by \code{spatial.fn}).
+#' metrics named \code{temporal}. The second is the measure of spatial variability
+#' named \code{spatial}.
 #'
 #' When \code{locations} are polygons and \code{spatial.fn} does equal \code{NA} or \code{""}, then the returned variable is a \code{terra::vect} object where the first column is the location/catchment IDs
 #' and the latter columns are the results for each variable at each time point as defined by \code{temporal.timestep}.
@@ -138,10 +138,10 @@
 #'               temporal.timestep = 'daily')
 #'
 #' # Extract the daily catchment average data.
-#' climateDataAvg = climateData$catchmentTemporal.mean
+#' climateDataAvg = climateData$temporal
 #'
 #' # Extract the daily catchment variance data.
-#' climateDataVar = climateData$catchmentSpatial.var
+#' climateDataVar = climateData$spatial
 #'
 #' # Remove temp. files
 #' unlink(ncdfFilename)
@@ -1103,26 +1103,7 @@ extract_data <- function(
   # Handle spatially averaged vs gridded values within catchment polygon.
   if (islocationsPolygon) {
     if (do.spatial.analysis) {
-
-      # Build char names for output list items
-      if (is.function(temporal.fn.outer))
-        temporal.fn.outer = as.character(substitute(temporal.fn.outer))
-      if (is.function(temporal.fn.inner))
-        temporal.fn.inner = as.character(substitute(temporal.fn.inner))
-      if (!is.na(temporal.fn.outer) && is.na(temporal.fn.inner))
-        temporal.lbl = temporal.fn.outer
-      if (is.na(temporal.fn.outer) && !is.na(temporal.fn.inner))
-        temporal.lbl = temporal.fn.inner
-      if (!is.na(temporal.fn.outer) && !is.na(temporal.fn.inner))
-        temporal.lbl = paste0(temporal.fn.outer,'_',temporal.fn.inner)
-      temporal.lbl = paste('temporal_',temporal.lbl,sep='')
-
-      spatial.lbl = paste('spatial_',spatial.fn,sep='')
-
-      # Build output list for spatially averaged polygon data
-      catchmentAvg = list(catchmentAvg, catchmentVar)
-      names(catchmentAvg) = c(temporal.lbl, spatial.lbl)
-
+      catchmentAvg = list(temporal=catchmentAvg, spatial=catchmentVar)
     } else {
       # Preserve spatial data and convert to a spatial grid (SpatialPixelsDataFrame)
       gridCoords = data.frame(Long=point.weights$coords[,1], Lat=point.weights$coords[,2])
