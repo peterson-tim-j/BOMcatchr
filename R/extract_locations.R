@@ -40,14 +40,31 @@
 #'
 #' @return terra::SpatVector
 #' @examples
-#' vars = grid_sources()
+#' # Get state boundary, all stream lines, all stream gauges and two catchment boundaries
+#'  st <- extract_locations('state','VIC')
+#'  riv <- extract_locations('river_simple',NA)
+#'  gauge <- extract_locations('water_gauge',NA)
+#'  catch <- extract_locations('catchment',c('407214','407220'))
+#'
+#'  # Filter streamlines and gauges to those within the catchment boundaries
+#'  gauge <- gauge[catch]
+#'  riv <- riv[catch]
+#'
+#'  # Map catchments in state
+#'  terra::plot(st)
+#'  terra::plot(catch, col='red', add=T)
+#'
+#'  # Map catchments, streamlines and gauges
+#'  terra::plot(catch, col='red')
+#'  terra::plot(riv, col='blue', add=T)
+#'  terra::plot(gauge, col='grey', add=T)
 #'
 #' @seealso
 #' \code{\link{extract_data}} for extracting climate data.
 #' @export
 extract_locations <- function(type= NA,
                               id = NA,
-                              url_base = 'https://hosting.wsapi.cloud.bom.gov.au/arcgis/rest/services/ahgf/') {
+                              url_base = 'https://hosting.wsapi.cloud.bom.gov.au/arcgis/rest/services/') {
 
     # Test internet connection
     if (!curl::has_internet())
@@ -81,13 +98,14 @@ extract_locations <- function(type= NA,
 
     # Set postfix URL for type
     url_postfix = switch(type,
-                         river_simple = 'Simplified_NetworkStream/MapServer/',
-                         waterbody_simple = 'Simplified_Waterbody/MapServer/',
-                         'Geofabric_V3x_All_Products/MapServer/'
+                         state = 'base_layers/Aust_State_boundary/MapServer/',
+                         river_simple = 'ahgf/Simplified_NetworkStream/MapServer/',
+                         waterbody_simple = 'ahgf/Simplified_Waterbody/MapServer/',
+                         'ahgf/Geofabric_V3x_All_Products/MapServer/'
                          )
 
     # Build filter for required locations
-    if (is.na(id)) {
+    if (length(id)==1 && is.na(id)) {
       where <- utils::URLencode('1=1', reserved=T)
     } else {
       if (type =='state') {
@@ -102,6 +120,10 @@ extract_locations <- function(type= NA,
                     WA = 9,
                     pretty.stop(paste('The following input id is unknown for the type "state":', id))
                     )
+
+        base_string <- paste0("%s IN (", paste(rep("%s ", length(id)),collapse = ", "), ')')
+        where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, as.list( c('state',id) ))), reserved = T)
+
       } else {
         # Set the field name use to filter each data type
         fname = switch(type,
@@ -139,17 +161,22 @@ extract_locations <- function(type= NA,
         if (any(!indx))
           pretty.stop(cat('The folowing id value are not in the spatial data:', id[!indx]))
 
-        if (all(is.character(id)))
-          where <- utils::URLencode( sprintf("%s IN ('%s')", fname, id), reserved = T)
-        else
-          where <- utils::URLencode( sprintf("%s IN (%d)", fname, id), reserved = T)
+        if (all(is.character(id))) {
+          base_string <- paste0("%s IN (", paste(rep("'%s' ", length(id)),collapse = ", "), ')')
+          where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, as.list( c(fname,id) ))), reserved = T)
+        }
+        else {
+          base_string <- paste0("%s IN (", paste(rep("%d ", length(id)),collapse = ", "), ')')
+          where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, as.list( c(fname,id) ))), reserved = T)
+        }
+
       }
     }
 
     # Build URL to data set
     url = paste0(url_base,
                  url_postfix,
-                 ind, '/',
+                 ind, '/query?',
                  'where=', where,
                  '&outFields=*',
                  '&returnGeometry=true',
