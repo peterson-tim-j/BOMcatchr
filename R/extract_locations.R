@@ -80,9 +80,9 @@ extract_locations <- function(type= NA,
 
     # Check type is a valid data type
     if (!is.character(type))
-      pretty.stop('The input variable type must be a character string.')
+      .pretty.stop('The input variable type must be a character string.')
     if (length(type)>1)
-      pretty.stop('The input variable type must be a single character string, not a vector.')
+      .pretty.stop('The input variable type must be a single character string, not a vector.')
 
     # Get geofabric index for the required variable
     ind = switch (type,
@@ -96,7 +96,7 @@ extract_locations <- function(type= NA,
       aquifer_upper = 57,
       aquifer_mid = 58,
       aquifer_lower = 59,
-      pretty.stop(paste('The following input type is invalid:', type))
+      .pretty.stop(paste('The following input type is invalid:', type))
     )
 
     # Set postfix URL for type
@@ -112,17 +112,21 @@ extract_locations <- function(type= NA,
       where <- utils::URLencode('1=1', reserved=T)
     } else {
       if (type =='state') {
-        id = switch(id,
-                    ACT = 1,
-                    NSW = 3,
-                    NT = 4,
-                    QLD = 5,
-                    SA = 6,
-                    TAS = 7,
-                    VIC = 8,
-                    WA = 9,
-                    pretty.stop(paste('The following input id is unknown for the type "state":', id))
-                    )
+        id_int = rep(0, length(id))
+        for (i in 1:length(id)) {
+          id_int[i] = switch(id[i],
+                      ACT = 1,
+                      NSW = 3,
+                      NT = 4,
+                      QLD = 5,
+                      SA = 6,
+                      TAS = 7,
+                      VIC = 8,
+                      WA = 9,
+                      .pretty.stop(paste('The following input id is unknown for the type "state":', id[i]))
+          )
+        }
+        id = id_int
 
         base_string <- paste0("%s IN (", paste(rep("%s ", length(id)),collapse = ", "), ')')
         where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, as.list( c('state',id) ))), reserved = T)
@@ -156,13 +160,13 @@ extract_locations <- function(type= NA,
 
         # Check field name
         if (!(fname %in% names(v)))
-          pretty.stop(paste('The variable name corresponding to the input type was not in the spatial data:', fname))
+          .pretty.stop(paste('The variable name corresponding to the input type was not in the spatial data:', fname))
 
 
         # Check if id values are in the corresponding field.
         indx = id %in% terra::values(v[,fname])[,1]
         if (any(!indx))
-          pretty.stop(cat('The folowing id value are not in the spatial data:', id[!indx]))
+          .pretty.stop(cat('The folowing id value are not in the spatial data:', id[!indx]))
 
         if (all(is.character(id))) {
           base_string <- paste0("%s IN (", paste(rep("'%s' ", length(id)),collapse = ", "), ')')
