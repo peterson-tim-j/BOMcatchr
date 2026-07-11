@@ -16,7 +16,7 @@
 #'  \item{\code{'water_gauge'} : Surface water gauging station. Geofabric ID = 2}
 #'  \item{\code{'river_simple'} : simplified line vectors of rivers.}
 #'  \item{\code{'waterbody_simple'} : simplified polygons of stationary area of surface water (natural or constructed)}
-#'  \item{\code{'drainage_basin'} : single large scale hydrological drainage basins. Geofabric ID = 34}
+#'  \item{\code{'river_region'} : single large scale hydrological drainage basins. Geofabric ID = 34}
 #'  \item{\code{'drainage_division'}: large scale collection of connected hydrological basins. Geofabric ID = 35}
 #'  \item{\code{'catchment'} : single (often small) hydrological drainage basin with a stream gauge at the outlet. Geofabric ID = 49}
 #'  \item{\code{'aquifer_upper'} : middle groundwater aquifer boundary and type. Geofabric ID = 57}
@@ -28,9 +28,9 @@
 #' \itemize{
 #'  \item{\code{'state'}: character string for the state. The options are \code{'ACT', 'NSW', 'NT' ,'QLD', 'SA', 'TAS', 'VIC', 'WA'}}.
 #'  \item{\code{'water_gauge'} : character string for the "stationno" ID.}
-#'  \item{\code{'river_simple'} : integer for the Geofabric "hydroid".}
+#'  \item{\code{'river_simple'} : integer for the Geofabric "rivregnum".}
 #'  \item{\code{'waterbody_simple'} : integer for the Geofabric "hydroid".}
-#'  \item{\code{'drainage_basin'} :integer for the Geofabric "level2num" ID. }
+#'  \item{\code{'river_region'} :integer for the Geofabric "hydroid". }
 #'  \item{\code{'drainage_division'}: integer for the Geofabric "divnumber" ID.}
 #'  \item{\code{'catchment'} : character string for the Geofabric "stationno" ID at the catchment outlet.}
 #'  \item{\code{'aquifer_upper'} : integer for the Geofabric "hydroid".}
@@ -40,22 +40,25 @@
 #'
 #' @return terra::SpatVector
 #' @examples
-#' # Get state boundary, all stream lines, all stream gauges and two catchment boundaries
+#' # Get state boundary, Loddon River drainage basin, all stream lines, all stream gauges and two catchment boundaries
 #'  st <- extract_locations('state','VIC')
+#'  dr <- extract_locations('river_region',43637156)
 #'  riv <- extract_locations('river_simple',NA)
 #'  gauge <- extract_locations('water_gauge',NA)
 #'  catch <- extract_locations('catchment',c('407214','407220'))
 #'
-#'  # Filter streamlines and gauges to those within the catchment boundaries
-#'  gauge <- gauge[catch]
-#'  riv <- riv[catch]
+#'  # Filter streamlines and gauges to those within the Loddon River basin.
+#'  gauge <- gauge[dr]
+#'  riv <- riv[dr]
 #'
-#'  # Map catchments in state
-#'  terra::plot(st)
+#'  # Map drainage basin and catchments in state
+#'  terra::plot(st, border='grey')
+#'  terra::plot(dr, border='black', add=T)
 #'  terra::plot(catch, col='red', add=T)
 #'
 #'  # Map catchments, streamlines and gauges
-#'  terra::plot(catch, col='red')
+#'  terra::plot(dr, border='black')
+#'  terra::plot(catch, border='red', add=T)
 #'  terra::plot(riv, col='blue', add=T)
 #'  terra::plot(gauge, col='grey', add=T)
 #'
@@ -72,7 +75,7 @@ extract_locations <- function(type= NA,
 
     # Define valid types
     types_valid = c('state', 'water_gauge', 'river_simple', 'waterbody_simple',
-                    'drainage_basin', 'drainage_division', 'catchment',
+                    'river_region', 'drainage_division', 'catchment',
                     'aquifer_upper', 'aquifer_mid', 'aquifer_lower')
 
     # Check type is a valid data type
@@ -87,7 +90,7 @@ extract_locations <- function(type= NA,
       water_gauge = 2,
       river_simple = 0,
       waterbody_simple = 0,
-      drainage_basin = 34,
+      river_region = 13,
       drainage_division = 35,
       catchment = 49,
       aquifer_upper = 57,
@@ -130,7 +133,7 @@ extract_locations <- function(type= NA,
                        water_gauge = 'stationno',
                        river_simple = 'hydroid',
                        waterbody_simple = 'hydroid',
-                       drainage_basin = 'level2num',
+                       river_region = 'hydroid',
                        drainage_division = 'divnumber',
                        catchment = 'stationno',
                        aquifer_upper = 'hydroid',
@@ -167,7 +170,7 @@ extract_locations <- function(type= NA,
         }
         else {
           base_string <- paste0("%s IN (", paste(rep("%d ", length(id)),collapse = ", "), ')')
-          where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, as.list( c(fname,id) ))), reserved = T)
+          where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, c(as.list(fname), as.list(id)) )), reserved = T)
         }
 
       }
