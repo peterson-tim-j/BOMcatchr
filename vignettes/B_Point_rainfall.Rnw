@@ -42,10 +42,10 @@ Now with the inputs defined we can download the gridded data and build the netCD
 fnames = grid_build(ncdfFilename = ncdfFilename,
                          updateFrom = dataFrom,
                          updateTo = dataTo,
-                         vars = c('precip', 'precip.monthly'))
+                         vars = c('tmax', 'precip', 'precip.monthly'))
 ```
 
-## Set the points for data extraction
+## Set the points for data extraction and map
 With the data grids built, let's load for the coordinates for the four example weather gauges and then convert them to a terra spatial vector object and the projection set to GDA94.
 ```{r}
 data("weather_gauge_loc")
@@ -54,10 +54,29 @@ coords = terra::vect(weather_gauge_loc,
                      crs = '+proj=longlat +ellps=GRS80 +no_defs',
                      geom = c("longitude", "latitude")
                      )
+
+n_sites = nrow(coords)
+```
+Now let's download a polygon of Australia and map the extraction location on top of it (as red circles).
+
+```{r}
+st = extract_locations('state',id=NA)
+
+terra::plot(st)
+terra::plot(coords, , col='red',add=T)
+terra::text(coords, labels=coords$site_ID, halo=TRUE, jitter = 6)
+
+terra::add_legend('bottomleft',
+                  legend = c('States and Territories', 'Weather gauge'),
+                  col=c('black','red'),
+                  pch = c(NA,16),
+                  lty=c(1,NA)
+                  )
+
 ```
 
-## Extract daily precipitation data
-Now let's extract the daily precipitation at the two locations. The data is extracted from the netCDF file \code{ncdfFilename} and between the dates \code{extractFrom} and \code{extractTo}.
+## Extract gridded data
+Now let's extract the gridded data at the four locations. The data is extracted from the netCDF file \code{ncdfFilename} and between the dates \code{extractFrom} and \code{extractTo}.
 
 Note the netCDF file \code{ncdfFilename} must be in the working directory or the full file path must be given.
 ```{r}
@@ -65,74 +84,124 @@ extracted.data = extract_data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coords,
-                                        vars = c('precip'),
+                                        vars = c('tmax', 'precip'),
                                         ET.function='')
 ```
 
-## Plot the daily precipitation at each site
-Now let's plot time series of the extracted daily precipitation.
+## Plot the extracted data over time
+Now let's plot time series of the extracted daily precipitation and maximum temperature.
 
 ```{r}
 #| fig.width = 8,
 #| fig.height = 8
 
-par(mfrow = c(2, 1))
-site.names = c('Bore-10084446','Rain-63005')
-for (i in 1:nrow(coords)){
+
+par(mfrow = c(n_sites, 2))
+for (i in 1:n_sites){
   filt = extracted.data$Location.ID == coords$site_ID[i]
 
-  data2plot = extracted.data$precip[filt]
   dates = ISOdate(extracted.data$year[filt],
                   extracted.data$month[filt],
                   extracted.data$day[filt])
 
-    plot(dates, data2plot,
-         main = paste('Extracted precip. at',site.names[i]),
-         ylab = 'Precip [mm/d]',
-         xlab = 'Date',
-         type = 'l')
+  data2plot = extracted.data$precip[filt]
+  plot(dates, data2plot,
+       main = paste('Extracted precip. at',coords$site_ID[i]),
+       ylab = 'Precip [mm/d]',
+       xlab = 'Date',
+       type = 'l')
+
+  data2plot = extracted.data$tmax[filt]
+  plot(dates, data2plot,
+       main = paste('Extracted max. temperature at',coords$site_ID[i]),
+       ylab = 'Max. temp [C]',
+       xlab = 'Date',
+       type = 'l')
 }
 ```
 
-## Check extracted data against daily precipitation gauge data
+## Check extracted data against gauge data
 To assess the reliability of the extracted rain gauge data, let's use the following observed precipitation for 2010 (from gauge_63005), sourced from the Australian Bureau of Meteorology.
 ```{r}
-data('raingauge')
+data("weather_gauge_obs")
 ```
-Now let's compare the extracted rainfall against the gauge rainfall data.
+Now let's compare the extracted data against the gauge data.
 
-The left plot shows that the gauge and extracted data plot along the 1:1. This shows that the extracted data is unbiased. The scatter does, however, show that there is some difference in the estimates. This arises because the source grids are at a 0.05 degree resolution, or about 5 km x 5 km, and this introduces some error with the gauge is not at the centre of the grid cell and the location to be extracted is not also at the centre.
+The left column shows the gauge and extracted daily precipitation. Similarly, the middle column shows that for the commutative daily precipitation and the right column shows that for the daily maximum temperature. All plots include the 1:1 line. Overall, the results show that the gridded rainfall can have a RMSE of a few mm/day while the temperature generally has a low RMSE of less and one degree. Interestingly, the rainfall RMSE appears to be dominated by a few large rainfall events.
+
+On the cause of the errors, the BOM weather gauge coordinates are only provided to within 0.01 of a degree, or about 1km. Hence, while the four test gauges were selected to be at the centre of the grid cells, the gauge coordinates introduce an error of plus / minus 500 m. That said, given the generally low RMSE and that all variable reply on the same package code for data handling, the package appears to be creating the netCDF data and exacting data introducing additional error.
 
 ```{r}
 #| fig.width = 8,
-#| fig.height = 4
-par(mfrow = c(1, 2))
+#| fig.height = 12
+par(mfrow = c(n_sites, 3), pty = "s")
 
-filt = extracted.data$Location.ID=='Rain-63005'
+for (i in 1:n_sites){
 
-xdata = raingauge$Rainfall.amount..millimetres.
-ydata = extracted.data$precip[filt]
-plot(xdata,
-     ydata,
-     xlim = c(0,35),
-     ylim = c(0,35),
-     main ='Obs. vs. Extracted precip.',
-     xlab ='Obs. [mm/d]',
-     ylab ='Extracted precip. [mm/d]')
-abline(0,1, col='grey', lty=2)
-rmse = round(sqrt(mean((xdata - ydata)^2)), 2)
-text(x=0, y=30, adj = c(0,0),
-     labels = paste('RMSE = ', rmse, 'mm/day'))
+  filt_obs = weather_gauge_obs$site_ID == coords$site_ID[i]
+  xdata = weather_gauge_obs[ which(filt_obs), ]$rainfall_mm
 
-plot(cumsum(xdata),
-     cumsum(ydata),
-     xlim = c(0,175),
-     ylim = c(0,175),
-     main = 'Cum. obs. vs. Extracted precip.',
-     xlab = 'Obs. [mm]',
-     ylab = 'Extracted precip. [mm]',
-     type = 'l')
-abline(0,1, col='grey', lty=2)
+  filt_grd = extracted.data$Location.ID == coords$site_ID[i]
+  ydata = extracted.data[filt_grd, ]$precip
+
+  filt_obsErr = xdata != -999
+  xdata = xdata[ filt_obsErr ]
+  ydata = ydata[ filt_obsErr ]
+
+  shared_limits <- range(c(xdata, ydata))
+  plot(xdata,
+       ydata,
+       xlim = shared_limits,
+       ylim = shared_limits,
+       asp = 1,
+       main = paste('Site', coords$site_ID[i], 'precip.'),
+       xlab = 'Obs. [mm/d]',
+       ylab = 'Extracted precip. [mm/d]')
+  abline(0,1, col='grey', lty=2)
+  rmse = round(sqrt(mean((xdata - ydata)^2)), 2)
+  bias = round(mean(xdata - ydata), 1)
+  text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
+       labels = paste('RMSE = ', rmse, 'mm/month'))
+  text(x=shared_limits[1], y=shared_limits[2]*0.825, adj = c(0,0),
+       labels = paste('Bias = ', bias, 'mm/month'))
+
+  xdata = cumsum(xdata)
+  ydata = cumsum(ydata)
+  shared_limits <- range(c(xdata, ydata))
+  plot(xdata,
+       ydata,
+       xlim = shared_limits,
+       ylim = shared_limits,
+       asp = 1,
+       main = paste('Site', coords$site_ID[i], 'cum. precip.'),
+       xlab = 'Obs. [mm]',
+       ylab = 'Extracted precip. [mm]',
+       type = 'l')
+  abline(0,1, col='grey', lty=2)
+
+  xdata = weather_gauge_obs[ which(filt_obs), ]$temperature_max_C
+  ydata = extracted.data[ filt_grd, ]$tmax
+
+  filt_obsErr = xdata != -999
+  xdata = xdata[ filt_obsErr ]
+  ydata = ydata[ filt_obsErr ]
+  shared_limits <- range(c(xdata, ydata))
+  plot(xdata,
+       ydata,
+       xlim = shared_limits,
+       ylim = shared_limits,
+       asp = 1,
+       main =paste('Site', coords$site_ID[i], 'max. T.'),
+       xlab ='Obs. [C]',
+       ylab ='Extracted tmax [C]')
+  abline(0,1, col='grey', lty=2)
+  rmse = round(sqrt(mean((xdata - ydata)^2)), 2)
+  bias = round(mean(xdata - ydata), 1)
+  text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
+       labels = paste('RMSE = ', rmse, 'C'))
+  text(x=shared_limits[1], y=shared_limits[2]*0.825, adj = c(0,0),
+       labels = paste('Bias = ', bias, 'C'))
+}
 ```
 
 ## Check extracted data against monthly precipitation gauge data
@@ -160,73 +229,96 @@ extracted.monthly = extract_data(ncdfFilename = ncdfFilename,
                                         temporal.timestep = 'monthly',
                                         ET.function='')
 ```
-Now let's aggregate the daily observed data to a monthly sum.
+Now let's convert the gauge data to an xts time-series object.
 ```{r}
 
-dates = as.Date(ISOdate( raingauge$Year,
-                         raingauge$Month,
-                         raingauge$Day))
+dates = as.Date(ISOdate( weather_gauge_obs$year,
+                         weather_gauge_obs$month,
+                         weather_gauge_obs$day))
 
-raingauge.xts = xts::as.xts(raingauge$Rainfall.amount..millimetres. ,
-                            order.by=dates)
+weather_gauge_obs_as_xts = xts::as.xts(weather_gauge_obs,
+                                order.by=dates)
 
-raingauge.monthly = xts::apply.monthly(raingauge.xts, apply, 2, 'sum')
-
+weather_gauge_obs_as_xts$year <- NULL
+weather_gauge_obs_as_xts$month <- NULL
+weather_gauge_obs_as_xts$day <- NULL
+weather_gauge_obs_as_xts$temperature_max_C  <- NULL
 ```
 
 Now we can compare the extracted estimates of monthly precipitation with the gauge monthly precipitation.
 
-The top plot below shows the monthly gauged precipitation vs the extracted daily precipitation aggregated to monthly. It shows that the daily gridded data has a modest bias when aggregated to monthly (at least for 2010).
+The left column shows the monthly gauged precipitation vs the extracted daily precipitation summed to monthly. It shows that the daily gridded data generally has a RMSE of 3-14 mm/month aand a low bias. The exception is 71041 at the Mt Thredo village, which is the only test gauge likely to be impacted by snow.
 
-The centre plot shows the monthly gauged precipitation vs the extracted monthly precipitation. It shows a clear bias at and above 100 mm/month and the significant over-estimation of one month.
+The centre column shows the monthly gauged precipitation vs the extracted monthly precipitation (i.e. the gridded monthly precipitation). It shows a comparable RMSE and bias to the daily gridded precipitation in the left column.
 
-The bottom plot show the extracted monthly precipitation vs the extracted daily precipitation aggregated to monthly. It shows that the daily aggregated precipitation estimates a slightly higher monthly precipitation.
+The right column shows the extracted monthly precipitation against the extracted daily precipitation summed to monthly. It shows that generally there is a low RMSE and bias, and hence there does not appear to be an obvious difference between the daily or monthly gridded precipitation products (as least for 2010).
 
 ```{r}
-#| fig.width = 6,
-#| fig.height = 10
-par(mfrow = c(3, 1))
+#| fig.width = 8,
+#| fig.height = 12
+par(mfrow = c(4, 3), pty = "s")
 
-filt1 = extracted.daily2monthly$Location.ID=='Rain-63005'
-filt2 = extracted.monthly$Location.ID=='Rain-63005'
+for (i in 1:n_sites){
+  xdata = weather_gauge_obs_as_xts[ weather_gauge_obs_as_xts$site_ID == coords$site_ID[i], ]
+  filt_obsErr = xdata$rainfall_mm != -999
+  xdata = xdata[ filt_obsErr, ]
+  xdata = xts::apply.monthly(xdata$rainfall_mm, apply, 2, 'sum')
+  xdata = as.numeric(xdata[])
 
-xdata = as.numeric(raingauge.monthly)
-ydata = extracted.daily2monthly$precip[filt1]
-plot(xdata,
-     ydata,
-     xlim = c(0,220),
-     ylim = c(0,220),
-     main='Obs. monthly vs extracted aggregated to monthly',
-     xlab='Obs. [mm/month]',
-     ylab='Aggregated precip. [mm/month]')
-abline(0,1, col='grey', lty=2)
-rmse = round(sqrt(mean((xdata - ydata)^2)), 2)
-text(x=0, y=200, adj = c(0,0),
-     labels = paste('RMSE = ', rmse, 'mm/month'))
+  filt = extracted.daily2monthly$Location.ID == coords$site_ID[i]
+  ydata = extracted.daily2monthly[ filt, 'precip']
 
-xdata = as.numeric(raingauge.monthly)
-ydata = extracted.monthly$precip[filt2]
-plot(xdata,
-     ydata,
-     xlim = c(0,220),
-     ylim = c(0,220),
-     main='Obs. monthly vs extracted monthly',
-     xlab='Obs. [mm/month]',
-     ylab='Extracted precip. [mm/month]')
-abline(0,1, col='grey', lty=2)
-rmse = round(sqrt(mean((xdata - ydata)^2)), 2)
-text(x=0, y=200, adj = c(0,0),
-     labels = paste('RMSE = ', rmse, 'mm/month'))
+  shared_limits <- range(c(xdata, ydata))
+  plot(xdata,
+       ydata,
+       xlim = shared_limits,
+       ylim = shared_limits,
+       asp = 1,
+       main = paste('Site', coords$site_ID[i], 'summed daily precip.'),
+       xlab ='Obs. [mm/d]',
+       ylab ='Summed extracted precip. [mm/month]')
+  abline(0,1, col='grey', lty=2)
+  rmse = round(sqrt(mean((xdata - ydata)^2)), 1)
+  bias = round(mean(xdata - ydata), 1)
+  text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
+       labels = paste('RMSE = ', rmse, 'mm/month'))
+  text(x=shared_limits[1], y=shared_limits[2]*0.825, adj = c(0,0),
+       labels = paste('Bias = ', bias, 'mm/month'))
+  ydata = extracted.monthly$precip.monthly[filt]
+  shared_limits <- range(c(xdata, ydata))
+  plot(xdata,
+       ydata,
+       xlim = shared_limits,
+       ylim = shared_limits,
+       asp = 1,
+       main = paste('Site', coords$site_ID[i], 'monthly precip.'),
+       xlab ='Obs. [mm/d]',
+       ylab ='Extracted precip. [mm/month]')
+  abline(0,1, col='grey', lty=2)
+  rmse = round(sqrt(mean((xdata - ydata)^2)), 1)
+  bias = round(mean(xdata - ydata), 1)
+  text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
+       labels = paste('RMSE = ', rmse, 'mm/month'))
+  text(x=shared_limits[1], y=shared_limits[2]*0.825, adj = c(0,0),
+       labels = paste('Bias = ', bias, 'mm/month'))
 
-xdata = extracted.monthly$precip[filt2]
-ydata = extracted.daily2monthly$precip[filt1]
-plot(xdata,
-     ydata,
-     xlim = c(0,220),
-     ylim = c(0,220),
-     main='Extracted monthly vs extracted aggregated to monthly',
-     xlab='Extracted precip. [mm/month]',
-     ylab='Aggregated precip. [mm/month]')
-abline(0,1, col='grey', lty=2)
+  xdata = extracted.monthly$precip.monthly[filt]
+  ydata = extracted.daily2monthly[ filt, 'precip']
+  shared_limits <- range(c(xdata, ydata))
+  plot(xdata,
+       ydata,
+       xlim = shared_limits,
+       ylim = shared_limits,
+       asp = 1,
+       main = paste('Site', coords$site_ID[i], 'gridded monthly vs daily'),
+       xlab ='Extracted monthly precip. [mm/month]',
+       ylab ='Summed daily precip. [mm/month]')
+  abline(0,1, col='grey', lty=2)
+  rmse = round(sqrt(mean((xdata - ydata)^2)), 1)
+  bias = round(mean(xdata - ydata), 1)
+  text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
+       labels = paste('RMSE = ', rmse, 'mm/month'))
+  text(x=shared_limits[1], y=shared_limits[2]*0.825, adj = c(0,0),
+       labels = paste('Bias = ', bias, 'mm/month'))
+}
 ```
-
