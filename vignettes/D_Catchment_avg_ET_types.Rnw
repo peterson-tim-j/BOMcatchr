@@ -19,6 +19,7 @@ library(BOMcatchr)
 ```
 
 This example calculates and plot various estimates of evaportranspiration. Ten different estimates of area weighted evapotranspiration over one year at catchment 407214 (Victoria, Australia) are derived.
+
 ## Make netCDF files
 Like the other vignettes, the netCDF data grids need to be built.
 
@@ -40,10 +41,10 @@ build.grids(ncdfFilename = ncdfFilename,
                    'vprp', 'solarrad'))
 ```
 
-## Load a catchment boundary
-Now that we have the meteorological data we can begin extracting data for the catchment. Here the catchment boundaries built into the package are used.
+## Load catchment boundaries
+Now that we have the meteorological data we can begin extracting data for two catchments. To make it easy to get the require location data, the package includes the function \code{extract_locations}, which pulls vector spatial data from the BOM Australian Hydrological Geospatial Fabric.  Here it to used to obtain the boundaries for two catchments within the Loddon basin, Victoria. However, shape files of polygons can easily be used once imported into R.
 ```{r}
-catch = catchments()
+catch <- extract_locations('catchment',c('407214','407220'))
 ```
 
 ## Extract daily precipitation and PET data
