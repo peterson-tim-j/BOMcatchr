@@ -793,7 +793,7 @@ extract_data <- function(
   }
 
   if (missing.method[3] != '') {
-    message('... Backfilling dates prior to the start of observations')
+    message('   ... Backfilling dates prior to the start of observations (if required).')
     data.brick = mapply(.do_backfilling,
                         data.brick,
                         time.points=timepoints2Extract,
