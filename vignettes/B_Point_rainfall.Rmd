@@ -64,7 +64,7 @@ st = extract_locations('state',id=NA)
 
 terra::plot(st)
 terra::plot(coords, , col='red',add=T)
-terra::text(coords, labels=coords$site_ID, halo=TRUE, jitter = 6)
+terra::text(coords, labels=coords$site_ID, halo=TRUE, jitter = 8)
 
 terra::add_legend('bottomleft',
                   legend = c('States and Territories', 'Weather gauge'),
@@ -93,10 +93,10 @@ Now let's plot time series of the extracted daily precipitation and maximum temp
 
 ```{r}
 #| fig.width = 8,
-#| fig.height = 8
+#| fig.height = 12
 
 
-par(mfrow = c(n_sites, 2))
+par(mfrow = c(n_sites, 2), cex = 0.5)
 for (i in 1:n_sites){
   filt = extracted.data$Location.ID == coords$site_ID[i]
 
@@ -134,17 +134,20 @@ On the cause of the errors, the BOM weather gauge coordinates are only provided 
 ```{r}
 #| fig.width = 8,
 #| fig.height = 12
-par(mfrow = c(n_sites, 3), pty = "s")
+par(mfrow = c(n_sites, 3),
+    mar = c(5, 5, 1.5, 1.5),
+    pty = "s",
+    cex = 0.5)
 
 for (i in 1:n_sites){
 
   filt_obs = weather_gauge_obs$site_ID == coords$site_ID[i]
-  xdata = weather_gauge_obs[ which(filt_obs), ]$rainfall_mm
+  xdata = weather_gauge_obs[ which(filt_obs), ]$precip_mmday
 
   filt_grd = extracted.data$Location.ID == coords$site_ID[i]
   ydata = extracted.data[filt_grd, ]$precip
 
-  filt_obsErr = xdata != -999
+  filt_obsErr = !(is.na(xdata) | xdata == -999)
   xdata = xdata[ filt_obsErr ]
   ydata = ydata[ filt_obsErr ]
 
@@ -161,9 +164,9 @@ for (i in 1:n_sites){
   rmse = round(sqrt(mean((xdata - ydata)^2)), 2)
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
-       labels = paste('RMSE = ', rmse, 'mm/month'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.825, adj = c(0,0),
-       labels = paste('Bias = ', bias, 'mm/month'))
+       labels = paste('RMSE = ', rmse, 'mm/day'))
+  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
+       labels = paste('Bias = ', bias, 'mm/day'))
 
   xdata = cumsum(xdata)
   ydata = cumsum(ydata)
@@ -179,10 +182,10 @@ for (i in 1:n_sites){
        type = 'l')
   abline(0,1, col='grey', lty=2)
 
-  xdata = weather_gauge_obs[ which(filt_obs), ]$temperature_max_C
+  xdata = weather_gauge_obs[ which(filt_obs), ]$tmax_C
   ydata = extracted.data[ filt_grd, ]$tmax
 
-  filt_obsErr = xdata != -999
+  filt_obsErr = !(is.na(xdata) | xdata == -999)
   xdata = xdata[ filt_obsErr ]
   ydata = ydata[ filt_obsErr ]
   shared_limits <- range(c(xdata, ydata))
@@ -199,7 +202,7 @@ for (i in 1:n_sites){
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
        labels = paste('RMSE = ', rmse, 'C'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.825, adj = c(0,0),
+  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
        labels = paste('Bias = ', bias, 'C'))
 }
 ```
@@ -229,21 +232,6 @@ extracted.monthly = extract_data(ncdfFilename = ncdfFilename,
                                         temporal.timestep = 'monthly',
                                         ET.function='')
 ```
-Now let's convert the gauge data to an xts time-series object.
-```{r}
-
-dates = as.Date(ISOdate( weather_gauge_obs$year,
-                         weather_gauge_obs$month,
-                         weather_gauge_obs$day))
-
-weather_gauge_obs_as_xts = xts::as.xts(weather_gauge_obs,
-                                order.by=dates)
-
-weather_gauge_obs_as_xts$year <- NULL
-weather_gauge_obs_as_xts$month <- NULL
-weather_gauge_obs_as_xts$day <- NULL
-weather_gauge_obs_as_xts$temperature_max_C  <- NULL
-```
 
 Now we can compare the extracted estimates of monthly precipitation with the gauge monthly precipitation.
 
@@ -256,13 +244,18 @@ The right column shows the extracted monthly precipitation against the extracted
 ```{r}
 #| fig.width = 8,
 #| fig.height = 12
-par(mfrow = c(4, 3), pty = "s")
+par(mfrow = c(n_sites, 3),
+    mar = c(5, 5, 1.5, 1.5),
+    pty = "s",
+    cex = 0.5)
 
 for (i in 1:n_sites){
-  xdata = weather_gauge_obs_as_xts[ weather_gauge_obs_as_xts$site_ID == coords$site_ID[i], ]
-  filt_obsErr = xdata$rainfall_mm != -999
-  xdata = xdata[ filt_obsErr, ]
-  xdata = xts::apply.monthly(xdata$rainfall_mm, apply, 2, 'sum')
+  xdata = weather_gauge_obs[ weather_gauge_obs$site_ID == as.numeric(coords$site_ID[i]), ]
+  filt_obsErr = !(is.na(xdata$precip_mmday) | xdata$precip_mmday == -999)
+  xdata = xdata[filt_obsErr, ]
+
+  xdata = xts::as.xts(xdata[, 'precip_mmday'], order.by=xdata[, 'date'])
+  xdata = xts::apply.monthly(xdata, apply, 2, 'sum')
   xdata = as.numeric(xdata[])
 
   filt = extracted.daily2monthly$Location.ID == coords$site_ID[i]
@@ -282,7 +275,7 @@ for (i in 1:n_sites){
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
        labels = paste('RMSE = ', rmse, 'mm/month'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.825, adj = c(0,0),
+  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
        labels = paste('Bias = ', bias, 'mm/month'))
   ydata = extracted.monthly$precip.monthly[filt]
   shared_limits <- range(c(xdata, ydata))
@@ -299,7 +292,7 @@ for (i in 1:n_sites){
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
        labels = paste('RMSE = ', rmse, 'mm/month'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.825, adj = c(0,0),
+  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
        labels = paste('Bias = ', bias, 'mm/month'))
 
   xdata = extracted.monthly$precip.monthly[filt]
@@ -318,7 +311,7 @@ for (i in 1:n_sites){
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
        labels = paste('RMSE = ', rmse, 'mm/month'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.825, adj = c(0,0),
+  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
        labels = paste('Bias = ', bias, 'mm/month'))
 }
 ```
