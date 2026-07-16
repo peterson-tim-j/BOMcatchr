@@ -411,7 +411,7 @@ extract_data <- function(
   if (!grepl('+proj=longlat', terra::crs(locations, proj=T)) ||
       !grepl('+ellps=GRS80', terra::crs(locations, proj=T))) {
     message('WARNING: The projection string of the locations does not appear to be +proj=longlat +ellps=GRS80. Attempting to transform coordinates...')
-    locations = terra::project(locations, crs = '+proj=longlat +ellps=GRS80')
+    locations = terra::project(locations, to = '+proj=longlat +ellps=GRS80')
   }
 
   # Check each catchment or point has a unique (non-NA) ID. Note.
