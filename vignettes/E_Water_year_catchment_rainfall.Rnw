@@ -34,7 +34,7 @@ ncdfFilename = tempfile(fileext='.nc')
 
 Next, let's make the data grids over this period. Note, the monthly root mean square interpolation error (RMSE) gridded data is not provided the Bureau of Meteorology and is therefore not able to be used below.
 ```{r}
-fname = grid.build(ncdfFilename = ncdfFilename,
+fname = grid_build(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('precip', 'precip.RMSE', 'precip.monthly'))
