@@ -78,7 +78,7 @@
   return(x.agg)
 }
 
-annom <- function(x, by, ind, FUN) {
+clim <- function(x, by, ind, FUN) {
 
   # Aggregate using user defined time step and function
   x.agg <- .time_agg_by(x, by = by, ind, FUN = FUN)
@@ -101,10 +101,6 @@ annom <- function(x, by, ind, FUN) {
   if (by == 'year' || by == 'period') {
     x.agg.avg <- colMeans(x.agg)
     x.agg.avg <- matrix(x.agg.avg, nrow = nrow(x.agg), ncol = length(x.agg.avg), byrow = TRUE)
-
-    # Calc residual
-    zoo::coredata(x.agg) <- x.agg - x.agg.avg
-
   } else {
     x.agg.avg <- aggregate(x.agg, by=x.agg.fmt, mean)
     x.agg.avg.df = data.frame(avg = zoo::coredata(x.agg.avg), row.names = zoo::index(x.agg.avg))
@@ -114,11 +110,24 @@ annom <- function(x, by, ind, FUN) {
 
     # Map seasonal means to all agg dates and bind
     x.agg.avg.df = x.agg.avg.df[x.agg.df$lbl,]
-
-    # Calc residual
     x.agg.df[,'lbl'] <- NULL
-    zoo::coredata(x.agg) <- as.matrix(x.agg.df - x.agg.avg.df)
+    x.agg.avg = as.matrix(x.agg.avg.df)
   }
+  zoo::coredata(x.agg) <- x.agg.avg
+  return(x.agg)
+}
+
+
+annom <- function(x, by, ind, FUN) {
+
+  # Get climate average over each time step
+  x.agg.avg <- clim(x, by, ind, FUN)
+
+  # Aggregate using user defined time step and function
+  x.agg <- .time_agg_by(x, by = by, ind, FUN = FUN)
+
+  # Calc residual and return
+  zoo::coredata(x.agg) <- x.agg - x.agg.avg
   return(x.agg)
 }
 
@@ -126,7 +135,6 @@ cumannom <- function(x, by, ind, FUN) {
   x = annom(x, by, ind, FUN)
 
   return(apply(x,2, cumsum))
-
 }
 
 # Get time index from netCDF grid
