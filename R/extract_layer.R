@@ -6,7 +6,8 @@
 #' low level function is unlikely to be of use to a user.
 #'
 #' @param ncdfFilename is a full file name (as string) to the netCDF file.
-#' @param extract.date is a date string specifying the date for data extraction..
+#' @param ncdf.cond connection to the netcdf file. Default is \code(NA). If not provided the connection is established.
+#' @param extract.date is a date string specifying the date for data extraction.
 #' @param var is a character string one one variable to extract. The options are \code{c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')}.
 #'
 #' @return
@@ -85,7 +86,7 @@ extract_layer <- function(
 
   # Close connetion
   if (do.ncclose)
-    RNetCDF::close.nc(ncout)
+    RNetCDF::close.nc(ncdf.cond)
 
   # Convert matric to rast and return.
   return( terra::rast(t(r), crs = grp.crs, ext = ext))
