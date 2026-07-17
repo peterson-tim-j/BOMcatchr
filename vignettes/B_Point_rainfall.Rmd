@@ -64,7 +64,7 @@ st = extract_locations('state',id=NA)
 
 terra::plot(st)
 terra::plot(coords, , col='red',add=T)
-terra::text(coords, labels=coords$site_ID, halo=TRUE, jitter = 8)
+terra::text(coords, labels=coords$site_ID, halo=TRUE, jitter = 10)
 
 terra::add_legend('bottomleft',
                   legend = c('States and Territories', 'Weather gauge'),
@@ -75,7 +75,7 @@ terra::add_legend('bottomleft',
 ```
 To evidence the weather gauges being close to the centre of each grid cell, the maps below show the boundary and centre of the grid cells neighbouring each gauge. The red circle show the location of the gauge. The black cross the centre of the grid cell, which is the point at which the grid cell estimate corresponds to (i.e. here not the lower-left). The grey squares are the boundaries of each grid cell.
 
-The mnaps show that the gauges are 0.01 to 0.02 degrees from the centre of a grid cell. This equates to approximately 1 to 2 km and is likely to introduce some error in the latter comparisons extracted data at the grid cell.
+The maps show that the gauges are less than 0.01 degrees from the centre of a grid cell. This equates to approximately less than 1 km and is unlikely to introduce major error in the latter comparisons extracted data at the grid cell.
 
 ```{r}
 #| fig.width = 8,
@@ -102,11 +102,10 @@ for (i in 1:n_sites){
                 weather_gauge_loc[i, 'latitude'] + 0.1
                 )
   coord_ext = terra::ext(coord_box)
-  crd = terra::vect(weather_gauge_loc[i,],  
+  crd = terra::vect(weather_gauge_loc[i,],
                     crs = '+proj=longlat +ellps=GRS80 +no_defs',
                     geom = c('longitude', 'latitude')
                    )
-
   v_crp = terra::crop(v, coord_ext)
   r_crp = terra::crop(r, coord_ext)
 
@@ -117,6 +116,8 @@ for (i in 1:n_sites){
   dist = min(dist)
 
   terra::plot(v_crp,
+              xlab = 'Long.',
+              ylab = 'Lat.',
               main = paste('Gauge', weather_gauge_loc[i,'site_ID'], ',',round(dist,3),'deg. from centre'),
               col='black',
               pch='x',
@@ -178,9 +179,9 @@ Now let's compare the extracted data against the gauge data.
 
 The left column shows the gauge and extracted daily precipitation. Similarly, the middle column shows that for the cumulative daily precipitation and the right column shows that for the daily maximum temperature. All plots include the 1:1 line.
 
-Overall, the results show that the gridded rainfall can have a RMSE of a few mm/day and that the bias is less than 1 mm/day. In comparison, the cross-validation of the gauge interpolations techniques used by the BoM (see Table 3 in Jones et al. 2009 at \url(https://doi.org/10.1071/ES09032)) show an RMSE for 2001-2007 of 3.1 mm/day. Additionally, Fig 8B in Jones et al. 2009 shows a strong north-south gradient in the daily rainfall RMSE. Similarly, the northern gauges used here (62100. 33195 and 14932) show a larger RMSE than the southern gauges (87163, 91126 and 10286). Overall, the rainfall errors reported below are very comparable to that reported by Jones et al. (2009). Hence the errors shown below are very unlikely to arise from the package data handling.
+Overall, the results show that the gridded rainfall has a RMSE of 1 to 5mm mm/day and an absolute bias of less than 0.5 mm/day. In comparison, the cross-validation of the gauge interpolations techniques used by the BoM (see Table 3 in Jones et al. 2009 at \url(https://doi.org/10.1071/ES09032)) show an RMSE for 2001-2007 of 3.1 mm/day. Additionally, Fig 8B in Jones et al. 2009 shows a strong north-south gradient in the daily rainfall RMSE. Similarly, the most northern gauge used here (33247) show a larger RMSE of (5 mm/day) than the southern gauges. Overall, the rainfall errors reported below are very comparable to that reported by Jones et al. (2009). Hence the errors shown below are very unlikely to arise from the package data handling.
 
-On the maximum temperature, it generally has a low RMSE of less and one degree and a near zero bias at all gauges. In comparison, Table 2B in Jones et al. 2009 reports an RMSE of 1.2 C and a zero bias. Overall, the error in the maximum temperature reported blow is very comparable to that by Jones et al. (2009). Again the errors shown below are very unlikely to arise from the package data handling.
+On the maximum temperature, it generally has a low RMSE of 0.6 to 2 degree Celsius and an absolute bias of 0.1 to 0.4 C. The only exception is gauge 79103 with an RMSE of 3 C and bias of -2 C, but this gauge it at an elevation of 1150 m and on a summit. In comparison, Table 2B in Jones et al. 2009 reports an RMSE of 1.2 C and a zero bias. Overall, the error in the maximum temperature is generally low and below that of Jones et al. (2009). Again the errors shown below are very unlikely to arise from the package data handling.
 
 ```{r}
 #| fig.width = 8,
@@ -286,11 +287,11 @@ extracted.monthly = extract_data(ncdfFilename = ncdfFilename,
 
 Now we can compare the extracted estimates of monthly precipitation with the gauge monthly precipitation.
 
-The left column shows the monthly gauged precipitation vs the extracted daily precipitation summed to monthly. It shows that the daily gridded data summed to monthly has a RMSE of 1 to 39mm mm/month and a bias of -8 to 16 mm/month. In comparison, the cross-validation of the gauge interpolations techniques used by the BoM (see Table 3A in Jones et al. 2009 at \url(https://doi.org/10.1071/ES09032)) show an RMSE for 2001-2007 of 21 mm/month and a bias of 0.5 mm/month. Additionally, Fig 8A in Jones et al. 2009 shows a very strong north-south gradient in the monthly rainfall RMSE that range from below 10 mm/month in the south to over 50 mm/month in the north. Similarly, the northern gauges reported here (62100, 33195 and 14932) show a RMSE of 26 to 48 mm/month and the the southern gauges (87163, 91126 and 10286) show a much lower RMSE of 1.7 to 8.7 mm/month. Overall, the rainfall errors reported below are very comparable to that reported by Jones et al. (2009). Hence the errors shown below are very unlikely to arise from the package data handling and aggregation to a monthly time-step.
+The left column shows the monthly gauged precipitation vs the extracted daily precipitation summed to monthly. It shows that the daily gridded data summed to monthly has a RMSE of 4 to 84 and an absolute bias of 1 to 45 mm/month. In comparison, the cross-validation of the gauge interpolations techniques used by the BoM (see Table 3A in Jones et al. 2009 at \url(https://doi.org/10.1071/ES09032)) show an RMSE for 2001-2007 of 21 mm/month and a bias of 0.5 mm/month. Additionally, Fig 8A in Jones et al. 2009 shows a very strong north-south gradient in the monthly rainfall RMSE that range from below 10 mm/month in the south to over 50 mm/month in the north. Similarly, the northern gauge reported here (33247) show a higher RMSE of 84 mm/month while the southern gauges (70263, 9741, 79103 and 91259) show a much lower RMSE of 3.5 to 24 mm/month. Again, the gauge 79103 at an elevation of 1150 m and on a summit has a higher RMSE of 24 mm/month. Overall, the rainfall errors reported below are very comparable to that reported by Jones et al. (2009). Hence the errors shown below are very unlikely to arise from the package data handling and aggregation to a monthly time-step.
 
 The centre column shows the monthly gauged precipitation vs the extracted monthly precipitation (i.e. the gridded monthly precipitation). It shows a very comparable RMSE and bias to the daily gridded precipitation in the left column.
 
-The right column shows the extracted monthly precipitation against the extracted daily precipitation summed to monthly. It shows that generally there is a lower RMSE and bias than shown in the adjacent columns, and hence there does not appear to be an obvious difference between the daily or monthly gridded precipitation products (as least for 2010).
+The right column shows the extracted monthly precipitation against the extracted daily precipitation summed to monthly. It does not show an obvious difference between the two estimates of monthly precipitation, though the most southern gauges the summed daily precipitation is slighly higher then the monthly gridded precipitation (as least for 2010).
 
 ```{r}
 #| fig.width = 8,
