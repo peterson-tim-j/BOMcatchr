@@ -1,9 +1,11 @@
-fnames = c( "IDCJAC0009_10286_2010_Data.csv",
-            "IDCJAC0009_14932_2010_Data.csv",
-            "IDCJAC0009_33195_2010_Data.csv",
-            "IDCJAC0009_62100_2010_Data.csv",
-            "IDCJAC0009_87163_2010_Data.csv",
-            "IDCJAC0009_91126_2010_Data.csv")
+fnames = c( c(
+  "IDCJAC0009_9741_2010_Data.csv",
+  "IDCJAC0009_15603_2010_Data.csv",
+  "IDCJAC0009_33247_2010_Data.csv",
+  "IDCJAC0009_70263_2010_Data.csv",
+  "IDCJAC0009_79103_2010_Data.csv",
+  "IDCJAC0009_91259_2010_Data.csv"
+))
 
 fnames = file.path('data-raw', fnames)
 
@@ -51,3 +53,35 @@ data = data[, c('site_ID', 'date','precip_mmday', 'tmax_C')]
 weather_gauge_obs = data
 usethis::use_data(weather_gauge_obs)
 
+# Create weather location data
+weather_gauge_loc = data.frame(site_ID = numeric(),
+                               longitude = numeric(),
+                               latitude = numeric()
+                               )
+
+
+weather_gauge_loc[1, 'site_ID'] = 33247
+weather_gauge_loc[1, 'longitude'] = 148.555
+weather_gauge_loc[1, 'latitude'] = -20.4925
+
+weather_gauge_loc[2, 'site_ID'] = 15603
+weather_gauge_loc[2, 'longitude'] = 133.3027
+weather_gauge_loc[2, 'latitude'] = -25.8428
+
+weather_gauge_loc[3, 'site_ID'] = 70263
+weather_gauge_loc[3, 'longitude'] = 149.7034
+weather_gauge_loc[3, 'latitude'] = -34.7495
+
+weather_gauge_loc[4, 'site_ID'] = 9741
+weather_gauge_loc[4, 'longitude'] = 117.8022
+weather_gauge_loc[4, 'latitude'] = -34.9414
+
+weather_gauge_loc[5, 'site_ID'] = 79103
+weather_gauge_loc[5, 'longitude'] = 142.6039
+weather_gauge_loc[5, 'latitude'] = -37.295
+
+weather_gauge_loc[6, 'site_ID'] = 91259
+weather_gauge_loc[6, 'longitude'] = 145.1517
+weather_gauge_loc[6, 'latitude'] = -41.1492
+
+usethis::use_data(weather_gauge_loc)
