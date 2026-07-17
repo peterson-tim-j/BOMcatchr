@@ -313,8 +313,16 @@ grid_build <- function(
                     by = gridgeo.unique[i,]$DPixel,
                     length.out = gridgeo.unique[i,]$nRows)
 
+    dxdy = gridgeo.unique[i,]$DPixel / 2
+    ext = c( min(longVec) - dxdy,
+             max(longVec) + dxdy,
+             min(latVec)  - dxdy,
+             max(latVec)  + dxdy
+           )
+
     grid.dims[[i]] = list(long = longVec,
                           lat = latVec,
+                          ext = ext,
                           time.datum = paste(gridgeo.unique$time.step[i], "since 1900-01-01 00:00:00.0 -0:00"),
                           crs = gridgeo.unique[i,]$ellipsoid.crs)
   }
@@ -413,6 +421,14 @@ grid_build <- function(
                           "degrees")
       RNetCDF::var.put.nc(grp,
                           'Lat',
+                          vals)
+
+      # Add grid extend. Used by extract_layer()
+      vals= grid.dims[[i]]$ext
+      RNetCDF::att.put.nc(grp,
+                          'NC_GLOBAL',
+                          'ext',
+                          "NC_DOUBLE",
                           vals)
 
       # Add attributes axis labels (for raster extraction)

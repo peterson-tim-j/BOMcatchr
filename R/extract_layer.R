@@ -72,10 +72,9 @@ extract_layer <- function(
                                 variable = 'NC_GLOBAL',
                                 attribute = "CRS")
 
-  # Get dimension data for map and build extent obj.
+  # Get dimension data for map
   x = RNetCDF::var.get.nc(grp, 'Long')
   y = RNetCDF::var.get.nc(grp, 'Lat')
-  ext = terra::ext(x = c(min(x), max(x), min(y), max(y)))
 
   # Read in one netcDF layer.
   r = RNetCDF::var.get.nc(grp,
@@ -84,10 +83,16 @@ extract_layer <- function(
                           count = c(length(x), length(y), 1),
                           na.mode=1)
 
+  # Get map extent and build terra obj.
+  grp.ext = RNetCDF::att.get.nc(grp,
+                                variable = 'NC_GLOBAL',
+                                attribute = 'ext')
+  grp.ext = terra::ext(grp.ext)
+
   # Close connetion
   if (do.ncclose)
     RNetCDF::close.nc(ncdf.cond)
 
   # Convert matric to rast and return.
-  return( terra::rast(t(r), crs = grp.crs, ext = ext))
+  return( terra::rast(t(r), crs = grp.crs, ext = grp.ext))
 }
