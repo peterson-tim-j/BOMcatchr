@@ -82,17 +82,48 @@
 
   # Only get file header data
   if (only.header) {
-    headerData = readLines(con,n=6)
-    #close(con)
+    nheaders = 6
+    headerData = readLines(con,n = nheaders)
 
-    nCols =as.integer(sub('ncols', '', headerData[1]))
-    nRows = as.integer(sub('nrows', '', headerData[2]));
-    SWLong = as.numeric(sub('xllcenter', '', headerData[3]));
-    SWLat = as.numeric(sub('yllcenter', '', headerData[4]));
-    DPixel = as.numeric(sub('cellsize', '', headerData[5]));
-    nodata = as.numeric(sub('nodata_value', '', headerData[6]));
+    headerData_df = data.frame(lbl = character(), val = numeric())
+    for (i in 1:nheaders) {
+      tmp = strsplit(headerData[i], ' ')[[1]]
+      headerData_df[i, 'lbl'] = tolower(tmp[1])
+      headerData_df[i, 'val'] = as.numeric(tmp[2])
+    }
 
-    header.data =  list(nCols=nCols,nRows=nRows,SWLong=SWLong,SWLat=SWLat,DPixel=DPixel,nodata=nodata)
+    # Displace datum long lat IF coordinates are from the
+    # lower left of a cell and not the centre.
+    if (any(grepl("llcorner", headerData_df[ , 'lbl'], ignore.case = TRUE))) {
+      ind = headerData_df[i, 'lbl'] == 'cellsize'
+
+      if (length(ind)==0)
+        .pretty_stop('Unexpected error. ASCII raster grid does not contain "cellsize" field.')
+
+      dxdy = headerData_df[ind, 'val'] / 2
+
+      ind = headerData_df[i, 'lbl'] == 'xllcorner'
+      headerData_df[ind, 'val'] = headerData_df[ind, 'val'] + dxdy
+      headerData_df[ind, 'lbl'] = 'xllcenter'
+
+      ind = headerData_df[i, 'lbl'] == 'yllcorner'
+      headerData_df[ind, 'val'] = headerData_df[ind, 'val'] + dxdy
+      headerData_df[ind, 'lbl'] = 'yllcenter'
+    }
+
+    # Check required columns exist
+    cols_req = c('ncols', 'nrows', 'xllcenter', 'yllcenter', 'cellsize', 'nodata_value')
+    if (!(all(cols_req %in%  headerData_df[ , 'lbl'])))
+      .pretty_stop(cat('Unexpected error. ASCII raster grid doesnt not contain the following required fields:',cols_req))
+
+    headerData = headerData_df[, 'val']
+    names(headerData) = headerData_df[, 'lbl']
+    header.data =  list(nCols = headerData['ncols'],
+                        nRows = headerData['nrows'],
+                        SWLong = headerData['xllcenter'],
+                        SWLat = headerData['yllcenter'],
+                        DPixel = headerData['cellsize'],
+                        nodata = headerData['nodata_value'])
 
     return(header.data)
   }else {
