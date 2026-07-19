@@ -42,10 +42,11 @@ fname = grid_build(ncdfFilename = ncdfFilename,
                          updateTo = date.to,
                          vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad'))
 ```
-## Load a catchment boundary
-Now that we have the meteorological data we can begin extracting data for two catchments. Here the catchment boundaries built into the package are used. However, shape files of polygons can easily be used once imported into R. Here the data is imported into the \code{catch} variable.
+## Load catchment boundaries
+Now that we have the meteorological data we can begin extracting data for two catchments. To make it easy to get the require location data, the package includes the function \code{extract_locations}, which pulls vector spatial data from the BOM Australian Hydrological Geospatial Fabric.  Here it to used to obtain the boundaries for two catchments within the Loddon basin, Victoria. However, shape files of polygons can easily be used once imported into R.
 ```{r}
-catch = catchments()
+catch <- extract_locations('catchment',c('407214','407220'))
+site_ID <- catch$stationno
 ```
 
 ## Extract daily precipitation and PET data
@@ -81,9 +82,9 @@ Next time series of the extracted daily precipitation and PET for each catchment
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catch$CatchID)) {
+for (i in 1:length(site_ID)) {
 
-  filt = climateData.daily$temporal$Location.ID == catch$CatchID[i]
+  filt = climateData.daily$temporal$Location.ID == site_ID[i]
 
   # Convert year, month and day columns from extractions to a date.
   climateData.daily.date = as.Date(paste0(climateData.daily$temporal$year[filt], "-",
@@ -103,7 +104,7 @@ for (i in 1:length(catch$CatchID)) {
         col = "#e31a1c",
         lwd = 3,
         mgp = c(2, 0.5, 0),
-        main=paste('Catchment ID',catch$CatchID[i]),
+        main=paste('Catchment ID',site_ID[i]),
         ylim = c(0, 80),
         ylab = "",
         xlab = "2010",
@@ -321,9 +322,9 @@ Now let's compare the two estimates of precipitation, PET and rainfall deficit. 
 par(mfrow=c(2,3), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catch$CatchID)) {
+for (i in 1:length(site_ID)) {
 
-  filt = metData.monthly.weighted$temporal$Location.ID == catch$CatchID[i]
+  filt = metData.monthly.weighted$temporal$Location.ID == site_ID[i]
 
   # Convert year, month and day columns from extractions to a date.
   metData.date = as.Date(paste0(metData.monthly.weighted$temporal$year[filt], "-",
@@ -365,7 +366,7 @@ for (i in 1:length(catch$CatchID)) {
        col = "#e31a1c",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       main=paste('Catchment ID',catch$CatchID[i]),
+       main=paste('Catchment ID',site_ID[i]),
        ylim = c(0, 120),
        ylab = "PET [mm/month]",
        xlab = "2010", xaxs = "i",

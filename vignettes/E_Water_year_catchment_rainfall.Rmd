@@ -43,6 +43,7 @@ fname = grid_build(ncdfFilename = ncdfFilename,
 Now that we have the meteorological data we can begin extracting data for two catchments. To make it easy to get the require location data, the package includes the function \code{extract_locations}, which pulls vector spatial data from the BOM Australian Hydrological Geospatial Fabric.  Here it to used to obtain the boundaries for two catchments within the Loddon basin, Victoria. However, shape files of polygons can easily be used once imported into R.
 ```{r}
 catch <- extract_locations('catchment',c('407214','407220'))
+site_ID <- catch$stationno
 ```
 
 ## Extract calendar year precipitation
@@ -81,9 +82,9 @@ climateData.annual.err = extract_data(ncdfFilename = ncdfFilename,
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the precipitation.
-for (i in 1:length(catch$CatchID)) {
+for (i in 1:length(site_ID)) {
 
-  filt = climateData.annual$temporal$Location.ID == catch$CatchID[i]
+  filt = climateData.annual$temporal$Location.ID == site_ID[i]
 
   # Plot precipitation from monthly data
   tmp.date = climateData.annual$temporal[filt,]
@@ -103,7 +104,7 @@ for (i in 1:length(catch$CatchID)) {
        xaxs = "r",
        bty = "l",
        yaxs = "r",
-       main=paste('Catchment ID',catch$CatchID[i]))
+       main=paste('Catchment ID',site_ID[i]))
 
   # Get water year data from daily data
   tmp.date = climateData.annual$temporal[filt,]
@@ -211,10 +212,10 @@ Now let's compare the two estimates of water year precipitation at the two catch
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catch$CatchID)) {
+for (i in 1:length(site_ID)) {
 
   # Water years precipitation from monthly data.
-  filt = climateData.month2wateryear$temporal$Location.ID == catch$CatchID[i]
+  filt = climateData.month2wateryear$temporal$Location.ID == site_ID[i]
   tmp.date = climateData.month2wateryear$temporal[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip.monthly
@@ -231,10 +232,10 @@ for (i in 1:length(catch$CatchID)) {
        xaxs = "r",
        bty = "l",
        yaxs = "r",
-       main=paste('Catchment ID',catch$CatchID[i]))
+       main=paste('Catchment ID',site_ID[i]))
 
   # Get water year data from daily data.
-  filt = climateData.daily2wateryear$temporal$Location.ID == catch$CatchID[i]
+  filt = climateData.daily2wateryear$temporal$Location.ID == site_ID[i]
   tmp.date = climateData.daily2wateryear$temporal[filt,]
   x.data = tmp.date$year
   y.data = tmp.date$precip
@@ -307,10 +308,10 @@ Now let's compare the two estimates the precipitation anomaly and cumulative ano
 par(mfrow=c(2,2), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
-for (i in 1:length(catch$CatchID)) {
+for (i in 1:length(site_ID)) {
 
   # Water years precipitation from monthly data.
-  filt = annom.seaonal$temporal$Location.ID == catch$CatchID[i]
+  filt = annom.seaonal$temporal$Location.ID == site_ID[i]
   tmp.date = annom.seaonal$temporal[filt,]
   x.data = as.Date(paste0(tmp.date$year,'-',
                           tmp.date$month,'-',
@@ -329,7 +330,7 @@ for (i in 1:length(catch$CatchID)) {
        xaxs = "r",
        bty = "l",
        yaxs = "r",
-       main=paste('Catchment ID',catch$CatchID[i]))
+       main=paste('Catchment ID',site_ID[i]))
 
   y.data = tmp.date$precip
   lines(x = x.data,
@@ -352,7 +353,7 @@ for (i in 1:length(catch$CatchID)) {
        xaxs = "r",
        bty = "l",
        yaxs = "r",
-       main=paste('Catchment ID',catch$CatchID[i]))
+       main=paste('Catchment ID', site_ID[i]))
 
   y.data = tmp.date$precip
   lines(x = x.data,
