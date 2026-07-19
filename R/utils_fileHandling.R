@@ -69,7 +69,7 @@
     con <- archive::file_read(file.name)
   } else if (f.extn == 'zip') {
 
-    zip.fname = unzip(file.name, list=T)$Name
+    zip.fname = utils::unzip(file.name, list=T)$Name
     ind = which(tools::file_ext(zip.fname) == ivar.file.ext)
     zip.fname = zip.fname[ind]
 
@@ -143,11 +143,11 @@
   }
 }
 
-
-# Helper function to import ncdf4. Required by raster() package
-.ignore_unused_imports <- function(fname) {
-  ncdf4::nc_version()
-}
+#
+# # Helper function to import ncdf4. Required by raster() package
+# .ignore_unused_imports <- function(fname) {
+#   ncdf4::nc_version()
+# }
 
 # Extract point data from ras grid
 .extract_point_data = function(r, interp.method, coords, do.infill, ext, interpMax) {
