@@ -19,6 +19,7 @@ options(tibble.print_min = 4L, tibble.print_max = 4L)
 To get started, the key steps are:
 
 1. Build the required netCDF grids of weather data.
+1. Get the spatial location(s) at which data is to be extracted.
 1. Extract the required weather data at user defined locations, duration and time-step.
 1. Update the data grids as new data becomes available.
 
@@ -32,16 +33,20 @@ The netCDF data grids are created using the function [grid_build](https://peters
 1. _updateFrom_ : start date for the data. Users often set this to the default date `
 as.Date('1900-01-01')` to extract all available data.
 1. _updateTo_ : end date for the data. Users often set this to the default date of two days ago to extract all available data.
-1. _urlPrecip_ etc to define which meteorological variables are to be input to the netCDF data grids. Setting any of them to _NA_ causes that variable to not be included in the netCDF data grids.
+1. _vars_ defining which meteorological variables are to be input to the netCDF data grids.
 
 See [here](https://peterson-tim-j.github.io/BOMcatchr/articles/A_Make_data_grids.html) for an example of how to build your first netCDF data file.
+
+# Get spatial location data
+
+_BOMcatchr_ provides the efficient downloading of selected Australian Hydrological Geospatial Fabric (Geofabric) spatial vector data (points, lines and polygons) that likely to be relevant to hydrological, hydrogeological and aquatic ecological studies. Run the example in thee function [extract_locations](https://peterson-tim-j.github.io/BOMcatchr/reference/extract_locations.html) to see the various types of data the are available. Additionally, you can also use your own ESRI shape files or a \code{terra::vect} object.
 
 ## Extract weather data
 
 Once the netCDF data grids are created, extract data using the [extract_data](https://peterson-tim-j.github.io/BOMcatchr/reference/extract_data.html) function. The essential user inputs are:
 
 1. _ncdfFilename _ file name pointing to the netCDF file.
-1. _locations_ defining the locations at which the data is to be xtracted. it can be a full file name to an ESRI shape file of points or polygons or a shape file already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS 80, and the first column must be a unique ID.
+1. _locations_ defining the locations at which the data is to be extracted. It can be the output from [extract_locations](https://peterson-tim-j.github.io/BOMcatchr/reference/extract_locations.html), a full file name to an ESRI shape file of points or polygons or a shape file already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS80 or WGS84, and the first column must be a unique ID.
 
 Many other user controls are available that control the duration, time-step, the spatial and temporal aggregation (e.g. _mean_, _sum_, _min_ or _max_), the meteorological variables required and the measure of evapotranspiration. For examples of time-series extractions see [here](https://peterson-tim-j.github.io/BOMcatchr/articles/B_Point_rainfall.html) and [here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-daily-precipitation-and-pet-data). For examples of spatial data extractions see [ here](https://peterson-tim-j.github.io/BOMcatchr/articles/C_Catchment_avg_ET_rainfall.html#extract-and-map-monthly-total-precipitation-and-pet)).
 
