@@ -5,7 +5,7 @@
 #' @details
 #' The function downloads a selected set of BOM Australian Hydrological Geospatial Fabric spatial
 #' vector data (points, lines and polygons) that likely to be relevant to hydrological, hydrogeological
-#' and aquatic ecological studies. All of the daat is sourced from \url{https://www.bom.gov.au/water/geofabric/}.
+#' and aquatic ecological studies. All of the data is sourced from \url{https://www.bom.gov.au/water/geofabric/}.
 #'
 #' To find the required ID for the desired data type, either download all data and filter for the required
 #' location (see example) or use the online mapping tool at \url{https://portal.wsapi.cloud.bom.gov.au/arcgis/home/webmap/viewer.html?useExisting=1&layers=35719064c4ea4ad79faa82f5c9c22068}
@@ -37,10 +37,14 @@
 #'  \item{\code{'aquifer_mid'} : integer for the Geofabric "hydroid".}
 #'  \item{\code{'aquifer_lower'} : integer for the Geofabric "hydroid".}
 #' }
+#' @param url_base character string for URL to the BOM geofabric spatial data. Provided to allow editing in case th URL changes.
+#' The default is https://hosting.wsapi.cloud.bom.gov.au/arcgis/rest/services/.
 #'
 #' @return terra::SpatVector
 #' @examples
-#' # Get state boundary, Loddon River drainage basin, all stream lines, all stream gauges and two catchment boundaries
+#' \donttest{
+#' # Get state boundary, Loddon River drainage basin,
+#' # all stream lines, all stream gauges and two catchment boundaries
 #'  st <- extract_locations('state','VIC')
 #'  dr <- extract_locations('river_region',43637156)
 #'  riv <- extract_locations('river_simple',NA)
@@ -53,14 +57,15 @@
 #'
 #'  # Map drainage basin and catchments in state
 #'  terra::plot(st, border='grey')
-#'  terra::plot(dr, border='black', add=T)
-#'  terra::plot(catch, col='red', add=T)
+#'  terra::plot(dr, border='black', add = TRUE)
+#'  terra::plot(catch, col='red', add = TRUE)
 #'
 #'  # Map catchments, streamlines and gauges
 #'  terra::plot(dr, border='black')
-#'  terra::plot(catch, border='red', add=T)
-#'  terra::plot(riv, col='blue', add=T)
-#'  terra::plot(gauge, col='grey', add=T)
+#'  terra::plot(catch, border='red', add = TRUE)
+#'  terra::plot(riv, col='blue', add = TRUE)
+#'  terra::plot(gauge, col='grey', add = TRUE)
+#' }
 #'
 #' @seealso
 #' \code{\link{extract_data}} for extracting climate data.
@@ -80,9 +85,9 @@ extract_locations <- function(type= NA,
 
     # Check type is a valid data type
     if (!is.character(type))
-      .pretty.stop('The input variable type must be a character string.')
+      .pretty_stop('The input variable type must be a character string.')
     if (length(type)>1)
-      .pretty.stop('The input variable type must be a single character string, not a vector.')
+      .pretty_stop('The input variable type must be a single character string, not a vector.')
 
     # Get geofabric index for the required variable
     ind = switch (type,
@@ -96,7 +101,7 @@ extract_locations <- function(type= NA,
       aquifer_upper = 57,
       aquifer_mid = 58,
       aquifer_lower = 59,
-      .pretty.stop(paste('The following input type is invalid:', type))
+      .pretty_stop(paste('The following input type is invalid:', type))
     )
 
     # Set postfix URL for type
@@ -123,7 +128,7 @@ extract_locations <- function(type= NA,
                       TAS = 7,
                       VIC = 8,
                       WA = 9,
-                      .pretty.stop(paste('The following input id is unknown for the type "state":', id[i]))
+                      .pretty_stop(paste('The following input id is unknown for the type "state":', id[i]))
           )
         }
         id = id_int
@@ -160,13 +165,13 @@ extract_locations <- function(type= NA,
 
         # Check field name
         if (!(fname %in% names(v)))
-          .pretty.stop(paste('The variable name corresponding to the input type was not in the spatial data:', fname))
+          .pretty_stop(paste('The variable name corresponding to the input type was not in the spatial data:', fname))
 
 
         # Check if id values are in the corresponding field.
         indx = id %in% terra::values(v[,fname])[,1]
         if (any(!indx))
-          .pretty.stop(cat('The folowing id value are not in the spatial data:', id[!indx]))
+          .pretty_stop(cat('The folowing id value are not in the spatial data:', id[!indx]))
 
         if (all(is.character(id))) {
           base_string <- paste0("%s IN (", paste(rep("'%s' ", length(id)),collapse = ", "), ')')
