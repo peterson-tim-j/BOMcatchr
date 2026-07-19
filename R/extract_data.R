@@ -50,8 +50,8 @@
 #' ET must also be extracted (i.e. the input for such would generally be \code{c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')}.
 #' Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
 #' provided by \code{rownames(BOMcatchr::grid_summary(ncdfFilename))}.
-#' @param locations is either the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
-#' already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS 80, and the first column must be a unique ID.
+#' @param locations is either an output \code{terraa::vect} onjhect from \code{\link{extract_locations}}, the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
+#' already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS80 or WGS84, and the first column must be a unique ID.
 #' @param temporal.timestep character string for the time step of the output data. The options are \code{daily}, \code{weekly}, \code{monthly}, \code{quarterly},
 #' \code{annual}  or a user-defined index for, say, water-years (see \code{xts::period.apply}). The default is \code{daily}.
 #' @param temporal.fn.outer character string or function object for complex aggregation of the raw daily or monthly source data to \code{temporal.timestep}. The function is
@@ -100,6 +100,7 @@
 #' When \code{locations} are points, the returned variable is a data.frame containing daily climate data at each point.
 #'
 #' @seealso
+#' \code{\link{extract_locations}} to get spatial data of catchment boundaries etc..
 #' \code{\link{grid_build}} for building the NetCDF files of daily climate data.
 #'
 #' @examples
@@ -123,10 +124,8 @@
 #'              updateTo=endDate,
 #'              vars = c('precip'))
 #'
-#' # Load example catchment boundaries and remove all but the first.
-#' # Note, this is done only to speed up the example runtime.
-#' catch = catchments()
-#' catch = catch[1,]
+#' # Load example catchment boundary.
+#' catch <- extract_locations('catchment',c('407214'))
 #'
 #' # Extract daily precip. data (not Tmin, Tmax, VPD, ET).
 #' # Note, the input "locations" can also be a file to a ESRI shape file.
@@ -409,9 +408,11 @@ extract_data <- function(
     terra::crs(locations) <- '+proj=longlat +ellps=GRS80'
   }
   if (!grepl('+proj=longlat', terra::crs(locations, proj=T)) ||
-      !grepl('+ellps=GRS80', terra::crs(locations, proj=T))) {
-    message('WARNING: The projection string of the locations does not appear to be +proj=longlat +ellps=GRS80. Attempting to transform coordinates...')
-    locations = terra::project(locations, to = '+proj=longlat +ellps=GRS80')
+      (!grepl('+datum=GRS80', terra::crs(locations, proj=T)) && !grepl('+datum=WGS84', terra::crs(locations, proj=T)))
+      ) {
+    message('WARNING: The projection string of the locations does not appear to be "+proj=longlat +datum=GRS80" or "+proj=longlat +datum=WGS84".')
+    message('         Attempting to transform coordinates to "+proj=longlat +datum=GRS80" ...')
+    locations = terra::project(locations, y = '+proj=longlat +datum=GRS80')
   }
 
   # Check each catchment or point has a unique (non-NA) ID. Note.
