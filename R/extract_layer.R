@@ -6,9 +6,12 @@
 #' low level function is unlikely to be of use to a user.
 #'
 #' @param ncdfFilename is a full file name (as string) to the netCDF file.
-#' @param ncdf.cond connection to the netcdf file. Default is \code(NA). If not provided the connection is established.
+#' @param ncdf.cond connection to the netcdf file. Default is \code{NA}. If not provided the connection is established.
 #' @param extract.date is a date string specifying the date for data extraction.
-#' @param var is a character string one one variable to extract. The options are \code{c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')}.
+#' @param var is a character string one one variable to extract. The options are
+#' \code{c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')}.
+#' @param vars.summary netCDF summary data.frame returned by \code{grid_summary(ncdfFilename)}.
+#' Default is \code{NA}, which results in \code{grid_summary(ncdfFilename)} being called internally.
 #'
 #' @return
 #' \code{terra::vect} object.
@@ -25,7 +28,7 @@ extract_layer <- function(
     vars.summary = NA) {
 
   # Check date.
-  if (class(extract.date) != 'Date') {
+  if (!methods::is(extract.date,'Date')) {
     if (is.character(extract.date)) {
       dateExtract = as.Date(extract.date,"%Y-%m-%d")
     } else
@@ -56,7 +59,7 @@ extract_layer <- function(
 
   # Open connection to netcdf file - if not provided.
   do.ncclose = F
-  if (is.na(ncdf.cond) || class(ncdf.cond)!='NetCDF') {
+  if (is.na(ncdf.cond) || !isa(ncdf.cond,'NetCDF')) {
     if (file.exists(ncdfFilename)) {
       ncdf.cond <- RNetCDF::open.nc(ncdfFilename)
       do.ncclose = T
