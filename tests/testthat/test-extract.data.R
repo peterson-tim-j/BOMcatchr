@@ -24,7 +24,7 @@ test_that("netCDF grid can be created",
       expect_no_error(
         {
           # Load example catchment boundaries.
-          catch <- catchments()
+          catch <- extract_locations('catchment',c('407214','407220'))
 
           # Extract catchment average monthly data P for Bet Bet Creek.
           climateData.P= extract_data(ncdfFilename=ncdfFilename,
@@ -33,15 +33,15 @@ test_that("netCDF grid can be created",
                                               locations=catch,
                                               vars = c('precip'),
                                               temporal.timestep = 'monthly',
-                                              temporal.function.name = 'sum',
-                                              spatial.function.name='var')
+                                              temporal.fn.inner = 'sum',
+                                              spatial.fn='var')
         },
         message='Testing extraction of P monthly data.'
       )
 
       # Test df dimensions
-      expect_true(is.data.frame(climateData.P$temporal.sum))
-      expect_shape(climateData.P$temporal.sum, dim = c(4, 6))
+      expect_true(is.data.frame(climateData.P$temporal))
+      expect_shape(climateData.P$temporal, dim = c(4, 6))
 
       expect_no_error(
         {
@@ -56,8 +56,8 @@ test_that("netCDF grid can be created",
                                                   locations=catch,
                                                   vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
                                                   temporal.timestep = 'monthly',
-                                                  temporal.function.name = 'sum',
-                                                  spatial.function.name='var',
+                                                  temporal.fn.inner = 'sum',
+                                                  spatial.fn='var',
                                                   ET.function='ET.MortonCRAE',
                                                   ET.timestep='monthly',
                                                   ET.constants=constants);
@@ -70,12 +70,12 @@ test_that("netCDF grid can be created",
       expect_type(climateData.P_PET, 'list')
 
       # Test df dimensions
-      expect_true(is.data.frame(climateData.P_PET$temporal.sum))
-      expect_shape(climateData.P_PET$temporal.sum, dim = c(4, 11))
+      expect_true(is.data.frame(climateData.P_PET$temporal))
+      expect_shape(climateData.P_PET$temporal, dim = c(4, 11))
 
       # check data is finite
-      expect_true(all(is.finite(climateData.P$temporal.sum[,5])), 'Test precip results are finite')
-      expect_true(all(is.finite(climateData.P_PET$temporal.sum[,11])), 'Test PET results are finite')
+      expect_true(all(is.finite(climateData.P$temporal[,5])), 'Test precip results are finite')
+      expect_true(all(is.finite(climateData.P_PET$temporal[,11])), 'Test PET results are finite')
 
 
       expect_no_error(
@@ -89,8 +89,8 @@ test_that("netCDF grid can be created",
                                       locations=centroid,
                                       vars = c('precip'),
                                       temporal.timestep = 'weekly',
-                                      temporal.function.name = 'sum',
-                                      spatial.function.name='var');
+                                      temporal.fn.inner = 'sum',
+                                      spatial.fn='var');
         },
         message='Testing extraction of point P weekly data.'
       )
@@ -104,7 +104,7 @@ test_that("netCDF grid can be created",
                                       locations=catch,
                                       vars = c('precip'),
                                       temporal.timestep = 'monthly',
-                                      temporal.function.name = 'sum');
+                                      temporal.fn.inner = 'sum');
         },
         message='Testing extraction of mapped P monthly data.'
       )
