@@ -148,17 +148,17 @@ grid_ages <- function(ncfile,
     source.dates.opt = unique(as.Date(unlist(source.dates.opt)))
 
     # Get list of colors, one for each date
-    cols = palette.colors(n=length(f.uniq),
+    cols = grDevices::palette.colors(n=length(f.uniq),
                           palette="polychrome36",
                           recycle=T)
     names(cols) <- source.dates.opt
 
     # Expand bottom margin for legend
-    mr = par()$mar
+    mr = graphics::par()$mar
     mr[1] = 10
     mr[2] = 7.1
     mr[4] = 2.1
-    par(mar=mr, xpd=T)
+    graphics::par(mar=mr, xpd=T)
 
     # Empty plot
     plot(
@@ -173,13 +173,13 @@ grid_ages <- function(ncfile,
 
     # x-axis labels
     # 3. Add custom date axis line manually
-    axis.Date(
+    graphics::axis.Date(
       side = 1,
       format = "%Y-%m"
       )
 
     # Y-axis labels
-    axis(
+    graphics::axis(
       side = 2,
       at = 1:length(vars),
       labels = vars,
@@ -194,7 +194,7 @@ grid_ages <- function(ncfile,
       data.rl = rle(as.character(data.tmp$Source.date))
 
       end_idx <- cumsum(data.rl$lengths)
-      start_idx <- c(1, head(end_idx + 1, -1))
+      start_idx <- c(1, utils::head(end_idx + 1, -1))
 
       periods <- data.frame(
         start = data.tmp$Date[start_idx],
@@ -207,7 +207,7 @@ grid_ages <- function(ncfile,
       for (irow in 1:nrow(periods)) {
         icol = cols[[ periods$source.date[irow] ]]
 
-        rect(
+        graphics::rect(
           xleft   = periods$start[irow],
           xright  = periods$end[irow],
           ybottom = y - 0.4,
@@ -218,7 +218,7 @@ grid_ages <- function(ncfile,
       }
     }
 
-    legend(x='bottom',
+    graphics::legend(x='bottom',
            legend= names(cols),
            fill=cols,
            horiz = T,
