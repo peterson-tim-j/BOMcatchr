@@ -1,6 +1,6 @@
 .onLoad <- function(libname, pkgname) {
   required_version <- "1.9"
-  current_version <- packageVersion("terra")
+  current_version <- utils::packageVersion("terra")
 
   if (current_version < required_version) {
     stop(sprintf(
@@ -10,7 +10,7 @@
   }
 
   required_version <- "1.14"
-  current_version <- packageVersion("Evapotranspiration")
+  current_version <- utils::packageVersion("Evapotranspiration")
 
   if (current_version < required_version) {
     stop(sprintf(
