@@ -15,9 +15,15 @@ extract_layer(
 \arguments{
 \item{ncdfFilename}{is a full file name (as string) to the netCDF file.}
 
-\item{extract.date}{is a date string specifying the date for data extraction..}
+\item{ncdf.cond}{connection to the netcdf file. Default is \code{NA}. If not provided the connection is established.}
 
-\item{var}{is a character string one one variable to extract. The options are \code{c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')}.}
+\item{extract.date}{is a date string specifying the date for data extraction.}
+
+\item{var}{is a character string one one variable to extract. The options are
+\code{c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')}.}
+
+\item{vars.summary}{netCDF summary data.frame returned by \code{grid_summary(ncdfFilename)}.
+Default is \code{NA}, which results in \code{grid_summary(ncdfFilename)} being called internally.}
 }
 \value{
 \code{terra::vect} object.

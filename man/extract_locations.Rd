@@ -39,6 +39,9 @@ Otherwise the input variable depends on the type. The options are:
  \item{\code{'aquifer_mid'} : integer for the Geofabric "hydroid".}
  \item{\code{'aquifer_lower'} : integer for the Geofabric "hydroid".}
 }}
+
+\item{url_base}{character string for URL to the BOM geofabric spatial data. Provided to allow editing in case th URL changes.
+The default is https://hosting.wsapi.cloud.bom.gov.au/arcgis/rest/services/.}
 }
 \value{
 terra::SpatVector
@@ -50,13 +53,15 @@ downloaded, allowing an efficient workflow from location selection to data extra
 \details{
 The function downloads a selected set of BOM Australian Hydrological Geospatial Fabric spatial
 vector data (points, lines and polygons) that likely to be relevant to hydrological, hydrogeological
-and aquatic ecological studies. All of the daat is sourced from \url{https://www.bom.gov.au/water/geofabric/}.
+and aquatic ecological studies. All of the data is sourced from \url{https://www.bom.gov.au/water/geofabric/}.
 
 To find the required ID for the desired data type, either download all data and filter for the required
 location (see example) or use the online mapping tool at \url{https://portal.wsapi.cloud.bom.gov.au/arcgis/home/webmap/viewer.html?useExisting=1&layers=35719064c4ea4ad79faa82f5c9c22068}
 }
 \examples{
-# Get state boundary, Loddon River drainage basin, all stream lines, all stream gauges and two catchment boundaries
+\donttest{
+# Get state boundary, Loddon River drainage basin,
+# all stream lines, all stream gauges and two catchment boundaries
  st <- extract_locations('state','VIC')
  dr <- extract_locations('river_region',43637156)
  riv <- extract_locations('river_simple',NA)
@@ -69,14 +74,15 @@ location (see example) or use the online mapping tool at \url{https://portal.wsa
 
  # Map drainage basin and catchments in state
  terra::plot(st, border='grey')
- terra::plot(dr, border='black', add=T)
- terra::plot(catch, col='red', add=T)
+ terra::plot(dr, border='black', add = TRUE)
+ terra::plot(catch, col='red', add = TRUE)
 
  # Map catchments, streamlines and gauges
  terra::plot(dr, border='black')
- terra::plot(catch, border='red', add=T)
- terra::plot(riv, col='blue', add=T)
- terra::plot(gauge, col='grey', add=T)
+ terra::plot(catch, border='red', add = TRUE)
+ terra::plot(riv, col='blue', add = TRUE)
+ terra::plot(gauge, col='grey', add = TRUE)
+}
 
 }
 \seealso{
