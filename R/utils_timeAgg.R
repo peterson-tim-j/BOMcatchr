@@ -102,7 +102,7 @@ clim <- function(x, by, ind, FUN) {
     x.agg.avg <- colMeans(x.agg)
     x.agg.avg <- matrix(x.agg.avg, nrow = nrow(x.agg), ncol = length(x.agg.avg), byrow = TRUE)
   } else {
-    x.agg.avg <- zoo::aggregate.zoo(x.agg, by=x.agg.fmt, mean)
+    x.agg.avg <- stats::aggregate(x.agg, by=x.agg.fmt, mean)
     x.agg.avg.df = data.frame(avg = zoo::coredata(x.agg.avg), row.names = zoo::index(x.agg.avg))
 
     # M<ake df of zoo agg data and timestep labels
