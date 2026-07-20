@@ -5,6 +5,7 @@ setwd('BOMcatchr')
 
 # Build docs
 library(roxygen2)
+library(qpdf)
 devtools::document()
 
 # Build PDF. If BOMcatchr.pdf already exists, then delete before running.
