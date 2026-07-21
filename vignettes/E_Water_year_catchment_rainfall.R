@@ -1,55 +1,27 @@
----
-title: "Water-year and seasonal area precipitation and error estimates"
-description: >
-  This vignette shows how to build extract water-year ans seasonal area weighted
-  precipitation, anomaly and cumulative anomaly. Interpolation error in the daily
-  precipitation is also estimated.
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Water-year and seasonal area precipitation and error estimates}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\usepackage[utf8]{inputenc}
----
-
-```{r, include = FALSE}
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 options(tibble.print_min = 4L, tibble.print_max = 4L)
-```
 
-```{r setup}
+## ----setup--------------------------------------------------------------------
 library(BOMcatchr)
-```
 
-## Make netCDF files
-The first step is to create the netCDF file. Here grids are build for monthly precipitation, daily precipitation and the daily root measure square error (RMSE) from the interpolation of the rain gauge data - and only between the dates \code{update.from} and \code{update.to}.
-
-First, let's define the start and end dates for data grids and the file names.
-
-```{r}
+## -----------------------------------------------------------------------------
 date.from = as.Date("2010-01-01","%Y-%m-%d")
 date.to = as.Date("2015-12-31","%Y-%m-%d")
 
 ncdfFilename = tempfile(fileext='.nc')
-```
 
-Next, let's make the data grids over this period. Note, the monthly root mean square interpolation error (RMSE) gridded data is not provided the Bureau of Meteorology and is therefore not able to be used below.
-```{r}
+## -----------------------------------------------------------------------------
 fname = grid_build(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('precip', 'precip.RMSE', 'precip.monthly'))
-```
-## Load catchment boundaries
-Now that we have the meteorological data we can begin extracting data for two catchments. To make it easy to get the require location data, the package includes the function \code{extract_locations}, which pulls vector spatial data from the BOM Australian Hydrological Geospatial Fabric.  Here it to used to obtain the boundaries for two catchments within the Loddon basin, Victoria. However, shape files of polygons can easily be used once imported into R.
-```{r}
+
+## -----------------------------------------------------------------------------
 catch <- extract_locations('catchment',c('407214','407220'))
 site_ID <- catch$stationno
-```
 
-## Extract calendar year precipitation
-Next let's extract the calendar year area weighted total precipitation across the two catchments. The data is extracted between the dates \code{extract.from} and \code{extract.to}. Because the output time step can be estimated from both the daily and monthly source data, both can be extracted at the same time.
-
-```{r}
+## -----------------------------------------------------------------------------
 climateData.annual = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
@@ -58,11 +30,8 @@ climateData.annual = extract_data(ncdfFilename = ncdfFilename,
                       temporal.timestep = 'annual',
                       temporal.fn.inner = 'sum',
                       spatial.fn = 'var')
-```
 
-Now let's also estimate the uncertainty in the calender year rainfall using the root mean square interpolation error (RMSE). Specifically, we are assuming that the error is unbiased, which allows us to assume the RMSE equals the standard deviation. Taking the square of it gives us the variance, which we can sum over the water year. Once all of the calender year data is extracted, the total annual precipitation is plotted.
-
-```{r}
+## -----------------------------------------------------------------------------
 sqrd_sum <- function(x) {return(sum(x^2))}
 
 climateData.annual.err = extract_data(ncdfFilename = ncdfFilename,
@@ -73,12 +42,8 @@ climateData.annual.err = extract_data(ncdfFilename = ncdfFilename,
                       temporal.timestep = 'annual',
                       temporal.fn.inner = sqrd_sum,
                       spatial.fn = 'var')
-```
 
-```{r}
-#| fig.width = 8,
-#| fig.height = 6
-
+## -----------------------------------------------------------------------------
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the precipitation.
@@ -140,17 +105,12 @@ for (i in 1:length(site_ID)) {
          xpd = NA,
          cex=0.75)
 }
-```
 
-## Extract water year precipitation
-Alternatively the water-year area weighted total precipitation cn be extracted. To do this, an index to start of each water year is required. Here the water year starts on the first of March. Note, the same approach can be used to extract data over other time steps, such as seasonal.
-
-```{r}
+## -----------------------------------------------------------------------------
 dates = seq.Date(date.from, date.to, by ='day')
 wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
-```
 
-```{r}
+## -----------------------------------------------------------------------------
 climateData.daily2wateryear = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
@@ -159,11 +119,8 @@ climateData.daily2wateryear = extract_data(ncdfFilename = ncdfFilename,
                       temporal.timestep = wateryear.ind,
                       temporal.fn.inner = 'sum',
                       spatial.fn = 'var')
-```
 
-Now let's estimate the uncertainty in the water year rainfall using the root mean square interpolation error (RMSE).
-
-```{r}
+## -----------------------------------------------------------------------------
 climateData.daily2wateryear.err = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
@@ -172,15 +129,12 @@ climateData.daily2wateryear.err = extract_data(ncdfFilename = ncdfFilename,
                       temporal.timestep = wateryear.ind,
                       temporal.fn.inner = sqrd_sum,
                       spatial.fn = 'var')
-```
-Finally, let's also extract the water year using the monthly gridded precipitation data.
 
-```{r}
+## -----------------------------------------------------------------------------
 dates = seq.Date(date.from, date.to, by ='month')
 wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
-```
 
-```{r}
+## -----------------------------------------------------------------------------
 climateData.month2wateryear = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
@@ -189,10 +143,8 @@ climateData.month2wateryear = extract_data(ncdfFilename = ncdfFilename,
                       temporal.timestep = wateryear.ind,
                       temporal.fn.inner = 'sum',
                       spatial.fn = 'var')
-```
 
-Before plotting the water year data, the time steps with less than a full water year of data are filtered out.
-```{r}
+## -----------------------------------------------------------------------------
 filt = climateData.daily2wateryear$temporal$days.per.timestep >= 365
 climateData.daily2wateryear$temporal = climateData.daily2wateryear$temporal[filt, ]
 
@@ -202,13 +154,8 @@ climateData.daily2wateryear.err$temporal = climateData.daily2wateryear.err$tempo
 filt = climateData.month2wateryear$temporal$months.per.timestep == 12
 climateData.month2wateryear$temporal = climateData.month2wateryear$temporal[filt, ]
 
-```
 
-Now let's compare the two estimates of water year precipitation at the two catchments. The blue line shows the water year total rainfall calculated from the daily data, with the black vertical bars denoting the estimated 5th to 95th error from the interpolation of rain gauges. The red line shows the the water year total rainfall calculated from the monthly data.
-```{r}
-#| fig.width = 8,
-#| fig.height = 6
-
+## -----------------------------------------------------------------------------
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
@@ -270,12 +217,8 @@ for (i in 1:length(site_ID)) {
          xpd = NA,
          cex=0.75)
 }
-```
 
-## Calculate the seasonal cumulative rainfall anomaly
-Multiple more advanced measures can also be derived. To demonstrate, here the area weighted seasonal rainfall anomaly is calculated using both the daily and monthly data. To achieve this only two changes are required. The input \code{temporal.timestep} is changed to \code{'seasonal'} and the temporal function \code{temporal.fn.inner} is changed. In the first example, the later function is changed to \code{'annom.mean'}. This calculates the seasonal anomaly where the within season data is the mean of the time-step. Many other options are also available such as \code{'annom.sum'}, \code{'annom.min'}, \code{'annom.max'}, \code{'annom.median'}, \code{'annom.var'}.
-
-```{r}
+## -----------------------------------------------------------------------------
 annom.seaonal = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
@@ -285,10 +228,8 @@ annom.seaonal = extract_data(ncdfFilename = ncdfFilename,
                       temporal.fn.outer = 'annom',
                       temporal.fn.inner = 'sum',
                       spatial.fn = 'var')
-```
-Now let's also calculate the the area weighted seasonal cumulative rainfall anomaly. Note, like the anomaly calculation, many other functions are available for the within-seasonal calculation.
 
-```{r}
+## -----------------------------------------------------------------------------
 cumannom.seaonal = extract_data(ncdfFilename = ncdfFilename,
                       extractFrom = date.from,
                       extractTo = date.to,
@@ -298,13 +239,8 @@ cumannom.seaonal = extract_data(ncdfFilename = ncdfFilename,
                       temporal.fn.outer = 'cumannom',
                       temporal.fn.inner = 'sum',
                       spatial.fn = 'var')
-```
 
-Now let's compare the two estimates the precipitation anomaly and cumulative anomaly at the two catchments. The blue line shows that calculated from the daily data and the red line shows that calculated from the monthly data.
-```{r}
-#| fig.width = 8,
-#| fig.height = 6
-
+## -----------------------------------------------------------------------------
 par(mfrow=c(2,2), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
@@ -373,4 +309,4 @@ for (i in 1:length(site_ID)) {
          xpd = NA,
          cex=0.75)
 }
-```
+

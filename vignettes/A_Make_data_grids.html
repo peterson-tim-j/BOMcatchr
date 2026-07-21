@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Make source data grids</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Make source data grids</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(BOMcatchr)</span></code></pre></div>
+<p>This example shows how to build the required data file, plot date
+that the file variables were built and then update it.</p>
+<div id="make-netcdf-file" class="section level2">
+<h2>Make netCDF file</h2>
+<p>This example shows the steps required to build the netCDF data grid
+file.</p>
+<p>First, let’s define the dates for the data grids. Here the data grids
+are created for data between the dates and . If the latter two dates
+were not input then data would be downloaded from 1/1/1900 to
+yesterday.</p>
+<p>Note, in practice users often run once to build the netCDF data file
+that contain all variables over the entire record length (which requires
+~5GB disk storage) and then use the netCDF grids for multiple projects,
+rather than re-building the netCDF grids for each project.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>startDate <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="fu">Sys.Date</span>()<span class="sc">-</span><span class="dv">15</span>,<span class="st">&quot;%Y-%m-%d&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>endDate <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="fu">Sys.Date</span>()<span class="sc">-</span><span class="dv">5</span>,<span class="st">&quot;%Y-%m-%d&quot;</span>)</span></code></pre></div>
+<p>Next the file name for the netCDF grids need to be defined. Here
+we’ll just use a temporary file. You should change this to a
+non-temporary file name and folder.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>ncdfFilename <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext=</span><span class="st">&#39;.nc&#39;</span>)</span></code></pre></div>
+<p>Now we’re ready to download and build the netCDF grids.</p>
+<p>The netCDF data file contains grids of daily rainfall, minimum and
+maximum temperature. Below, this will be updated to include vapour
+pressure and solar radiation for all of Australia.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">grid_build</span>(<span class="at">ncdfFilename=</span>ncdfFilename,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                <span class="at">updateFrom=</span>startDate, <span class="at">updateTo=</span>endDate,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip&#39;</span>,<span class="st">&#39;tmin&#39;</span>,<span class="st">&#39;tmax&#39;</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;     Testing tmin grid data.</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;     Testing tmax grid data.</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ... Checking updateFrom and updateTo dates.</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;        - New variables to add: precip  tmin  tmax</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-07-06  to  2026-07-16</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; Data construction FINISHED.</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;        Imported Errors</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; precip       11      0</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; tmin         11      0</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; tmax         11      0</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:14</span></span></code></pre></div>
+<p>Now let’s get a summary of the netCDF file that we’ve created. Note
+that the output data.frame shows the expected variables over the
+expected date range.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>summary.df <span class="ot">&lt;-</span> BOMcatchr<span class="sc">::</span><span class="fu">grid_summary</span>(ncdffile.name)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>summary.df</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt;        group    var.string       from         to time.step</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; precip grid1 /grid1/precip 2026-07-06 2026-07-16      days</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; tmin   grid1   /grid1/tmin 2026-07-06 2026-07-16      days</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; tmax   grid1   /grid1/tmax 2026-07-06 2026-07-16      days</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;                                    time.datum  units              ellipsoid.crs</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; tmax   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span></code></pre></div>
+</div>
+<div id="plot-source-data-of-data" class="section level2">
+<h2>Plot source data of data</h2>
+<p>The BoM gridded data undergoes a detailed review and update process
+(see <a href="here">https://www.bom.gov.au/climate/austmaps/about-rain-maps.shtml</a>
+and <a href="here">https://www.bom.gov.au/climate/austmaps/update-schedule.shtml</a>
+). Hence, the netCDF grids that one may have built some time ago may be
+require updating with revised BoM data.</p>
+<p>To understand when each variable and time-step was built, and which
+needs updating, the netCDF data can be examined against the above BoM
+update schedules - see for details. The plot below shows the date each
+time-step of each variable was downloaded. The output from reports if
+any variables can be updated. Note, the input is ONLY used for testing
+and should not be input during regular use. Here today is set to 12 days
+into the future.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>summary.ages <span class="ot">&lt;-</span> BOMcatchr<span class="sc">::</span><span class="fu">grid_ages</span>(ncdffile.name, <span class="at">today =</span> <span class="fu">Sys.Date</span>()<span class="sc">+</span><span class="dv">12</span>, <span class="at">plot.sourcedate =</span> T)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; Summary of source grid update dates for each variable:</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;     precip : 2026-07-06</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;     tmin : 2026-07-06</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;     tmax : 2026-07-06</span></span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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tsfPtMKfwP6xowDv8pMWfDo4Tiw3qeUVOPOviIy8perYM78EulUzlOvbOrcevjL04aExTvpSg+5bE3iaHba4bTUdiVb97y8rKZ8StmZUG0czuVRuWssj4McDUdmV+rIqBy6VAmAIx2AADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADOW+L1gAAAGqSURBVCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADCFgAAwhYAAMIWAADP0fcRQCMrM+/iQAAAAASUVORK5CYII=" /><!-- --></p>
+</div>
+<div id="update-an-existing-variable" class="section level2">
+<h2>Update an existing variable</h2>
+<p>Now that we’ve built the above file, the updating can be
+demonstrated.</p>
+<p>The package allows for such updating between user defined dates. Here
+we’ll update the data between the dates defined prior. Also, note that
+is not defined. This will cause all variables in the original file to be
+updated. That said, individual variables can be updated.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">grid_build</span>(<span class="at">ncdfFilename=</span>ncdffile.name,</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>                <span class="at">updateFrom=</span>startDate, <span class="at">updateTo=</span>endDate)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt;     Testing tmin grid data.</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt;     Testing tmax grid data.</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; ... Checking updateFrom and updateTo dates.</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt;        - New variables to add: (none)</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt;        - Existing variables to modify: precip  tmin  tmax</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-07-06  to  2026-07-16</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; Data construction FINISHED.</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt;        Imported Errors</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; precip       11      0</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; tmin         11      0</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; tmax         11      0</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:12</span></span></code></pre></div>
+</div>
+<div id="add-a-variable-to-existing-data-grids" class="section level2">
+<h2>Add a variable to existing data grids</h2>
+<p>Here we’ll update the data grids to also include vapour pressure.
+Here the same date range will be used. Because the date range of the new
+variable equals the date range of the existing variables, only vapour
+pressure data is updated. This feature can be used to update the data of
+a single variable as required.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">grid_build</span>(<span class="at">ncdfFilename=</span>ncdffile.name,</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>                <span class="at">updateFrom=</span>startDate, <span class="at">updateTo=</span>endDate,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;vprp&#39;</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt;     Testing vprp grid data.</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt;     Testing tmin grid data.</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt;     Testing tmax grid data.</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; ... Checking updateFrom and updateTo dates.</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt;        - New variables to add: vprp</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;        - Existing variables to modify: (none)</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-07-06  to  2026-07-16</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; Data construction FINISHED.</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt;      Imported Errors</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co">#&gt; vprp       11      0</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:06</span></span></code></pre></div>
+<p>Now let’s check that the file includes both the original three
+variable plus vapour pressure.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>summary.df <span class="ot">&lt;-</span> BOMcatchr<span class="sc">::</span><span class="fu">grid_summary</span>(ncdffile.name)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>summary.df</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt;        group    var.string       from         to time.step</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; precip grid1 /grid1/precip 2026-07-06 2026-07-16      days</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; tmin   grid1   /grid1/tmin 2026-07-06 2026-07-16      days</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; tmax   grid1   /grid1/tmax 2026-07-06 2026-07-16      days</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; vprp   grid1   /grid1/vprp 2026-07-06 2026-07-16      days</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt;                                    time.datum  units              ellipsoid.crs</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; precip days since 1900-01-01 00:00:00.0 -0:00 mm/day +proj=longlat +ellps=GRS80</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; tmin   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; tmax   days since 1900-01-01 00:00:00.0 -0:00  deg_C +proj=longlat +ellps=GRS80</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; vprp   days since 1900-01-01 00:00:00.0 -0:00    hpa +proj=longlat +ellps=GRS80</span></span></code></pre></div>
+</div>
+<div id="add-a-variable-to-existing-data-grids-and-update-other-variables" class="section level2">
+<h2>Add a variable to existing data grids and update other
+variables</h2>
+<p>Now lets add solar radiation. Here an earlier start date will be
+used. However, because the date range of all variables within the netCDF
+file must be equal, the date range of the other variables must also be
+updated.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>startDate <span class="ot">&lt;-</span> startDate <span class="sc">-</span> <span class="dv">5</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>ncdffile.name <span class="ot">&lt;-</span> <span class="fu">grid_build</span>(<span class="at">ncdfFilename=</span>ncdffile.name,</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>                <span class="at">updateFrom=</span>startDate, <span class="at">updateTo=</span>endDate,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;solarrad&#39;</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; ... Testing downloading of each variable.</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt;     Testing solarrad grid data.</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt;     Testing precip grid data.</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt;     Testing tmin grid data.</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt;     Testing tmax grid data.</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt;     Testing vprp grid data.</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; ... Checking updateFrom and updateTo dates.</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; ... NetCDF file will be updated as follows:</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt;        - New variables to add: solarrad</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt;        - Existing variables to modify: precip  tmin  tmax  vprp</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt;        - Data will be updated from  2026-07-01  to  2026-07-16</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; ... Downloading data for each variable and importing to netcdf file:</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt; Data construction FINISHED.</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt; Summary of time points successfully imported (and errors).</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt;          Imported Errors</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt; solarrad       16      0</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt; precip         16      0</span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; tmin           16      0</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; tmax           16      0</span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt; vprp           16      0</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:31</span></span></code></pre></div>
+<p>Now let’s check that the file includes both the prior four variables
+plus solar radiation.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>summary.df <span class="ot">&lt;-</span> BOMcatchr<span class="sc">::</span><span class="fu">grid_summary</span>(ncdffile.name)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>summary.df</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt;          group      var.string       from         to time.step</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; precip   grid1   /grid1/precip 2026-07-01 2026-07-16      days</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; tmin     grid1     /grid1/tmin 2026-07-01 2026-07-16      days</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; tmax     grid1     /grid1/tmax 2026-07-01 2026-07-16      days</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; vprp     grid1     /grid1/vprp 2026-07-01 2026-07-16      days</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; solarrad grid2 /grid2/solarrad 2026-07-01 2026-07-16      days</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt;                                      time.datum  units</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; precip   days since 1900-01-01 00:00:00.0 -0:00 mm/day</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; tmin     days since 1900-01-01 00:00:00.0 -0:00  deg_C</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt; tmax     days since 1900-01-01 00:00:00.0 -0:00  deg_C</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; vprp     days since 1900-01-01 00:00:00.0 -0:00    hpa</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt; solarrad days since 1900-01-01 00:00:00.0 -0:00 MJ/m^2</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt;                       ellipsoid.crs</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; precip   +proj=longlat +ellps=GRS80</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; tmin     +proj=longlat +ellps=GRS80</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt; tmax     +proj=longlat +ellps=GRS80</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt; vprp     +proj=longlat +ellps=GRS80</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt; solarrad +proj=longlat +ellps=GRS80</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -15,5 +15,3 @@ BOMcatchr.pdf
 NEWS.md
 NEWS.html
 ^data-raw$
-^vignettes$
-^vignettes/.*
