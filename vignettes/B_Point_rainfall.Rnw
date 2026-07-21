@@ -48,7 +48,7 @@ With the data grids built, let's load for the coordinates for the four example w
 data("weather_gauge_loc")
 
 coords = terra::vect(weather_gauge_loc,
-                     crs = '+proj=longlat +ellps=GRS80 +no_defs',
+                     crs = '+proj=longlat +datum=GRS80',
                      geom = c("longitude", "latitude")
                      )
 
