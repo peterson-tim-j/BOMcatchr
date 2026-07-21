@@ -115,66 +115,71 @@ extract_locations <- function(type= NA,
                          )
 
     # Build filter for required locations
-    if (length(id)==1 && is.na(id)) {
-      where <- utils::URLencode('1=1', reserved=T)
-    } else {
-      if (type =='state') {
+    if (type =='state') {
+      fname <- 'state'
+      if (length(id)==1 && is.na(id))
+        where <- utils::URLencode('1=1', reserved=T)
+      else {
         id_int = rep(0, length(id))
         for (i in 1:length(id)) {
           id_int[i] = switch(id[i],
-                      ACT = 1,
-                      NSW = 3,
-                      NT = 4,
-                      QLD = 5,
-                      SA = 6,
-                      TAS = 7,
-                      VIC = 8,
-                      WA = 9,
-                      .pretty_stop(paste('The following input id is unknown for the type "state":', id[i]))
+                             ACT = 1,
+                             NSW = 3,
+                             NT = 4,
+                             QLD = 5,
+                             SA = 6,
+                             TAS = 7,
+                             VIC = 8,
+                             WA = 9,
+                             .pretty_stop(paste('The following input id is unknown for the type "state":', id[i]))
           )
         }
         id = id_int
 
         base_string <- paste0("%s IN (", paste(rep("%s ", length(id)),collapse = ", "), ')')
+
         where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, as.list( c('state',id) ))), reserved = T)
-        fname <- 'state'
-      } else {
-        # Set the field name use to filter each data type
-        fname = switch(type,
-                       water_gauge = 'stationno',
-                       river_simple = 'hydroid',
-                       waterbody_simple = 'hydroid',
-                       river_region = 'hydroid',
-                       drainage_division = 'divnumber',
-                       catchment = 'stationno',
-                       aquifer_upper = 'hydroid',
-                       aquifer_mid = 'hydroid',
-                       aquifer_lower = 'hydroid'
-        )
+      }
+    } else {
+      # Set the field name use to filter each data type
+      fname = switch(type,
+                     water_gauge = 'stationno',
+                     river_simple = 'hydroid',
+                     waterbody_simple = 'hydroid',
+                     river_region = 'hydroid',
+                     drainage_division = 'divnumber',
+                     catchment = 'stationno',
+                     aquifer_upper = 'hydroid',
+                     aquifer_mid = 'hydroid',
+                     aquifer_lower = 'hydroid'
+      )
 
-        # Build URL that does not download the geometry and then check the ID is in the returned objects.
+      # Build URL that does not download the geometry and then check the ID is in the returned objects.
+      where <- utils::URLencode('1=1', reserved=T)
+      url = paste0(url_base,
+                   url_postfix,
+                   ind, '/query?',
+                   'where=', where,
+                   '&outFields=*',
+                   '&returnGeometry=false',
+                   '&f=geojson')
+
+      # Download data
+      v = terra::vect(url)
+
+      # Check field name
+      if (!(fname %in% names(v)))
+        .pretty_stop(paste('The variable name corresponding to the input type was not in the spatial data:', fname))
+
+      if (length(id)==1 && is.na(id))
         where <- utils::URLencode('1=1', reserved=T)
-        url = paste0(url_base,
-                     url_postfix,
-                     ind, '/query?',
-                     'where=', where,
-                     '&outFields=*',
-                     '&returnGeometry=false',
-                     '&f=geojson')
-
-        # Download data
-        v = terra::vect(url)
-
-        # Check field name
-        if (!(fname %in% names(v)))
-          .pretty_stop(paste('The variable name corresponding to the input type was not in the spatial data:', fname))
-
-
+      else {
         # Check if id values are in the corresponding field.
         indx = id %in% terra::values(v[,fname])[,1]
         if (any(!indx))
           .pretty_stop(cat('The folowing id value are not in the spatial data:', id[!indx]))
 
+        # Buid where filter
         if (all(is.character(id))) {
           base_string <- paste0("%s IN (", paste(rep("'%s' ", length(id)),collapse = ", "), ')')
           where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, as.list( c(fname,id) ))), reserved = T)
@@ -183,7 +188,6 @@ extract_locations <- function(type= NA,
           base_string <- paste0("%s IN (", paste(rep("%d ", length(id)),collapse = ", "), ')')
           where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, c(as.list(fname), as.list(id)) )), reserved = T)
         }
-
       }
     }
 
