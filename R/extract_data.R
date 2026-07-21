@@ -408,11 +408,14 @@ extract_data <- function(
     terra::crs(locations) <- '+proj=longlat +ellps=GRS80'
   }
   if (!grepl('+proj=longlat', terra::crs(locations, proj=T)) ||
-      (!grepl('+datum=GRS80', terra::crs(locations, proj=T)) && !grepl('+datum=WGS84', terra::crs(locations, proj=T)))
+      (!grepl('+datum=GRS80', terra::crs(locations, proj=T)) &&
+       !grepl('+datum=WGS84', terra::crs(locations, proj=T)) &&
+       !grepl('+ellps=GRS80', terra::crs(locations, proj=T)) &&
+       !grepl('+ellps=WGS84', terra::crs(locations, proj=T))   )
       ) {
     message('WARNING: The projection string of the locations does not appear to be "+proj=longlat +datum=GRS80" or "+proj=longlat +datum=WGS84".')
-    message('         Attempting to transform coordinates to "+proj=longlat +datum=GRS80" ...')
-    locations = terra::project(locations, y = '+proj=longlat +datum=GRS80')
+    message('         Attempting to transform coordinates to "+proj=longlat +ellps=GRS80" ...')
+    locations = terra::project(locations, y = '+proj=longlat +ellps=GRS80')
   }
 
   # Check each catchment or point has a unique (non-NA) ID. Note.
