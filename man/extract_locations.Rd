@@ -28,7 +28,9 @@ extract_locations(
 \item{id}{is a scalar or vector of identifiers for the type of item to be downloaded. If \code{NA}, then all items will be downloaded.
 Otherwise the input variable depends on the type. The options are:
 \itemize{
- \item{\code{'state'}: character string for the state. The options are \code{'ACT', 'NSW', 'NT' ,'QLD', 'SA', 'TAS', 'VIC', 'WA'}}.
+ \item{\code{'state'}: character string for the state. The options are
+ \code{'ACT', 'NSW', 'NT' ,'QLD', 'SA', 'TAS', 'VIC', 'WA'}}. Note, column 1 is an integer ID for each state
+ and not a character label.
  \item{\code{'water_gauge'} : character string for the "stationno" ID.}
  \item{\code{'river_simple'} : integer for the Geofabric "rivregnum".}
  \item{\code{'waterbody_simple'} : integer for the Geofabric "hydroid".}

@@ -26,7 +26,9 @@
 #' @param id is a scalar or vector of identifiers for the type of item to be downloaded. If \code{NA}, then all items will be downloaded.
 #' Otherwise the input variable depends on the type. The options are:
 #' \itemize{
-#'  \item{\code{'state'}: character string for the state. The options are \code{'ACT', 'NSW', 'NT' ,'QLD', 'SA', 'TAS', 'VIC', 'WA'}}.
+#'  \item{\code{'state'}: character string for the state. The options are
+#'  \code{'ACT', 'NSW', 'NT' ,'QLD', 'SA', 'TAS', 'VIC', 'WA'}}. Note, column 1 is an integer ID for each state
+#'  and not a character label.
 #'  \item{\code{'water_gauge'} : character string for the "stationno" ID.}
 #'  \item{\code{'river_simple'} : integer for the Geofabric "rivregnum".}
 #'  \item{\code{'waterbody_simple'} : integer for the Geofabric "hydroid".}
@@ -135,7 +137,7 @@ extract_locations <- function(type= NA,
 
         base_string <- paste0("%s IN (", paste(rep("%s ", length(id)),collapse = ", "), ')')
         where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, as.list( c('state',id) ))), reserved = T)
-
+        fname <- 'state'
       } else {
         # Set the field name use to filter each data type
         fname = switch(type,
@@ -197,6 +199,10 @@ extract_locations <- function(type= NA,
 
     # Download spatial data
     v = terra::vect(url)
+
+    # Move column fname to col 1. This is done to meet the requirements of
+    # extract_data() that the first column is the unique identifier.
+    v = v[, c(fname, setdiff(names(v), fname))]
 
     return(v)
 }
