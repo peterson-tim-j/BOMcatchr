@@ -283,7 +283,7 @@ annom.seaonal = extract_data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = 'seasonal',
                       temporal.fn.outer = 'annom',
-                      temporal.fn.inner = 'mean',
+                      temporal.fn.inner = 'sum',
                       spatial.fn = 'var')
 ```
 Now let's also calculate the the area weighted seasonal cumulative rainfall anomaly. Note, like the anomaly calculation, many other functions are available for the within-seasonal calculation.
@@ -296,7 +296,7 @@ cumannom.seaonal = extract_data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = 'seasonal',
                       temporal.fn.outer = 'cumannom',
-                      temporal.fn.inner = 'mean',
+                      temporal.fn.inner = 'sum',
                       spatial.fn = 'var')
 ```
 
