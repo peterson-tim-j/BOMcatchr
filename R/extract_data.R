@@ -43,13 +43,13 @@
 #' @param ncdfFilename is a full file name (as string) to the netCDF file.
 #' @param extractFrom is a date string specifying the start date for data extraction. The default is \code{"1900-1-1"}.
 #' @param extractTo is a date string specifying the end date for the data extraction. The default is today's date as YYYY-MM-DD.
-#' @param vars is a vector of variables names to extract. The available variables are: daily precipitation,
-#' daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation and evapotranspiration.
-#' The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')}. Importantly, the input \code{et} is
-#' calculated from the available gridded data (see \code{ET.} inputs below). To calculate the ET, all of the required inputs for the calculation
-#' ET must also be extracted (i.e. the input for such would generally be \code{c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')}.
-#' Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
-#' provided by \code{rownames(BOMcatchr::grid_summary(ncdfFilename))}.
+#' @param vars is a vector of variables names to extract. The available variables are: daily daily maximum temperature, minimum temperature,
+#' daily precipitation, daily precipitation root-mean-square-error (RMSE), monthly precipitation, daily 9am and 3pm vapour pressure grids and
+#' daily solar radiation and evapotranspiration. The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'precip.RMSE', 'precip.monthly',
+#' 'vprp_9am', 'vprp_3pm', 'solarrad', 'et')}. Importantly, the input \code{et} is calculated from the available gridded data (see \code{ET.} inputs below).
+#' To calculate the ET, all of the required inputs for the calculation ET must also be extracted (i.e. the input for such would generally be
+#' \code{c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et')}. Any or all of the defaults are available. The default \code{''} and this will result in
+#' all of the variables in the netCDF file and provided by \code{rownames(BOMcatchr::grid_summary(ncdfFilename))}.
 #' @param locations is either an output \code{terraa::vect} onjhect from \code{\link{extract_locations}}, the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
 #' already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the EPSG:4283 datum (i.e. GDA94), and the first column must be a unique ID.
 #' @param temporal.timestep character string for the time step of the output data. The options are \code{daily}, \code{weekly}, \code{monthly}, \code{quarterly},
@@ -252,7 +252,7 @@ extract_data <- function(
     temporal.timestep = 'period'
 
   } else if (!any(which(temporal.timestep.options == temporal.timestep))) {
-    .pretty_stop('temporal.timestep must be one of the options listed by .time_agg_options()$temporal.timestep.')
+    .pretty_stop(cat('When temporal.timestep is a character string, it must be one of the following:', temporal.timestep.options))
   }
 
   # Check time step is appropriate for monthly source data - if to be extracted
@@ -266,25 +266,25 @@ extract_data <- function(
   if (!is.character(temporal.fn.outer) &&
       !is.function(temporal.fn.outer)  &&
       !is.na(temporal.fn.outer))
-    .pretty_stop(paste('The input temporal.fn.outer must be a character string to a package built-in function',
-                      'a user-defined function of NA'))
+    .pretty_stop(cat(paste('The input temporal.fn.outer must be a character string to a package built-in function,',
+                           'a user-defined function or NA. The built-in functions are:'),base.agg.fun.inner))
   if (is.character(temporal.fn.outer) && !any(temporal.fn.outer %in% base.agg.fun.outer))
-    .pretty_stop('When temporal.fn.outer is a character string, is must be one of recognised package built-in functions.')
+    .pretty_stop(cat('When temporal.fn.outer is a character string, it must be one of following recognised package built-in functions:', base.agg.fun.outer))
   if (!is.character(temporal.fn.outer) &&
       !is.function(temporal.fn.outer)  &&
       !is.na(temporal.fn.outer))
-    .pretty_stop(paste('The input temporal.fn.outer must be a character string or a package built-in functions',
-                      'or a user-defined function or NA.'))
+    .pretty_stop(cat(paste('The input temporal.fn.outer must be a character string to a package built-in function name',
+                      'or a user-defined function or NA. The recognised package built-in functions:'), base.agg.fun.outer))
   if (is.character(temporal.fn.outer) && !any(temporal.fn.outer %in% base.agg.fun.outer))
-    .pretty_stop('When temporal.fn.outer is a character string, is must be one of recognised package built-in functions.')
+    .pretty_stop(cat('When temporal.fn.outer is a character string, it must be one of following recognised package built-in functions:', base.agg.fun.outer))
 
   if (!is.character(temporal.fn.inner) &&
       !is.function(temporal.fn.inner)  &&
       !is.na(temporal.fn.inner))
-    .pretty_stop(paste('The input temporal.fn.inner must be a character string or a package built-in function',
-                      'or a user-defined function or NA'))
+    .pretty_stop(cat(paste('The input temporal.fn.outer must be a character string to a package built-in function,',
+                           'a user-defined function or NA. The built-in functions are:'),base.agg.fun.inner))
   if (is.character(temporal.fn.inner) && !any(base.agg.fun.inner %in% temporal.fn.inner))
-    .pretty_stop('When temporal.fn.inner is a character string, is must be one of recognised package built-in functions.')
+    .pretty_stop(cat('When temporal.fn.inner is a character string, it must be one of following recognised package built-in functions:', base.agg.fun.inner))
 
   if (!is.function(temporal.fn.outer) && is.na(temporal.fn.outer) &&
       !is.function(temporal.fn.inner) && is.na(temporal.fn.inner))
@@ -371,8 +371,8 @@ extract_data <- function(
       .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: tmin')
     if (ET.inputdata.filt$Tmax[1] && !('tmax' %in% vars))
       .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: tmax')
-    if (ET.inputdata.filt$va[1] && !('vprp' %in% vars))
-      .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: vprp')
+    if (ET.inputdata.filt$va[1] && !('vprp_3pm' %in% vars))
+      .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: vprp_3pm')
     if (ET.inputdata.filt$Precip[1] && !('precip' %in% vars))
       .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: precip')
     if (ET.inputdata.filt$Rs[1] && !('solarrad' %in% vars))
@@ -862,7 +862,7 @@ extract_data <- function(
                                Tmin   = if ('tmin' %in% vars) data.brick[['tmin']][,j]     else rep(NA,ntimepoints2Extract),
                                Tmax   = if ('tmax' %in% vars) data.brick[['tmax']][,j]     else rep(NA,ntimepoints2Extract),
                                Rs     = if ('solarrad' %in% vars) data.brick[['solarrad']][,j] else rep(NA,ntimepoints2Extract),
-                               va     = if ('vprp' %in% vars) data.brick[['vprp']][,j]/10  else rep(NA,ntimepoints2Extract),
+                               va     = if ('vprp_3pm' %in% vars) data.brick[['vprp_3pm']][,j]/10  else rep(NA,ntimepoints2Extract),
                                Precip = if ('precip' %in% vars) data.brick[['precip']][,j]   else rep(NA,ntimepoints2Extract)
                                )
 
@@ -873,7 +873,7 @@ extract_data <- function(
             dataRAW$Tmax <- NULL
           if (!('solarrad' %in% vars))
             dataRAW$Rs <- NULL
-          if (!('vprp' %in% vars))
+          if (!('vprp_3pm' %in% vars))
             dataRAW$va <- NULL
           if (!('precip' %in% vars))
             dataRAW$Precip <- NULL
