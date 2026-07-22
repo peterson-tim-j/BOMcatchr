@@ -3,7 +3,7 @@
 
 .time_agg_options <- function() {
   opt = list( temporal.timestep = c('daily','weekly','monthly','quarterly', 'seasonal', 'wetdry_seasonal','tropical_seasonal', 'annual', 'period') ,
-              temporal.function.outer = c('annom', 'cumannom'),
+              temporal.function.outer = c('clim', 'annom', 'cumannom'),
               temporal.function.inner = c('sum', 'mean', 'min', 'max', 'median', 'sd', 'var', 'IQR'),
               spatial.function = c() )
   return(opt)
