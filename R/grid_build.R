@@ -28,11 +28,12 @@
 #' @param updateTo is a date string specifying the end date for the AWAP data. If
 #'  \code{ncdfFilename} is specified and exist, then the netCDF grids will be
 #'  updated with new data to \code{updateFrom}. The default is two days ago as YYYY-MM-DD.
-#' @param vars is a vector of variables names to build or update. The available variables are: daily precipitation,
-#' monthly precipitation, daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation.
-#' Any or all of the defaults are available. If \code{vars=''} and the netCDF does not exist, then the default is
-#' \code{c('precip', 'precip.monthly','tmin', 'tmax', 'vprp', 'solarrad')} and provided by \code{rownames(grid_sources())}.
-#' However, if \code{vars=''} and the netCDF file does exist, then default is to use the variable names in the file.
+#' @param vars is a vector of variables names to build or update. The available variables are: daily daily maximum temperature, minimum temperature,
+#' daily precipitation, daily precipitation root-mean-square-error (RMSE), monthly precipitation, daily 9am and 3pm vapour pressure grids and
+#' daily solar radiation The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'precip.RMSE', 'precip.monthly',
+#' 'vprp_9am', 'vprp_3pm', 'solarrad')}. Any or all of the defaults are available. If \code{vars=''} and the netCDF does not exist, then the default is
+#' all available variables as provided by \code{rownames(grid_sources())}. However, if \code{vars=''} and the netCDF file does exist, then default
+#' is to use the variable names in the file.
 #' @param keepFiles is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.
 #' @param compressionLevel is the netCDF compression level between 1 (low) and 9 (high), and \code{NA} for no compression.
 #' Note, data extraction runtime may slightly increase with the level of compression. The default is \code{5}.
