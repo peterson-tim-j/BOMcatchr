@@ -89,7 +89,17 @@ grid_sources <- function() {
                            'EPSG:4283',
                            '')
 
-  var.data['vprp',] <- c(  '3pm daily vapour pressure',
+  var.data['vprp_9am',] <- c(  '9am daily vapour pressure',
+                           'hpa',
+                           'days',
+                           'https://www.bom.gov.au/web03/ncc/www/awap/vprp/vprph09/daily/grid/0.05/history/nat/',
+                           'grid.Z',
+                           'grid',
+                           'vprp',
+                           'EPSG:4283',
+                           '90')
+
+  var.data['vprp_3pm',] <- c(  '3pm daily vapour pressure',
                            'hpa',
                            'days',
                            'https://www.bom.gov.au/web03/ncc/www/awap/vprp/vprph15/daily/grid/0.05/history/nat/',
