@@ -48,7 +48,7 @@ With the data grids built, let's load for the coordinates for the four example w
 data("weather_gauge_loc")
 
 coords = terra::vect(weather_gauge_loc,
-                     crs = '+proj=longlat +ellps=GRS80 +no_defs',
+                     crs = 'EPSG:4283',
                      geom = c("longitude", "latitude")
                      )
 
@@ -92,7 +92,7 @@ r  = extract_layer(ncdfFilename = ncdfFilename,
 
 # Get coordinate of grid cell centre.
 v = terra::xyFromCell(r, 1:(terra::ncol(r)*terra::nrow(r)) )
-v = terra::vect(v,  crs = '+proj=longlat +ellps=GRS80 +no_defs')
+v = terra::vect(v,  crs = 'EPSG:4283')
 
 # Map around each gauge
 for (i in 1:n_sites){
@@ -103,7 +103,7 @@ for (i in 1:n_sites){
                 )
   coord_ext = terra::ext(coord_box)
   crd = terra::vect(weather_gauge_loc[i,],
-                    crs = '+proj=longlat +ellps=GRS80 +no_defs',
+                    crs = 'EPSG:4283',
                     geom = c('longitude', 'latitude')
                    )
   v_crp = terra::crop(v, coord_ext)
