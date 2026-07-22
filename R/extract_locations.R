@@ -6,6 +6,7 @@
 #' The function downloads a selected set of BOM Australian Hydrological Geospatial Fabric spatial
 #' vector data (points, lines and polygons) that likely to be relevant to hydrological, hydrogeological
 #' and aquatic ecological studies. All of the data is sourced from \url{https://www.bom.gov.au/water/geofabric/}.
+#' The spatial data is transformed to a GDA94 datum (i.e. EPSG:4283) to be consistent with the gridded weather data.
 #'
 #' To find the required ID for the desired data type, either download all data and filter for the required
 #' location (see example) or use the online mapping tool at \url{https://portal.wsapi.cloud.bom.gov.au/arcgis/home/webmap/viewer.html?useExisting=1&layers=35719064c4ea4ad79faa82f5c9c22068}
@@ -30,7 +31,7 @@
 #'  \code{'ACT', 'NSW', 'NT' ,'QLD', 'SA', 'TAS', 'VIC', 'WA'}}. Note, column 1 is an integer ID for each state
 #'  and not a character label.
 #'  \item{\code{'water_gauge'} : character string for the "stationno" ID.}
-#'  \item{\code{'river_simple'} : integer for the Geofabric "rivregnum".}
+#'  \item{\code{'river_simple'} : character string for the name of the river "ahgfnetwor". Note, not all rivers are named.}
 #'  \item{\code{'waterbody_simple'} : integer for the Geofabric "hydroid".}
 #'  \item{\code{'river_region'} :integer for the Geofabric "hydroid". }
 #'  \item{\code{'drainage_division'}: integer for the Geofabric "divnumber" ID.}
@@ -144,7 +145,7 @@ extract_locations <- function(type= NA,
       # Set the field name use to filter each data type
       fname = switch(type,
                      water_gauge = 'stationno',
-                     river_simple = 'hydroid',
+                     river_simple = 'ahgfnetwor',
                      waterbody_simple = 'hydroid',
                      river_region = 'hydroid',
                      drainage_division = 'divnumber',
@@ -207,6 +208,9 @@ extract_locations <- function(type= NA,
     # Move column fname to col 1. This is done to meet the requirements of
     # extract_data() that the first column is the unique identifier.
     v = v[, c(fname, setdiff(names(v), fname))]
+
+    # To datum to GDA94
+    v = terra::project(v, y = 'EPSG:4283')
 
     return(v)
 }

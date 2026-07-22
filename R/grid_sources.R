@@ -46,7 +46,7 @@ grid_sources <- function() {
                            'grid.Z',
                            'grid',
                            'tmax',
-                           '+proj=longlat +ellps=GRS80',
+                           'EPSG:4283',
                            '3, 7, 10, 90')
 
   var.data['tmin',] <- c(  'Min daily temperature',
@@ -56,7 +56,7 @@ grid_sources <- function() {
                            'grid.Z',
                            'grid',
                            'tmin',
-                           '+proj=longlat +ellps=GRS80',
+                           'EPSG:4283',
                            '3, 7, 10, 90')
 
   var.data['precip',] <- c('Total daily precipitation',
@@ -66,7 +66,7 @@ grid_sources <- function() {
                            'grid.Z',
                            'grid',
                            'precip',
-                           '+proj=longlat +ellps=GRS80',
+                           'EPSG:4283',
                            '7, 10, 20, 30, 40, 180')
 
   var.data['precip.RMSE',] <- c('Root mean square error of daily precipitation estimate',
@@ -76,7 +76,7 @@ grid_sources <- function() {
                            'grid.Z',
                            'grid',
                            'precip.rmse',
-                           '+proj=longlat +ellps=GRS80',
+                           'EPSG:4283',
                            '7, 10, 20, 30, 40, 180')
 
   var.data['precip.monthly',] <- c('Total monthly precipitation',
@@ -86,7 +86,7 @@ grid_sources <- function() {
                            'grid.zip',
                            'txt',
                            'precip.monthly',
-                           '+proj=longlat +ellps=GRS80',
+                           'EPSG:4283',
                            '')
 
   var.data['vprp',] <- c(  '3pm daily vapour pressure',
@@ -96,7 +96,7 @@ grid_sources <- function() {
                            'grid.Z',
                            'grid',
                            'vprp',
-                           '+proj=longlat +ellps=GRS80',
+                           'EPSG:4283',
                            '90')
 
   var.data['solarrad',] <- c(  'Total daily solar radiation',
@@ -106,10 +106,9 @@ grid_sources <- function() {
                            'grid.Z',
                            'grid',
                            'solarrad',
-                           '+proj=longlat +ellps=GRS80',
+                           'EPSG:4283',
                            '')
 
   return(var.data)
 
 }
-

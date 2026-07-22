@@ -51,7 +51,7 @@
 #' Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
 #' provided by \code{rownames(BOMcatchr::grid_summary(ncdfFilename))}.
 #' @param locations is either an output \code{terraa::vect} onjhect from \code{\link{extract_locations}}, the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
-#' already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the ellipsoid GRS80 or WGS84, and the first column must be a unique ID.
+#' already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the EPSG:4283 datum (i.e. GDA94), and the first column must be a unique ID.
 #' @param temporal.timestep character string for the time step of the output data. The options are \code{daily}, \code{weekly}, \code{monthly}, \code{quarterly},
 #' \code{annual}  or a user-defined index for, say, water-years (see \code{xts::period.apply}). The default is \code{daily}.
 #' @param temporal.fn.outer character string or function object for complex aggregation of the raw daily or monthly source data to \code{temporal.timestep}. The function is
@@ -404,18 +404,13 @@ extract_data <- function(
 
   # Check projection of locations
   if (is.na(terra::crs(locations, proj=T))) {
-    message('WARNING: The projection string of the locations is NA. Setting to +proj=longlat +ellps=GRS80.')
-    terra::crs(locations) <- '+proj=longlat +ellps=GRS80'
+    message('WARNING: The projection string of the locations is NA. Setting to +proj=longlat +datum=GDA94 (i.e. EPSG:4283).')
+    terra::crs(locations) <- 'EPSG:4283'
   }
-  if (!grepl('+proj=longlat', terra::crs(locations, proj=T)) ||
-      (!grepl('+datum=GRS80', terra::crs(locations, proj=T)) &&
-       !grepl('+datum=WGS84', terra::crs(locations, proj=T)) &&
-       !grepl('+ellps=GRS80', terra::crs(locations, proj=T)) &&
-       !grepl('+ellps=WGS84', terra::crs(locations, proj=T))   )
-      ) {
-    message('WARNING: The projection string of the locations does not appear to be "+proj=longlat +datum=GRS80" or "+proj=longlat +datum=WGS84".')
-    message('         Attempting to transform coordinates to "+proj=longlat +ellps=GRS80" ...')
-    locations = terra::project(locations, y = '+proj=longlat +ellps=GRS80')
+  if (terra::crs(locations, describe=T)$code != '4283') {
+    message('WARNING: The projection string of the locations does not appear to be "+proj=longlat +datum=GDA94" (i.e. EPSG:4283).')
+    message('         Attempting to transform coordinates to EPSG:4283 ...')
+    locations = terra::project(locations, y = 'EPSG:4283')
   }
 
   # Check each catchment or point has a unique (non-NA) ID. Note.
@@ -679,13 +674,13 @@ extract_data <- function(
   #terra::tmpFiles(remove = TRUE, old = TRUE)
 
   if (getET) {
-    message('... Extracted DEM elevations from AWS (using tmax coordinate and a GRS80 ellipsoid).')
+    message('... Extracted DEM elevations from AWS (using tmax coordinate and GDA94).')
 
     # Test internet connection
     if (!curl::has_internet())
       .pretty_stop('No internet connection appears available to get elevation data. Check connection.')
 
-    crsAUS = sf::st_crs("+proj=longlat +ellps=GRS80")
+    crsAUS = sf::st_crs("EPSG:4283")
     DEMpoints = elevatr::get_elev_point(locations=data.frame(x=point.weights$coords[,1],
                                                              y=point.weights$coords[,2]),
                                         prj = crsAUS,
