@@ -33,13 +33,13 @@ extract_data(
 
 \item{extractTo}{is a date string specifying the end date for the data extraction. The default is today's date as YYYY-MM-DD.}
 
-\item{vars}{is a vector of variables names to extract. The available variables are: daily precipitation,
-daily minimum temperature, daily maximum temperature, daily 3pm vapour pressure grids and daily solar radiation and evapotranspiration.
-The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'precip.monthly', 'vprp', 'solarrad', 'et')}. Importantly, the input \code{et} is
-calculated from the available gridded data (see \code{ET.} inputs below). To calculate the ET, all of the required inputs for the calculation
-ET must also be extracted (i.e. the input for such would generally be \code{c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et')}.
-Any or all of the defaults are available. The default \code{''} and this will result in all of the variables in the netCDF file and
-provided by \code{rownames(BOMcatchr::grid_summary(ncdfFilename))}.}
+\item{vars}{is a vector of variables names to extract. The available variables are: daily daily maximum temperature, minimum temperature,
+daily precipitation, daily precipitation root-mean-square-error (RMSE), monthly precipitation, daily 9am and 3pm vapour pressure grids and
+daily solar radiation and evapotranspiration. The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'precip.RMSE', 'precip.monthly',
+'vprp_9am', 'vprp_3pm', 'solarrad', 'et')}. Importantly, the input \code{et} is calculated from the available gridded data (see \code{ET.} inputs below).
+To calculate the ET, all of the required inputs for the calculation ET must also be extracted (i.e. the input for such would generally be
+\code{c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et')}. Any or all of the defaults are available. The default \code{''} and this will result in
+all of the variables in the netCDF file and provided by \code{rownames(BOMcatchr::grid_summary(ncdfFilename))}.}
 
 \item{locations}{is either an output \code{terraa::vect} onjhect from \code{\link{extract_locations}}, the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
 already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the EPSG:4283 datum (i.e. GDA94), and the first column must be a unique ID.}
