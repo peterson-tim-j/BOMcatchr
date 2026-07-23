@@ -95,7 +95,7 @@ grid_sources <- function() {
                            'https://www.bom.gov.au/web03/ncc/www/awap/vprp/vprph09/daily/grid/0.05/history/nat/',
                            'grid.Z',
                            'grid',
-                           'vprp',
+                           'vprp_9am',
                            'EPSG:4283',
                            '90')
 
@@ -105,7 +105,7 @@ grid_sources <- function() {
                            'https://www.bom.gov.au/web03/ncc/www/awap/vprp/vprph15/daily/grid/0.05/history/nat/',
                            'grid.Z',
                            'grid',
-                           'vprp',
+                           'vprp_3pm',
                            'EPSG:4283',
                            '90')
 
