@@ -161,7 +161,7 @@ for (i in 1:length(site_ID)) {
 ## Extract and map monthly total precipitation and PET
 The meteorological spatial data can also be extracted at the required timescale. Here the monthly total precipitation and PET across the two catchments is mapped.
 
-To extract the spatial data, and not some statistic of the spatial data such as the sum, the variable _spatial.function.name_ is set to _''_.
+To extract the spatial data, and not some statistic of the spatial data such as the sum, the variable _spatial.fn_ is set to _''_.
 
 To extract the monthly totals, \code{temporal.timestep} is set to \code{'monthly'}  and \code{temporal.function.name} to \code{'sum'}. For the former, the options are _daily_, _weekly_, _monthly_, _quarterly_ and _annual_. For the latter, any built-in function or user-defined function that accepts a single vector of data and returns a single number should work.
 
@@ -173,7 +173,7 @@ PrecipData.monthly = extract_data(ncdfFilename=ncdfFilename,
                      extractTo = date.to,
                      vars = c('precip'),
                      locations=catch,
-                     spatial.function.name = '',
+                     spatial.fn = '',
                      temporal.timestep = 'monthly',
                      temporal.fn.inner = 'sum')
 ```
@@ -315,7 +315,7 @@ metData.monthly.centroid = extract_data(ncdfFilename=ncdfFilename,
                      ET.constants =  constants)
 ```
 
-Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduced errors of 8 - 21  mm/month.
+Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduced a mean error of 8 - 18  mm/month.
 ```{r}
 #| fig.width = 8,
 #| fig.height = 6
@@ -398,7 +398,7 @@ for (i in 1:length(site_ID)) {
 
   lines(metData.date, precip.deficit.centroid, col = "#bc80bd", lwd = 1.2)
 
-  text(x = par("usr")[1]+5,
+  text(x = par("usr")[1]+2,
        y = par("usr")[3]+10,
        labels = paste('Mean diff. =',round(mean(precip.deficit.weighted -
               precip.deficit.centroid),1),'mm/month'),
