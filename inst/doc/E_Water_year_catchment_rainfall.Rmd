@@ -54,7 +54,7 @@ climateData.annual = extract.data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = 'annual',
                       temporal.function.name = 'sum',
-                      spatial.function.name = 'var')
+                      spatial.fn = 'var')
 ```
 
 Now let's also estimate the uncertainty in the calender year rainfall using the root mean square interpolation error (RMSE). Specifically, we are assuming that the error is unbiased, which allows us to assume the RMSE equals the standard deviation. Taking the square of it gives us the variance, which we can sum over the water year. Once all of the calender year data is extracted, the total annual precipitation is plotted.
@@ -69,7 +69,7 @@ climateData.annual.err = extract.data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = 'annual',
                       temporal.function.name = sqrd.sum,
-                      spatial.function.name = 'var')
+                      spatial.fn = 'var')
 ```
 
 ```{r}
@@ -155,7 +155,7 @@ climateData.daily2wateryear = extract.data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name = 'sum',
-                      spatial.function.name = 'var')
+                      spatial.fn = 'var')
 ```
 
 Now let's estimate the uncertainty in the water year rainfall using the root mean square interpolation error (RMSE).
@@ -168,7 +168,7 @@ climateData.daily2wateryear.err = extract.data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name = sqrd.sum,
-                      spatial.function.name = 'var')
+                      spatial.fn = 'var')
 ```
 Finally, let's also extract the water year using the monthly gridded precipitation data.
 
@@ -185,7 +185,7 @@ climateData.month2wateryear = extract.data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name = 'sum',
-                      spatial.function.name = 'var')
+                      spatial.fn = 'var')
 ```
 
 Before plotting the water year data, the time steps with less than a full water year of data are filtered out.

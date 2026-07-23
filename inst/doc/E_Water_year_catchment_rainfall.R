@@ -28,7 +28,7 @@ climateData.annual = extract.data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = 'annual',
                       temporal.function.name = 'sum',
-                      spatial.function.name = 'var')
+                      spatial.fn = 'var')
 
 ## -----------------------------------------------------------------------------
 sqrd.sum <- function(x) {return(sum(x^2))}
@@ -40,7 +40,7 @@ climateData.annual.err = extract.data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = 'annual',
                       temporal.function.name = sqrd.sum,
-                      spatial.function.name = 'var')
+                      spatial.fn = 'var')
 
 ## -----------------------------------------------------------------------------
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
@@ -117,7 +117,7 @@ climateData.daily2wateryear = extract.data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name = 'sum',
-                      spatial.function.name = 'var')
+                      spatial.fn = 'var')
 
 ## -----------------------------------------------------------------------------
 climateData.daily2wateryear.err = extract.data(ncdfFilename = ncdfFilename,
@@ -127,7 +127,7 @@ climateData.daily2wateryear.err = extract.data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name = sqrd.sum,
-                      spatial.function.name = 'var')
+                      spatial.fn = 'var')
 
 ## -----------------------------------------------------------------------------
 dates = seq.Date(date.from, date.to, by ='month')
@@ -141,7 +141,7 @@ climateData.month2wateryear = extract.data(ncdfFilename = ncdfFilename,
                       locations = catch,
                       temporal.timestep = wateryear.ind,
                       temporal.function.name = 'sum',
-                      spatial.function.name = 'var')
+                      spatial.fn = 'var')
 
 ## -----------------------------------------------------------------------------
 filt = climateData.daily2wateryear$temporal.sum$days.per.timestep >= 365

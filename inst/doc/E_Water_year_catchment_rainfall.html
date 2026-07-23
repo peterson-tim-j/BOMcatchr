@@ -402,7 +402,7 @@ time.</p>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                      <span class="at">locations =</span> catch,</span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> <span class="st">&#39;annual&#39;</span>,</span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>                      <span class="at">temporal.function.name =</span> <span class="st">&#39;sum&#39;</span>,</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>                      <span class="at">spatial.function.name =</span> <span class="st">&#39;var&#39;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>                      <span class="at">spatial.fn =</span> <span class="st">&#39;var&#39;</span>)</span>
 <span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
 <span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2015-12-31</span></span>
 <span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2015-12-31  at  2  locations</span></span>
@@ -434,7 +434,7 @@ year data is extracted, the total annual precipitation is plotted.</p>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>                      <span class="at">locations =</span> catch,</span>
 <span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> <span class="st">&#39;annual&#39;</span>,</span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>                      <span class="at">temporal.function.name =</span> sqrd.sum,</span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>                      <span class="at">spatial.function.name =</span> <span class="st">&#39;var&#39;</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>                      <span class="at">spatial.fn =</span> <span class="st">&#39;var&#39;</span>)</span>
 <span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
 <span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2015-12-31</span></span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2015-12-31  at  2  locations</span></span>
@@ -529,7 +529,7 @@ seasonal.</p>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>                      <span class="at">locations =</span> catch,</span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> wateryear.ind,</span>
 <span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>                      <span class="at">temporal.function.name =</span> <span class="st">&#39;sum&#39;</span>,</span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>                      <span class="at">spatial.function.name =</span> <span class="st">&#39;var&#39;</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>                      <span class="at">spatial.fn =</span> <span class="st">&#39;var&#39;</span>)</span>
 <span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
 <span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2015-12-31</span></span>
 <span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2015-12-31  at  2  locations</span></span>
@@ -554,7 +554,7 @@ the root mean square interpolation error (RMSE).</p>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>                      <span class="at">locations =</span> catch,</span>
 <span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> wateryear.ind,</span>
 <span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>                      <span class="at">temporal.function.name =</span> sqrd.sum,</span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>                      <span class="at">spatial.function.name =</span> <span class="st">&#39;var&#39;</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>                      <span class="at">spatial.fn =</span> <span class="st">&#39;var&#39;</span>)</span>
 <span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2015-12-31</span></span>
 <span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2015-12-31  at  2  locations</span></span>
@@ -581,7 +581,7 @@ precipitation data.</p>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>                      <span class="at">locations =</span> catch,</span>
 <span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> wateryear.ind,</span>
 <span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>                      <span class="at">temporal.function.name =</span> <span class="st">&#39;sum&#39;</span>,</span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>                      <span class="at">spatial.function.name =</span> <span class="st">&#39;var&#39;</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>                      <span class="at">spatial.fn =</span> <span class="st">&#39;var&#39;</span>)</span>
 <span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
 <span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;     NetCDF climate data exists from 2010-01-01 to 2015-12-31</span></span>
 <span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt;     Data will be extracted from  2010-01-01  to  2015-12-31  at  2  locations</span></span>

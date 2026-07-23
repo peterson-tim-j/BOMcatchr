@@ -433,7 +433,7 @@ changed from the default of to .</p>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                      <span class="at">locations=</span>catch,</span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                      <span class="at">temporal.timestep =</span> <span class="st">&#39;daily&#39;</span>,</span>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>                      <span class="at">temporal.function.name=</span><span class="st">&#39;sum&#39;</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                      <span class="at">spatial.function.name=</span><span class="st">&#39;var&#39;</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                      <span class="at">spatial.fn=</span><span class="st">&#39;var&#39;</span>,</span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>                      <span class="at">ET.function=</span><span class="st">&#39;ET.MortonCRAE&#39;</span>,</span>
 <span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>                      <span class="at">ET.timestep =</span> <span class="st">&#39;monthly&#39;</span>,</span>
 <span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>                      <span class="at">ET.Mortons.est=</span><span class="st">&#39;wet areal ET&#39;</span>,</span>
@@ -552,7 +552,7 @@ standard deviation).</p>
 timescale. Here the monthly total precipitation and PET across the two
 catchments is mapped.</p>
 <p>To extract the spatial data, and not some statistic of the spatial
-data such as the sum, the variable <em>spatial.function.name</em> is set
+data such as the sum, the variable <em>spatial.fn</em> is set
 to <em>’’</em>.</p>
 <p>To extract the monthly totals, is set to and to . For the former, the
 options are <em>daily</em>, <em>weekly</em>, <em>monthly</em>,
@@ -565,7 +565,7 @@ and returns a single number should work.</p>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>                     <span class="at">extractTo =</span> date.to,</span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>                     <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;precip&#39;</span>),</span>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>                     <span class="at">locations=</span>catch,</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>                     <span class="at">spatial.function.name =</span> <span class="st">&#39;&#39;</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>                     <span class="at">spatial.fn =</span> <span class="st">&#39;&#39;</span>,</span>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>                     <span class="at">temporal.timestep =</span> <span class="st">&#39;monthly&#39;</span>,</span>
 <span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>                     <span class="at">temporal.function.name =</span> <span class="st">&#39;sum&#39;</span>)</span>
 <span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; Extraction data summary:</span></span>
@@ -641,7 +641,7 @@ map.</p>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>                     <span class="at">extractTo=</span>date.to,</span>
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>                     <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
 <span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>                     <span class="at">locations=</span>catch,</span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>                     <span class="at">spatial.function.name =</span> <span class="st">&#39;&#39;</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>                     <span class="at">spatial.fn =</span> <span class="st">&#39;&#39;</span>,</span>
 <span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>                     <span class="at">temporal.timestep =</span> <span class="st">&#39;monthly&#39;</span>,</span>
 <span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>                     <span class="at">temporal.function.name =</span> <span class="st">&#39;sum&#39;</span>,</span>
 <span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>                     <span class="at">ET.function =</span> <span class="st">&#39;ET.MortonCRAE&#39;</span>,</span>
@@ -715,7 +715,7 @@ weighted approach and centroids.</p>
 <span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>                     <span class="at">extractTo=</span>date.to,</span>
 <span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>                     <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&#39;tmax&#39;</span>, <span class="st">&#39;tmin&#39;</span>, <span class="st">&#39;precip&#39;</span>, <span class="st">&#39;vprp&#39;</span>, <span class="st">&#39;solarrad&#39;</span>, <span class="st">&#39;et&#39;</span>),</span>
 <span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>                     <span class="at">locations =</span> catch,</span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>                     <span class="at">spatial.function.name =</span> <span class="st">&#39;sum&#39;</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>                     <span class="at">spatial.fn =</span> <span class="st">&#39;sum&#39;</span>,</span>
 <span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                     <span class="at">temporal.timestep =</span> <span class="st">&#39;monthly&#39;</span>,</span>
 <span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>                     <span class="at">temporal.function.name =</span> <span class="st">&#39;sum&#39;</span>,</span>
 <span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>                     <span class="at">ET.function =</span> <span class="st">&#39;ET.MortonCRAE&#39;</span>,</span>
