@@ -2,7 +2,7 @@
 #' Extract netCDF layer of one variable at one date.
 #'
 #' @description
-#' extract_layer extracts the AWAP climate data for one date and one variable. This is
+#' extract_layer extracts gridded climate data layer for one date and one variable. This is
 #' low level function is unlikely to be of use to a user.
 #'
 #' @param ncdfFilename is a full file name (as string) to the netCDF file.
