@@ -40,7 +40,7 @@ Next, let's make the data grids over this period.
 fname = grid_build(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
-                         vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad'))
+                         vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'))
 ```
 ## Load catchment boundaries
 Now that we have the meteorological data we can begin extracting data for two catchments. To make it easy to get the require location data, the package includes the function \code{extract_locations}, which pulls vector spatial data from the BOM Australian Hydrological Geospatial Fabric.  Here it to used to obtain the boundaries for two catchments within the Loddon basin, Victoria. However, shape files of polygons can easily be used once imported into R.
@@ -64,7 +64,7 @@ The area weighted daily meteorological variables and PET can then be calculated 
 climateData.daily = extract_data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
                       extractTo=date.to,
-                      vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
+                      vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
                       locations=catch,
                       temporal.timestep = 'daily',
                       temporal.fn.inner ='sum',
@@ -239,7 +239,7 @@ Next let's extract all variables and calculate the PET and then map.
 metData.monthly = extract_data(ncdfFilename=ncdfFilename,
                      extractFrom=date.from,
                      extractTo=date.to,
-                     vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
+                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
                      locations=catch,
                      spatial.fn = '',
                      temporal.timestep = 'monthly',
@@ -292,7 +292,7 @@ Next, the meteorological data and PET are derived using both the area weighted a
 metData.monthly.weighted = extract_data(ncdfFilename=ncdfFilename,
                      extractFrom = date.from,
                      extractTo=date.to,
-                     vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
+                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
                      locations = catch,
                      spatial.fn = 'var',
                      temporal.timestep = 'monthly',
@@ -305,7 +305,7 @@ metData.monthly.weighted = extract_data(ncdfFilename=ncdfFilename,
 metData.monthly.centroid = extract_data(ncdfFilename=ncdfFilename,
                      extractFrom = date.from,
                      extractTo = date.to,
-                     vars = c('tmax', 'tmin', 'precip', 'vprp', 'solarrad', 'et'),
+                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
                      locations = centroid,
                      temporal.timestep = 'monthly',
                      temporal.fn.inner = 'sum',
