@@ -2,28 +2,28 @@
 #' Extract data over catchment area and duration .
 #'
 #' @description
-#' extract_data extracts the AWAP climate data for each point or polygon. For the latter, either the daily spatial mean and variance (or user defined function) of
-#' each climate metric is calculated or the spatial data is returned.
+#' extract_data extracts the gridded climate data for each point or polygon using user-defined metrics and time-steps.
 #'
 #' @details
 #' Daily data is extracted and can be aggregated to a weekly, monthly, quarterly, annual or a user-defined timestep using a user-defined function
 #' (e.g. sum, mean, min, max as defined by \code{temporal.fn.outer}). The temporally aggregated data at each grid cell is then used to derive the spatial
 #' mean or the spatial variance (or any other function as defined by \code{spatial.fn}).
 #'
-#' The calculation of the spatial mean uses the fraction of each AWAP grid cell within the catchment polygon.
-#' The variance calculation (or user defined function) does not use the fraction of the grid cell and returns NA if there are <2 grid cells in the catchment boundary.
-#' Prior to the spatial aggregation, evapotranspiration (ET) can also calculated; after which, say, the mean and
-#' variance PET can be calculated.
+#' The calculation of the spatially weighted estimates uses (i) the fraction of each grid cell within, say, the catchment polygon and (ii) are area
+#' of each grid cell, which changes with longitude, divided by the mean area. Specifically, the fractional area of each grid cell is multiplied
+#' by the scaled area.
 #'
-#' The data extraction will by default be undertaken from 1/1/1900 to yesterday, even if the netCDF grids were only
-#' built for a subset of this time period. If the latter situation applies, it is recommended that the extraction start
-#' and end dates are input by the user.
+#' The variance calculation (or user defined function) does not use the fractional weight of the grid cell and returns NA if there are <2 grid cells in the catchment boundary.
+#' Prior to the spatial aggregation, evapotranspiration (ET) can also calculated; after which, say, the mean and
+#' variance of the evaporation can be calculated.
+#'
+#' The data extraction will by default be undertaken from 1/1/1900 to yesterday, else the minimum date range from all of the variables to be extracted.
 #'
 #' The ET can be calculated using one of eight methods at a user defined calculation time-step; that is the \code{ET.timestep} defines the
 #' time step at which the estimates are derived and differs from the output timestep as defined by \code{temporal.fn.outer}). When \code{ET.timestep} is monthly or annual then
 #' the ET estimate is linearly interpolated to a daily time step (using zoo:na.spline()) and then constrained to >=0. In calculating ET, the input data
 #' is pre-processed using Evapotranspiration::ReadInputs() such that missing days, missing entries and abnormal values are interpolated
-#' (by default) with the former two interpolated using the "DoY average", i.e. replacement with same day-of-the-year average. Additionally, when AWAP solar
+#' (by default) with the former two interpolated using the "DoY average", i.e. replacement with same day-of-the-year average. Additionally, when solar
 #' radiation is required for the ET function, data is only available from 1/1/1990. To derive ET values <1990, the average solar radiation for each day of the year from
 #' 1/1/990 to "extractTo" is derived (i.e. 365 values) and then applied to each day prior to 1990. Importantly, in this situation the estimates of ET <1990
 #' are dependent upon the end date extracted. Re-running the estimation of ET with a later extractTo data will change the estimates of ET
@@ -75,7 +75,7 @@
 #' will then be assigned a value from a user-defined function from these observations (NB: when only one observed value exists for the day, then the observed value is returned).
 #' The default function is \code{mean}. Other standard functions (e.g. \code{median}) or user defined functions can be used.
 #' The default for this input is \code{c('5', 'linear', 'mean')}. All gap filling method can be turned off with the input \code{c('0', '', '')}, which is useful to identify the interpolated data points.
-#' @param ET.function character string for the evapotranspiration function to be used. The methods that can be derived from the AWAP data are are \code{\link[Evapotranspiration]{ET.Abtew}},
+#' @param ET.function character string for the evapotranspiration function to be used. The methods that can be derived from the gridded data are are \code{\link[Evapotranspiration]{ET.Abtew}},
 #' \code{\link[Evapotranspiration]{ET.HargreavesSamani}}, \code{\link[Evapotranspiration]{ET.JensenHaise}}, \code{\link[Evapotranspiration]{ET.Makkink}}, \code{\link[Evapotranspiration]{ET.McGuinnessBordne}}, \code{\link[Evapotranspiration]{ET.MortonCRAE}} ,
 #' \code{\link[Evapotranspiration]{ET.MortonCRWE}}, \code{\link[Evapotranspiration]{ET.Turc}}. Default is \code{\link[Evapotranspiration]{ET.MortonCRAE}} i.e. the  complementary relationship for areal evapotranspiration .
 #' @param ET.DEM.res is the zoom resolution for the land surface elevation and is required to calculate the ET. \code{elevatr} package is used to extract elevation (metres) from
@@ -147,7 +147,7 @@
 #' }
 #' @export
 extract_data <- function(
-    ncdfFilename=file.path(getwd(),'AWAP.nc'),
+    ncdfFilename=file.path(getwd(),'BOMcatchr_data.nc'),
     extractFrom = as.Date("1900-01-01","%Y-%m-%d"),
     extractTo  = as.Date(Sys.Date(),"%Y-%m-%d"),
     vars = '',
@@ -592,12 +592,6 @@ extract_data <- function(
     var.group.string = vars.extract.summary[ind,]$var.string[1]
     base.var.grid = vars.extract.summary[ind,]$group
 
-    # # Get index to required netCDF layers
-    # ind = .get_ncdf_date_index(vars.extract.summary[ind,]$time.datum,
-    #                           extractTo,
-    #                           vars.extract.summary[ind,]$from,
-    #                           vars.extract.summary[ind,]$to)
-
     # For variables not on the same grid geometry as the base.variable,
     # the extraction location is converted from the input option ('simple'
     # for polygons), to 'bilinear'. This is required because the grid cells
@@ -618,12 +612,6 @@ extract_data <- function(
     )
     RNetCDF::close.nc(ncout)
 
-    # grid.tmp <- terra::rast(ncdfFilename,
-    #                         subds = var.group.string,
-    #                         md=T,
-    #                         drivers="NETCDF")[[ind]]
-    # terra::crs(grid.tmp) <- crs.vars[[base.var.name]]
-
     for (i in 1:length(locations)) {
         if (i%%10 ==0 ) {
           message(paste('   ... Building weights for catchment ', i,' of ',length(locations)));
@@ -632,11 +620,8 @@ extract_data <- function(
 
         # Extract the weights for grid cells within the locations polygon.
         # Note, the raster grid is cropped to the extent of the catchment polygon.
-        # This was undertaken to improve the run time performance but more importantly to overcome an error
-        # thrown by raster::rasterize when the raster is large (see https://github.com/rspatial/raster/issues/192).
-        # This solution should work when the locations polygon is not very large (e.g. not a reasonable fraction of the
-        # Australian land mass). NOTE 2: Feature included after converting from raster:: to terra:: for to aid
-        # performance.
+        # Grid cell area is used t adjust weights.
+        #---------
         w <- terra::rasterize(
           x = locations[i, ],
           y = terra::crop(r, locations[i, ], snap = "out"),
@@ -651,6 +636,15 @@ extract_data <- function(
         w.vals = w.vals[filt]
         w.LongLat = w.LongLat[filt, ]
 
+        # Get area of cells (in metres) that have a weight >0
+        a = terra::cellSize(w)
+        a = terra::values(a)
+        a = a[filt]
+        a = a / mean(a)
+
+        # Adjust weights by the cell area
+        w.vals = w.vals * a
+
         # Normalise the weights
         w.vals = w.vals/sum(w.vals);
 
@@ -661,6 +655,7 @@ extract_data <- function(
 
         # Clean up
         rm('w', 'w.vals', 'w.LongLat', 'filt')
+        #---------
     }
   } else {
     # Set points to extract to each grid geometry
