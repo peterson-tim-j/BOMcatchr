@@ -142,7 +142,7 @@ for (i in 1:length(site_ID)) {
 }
 ```
 
-## Extract water year precipitation
+## Water year precipitation
 Alternatively the water-year area weighted total precipitation cn be extracted. To do this, an index to start of each water year is required. Here the water year starts on the first of March. Note, the same approach can be used to extract data over other time steps, such as seasonal.
 
 ```{r}
@@ -211,7 +211,7 @@ Now let's compare the two estimates of water year precipitation at the two catch
 
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
-# Loop through each catchment and plot the daily precipitation and PET.
+# Loop through each catchment and plot.
 for (i in 1:length(site_ID)) {
 
   # Water years precipitation from monthly data.
@@ -271,7 +271,7 @@ for (i in 1:length(site_ID)) {
          cex=0.75)
 }
 ```
-## Calculate seasonal rainfall climatology
+## Seasonal rainfall climatology
 Multiple more advanced measures can also be derived. To demonstrate, first the area weighted average seasonal rainfall is calculated using both the daily and monthly data. To achieve this only two changes are required. The input \code{temporal.timestep} is changed to \code{'seasonal'} and the temporal function \code{temporal.fn.inner} is changed to \code{'clim'}. Below this is used to calculate the average total precipitation for each season.
 
 ```{r}
@@ -293,7 +293,7 @@ clim.seasonal = extract_data(ncdfFilename = ncdfFilename,
 par(mfrow=c(length(site_ID), 1),
     mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
-# Loop through each catchment and plot the daily precipitation and PET.
+# Loop through each catchment and plot.
 for (i in 1:length(site_ID)) {
 
   # Water years precipitation from monthly data.
@@ -338,8 +338,8 @@ for (i in 1:length(site_ID)) {
 }
 ```
 
-## Calculate the seasonal cumulative rainfall anomaly
-Additonal advanced measures can also be derived. Here the area weighted seasonal rainfall anomaly is calculated using both the daily and monthly data. To achieve this the input \code{temporal.timestep} is changed to \code{'seasonal'} and the temporal function \code{temporal.fn.inner} is changed. In the first example, the later function is changed to \code{'annom'}. This calculates the seasonal anomaly where the within season data is the mean of the time-step.
+## Seasonal cumulative rainfall anomaly
+Additional advanced measures can also be derived. Here the area weighted seasonal rainfall anomaly is calculated using both the daily and monthly data. To achieve this the input \code{temporal.timestep} is changed to \code{'seasonal'} and the temporal function \code{temporal.fn.inner} is changed. In the first example, the later function is changed to \code{'annom'}. This calculates the seasonal anomaly where the within season data is the mean of the time-step.
 
 ```{r}
 annom.seasonal = extract_data(ncdfFilename = ncdfFilename,
@@ -373,7 +373,7 @@ Now let's compare the two estimates the precipitation anomaly and cumulative ano
 
 par(mfrow=c(2,2), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
-# Loop through each catchment and plot the daily precipitation and PET.
+# Loop through each catchment and plot.
 for (i in 1:length(site_ID)) {
 
   # Water years precipitation from monthly data.
@@ -445,4 +445,71 @@ for (i in 1:length(site_ID)) {
        lwd = 1.2)
 
   lines(range(x.data), c(0, 0), col='grey', lty = "dashed")
+}
+```
+
+## Custom temporal aggregation: median seasonal precipitation event duration
+Custom functions can also be used to aggregate the extracted data to the required time-step. To illustrate, the function below calculates the mean precipitation event (>=1mm/day) duration.
+
+```{r}
+runlength_precip <- function(x) {
+  # Precip events >1 mm/day
+  ind <- as.vector(x >=1)
+
+  # Do run length analysis
+  r <- rle(ind)
+
+  # Return median event run length
+  return(mean(r$lengths))
+}
+```
+The custom function can then be used in the data extraction function. Here is is used to calculate the water-year mean precipitation event duration, but any other time step (e.g. seasonal) could be used.
+
+```{r}
+dates = seq.Date(date.from, date.to, by ='day')
+wateryear.ind = which(as.numeric(format(dates, '%m')) == 3 & as.numeric(format(dates, '%d'))==1)
+
+rle.wateryear <- extract_data(ncdfFilename = ncdfFilename,
+             extractFrom = date.from,
+             extractTo = date.to,
+             vars = c('precip'),
+             locations = catch,
+             temporal.timestep = wateryear.ind,
+             temporal.fn.outer = NA,
+             temporal.fn.inner = runlength_precip,
+             spatial.fn = 'var')
+```
+
+Now let's plot the median water-year precipitation event duration.
+
+```{r}
+#| fig.width = 8,
+#| fig.height = 6
+
+par(mfrow=c(length(site_ID), 1),
+    mar =  c(5, 7.5, 4, 2.7) + 0.1)
+
+# Loop through each catchment and plot.
+for (i in 1:length(site_ID)) {
+  filt = rle.wateryear$temporal$Location.ID == site_ID[i]
+  tmp.date = rle.wateryear$temporal[filt,]
+  x.data = as.Date(paste0(tmp.date$year,'-',
+                          tmp.date$month,'-',
+                          tmp.date$day))
+  y.data = tmp.date$precip
+
+  plot(x = x.data,
+       y = y.data,
+       type = "l",
+       col = "red",
+       lwd = 1.2,
+       mgp = c(2, 0.5, 0),
+       ylab = "Mean precip. event duration  [days]",
+       xlab = "Date",
+       xaxs = "r",
+       bty = "l",
+       yaxs = "r",
+       main=paste('Catchment ID',site_ID[i]))
+
+}
 ```
