@@ -37,7 +37,7 @@ test_that("netCDF grid can be created",
 
       # Test the summary.df is a data frame and dimensions
       expect_true(is.data.frame(summary.df))
-      expect_shape(summary.df, dim = c(7, 8))
+      expect_shape(summary.df, dim = c(8, 8))
 
       # Test grid ages can be calculated and plotted
       expect_no_error(
@@ -71,6 +71,6 @@ test_that("netCDF grid can be created",
 
       # Test the summary.df is a data frame and dimensions
       expect_true(is.data.frame(summary.df))
-      expect_shape(summary.df, dim = c(7, 8))
+      expect_shape(summary.df, dim = c(8, 8))
     }
 )
