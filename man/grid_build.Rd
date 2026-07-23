@@ -5,7 +5,7 @@
 \title{Build a netCDF file of climate data.}
 \usage{
 grid_build(
-  ncdfFilename = file.path(getwd(), "AWAP.nc"),
+  ncdfFilename = file.path(getwd(), "BOMcatchr_data.nc"),
   updateFrom = as.Date("1900-01-01", "\%Y-\%m-\%d"),
   updateTo = as.Date(Sys.Date() - 2, "\%Y-\%m-\%d"),
   vars = "",
@@ -16,14 +16,14 @@ grid_build(
 }
 \arguments{
 \item{ncdfFilename}{is a file path (as string) and name to the netCDF file.
-If only a file name is given, then the file is assumed to exist / be created in \code{getwd()}. The default file name and path is \code{file.path(getwd(),'AWAP.nc')}.}
+If only a file name is given, then the file is assumed to exist / be created in \code{getwd()}. The default file name and path is \code{file.path(getwd(),'BOMcatchr_data.nc')}.}
 
-\item{updateFrom}{is a date string specifying the start date for the AWAP data. If
+\item{updateFrom}{is a date string specifying the start date for the gridded data. If
 \code{ncdfFilename} is specified and exist, then the netCDF grids will be
  updated with new data from \code{updateFrom}. To update the file from the end of the last day in the file
  set \code{updateFrom=NA}. The default is \code{"1900-1-1"}.}
 
-\item{updateTo}{is a date string specifying the end date for the AWAP data. If
+\item{updateTo}{is a date string specifying the end date for the gridded data. If
 \code{ncdfFilename} is specified and exist, then the netCDF grids will be
 updated with new data to \code{updateFrom}. The default is two days ago as YYYY-MM-DD.}
 
@@ -34,7 +34,7 @@ daily solar radiation The input vector for these options are \code{c('tmax', 'tm
 all available variables as provided by \code{rownames(grid_sources())}. However, if \code{vars=''} and the netCDF file does exist, then default
 is to use the variable names in the file.}
 
-\item{keepFiles}{is a logical scalar to keep the downloaded AWAP grid files. The default is \code{FALSE}.}
+\item{keepFiles}{is a logical scalar to keep the downloaded gridded data files. The default is \code{FALSE}.}
 
 \item{compressionLevel}{is the netCDF compression level between 1 (low) and 9 (high), and \code{NA} for no compression.
 Note, data extraction runtime may slightly increase with the level of compression. The default is \code{5}.}
