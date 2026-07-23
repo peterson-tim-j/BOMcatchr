@@ -26,7 +26,7 @@
 #' @export
 grid_sources <- function() {
 
-  vars = c('tmax', 'tmin', 'precip', 'precip.RMSE', 'precip.monthly', 'vprp', 'solarrad')
+  vars = c('tmax', 'tmin', 'precip', 'precip.RMSE', 'precip.monthly', 'vprp_9am',  'vprp_3pm', 'solarrad')
   nvars = length(vars)
   var.data = data.frame(label = rep('', nvars),
                         units  = rep('', nvars),
