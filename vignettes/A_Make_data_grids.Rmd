@@ -78,7 +78,7 @@ Here we'll update the data grids to also include vapour pressure. Here the same 
 ```{r}
 ncdffile.name <- grid_build(ncdfFilename=ncdffile.name,
                 updateFrom=startDate, updateTo=endDate,
-                vars = c('vprp'))
+                vars = c('vprp_3pm'))
 ```
 
 Now let's check that the file includes both the original three variable plus vapour pressure.
