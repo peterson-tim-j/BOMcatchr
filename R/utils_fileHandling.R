@@ -128,15 +128,28 @@
     return(header.data)
   }else {
     # Read grid data
+    rawtext = readLines(con, n = -1)
     grd = matrix(
       scan(
-        text = readLines(con, n = (6+nRows))[7:(nRows+6)],
+        #text = readLines(con, n = (6+nRows))[7:(nRows+6)],
+        text = rawtext[7:(nRows+6)],
         what = numeric(),
         quiet = TRUE,
         na.strings=noData),
       ncol = nCols,
       byrow = T)
 
+    # Get the number of stations used to derive grid
+    nstations_num = NA
+    nstations_text = rawtext[(nRows+7):length(rawtext)]
+    ind = which(grepl('NUMBER OF STATIONS REPORTING',nstations_text))
+    if (length(ind)>0) {
+      nstations_text = nstations_text[ind]
+      nstations_text <- regmatches(nstations_text, gregexpr("\\d+", nstations_text))
+      nstations_num <- as.numeric(unlist(nstations_text))
+    }
+
+    grd = list(grd = grd, n_stations = nstations_num)
     #close(con)
 
     return(grd)

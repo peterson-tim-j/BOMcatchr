@@ -474,6 +474,12 @@ grid_build <- function(
                           c('Time'),
                           deflate = compressionLevel)
 
+      RNetCDF::var.def.nc(grp,
+                          paste0(ivar,'.numStations'),
+                          'NC_UINT',
+                          c('Time'),
+                          deflate = compressionLevel)
+
       # Add variable attributes
       RNetCDF::att.put.nc(grp,
                           ivar,
@@ -665,9 +671,17 @@ grid_build <- function(
         # Put new grid in netCDF
         RNetCDF::var.put.nc(igrp,
                             ivar,
-                            t(grid.tmp),
+                            t(grid.tmp$grd),
                             start=c(1, 1, ind),
                             count = c(gridgeo[ivar,]$nCols, gridgeo[ivar,]$nRows, 1),
+                            na.mode=1)
+
+        # Put the number of stations into the netCDF
+        RNetCDF::var.put.nc(igrp,
+                            paste0(ivar,'.numStations'),
+                            grid.tmp$n_stations,
+                            start=ind,
+                            count = 1,
                             na.mode=1)
 
         # Record the source date of the data added to the ncdf
