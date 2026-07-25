@@ -100,8 +100,10 @@
 #' When \code{locations} are points, the returned variable is a data.frame containing daily climate data at each point.
 #'
 #' @seealso
-#' \code{\link{extract_locations}} to get spatial data of catchment boundaries etc..
 #' \code{\link{grid_build}} for building the NetCDF files of daily climate data.
+#' \code{\link{grid_ages}} for summarising the dates the gridded data was created by the BoM and downloaded, and what needs updating.
+#' \code{\link{extract_nstations}} for extracting the number of weather stations used at each time point to create the grids.
+#' \code{\link{extract_locations}} to get spatial data of catchment boundaries, rivers, etc.
 #'
 #' @examples
 #' # The example shows how to extract and save data.
