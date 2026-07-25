@@ -15,11 +15,12 @@
 #' list of data.frames, one for each variable in the netCDF file. Each data frame contains
 #' the following columns:
 #' \itemize{
-#'  \item{\code{Date}: observation date,}
-#'  \item{\code{Source.date}: date observation was downloaded from the BoM.}
-#'  \item{\code{Source.age} : age of observation in days.}
-#'  \item{\code{1 < age <= 7 } : logical if \code{Source.age} is greater than the left threshold and less than or equal to right duration threshold.}
-#'  \item{\code{age <= 7 } : logical if \code{Source.age} is less than or equal to the maximum duration threshold.}
+#'  \item{\code{date}: observation date,}
+#'  \item{\code{source.date}: date grid was downloaded from the BoM.}
+#'  \item{\code{create.date}: date grid was created by BoM.}
+#'  \item{\code{source.age} : age of observation in days.}
+#'  \item{\code{1 < age <= 7 } : logical if \code{source.age} is greater than the left threshold and less than or equal to right duration threshold.}
+#'  \item{\code{age <= 7 } : logical if \code{source.age} is less than or equal to the maximum duration threshold.}
 #' }
 #' @seealso \code{\link{grid_sources}} for update threshold data.
 #' @export
@@ -58,8 +59,16 @@ grid_ages <- function(ncfile,
                                           start=data.ind[1],
                                           count = length(data.ind))
 
-    # Convert netCDF source dates to a date class
+    # Get date grid created
+    data.createDates = RNetCDF::var.get.nc(grp,
+                                          paste0(ivar,'.createDate'),
+                                          start=data.ind[1],
+                                          count = length(data.ind))
+
+    # Convert netCDF dates to a date class
     data.soureDates = as.Date(as.character(data.soureDates),
+                              format = "%Y%m%d")
+    data.createDates = as.Date(as.character(data.createDates),
                               format = "%Y%m%d")
 
     # Calc the age of each data ppint. Below, the result is compared against the threshold
@@ -99,9 +108,10 @@ grid_ages <- function(ncfile,
     data.soureDates = as.factor(data.soureDates)
 
     # Build factor vector of source data dates
-    summary.lst[[ivar]] = data.frame(Date = data.timepoints,
-                                             Source.date = data.soureDates,
-                                             Source.age = tot.age)
+    summary.lst[[ivar]] = data.frame(date = data.timepoints,
+                                     source.date = data.soureDates,
+                                     create.date = data.createDates,
+                                     source.age = tot.age)
 
     # Add if data past age thresholds
     if (has.thresholds)
@@ -116,6 +126,8 @@ grid_ages <- function(ncfile,
   if (!silent) {
     message('Summary of source grid update dates for each variable:')
     for (ivar in rownames(data.existing)) {
+      # Only check those with BOM update thresholds
+      if (nchar(data.src[ivar,]$update.days)>0) {
         tmp.data = summary.lst[[ivar]]
         update.from = '(none)'
         if (ncol(tmp.data)>3) {
@@ -124,6 +136,7 @@ grid_ages <- function(ncfile,
             update.from = tmp.data[ min(ind), 1]
         }
         message( paste('   ',ivar,':',update.from))
+      }
     }
   }
 
@@ -135,20 +148,20 @@ grid_ages <- function(ncfile,
     names(ypos) <- vars
 
     # Get obs date range
-    f.min = function(x){return(min(x$Date))}
-    f.max = function(x){return(max(x$Date))}
+    f.min = function(x){return(min(x$date))}
+    f.max = function(x){return(max(x$date))}
     start.date = lapply(summary.lst, f.min)
     end.date = lapply(summary.lst, f.max)
     start.date = min(as.Date(unlist(start.date)))
     end.date = max(as.Date(unlist(end.date)))
 
     # Get list of unique source dates
-    f.uniq =  function(x){return(unique(x$Source.date))}
+    f.uniq =  function(x){return(unique(x$source.date))}
     source.dates.opt = lapply(summary.lst, f.uniq)
     source.dates.opt = unique(as.Date(unlist(source.dates.opt)))
 
     # Get list of colors, one for each date
-    cols = grDevices::palette.colors(n=length(f.uniq),
+    cols = grDevices::palette.colors(n=length(source.dates.opt),
                           palette="polychrome36",
                           recycle=T)
     names(cols) <- source.dates.opt
@@ -191,14 +204,14 @@ grid_ages <- function(ncfile,
 
       data.tmp = summary.lst[[ivar]]
 
-      data.rl = rle(as.character(data.tmp$Source.date))
+      data.rl = rle(as.character(data.tmp$source.date))
 
       end_idx <- cumsum(data.rl$lengths)
       start_idx <- c(1, utils::head(end_idx + 1, -1))
 
       periods <- data.frame(
-        start = data.tmp$Date[start_idx],
-        end   = data.tmp$Date[end_idx],
+        start = data.tmp$date[start_idx],
+        end   = data.tmp$date[end_idx],
         source.date = data.rl$values
       )
 
@@ -208,8 +221,8 @@ grid_ages <- function(ncfile,
         icol = cols[[ periods$source.date[irow] ]]
 
         graphics::rect(
-          xleft   = periods$start[irow],
-          xright  = periods$end[irow],
+          xleft   = periods$start[irow] - 0.5,
+          xright  = periods$end[irow] + 0.5,
           ybottom = y - 0.4,
           ytop    = y + 0.4,
           col     = icol,
@@ -222,8 +235,10 @@ grid_ages <- function(ncfile,
            legend= names(cols),
            fill=cols,
            horiz = T,
-           inset = c(0, -0.55),
-           title = 'Source date')
+           inset = c(0, -0.85),
+           title = 'Source date',
+           cex = 0.75
+           )
   }
 
   return(summary.lst)
