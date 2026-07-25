@@ -28,11 +28,12 @@ to demonstrate the function within the vignettes.}
 list of data.frames, one for each variable in the netCDF file. Each data frame contains
 the following columns:
 \itemize{
- \item{\code{Date}: observation date,}
- \item{\code{Source.date}: date observation was downloaded from the BoM.}
- \item{\code{Source.age} : age of observation in days.}
- \item{\code{1 < age <= 7 } : logical if \code{Source.age} is greater than the left threshold and less than or equal to right duration threshold.}
- \item{\code{age <= 7 } : logical if \code{Source.age} is less than or equal to the maximum duration threshold.}
+ \item{\code{date}: observation date,}
+ \item{\code{source.date}: date grid was downloaded from the BoM.}
+ \item{\code{create.date}: date grid was created by BoM.}
+ \item{\code{source.age} : age of observation in days.}
+ \item{\code{1 < age <= 7 } : logical if \code{source.age} is greater than the left threshold and less than or equal to right duration threshold.}
+ \item{\code{age <= 7 } : logical if \code{source.age} is less than or equal to the maximum duration threshold.}
 }
 }
 \description{

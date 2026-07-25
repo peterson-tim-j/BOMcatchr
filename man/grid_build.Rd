@@ -99,5 +99,8 @@ David A. Jones, William Wang and Robert Fawcett, (2009), High-quality spatial cl
 Australian Meteorological and Oceanographic Journal, 58 , p233-248.
 }
 \seealso{
-\code{\link{extract_data}} for extracting catchment daily average and variance data.
+\code{\link{grid_summary}} for summarising the built data.
+\code{\link{grid_ages}} for summarising the dates the gridded data was created by the BoM and downloaded, and what needs updating.
+\code{\link{extract_data}} for extracting data at points and polygons.
+\code{\link{extract_nstations}} for extracting the number of weather stations used at each time point to create the grids.
 }
