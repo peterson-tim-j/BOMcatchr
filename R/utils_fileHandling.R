@@ -140,7 +140,7 @@
       byrow = T)
 
     # Get the number of stations used to derive grid
-    nstations_num = NA
+    nstations_num = -999
     nstations_text = rawtext[(nRows+7):length(rawtext)]
     ind = which(grepl('NUMBER OF STATIONS REPORTING',nstations_text))
     if (length(ind)>0) {
@@ -149,8 +149,17 @@
       nstations_num <- as.numeric(unlist(nstations_text))
     }
 
-    grd = list(grd = grd, n_stations = nstations_num)
-    #close(con)
+    # Get the data update date
+    createDate_date = as.Date('0000-01-01',format='%Y-%m-%d')
+    createDate_text = rawtext[(nRows+7):length(rawtext)]
+    ind = which(grepl('LAST UPDATED:',createDate_text))
+    if (length(ind)>0) {
+      createDate_text = createDate_text[ind]
+      createDate_text = regmatches(createDate_text, regexpr("\\d{4}-\\d{2}-\\d{2}", createDate_text))
+      createDate_date = as.Date(createDate_text, format='%Y-%m-%d')
+    }
+
+    grd = list(grd = grd, n_stations = nstations_num, createDate = createDate_date)
 
     return(grd)
   }
