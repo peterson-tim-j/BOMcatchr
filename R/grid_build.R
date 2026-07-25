@@ -42,7 +42,11 @@
 #' @return
 #' A string containing the full file name to the netCDF file.
 #'
-#' @seealso \code{\link{extract_data}} for extracting catchment daily average and variance data.
+#' @seealso
+#' \code{\link{grid_summary}} for summarising the built data.
+#' \code{\link{grid_ages}} for summarising the dates the gridded data was created by the BoM and downloaded, and what needs updating.
+#' \code{\link{extract_data}} for extracting data at points and polygons.
+#' \code{\link{extract_nstations}} for extracting the number of weather stations used at each time point to create the grids.
 #'
 #' @references
 #' David A. Jones, William Wang and Robert Fawcett, (2009), High-quality spatial climate data-sets for Australia,
@@ -475,8 +479,14 @@ grid_build <- function(
                           deflate = compressionLevel)
 
       RNetCDF::var.def.nc(grp,
-                          paste0(ivar,'.numStations'),
+                          paste0(ivar,'.createDate'),
                           'NC_UINT',
+                          c('Time'),
+                          deflate = compressionLevel)
+
+      RNetCDF::var.def.nc(grp,
+                          paste0(ivar,'.numStations'),
+                          'NC_INT',
                           c('Time'),
                           deflate = compressionLevel)
 
@@ -688,6 +698,14 @@ grid_build <- function(
         RNetCDF::var.put.nc(igrp,
                             paste0(ivar,'.sourceDate'),
                             as.integer(format(Sys.Date(), "%Y%m%d")),
+                            start=ind,
+                            count = 1,
+                            na.mode=1)
+
+        # Record the grid creation date of the data added to the ncdf
+        RNetCDF::var.put.nc(igrp,
+                            paste0(ivar,'.createDate'),
+                            as.integer(format(grid.tmp$createDate, "%Y%m%d")),
                             start=ind,
                             count = 1,
                             na.mode=1)
