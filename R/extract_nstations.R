@@ -19,8 +19,21 @@
 extract_nstations <- function(ncfile,
                               vars = '') {
 
+  if (!is.character(ncfile))
+    .pretty_stop('ncdfFilename is invalid. It must be a character string for the file name.')
+
+  if (!file.exists(ncfile))
+    .pretty_stop('ncdfFilename does not exists. It must first be built before that number of stations can be extracted.')
+
   # Get summary of existing data
   data.existing = grid_summary(ncfile)
+  if (vars=='') {
+    vars = row.names(data.existing)
+  } else {
+    ind = !(vars %in% row.names(data.existing))
+    if (any(ind))
+      .pretty_stop(cat('The following vars are not in the build netCDF file:', vars[ind]))
+  }
 
   # open netcdf file
   ncout <- RNetCDF::open.nc(ncfile, write=F)
@@ -28,7 +41,7 @@ extract_nstations <- function(ncfile,
   # Initialise output list
   summary.lst = list()
 
-  for (ivar in rownames(data.existing)) {
+  for (ivar in vars) {
 
     # Build vector of data dates and get netCDF index to the dates
     data.timepoints = .get_ncdf_dates(data.existing[ivar,]$from,
@@ -47,7 +60,8 @@ extract_nstations <- function(ncfile,
                                           paste0(ivar,'.numStations'),
                                           start=data.ind[1],
                                           count = length(data.ind))
-
+    ind = data.nstations == -999
+    data.nstations[ind] = NA
 
     # Build factor vector of source data dates
     summary.lst[[ivar]] = data.frame(Date = data.timepoints,
