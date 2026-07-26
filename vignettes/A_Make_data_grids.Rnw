@@ -1,11 +1,11 @@
 ---
-title: "Make source data grids"
+title: "1. Make source data grids"
 description: >
   This vignette shows how to build the netCDF data file and then
   update it to new start and end dates.
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Make source data grids}
+  %\VignetteIndexEntry{1. Make source data grids}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
