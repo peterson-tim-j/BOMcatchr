@@ -61,7 +61,7 @@ The BoM gridded data undergoes a detailed review and update process (see [https:
 To understand when each variable and time-step was built, and which needs updating, the netCDF data can be examined against the above BoM update schedules - see \code{grid_sources()} for details. The plot below shows the date each time-step of each variable was created. The output from \code{grid_ages} reports if any variables can be updated. Note, the input \code{today} is ONLY used for testing and should not be input during regular use. Here today is set to 12 days into the future.
 ```{r}
 #| fig.width = 8,
-#| fig.height = 4
+#| fig.height = 3
 
 summary.ages <- BOMcatchr::grid_ages(ncdffile.name,
                                      today = Sys.Date()+12,
@@ -142,10 +142,10 @@ summary.df <- BOMcatchr::grid_summary(ncdffile.name)
 summary.df
 ```
 
-And finally, again let's plot the source data age of the grids (note, for the demonstration we're again assuming we're 12 days into the future).
+And finally, again let's plot the source data age of the grids (note, for the demonstration we're again assuming it is 12 days into the future).
 ```{r}
 #| fig.width = 8,
-#| fig.height = 4
+#| fig.height = 3
 
 summary.ages <- BOMcatchr::grid_ages(ncdffile.name,
                                      today = Sys.Date()+12,

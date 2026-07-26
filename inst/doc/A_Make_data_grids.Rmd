@@ -28,7 +28,7 @@ First, let's define the dates for the data grids. Here the data grids are create
 Note, in practice users often run \code{grid_build} once to build the netCDF data file that contain all variables over the entire record length (which requires ~5GB disk storage) and then use the netCDF grids for multiple projects, rather than re-building the netCDF grids for each project.
 
 ```{r}
-startDate <- as.Date(Sys.Date()-15,"%Y-%m-%d")
+startDate <- as.Date(Sys.Date()-25,"%Y-%m-%d")
 endDate <- as.Date(Sys.Date()-5,"%Y-%m-%d")
 ```
 
@@ -42,24 +42,57 @@ Now we're ready to download and build the netCDF grids.
 The netCDF data file contains grids of daily rainfall, minimum and maximum temperature. Below, this will be updated to include vapour pressure and solar radiation for all of Australia.
 ```{r}
 ncdffile.name <- grid_build(ncdfFilename=ncdfFilename,
-                updateFrom=startDate, updateTo=endDate,
+                updateFrom=startDate,
+                updateTo=endDate,
                 vars = c('precip','tmin','tmax'))
 ```
 
-Now let's get a summary of the netCDF file that we've created. Note that the output data.frame shows the expected variables over the expected date range.
+Now let's get a summary of when the the netCDF source data was created. Note, the output data.frame shows the gridded variables over the expected date range.
 ```{r}
 summary.df <- BOMcatchr::grid_summary(ncdffile.name)
 summary.df
 ```
 
-## Plot source data of data
+The number of weather stations used to grid each time step
+
+## Plot source data dates and required data updates
 The BoM gridded data undergoes a detailed review and update process (see [https://www.bom.gov.au/climate/austmaps/about-rain-maps.shtml](here) and [https://www.bom.gov.au/climate/austmaps/update-schedule.shtml](here) ). Hence, the netCDF grids that one may have built some time ago may be require updating with revised BoM data.
 
-To understand when each variable and time-step was built, and which needs updating, the netCDF data can be examined against the above BoM update schedules - see \code{grid_sources()} for details. The plot below shows the date each time-step of each variable was downloaded. The output from \code{grid_ages} reports if any variables can be updated. Note, the input \code{today} is ONLY used for testing and should not be input during regular use. Here today is set to 12 days into the future.
+To understand when each variable and time-step was built, and which needs updating, the netCDF data can be examined against the above BoM update schedules - see \code{grid_sources()} for details. The plot below shows the date each time-step of each variable was created. The output from \code{grid_ages} reports if any variables can be updated. Note, the input \code{today} is ONLY used for testing and should not be input during regular use. Here today is set to 12 days into the future.
 ```{r}
-summary.ages <- BOMcatchr::grid_ages(ncdffile.name, today = Sys.Date()+12, plot.sourcedate = T)
+#| fig.width = 8,
+#| fig.height = 3
+
+summary.ages <- BOMcatchr::grid_ages(ncdffile.name,
+                                     today = Sys.Date()+12,
+                                     plot.sourcedate = T)
 ```
 
+## Plot the number of weather stations used to make grids
+The number of weather stations used to create each grid changes over time, which can provide a measure of grid reliability. We can extract the number of stations per variable as follows:
+```{R}
+nstations <- BOMcatchr::extract_nstations(ncdffile.name)
+```
+Now let's plot the number of stations over time.
+```{R}
+#| fig.width = 8,
+#| fig.height = 6
+
+ nvars = length(nstations)
+ par(mfrow=c(nvars,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
+
+ for (i in 1:nvars) {
+    xdata = nstations[[i]]$Date
+    ydata = nstations[[i]]$n_stations
+
+    plot(xdata,
+         ydata,
+         main = names(nstations)[i],
+         ylab = 'Number stations',
+         xlab = 'Date',
+         type='l')
+ }
+```
 ## Update an existing variable
 
 Now that we've built the above file, the updating can be demonstrated.
@@ -68,7 +101,8 @@ The package allows for such updating between user defined dates. Here we'll upda
 
 ```{r}
 ncdffile.name <- grid_build(ncdfFilename=ncdffile.name,
-                updateFrom=startDate, updateTo=endDate)
+                updateFrom=startDate,
+                updateTo=endDate)
 ```
 
 ## Add a variable to existing data grids
@@ -77,7 +111,8 @@ Here we'll update the data grids to also include vapour pressure. Here the same 
 
 ```{r}
 ncdffile.name <- grid_build(ncdfFilename=ncdffile.name,
-                updateFrom=startDate, updateTo=endDate,
+                updateFrom=startDate,
+                updateTo=endDate,
                 vars = c('vprp_3pm'))
 ```
 
@@ -96,7 +131,8 @@ startDate <- startDate - 5
 
 ```{r}
 ncdffile.name <- grid_build(ncdfFilename=ncdffile.name,
-                updateFrom=startDate, updateTo=endDate,
+                updateFrom=startDate,
+                updateTo=endDate,
                 vars = c('solarrad'))
 ```
 
@@ -104,4 +140,14 @@ Now let's check that the file includes both the prior four variables plus solar 
 ```{r}
 summary.df <- BOMcatchr::grid_summary(ncdffile.name)
 summary.df
+```
+
+And finally, again let's plot the source data age of the grids (note, for the demonstration we're again assuming it is 12 days into the future).
+```{r}
+#| fig.width = 8,
+#| fig.height = 3
+
+summary.ages <- BOMcatchr::grid_ages(ncdffile.name,
+                                     today = Sys.Date()+12,
+                                     plot.sourcedate = T)
 ```
