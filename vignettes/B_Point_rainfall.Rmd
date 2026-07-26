@@ -1,10 +1,10 @@
 ---
-title: "Reliability of point daily and monthly data"
+title: "2. Reliability of point daily and monthly data"
 description: >
   This vignette demonstrates the reliability of the package by comparing extracted data against observations from six rainfall and temperate gauges. The building and extraction of data at user-defined time-step is first demonstrated.
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Reliability of point daily and monthly data}
+  %\VignetteIndexEntry{2. Reliability of point daily and monthly data}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---

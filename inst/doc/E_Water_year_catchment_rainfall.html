@@ -12,7 +12,7 @@
 
 
 
-<title>Water-year and seasonal area weighted precipitation and error estimates</title>
+<title>5. Water-year and seasonal area weighted precipitation and error estimates</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -336,7 +336,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Water-year and seasonal area weighted
+<h1 class="title toc-ignore">5. Water-year and seasonal area weighted
 precipitation and error estimates</h1>
 
 
@@ -378,7 +378,7 @@ below.</p>
 <span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; precip             2191      0</span></span>
 <span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; precip.RMSE        2191      0</span></span>
 <span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; precip.monthly       72      0</span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:22:30</span></span></code></pre></div>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:23:06</span></span></code></pre></div>
 </div>
 <div id="load-catchment-boundaries" class="section level2">
 <h2>Load catchment boundaries</h2>
@@ -425,7 +425,7 @@ time.</p>
 <span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; precip.monthly          0                      0                0</span></span>
 <span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:38</span></span></code></pre></div>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:41</span></span></code></pre></div>
 <p>Now let’s also estimate the uncertainty in the calender year rainfall
 using the root mean square interpolation error (RMSE). Specifically, we
 are assuming that the error is unbiased, which allows us to assume the
@@ -459,7 +459,7 @@ year data is extracted, the total annual precipitation is plotted.</p>
 <span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; precip.RMSE          0                      0                0</span></span>
 <span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:34</span></span></code></pre></div>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:35</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mar =</span>  <span class="fu">c</span>(<span class="dv">5</span>, <span class="fl">7.5</span>, <span class="dv">4</span>, <span class="fl">2.7</span>) <span class="sc">+</span> <span class="fl">0.1</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># Loop through each catchment and plot the precipitation.</span></span>
@@ -557,7 +557,7 @@ seasonal.</p>
 <span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; precip          0                      0                0</span></span>
 <span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:35</span></span></code></pre></div>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:32</span></span></code></pre></div>
 <p>Now let’s estimate the uncertainty in the water year rainfall using
 the root mean square interpolation error (RMSE).</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>climateData.daily2wateryear.err <span class="ot">=</span> <span class="fu">extract_data</span>(<span class="at">ncdfFilename =</span> ncdfFilename,</span>
@@ -585,7 +585,7 @@ the root mean square interpolation error (RMSE).</p>
 <span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co">#&gt; precip.RMSE          0                      0                0</span></span>
 <span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:34</span></span></code></pre></div>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:30</span></span></code></pre></div>
 <p>Finally, let’s also extract the water year using the monthly gridded
 precipitation data.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>dates <span class="ot">=</span> <span class="fu">seq.Date</span>(date.from, date.to, <span class="at">by =</span><span class="st">&#39;month&#39;</span>)</span>
@@ -727,7 +727,7 @@ calculate the average total precipitation for each season.</p>
 <span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="co">#&gt; precip.monthly          0                      0                0</span></span>
 <span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:38</span></span></code></pre></div>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:34</span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="fu">length</span>(site_ID), <span class="dv">1</span>),</span>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>    <span class="at">mar =</span>  <span class="fu">c</span>(<span class="dv">5</span>, <span class="fl">7.5</span>, <span class="dv">4</span>, <span class="fl">2.7</span>) <span class="sc">+</span> <span class="fl">0.1</span>)</span>
 <span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
@@ -811,7 +811,7 @@ season data is the mean of the time-step.</p>
 <span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a><span class="co">#&gt; precip.monthly          0                      0                0</span></span>
 <span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb17-27"><a href="#cb17-27" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:38</span></span></code></pre></div>
+<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:34</span></span></code></pre></div>
 <p>Now let’s also calculate the the area weighted seasonal cumulative
 rainfall anomaly. Note, like the anomaly calculation, many other
 functions are available for the within-seasonal calculation.</p>
@@ -842,7 +842,7 @@ functions are available for the within-seasonal calculation.</p>
 <span id="cb18-25"><a href="#cb18-25" tabindex="-1"></a><span class="co">#&gt; precip.monthly          0                      0                0</span></span>
 <span id="cb18-26"><a href="#cb18-26" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb18-27"><a href="#cb18-27" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb18-28"><a href="#cb18-28" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:38</span></span></code></pre></div>
+<span id="cb18-28"><a href="#cb18-28" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:34</span></span></code></pre></div>
 <p>Now let’s compare the two estimates the precipitation anomaly and
 cumulative anomaly at the two catchments. The blue line shows that
 calculated from the daily data and the red line shows that calculated
@@ -972,7 +972,7 @@ duration, but any other time step (e.g. seasonal) could be used.</p>
 <span id="cb21-27"><a href="#cb21-27" tabindex="-1"></a><span class="co">#&gt; precip          0                      0                0</span></span>
 <span id="cb21-28"><a href="#cb21-28" tabindex="-1"></a><span class="co">#&gt; ... Calculating area weighted results at required time-step.</span></span>
 <span id="cb21-29"><a href="#cb21-29" tabindex="-1"></a><span class="co">#&gt; Data extraction FINISHED.</span></span>
-<span id="cb21-30"><a href="#cb21-30" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:35</span></span></code></pre></div>
+<span id="cb21-30"><a href="#cb21-30" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:01:31</span></span></code></pre></div>
 <p>Now let’s plot the median water-year precipitation event
 duration.</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="fu">length</span>(site_ID), <span class="dv">1</span>),</span>

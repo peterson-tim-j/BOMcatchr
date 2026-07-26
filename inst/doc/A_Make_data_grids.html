@@ -12,7 +12,7 @@
 
 
 
-<title>Make source data grids</title>
+<title>1. Make source data grids</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -336,7 +336,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Make source data grids</h1>
+<h1 class="title toc-ignore">1. Make source data grids</h1>
 
 
 
@@ -385,7 +385,7 @@ pressure and solar radiation for all of Australia.</p>
 <span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; precip       21      0</span></span>
 <span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; tmin         21      0</span></span>
 <span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; tmax         21      0</span></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:26</span></span></code></pre></div>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:25</span></span></code></pre></div>
 <p>Now let’s get a summary of when the the netCDF source data was
 created. Note, the output data.frame shows the gridded variables over
 the expected date range.</p>
@@ -472,7 +472,7 @@ updated. That said, individual variables can be updated.</p>
 <span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; precip       21      0</span></span>
 <span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; tmin         21      0</span></span>
 <span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; tmax         21      0</span></span>
-<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:22</span></span></code></pre></div>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:21</span></span></code></pre></div>
 </div>
 <div id="add-a-variable-to-existing-data-grids" class="section level2">
 <h2>Add a variable to existing data grids</h2>
@@ -548,7 +548,7 @@ updated.</p>
 <span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="co">#&gt; tmin           26      0</span></span>
 <span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a><span class="co">#&gt; tmax           26      0</span></span>
 <span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a><span class="co">#&gt; vprp_3pm       26      0</span></span>
-<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:51</span></span></code></pre></div>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a><span class="co">#&gt; Total run time (DD:HH:MM:SS): 00:00:00:52</span></span></code></pre></div>
 <p>Now let’s check that the file includes both the prior four variables
 plus solar radiation.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>summary.df <span class="ot">&lt;-</span> BOMcatchr<span class="sc">::</span><span class="fu">grid_summary</span>(ncdffile.name)</span>

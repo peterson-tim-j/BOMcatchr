@@ -1,12 +1,12 @@
 ---
-title: "Water-year and seasonal area weighted precipitation and error estimates"
+title: "5. Water-year and seasonal area weighted precipitation and error estimates"
 description: >
   This vignette shows how to build extract water-year and seasonal area weighted
   precipitation, climatology, anomaly and cumulative anomaly. Interpolation error in the daily
   precipitation is also estimated.
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Water-year and seasonal area precipitation and error estimates}
+  %\VignetteIndexEntry{5. Water-year and seasonal area precipitation and error estimates}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
