@@ -11,6 +11,9 @@
 #' To find the required ID for the desired data type, either download all data and filter for the required
 #' location (see example) or use the online mapping tool at \url{https://portal.wsapi.cloud.bom.gov.au/arcgis/home/webmap/viewer.html?useExisting=1&layers=35719064c4ea4ad79faa82f5c9c22068}
 #'
+#' Note, when \code{id=NA} all of the spatial data of the given type is downloaded. For some variables (e.g. \code{'catchment'})
+#' there is a significant amount of data and the request may fail. If this occurs, try downloading the data in smaller sets.
+#'
 #' @param type is a character for the type of geofabric item to download. The options are:
 #' \itemize{
 #'  \item{\code{'state'}: Australian state or territory, including islands. Geofabric ID = 0}
@@ -166,7 +169,14 @@ extract_locations <- function(type= NA,
                    '&f=geojson')
 
       # Download data
-      v = terra::vect(url)
+      tryCatch( {
+        v = terra::vect(url)
+        },
+        error = function(e) {
+          .pretty_stop(paste('The variable names could not be downloaded.',
+                             'Try again later, else download a smaller number of identifiers.'))
+        }
+      )
 
       # Check field name
       if (!(fname %in% names(v)))
@@ -182,6 +192,7 @@ extract_locations <- function(type= NA,
 
         # Buid where filter
         if (all(is.character(id))) {
+          id = toupper(id)
           base_string <- paste0("%s IN (", paste(rep("'%s' ", length(id)),collapse = ", "), ')')
           where <- utils::URLencode( do.call(sprintf, c(fmt = base_string, as.list( c(fname,id) ))), reserved = T)
         }
@@ -203,7 +214,14 @@ extract_locations <- function(type= NA,
                  )
 
     # Download spatial data
-    v = terra::vect(url)
+    tryCatch( {
+      v = terra::vect(url)
+    },
+    error = function(e) {
+      .pretty_stop(paste('The spatial data could not be downloaded.',
+                         'Try again later, else download a smaller number of identifiers.'))
+    }
+    )
 
     # Move column fname to col 1. This is done to meet the requirements of
     # extract_data() that the first column is the unique identifier.
