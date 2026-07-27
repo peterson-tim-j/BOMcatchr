@@ -259,6 +259,10 @@ grid_build <- function(
 
     # Add string for time origin
     gridgeo[ivar,]$time.datum = paste( gridgeo[ivar,]$time.step, "since 1900-01-01 00:00:00.0 -0:00")
+
+    # Delete downloaded file.
+    if (file.exists(destFile$file.name) && !keepFiles)
+      file.remove(destFile$file.name)
   }
 
   # Identify the unique grid dimensions and assign grid
@@ -634,10 +638,11 @@ grid_build <- function(
     ivar.url = vars.all[ivar,]$data.URL
     ivar.url.ext = vars.all[ivar,]$data.file.extension
     ivar.file.ext = vars.all[ivar,]$data.file.format
-    ivar.timetep = vars.all[ivar,]$time.step
+    ivar.timestep = vars.all[ivar,]$time.step
+    ivar.startdate = as.Date(vars.all[ivar,]$date.start, format = '%Y-%m-%d')
 
     # Set time points to update for the time step of this variable
-    timepoints2Update = .get_ncdf_dates(updateFrom, updateTo, gridgeo[ivar,]$time.step)
+    timepoints2Update = .get_ncdf_dates(updateFrom, updateTo, ivar.timestep, ivar.startdate)
     ntimepoints2Update = length(timepoints2Update)
 
     # Setup progress bar
@@ -658,7 +663,7 @@ grid_build <- function(
       destFile <- .grid_download(ivar.url,
                                 ivar.url.ext,
                                 ivar.file.ext,
-                                ivar.timetep,
+                                ivar.timestep,
                                 ivar,
                                 workingFolder,
                                 datestring)
@@ -735,7 +740,7 @@ grid_build <- function(
          timepoints2Update[1] < ncdf.start_date) {
 
       # If monthly, shift to the start of the month
-      if (ivar.timetep == 'months')
+      if (ivar.timestep == 'months')
         timepoints2Update[1] = as.Date(format( as.Date(timepoints2Update[1],'%Y-%m-%d'),"%Y-%m-01"))
 
       RNetCDF::att.put.nc(igrp,
