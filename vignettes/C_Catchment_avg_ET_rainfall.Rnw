@@ -42,11 +42,33 @@ fname = grid_build(ncdfFilename = ncdfFilename,
                          updateTo = date.to,
                          vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'))
 ```
-## Load catchment boundaries
+## Load catchment boundaries and map
 Now that we have the meteorological data we can begin extracting data for two catchments. To make it easy to get the require location data, the package includes the function \code{extract_locations}, which pulls vector spatial data from the BOM Australian Hydrological Geospatial Fabric.  Here it to used to obtain the boundaries for two catchments within the Loddon basin, Victoria. However, shape files of polygons can easily be used once imported into R.
 ```{r}
 catch <- extract_locations('catchment',c('407214','407220'))
 site_ID <- catch$stationno
+```
+To further illustrate the extraction of the geofabric data, let's also extract the Loddon drainage basin, simplified stream network and the rainfall gauges.
+```{R}
+dr <- extract_locations('river_region',43637156)
+riv <- extract_locations('river_simple',NA)
+gauge <- extract_locations('water_gauge',NA)
+```
+
+Next, we can filter the stream network and gauges to those in the drainage basin.
+```{R}
+gauge <- gauge[dr]
+riv <- riv[dr]
+```
+Finally, let's map the drainage basin (black), stream network (blue), stream gauges (grey) and the example catchment boundaries (red).
+```{R}
+#| fig.width = 4,
+#| fig.height = 6
+
+terra::plot(dr, border='black')
+terra::plot(catch, border='red', add = TRUE)
+terra::plot(riv, col='blue', add = TRUE)
+terra::plot(gauge, col='grey', add = TRUE)
 ```
 
 ## Extract daily precipitation and PET data
