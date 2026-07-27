@@ -213,30 +213,48 @@ cumannom <- function(x, by, ind, FUN) {
   return(dates)
 }
 
-.get_ncdf_dates <- function(date.from, date.to, date.time.step) {
+.is_date <- function(x) {
+  inherits(x,'Date')
+}
+
+.get_ncdf_dates <- function(date.from, date.to, timestep, date.start) {
+
+  # Check inputs
+  if (!.is_date(date.from))
+    .pretty_stop('Unexpected error. The input date.from, sent to .get_ncdf_dates, is not a date object.')
+  if (!.is_date(date.to))
+    .pretty_stop('Unexpected error. The input date.to, sent to .get_ncdf_dates, is not a date object.')
+  if (!.is_date(date.start))
+    .pretty_stop('Unexpected error. The input date.start, sent to .get_ncdf_dates, is not a date object.')
 
   # Convert date.from and date.to to the last day of the time step.
-  date.from = switch(date.time.step,
+  date.from = switch(timestep,
                      days = date.from,
                      months = as.Date(format( as.Date(date.from,'%Y-%m-%d'),"%Y-%m-01"), "%Y-%m-%d")
   )
 
-  date.to = switch(date.time.step,
+  date.to = switch(timestep,
                    days = date.to,
                    months = .get_end_of_month(date.to)
   )
 
   # Build sequence of dates as required timw step
-  date.target = switch(date.time.step,
+  date.target = switch(timestep,
                        days   = seq( from=date.from, to=date.to, by="day"),
                        months = seq( from=date.from, to=date.to, by="month"))
 
   # Shift dates to the end of the month.
-  if (date.time.step == 'months')
+  if (timestep == 'months')
     date.target = .get_end_of_month(date.target)
 
   # Filter to be less than today
   filt = date.target <= (Sys.Date() - 1)
-  return(date.target[filt])
+  date.target = date.target[filt]
+
+  # Filter to be at or after the start date of the source data.
+  filt = date.target >= date.start
+  date.target = date.target[filt]
+
+  return(date.target)
 }
 
