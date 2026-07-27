@@ -18,8 +18,17 @@ test_that("netCDF grid can be created",
                                    updateFrom=startDate,
                                    updateTo=endDate)
         },
-        message='Testing creaion of two month netCDF grids.'
+        message='Testing creation of two month netCDF grids.'
       )
+
+      expect_no_error(
+        {
+          nstations <- BOMcatchr::extract_nstations(ncdfFilename)
+        },
+        message='Extracting number of weather stations over time.'
+      )
+      expect_true(is.list(nstations))
+      expect_true(is.data.frame(nstations$precip))
 
       expect_no_error(
         {
