@@ -671,52 +671,56 @@ grid_build <- function(
       # Read in grid and add to netCDF file
       if (destFile$didFail == 0 && file.exists(destFile$file.name)) {
 
-        grid.tmp <- .grid_read(destFile$file.name,
-                              ivar.file.ext,
-                              only.header=F,
-                              gridgeo[ivar,]$nRows,
-                              gridgeo[ivar,]$nCols,
-                              noData=gridgeo[ivar,]$nodata)
+        tryCatch({
+          # Read in downloaded grid, number stations and creation date
+          grid.tmp <- .grid_read(destFile$file.name,
+                                ivar.file.ext,
+                                only.header=F,
+                                gridgeo[ivar,]$nRows,
+                                gridgeo[ivar,]$nCols,
+                                noData=gridgeo[ivar,]$nodata)
 
-        # Find index to the date to update within the net CDF grid
-        # Get index to required netCDF layers
-        ind = .get_ncdf_date_index(gridgeo[ivar,]$time.datum,
-                                  timepoints2Update[i])
+          # Find index to the date to update within the net CDF grid
+          # Get index to required netCDF layers
+          ind = .get_ncdf_date_index(gridgeo[ivar,]$time.datum,
+                                     timepoints2Update[i])
 
-        # Put new grid in netCDF
-        RNetCDF::var.put.nc(igrp,
-                            ivar,
-                            t(grid.tmp$grd),
-                            start=c(1, 1, ind),
-                            count = c(gridgeo[ivar,]$nCols, gridgeo[ivar,]$nRows, 1),
-                            na.mode=1)
+          # Put new grid in netCDF
+          RNetCDF::var.put.nc(igrp,
+                              ivar,
+                              t(grid.tmp$grd),
+                              start=c(1, 1, ind),
+                              count = c(gridgeo[ivar,]$nCols, gridgeo[ivar,]$nRows, 1),
+                              na.mode=1)
 
-        # Put the number of stations into the netCDF
-        RNetCDF::var.put.nc(igrp,
-                            paste0(ivar,'.numStations'),
-                            grid.tmp$n_stations,
-                            start=ind,
-                            count = 1,
-                            na.mode=1)
+          # Put the number of stations into the netCDF
+          RNetCDF::var.put.nc(igrp,
+                              paste0(ivar,'.numStations'),
+                              grid.tmp$n_stations,
+                              start=ind,
+                              count = 1,
+                              na.mode=1)
 
-        # Record the source date of the data added to the ncdf
-        RNetCDF::var.put.nc(igrp,
-                            paste0(ivar,'.sourceDate'),
-                            as.integer(format(Sys.Date(), "%Y%m%d")),
-                            start=ind,
-                            count = 1,
-                            na.mode=1)
+          # Record the source date of the data added to the ncdf
+          RNetCDF::var.put.nc(igrp,
+                              paste0(ivar,'.sourceDate'),
+                              as.integer(format(Sys.Date(), "%Y%m%d")),
+                              start=ind,
+                              count = 1,
+                              na.mode=1)
 
-        # Record the grid creation date of the data added to the ncdf
-        RNetCDF::var.put.nc(igrp,
-                            paste0(ivar,'.createDate'),
-                            as.integer(format(grid.tmp$createDate, "%Y%m%d")),
-                            start=ind,
-                            count = 1,
-                            na.mode=1)
+          # Record the grid creation date of the data added to the ncdf
+          RNetCDF::var.put.nc(igrp,
+                              paste0(ivar,'.createDate'),
+                              as.integer(format(grid.tmp$createDate, "%Y%m%d")),
+                              start=ind,
+                              count = 1,
+                              na.mode=1)
 
-        buildSummary.df[ivar,]$Imported = buildSummary.df[ivar,]$Imported + 1
-
+          buildSummary.df[ivar,]$Imported = buildSummary.df[ivar,]$Imported + 1
+        },error = function(cond) {
+          buildSummary.df[ivar,]$Errors = buildSummary.df[ivar,]$Errors + 1
+        })
       } else {
         buildSummary.df[ivar,]$Errors = buildSummary.df[ivar,]$Errors + 1
       }
