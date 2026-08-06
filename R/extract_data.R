@@ -180,10 +180,15 @@ extract_data <- function(
   if (!is.character(vars))
     .pretty_stop('vars must be a character vector of variables names.')
 
-  # Check variables to extract are input.
-  if (all(is.na(locations)) ||
-     (is.character(locations) && nchar(locations)==0))
-    .pretty_stop('locations must be input so that the sites to extract are defined.')
+  # Check locations variable for extraction is valid.
+  tryCatch( {
+    if (all(is.na(locations)) ||
+        (is.character(locations) && nchar(locations)==0))
+      .pretty_stop('locations must be input so that the sites to extract are defined.')
+    }, error = function(e) {
+      .pretty_stop('locations input variable could not be loaded. If it is a terra::vect object, then try reloading it.')
+    }
+  )
 
   # If vars is empty, then extract all variables in the file.
   if (length(vars)==1 && vars=='') {
@@ -475,22 +480,19 @@ extract_data <- function(
   }
 
   # Get netCDF geometry
-  ncdf.dataFrom = max(vars.extract.summary$from)
-  ncdf.dataTo = min(vars.extract.summary$to)
-  #timePoints = seq.Date(ncdf.dataFrom, ncdf.dataTo, by='day')
+  ncdf.dataFrom = min(vars.extract.summary$from)
+  ncdf.dataTo = max(vars.extract.summary$to)
 
   # Build and provide summary of extraction dates and data extent.
   message('Extraction data summary:')
-  # Write summary of Net CDF data.
   message(paste('    NetCDF climate data exists from', ncdf.dataFrom,'to', ncdf.dataTo));
-
   if (extractFrom < ncdf.dataFrom) {
-    message('    WARNING: The extraction start date is prior to the existing data start date.');
+    message('    WARNING: The extraction start date is prior to the earliest data start date.');
     message('             Dates are adjusted accordingly.');
     message('             Consider extending the existing date range using grid_build()');
   }
   if (extractTo > ncdf.dataTo) {
-    message('    WARNING: The extraction end date is after to the existing data end date.');
+    message('    WARNING: The extraction end date is after to the latest data end date.');
     message('             Dates are adjusted accordingly.');
     message('             Consider extending the existing date range using grid_build()');
   }
@@ -703,11 +705,15 @@ extract_data <- function(
   # timestep source data to be jointly extracted.
   timepoints2Extract = list()
 
-  # look though each variable and rime step to get the required data
+  # look though each variable and time step to get the required data
   for (ivar in vars) {
 
     # Recalculate the time points to extract.
-    timepoints2Extract[[ivar]] = .get_ncdf_dates(extractFrom, extractTo, vars.extract.summary[ivar,]$time.step)
+    timepoints2Extract[[ivar]] = .get_ncdf_dates(extractFrom,
+                                                 extractTo,
+                                                 vars.extract.summary[ivar,]$time.step,
+                                                 vars.extract.summary[ivar,]$from
+                                                 )
 
     # Get index to required netCDF layers
     ind = .get_ncdf_date_index(vars.extract.summary[ivar,]$time.datum,
@@ -737,12 +743,20 @@ extract_data <- function(
                          vars.summary = vars.extract.summary[ivar,]
                          )
 
+      # Extend of locations, used for cropping. Buffer added for points in 1 cell.
+      coords_ext = terra::ext(locations)
+      r_ext = terra::ext(r)
+      coords_ext$xmin = max(coords_ext$xmin - terra::res(r)[1], r_ext$xmin)
+      coords_ext$ymin = max(coords_ext$ymin - terra::res(r)[2], r_ext$ymin)
+      coords_ext$xmax = min(coords_ext$xmax + terra::res(r)[1], r_ext$xmax)
+      coords_ext$ymax = min(coords_ext$ymax + terra::res(r)[2], r_ext$ymax)
+
       # Extract data for each variable
       data.brick[[ivar]][j,] = .extract_point_data(r = r,
                                     interp.method = interp.method.vars[[ivar]],
                                     coords = point.weights$coords,
                                     do.infill =T,
-                                    ext = terra::ext(locations),
+                                    ext = coords_ext,
                                     interpMax = missing.method[1])
 
       # Update progress bar
