@@ -60,6 +60,9 @@ The spatial data is transformed to a GDA94 datum (i.e. EPSG:4283) to be consiste
 
 To find the required ID for the desired data type, either download all data and filter for the required
 location (see example) or use the online mapping tool at \url{https://portal.wsapi.cloud.bom.gov.au/arcgis/home/webmap/viewer.html?useExisting=1&layers=35719064c4ea4ad79faa82f5c9c22068}
+
+Note, when \code{id=NA} all of the spatial data of the given type is downloaded. For some variables (e.g. \code{'catchment'})
+there is a significant amount of data and the request may fail. If this occurs, try downloading the data in smaller sets.
 }
 \examples{
 \donttest{
