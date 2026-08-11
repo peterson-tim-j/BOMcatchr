@@ -51,7 +51,14 @@ time required to build the netCDF grids. Finally, the \code{chunksizes} can only
 is created, \code{chunksizes} cannot be modified.}
 }
 \value{
-A string containing the full file name to the netCDF file.
+A list of data.frames, one for each time step size (i.e. daily or monthly), giving an error code for each time step and variable.
+The codes are as follows:
+\itemize{
+ \item{1: Successfully downloaded timestep and added it to the netCDF file.}
+ \item{0: No code recorded (default).}
+ \item{-1: Error downloading the grid data for the timestep.}
+ \item{-2: Error importing the downloaded data into the netCDF file.}
+}
 }
 \description{
 \code{grid_build} builds one netCDF file containing Australian climate data.
@@ -89,14 +96,14 @@ ncdfFilename = tempfile(fileext='.nc')
 
 \donttest{
 # Build netCDF grids for daily precipitation and only over the defined time period.
-file.names = grid_build(ncdfFilename=ncdfFilename,
+dataErr_df = grid_build(ncdfFilename=ncdfFilename,
              updateFrom=startDate,
              updateTo=endDate,
              vars = c('precip'))
 
 # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 # the same file names but \code{updateFrom=NA}.
-file.names = grid_build(ncdfFilename=ncdfFilename,
+dataErr_df = grid_build(ncdfFilename=ncdfFilename,
              updateFrom=NA)
 
  # Remove temp. file

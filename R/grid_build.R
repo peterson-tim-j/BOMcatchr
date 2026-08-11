@@ -48,7 +48,14 @@
 #' is created, \code{chunksizes} cannot be modified.
 #'
 #' @return
-#' A string containing the full file name to the netCDF file.
+#' A list of data.frames, one for each time step size (i.e. daily or monthly), giving an error code for each time step and variable.
+#' The codes are as follows:
+#' \itemize{
+#'  \item{1: Successfully downloaded timestep and added it to the netCDF file.}
+#'  \item{0: No code recorded (default).}
+#'  \item{-1: Error downloading the grid data for the timestep.}
+#'  \item{-2: Error importing the downloaded data into the netCDF file.}
+#' }
 #'
 #' @seealso
 #' \code{\link{grid_summary}} for summarising the built data.
@@ -74,14 +81,14 @@
 #'
 #' \donttest{
 #' # Build netCDF grids for daily precipitation and only over the defined time period.
-#' file.names = grid_build(ncdfFilename=ncdfFilename,
+#' dataErr_df = grid_build(ncdfFilename=ncdfFilename,
 #'              updateFrom=startDate,
 #'              updateTo=endDate,
 #'              vars = c('precip'))
 #'
 #' # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 #' # the same file names but \code{updateFrom=NA}.
-#' file.names = grid_build(ncdfFilename=ncdfFilename,
+#' dataErr_df = grid_build(ncdfFilename=ncdfFilename,
 #'              updateFrom=NA)
 #'
 #'  # Remove temp. file
@@ -648,13 +655,16 @@ grid_build <- function(
                 format.Date(updateFrom,'%Y-%m-%d'),' to ',
                 format.Date(updateTo,'%Y-%m-%d')));
 
+  # Build list of DFs recording success/errors per variable and time step
+  buildSummary = list()
+  has_errors = F
+  for (ivar.timestep in unique(vars.all$time.step)) {
+    buildSummary[[ ivar.timestep]] = data.frame(date = as.Date(numeric()),
+                                               row.names	= NULL)
+  }
+
   message('... Downloading data for each variable and importing to netcdf file:')
   ncout <- RNetCDF::open.nc(ncdfFilename, write=T)
-
-  buildSummary.df = data.frame(Imported=rep(0, length(vars.2modify)),
-                           Errors=rep(0, length(vars.2modify)),
-                           row.names = vars.2modify)
-
   for (ivar in vars.2modify) {
 
     # Get group for current var
@@ -669,6 +679,11 @@ grid_build <- function(
     # Set time points to update for the time step of this variable
     timepoints2Update = .get_ncdf_dates(updateFrom, updateTo, ivar.timestep, ivar.startdate)
     ntimepoints2Update = length(timepoints2Update)
+
+    # Add date to output df
+    if ( nrow(buildSummary[[ ivar.timestep ]]) ==0 )
+      buildSummary[[ ivar.timestep ]][1:ntimepoints2Update,'date'] = timepoints2Update
+    buildSummary[[ ivar.timestep ]][1:ntimepoints2Update, ivar] = rep(0, ntimepoints2Update)
 
     # Setup progress bar
     pbar <- progress::progress_bar$new(
@@ -742,12 +757,15 @@ grid_build <- function(
                               count = 1,
                               na.mode=1)
 
-          buildSummary.df[ivar,]$Imported = buildSummary.df[ivar,]$Imported + 1
+          buildSummary[[ ivar.timestep ]][i, ivar] = 1
+
         },error = function(cond) {
-          buildSummary.df[ivar,]$Errors = buildSummary.df[ivar,]$Errors + 1
+          buildSummary[[ ivar.timestep ]][i, ivar] = -2
+          has_errors = T
         })
       } else {
-        buildSummary.df[ivar,]$Errors = buildSummary.df[ivar,]$Errors + 1
+        buildSummary[[ ivar.timestep ]][i, ivar] = -1
+        has_errors = T
       }
 
       # Delete downloaded file.
@@ -790,10 +808,12 @@ grid_build <- function(
   # Close the file, writing data to disk
   RNetCDF::close.nc(ncout)
 
-  message('Data construction FINISHED.')
+  message('Data file construction FINISHED.')
+  if (has_errors) {
+    message('WARNING: Some errors were encountered downloading and/or importing the data.')
+    message('         Check the output list variable for details.')
+  }
 
-  message('Summary of time points successfully imported (and errors).')
-  print(buildSummary.df)
 
   duration <- difftime(Sys.time(), sys.start.time, units="secs")
   x <- abs(as.numeric(duration))
@@ -801,6 +821,6 @@ grid_build <- function(
             x %/% 86400,  x %% 86400 %/%
             3600, x %% 3600 %/% 60,  x %% 60 %/% 1))
 
-  return(ncdfFilename)
+  return(buildSummary)
 
 }
