@@ -11,7 +11,8 @@ grid_build(
   vars = "",
   keepFiles = FALSE,
   compressionLevel = 5,
-  vars.sourceData = grid_sources()
+  vars.sourceData = grid_sources(),
+  chunksizes = NULL
 )
 }
 \arguments{
@@ -41,6 +42,13 @@ Note, data extraction runtime may slightly increase with the level of compressio
 
 \item{vars.sourceData}{is a data.frame of variable unit, time step and source URLs. This input is provided in-case the default URLs need to be changed.
 The default is \code{grid_sources())}}
+
+\item{chunksizes}{netCDF chunk size expressed as the number of elements along each dimension (see \code{RNetCDF::var.def.nc} for details). Here the default
+is \code{NULL}, which informs the NetCDF library to use a default chunking strategy intended to give reasonable performance for building and reading the grids.
+Alternatively, to further reduce the time required to extract long time-series at a few grid cells the input can be changed to, say, \code{c(20, 20, 365)}, where the
+first two elements are for the spatial coordinate chunks and the third is for time. Importantly, such prioritising of the time dimension dramatically increases the
+time required to build the netCDF grids. Finally, the \code{chunksizes} can only be set when a new variable is added to a file. Once the variable
+is created, \code{chunksizes} cannot be modified.}
 }
 \value{
 A string containing the full file name to the netCDF file.

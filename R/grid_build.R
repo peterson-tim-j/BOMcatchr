@@ -39,6 +39,13 @@
 #' Note, data extraction runtime may slightly increase with the level of compression. The default is \code{5}.
 #' @param vars.sourceData is a data.frame of variable unit, time step and source URLs. This input is provided in-case the default URLs need to be changed.
 #' The default is \code{grid_sources())}
+#' @param chunksizes netCDF chunk size expressed as the number of elements along each dimension (see \code{RNetCDF::var.def.nc} for details). Here the default
+#' is \code{NULL}, which informs the NetCDF library to use a default chunking strategy intended to give reasonable performance for building and reading the grids.
+#' Alternatively, to further reduce the time required to extract long time-series at a few grid cells the input can be changed to, say, \code{c(20, 20, 365)}, where the
+#' first two elements are for the spatial coordinate chunks and the third is for time. Importantly, such prioritising of the time dimension dramatically increases the
+#' time required to build the netCDF grids. Finally, the \code{chunksizes} can only be set when a new variable is added to a file. Once the variable
+#' is created, \code{chunksizes} cannot be modified.
+#'
 #' @return
 #' A string containing the full file name to the netCDF file.
 #'
@@ -87,7 +94,8 @@ grid_build <- function(
   vars = '',
   keepFiles=FALSE,
   compressionLevel = 5,
-  vars.sourceData = grid_sources() )  {
+  vars.sourceData = grid_sources(),
+  chunksizes = NULL)  {
 
   # Get system time to estimate run time at the end.
   sys.start.time = Sys.time()
@@ -96,7 +104,7 @@ grid_build <- function(
   if (!is.character(ncdfFilename))
     .pretty_stop('ncdfFilename is invalid. It must be a character string for the file name.')
 
-  # Get workingFolder
+  # Get working folder
   workingFolder = dirname(ncdfFilename)
   if (workingFolder == '.')
     workingFolder = getwd()
@@ -142,7 +150,7 @@ grid_build <- function(
   # Set number of variables
   nvars = length(vars)
 
-  # Check that the ncdf files
+  # Check that the ncdf file exists.
   vars.prior = c()
   if (file.exists(ncdfFilename)) {
     # Get the list of existing variables.
@@ -209,6 +217,13 @@ grid_build <- function(
     .pretty_stop('The update dates are invalid. updateFrom must be prior to updateTo')
   #----------------
 
+  # Check chunksizes
+  if ( !is.null(chunksizes) &&  !is.vector(chunksizes))
+       .pretty_stop('The input chunksizes is invalid. It must be NULL or a vector of three integers greater than or equal to one.')
+  if ( is.vector(chunksizes) && length(chunksizes) != 3)
+       .pretty_stop('The input chunksizes is invalid. If inputting a vector it must be three integers greater than or equal to one.')
+  if ( is.vector(chunksizes) && any(chunksizes<1))
+    .pretty_stop('The input chunksizes is invalid. If inputting a vector it must be three integers greater than or equal to one.')
 
   # Increase maximum file download time from 60 sec to 300 sec.
   # This is following the request from Em. Prof. Brian Ripley on 9/12/2020.
@@ -470,28 +485,30 @@ grid_build <- function(
       grp = RNetCDF::grp.inq.nc(ncout, ncdf.grid.name)$self
 
       # Define variable in group
-      RNetCDF::var.def.nc(grp,
-                          ivar,
-                          'NC_FLOAT',
-                          c('Long', 'Lat', 'Time'),
+      RNetCDF::var.def.nc(ncfile = grp,
+                          varname = ivar,
+                          vartype = 'NC_FLOAT',
+                          dimensions = c('Long', 'Lat', 'Time'),
+                          chunking = T,
+                          chunksizes = chunksizes,
                           deflate = compressionLevel)
 
-      RNetCDF::var.def.nc(grp,
-                          paste0(ivar,'.sourceDate'),
-                          'NC_UINT',
-                          c('Time'),
+      RNetCDF::var.def.nc(ncfile = grp,
+                          varname = paste0(ivar,'.sourceDate'),
+                          vartype = 'NC_UINT',
+                          dimensions = c('Time'),
                           deflate = compressionLevel)
 
-      RNetCDF::var.def.nc(grp,
-                          paste0(ivar,'.createDate'),
-                          'NC_UINT',
-                          c('Time'),
+      RNetCDF::var.def.nc(ncfile = grp,
+                          varname = paste0(ivar,'.createDate'),
+                          vartype = 'NC_UINT',
+                          dimensions = c('Time'),
                           deflate = compressionLevel)
 
-      RNetCDF::var.def.nc(grp,
-                          paste0(ivar,'.numStations'),
-                          'NC_INT',
-                          c('Time'),
+      RNetCDF::var.def.nc(ncfile = grp,
+                          varname = paste0(ivar,'.numStations'),
+                          vartype = 'NC_INT',
+                          dimensions = c('Time'),
                           deflate = compressionLevel)
 
       # Add variable attributes
