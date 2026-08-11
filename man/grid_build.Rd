@@ -54,8 +54,8 @@ is created, \code{chunksizes} cannot be modified.}
 A list of data.frames, one for each time step size (i.e. daily or monthly), giving an error code for each time step and variable.
 The codes are as follows:
 \itemize{
- \item{1: Successfully downloaded timestep and added it to the netCDF file.}
- \item{0: No code recorded (default).}
+ \item{ 1: Successfully downloaded timestep and added it to the netCDF file.}
+ \item{ 0: No code recorded (default). This is likely because the timestep was prior to the start of the available BOM data.}
  \item{-1: Error downloading the grid data for the timestep.}
  \item{-2: Error importing the downloaded data into the netCDF file.}
 }
