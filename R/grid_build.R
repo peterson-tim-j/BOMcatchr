@@ -5,10 +5,11 @@
 #' grid_build creates one netCDF file of daily climate data.
 #'
 #' @details
-#' One netCDF file is created than contains precipitation, minimum
-#' daily temperature, maximum daily temperature and vapour pressure and the solar radiation data. It should span from 1/1/1900 to yesterday
-#' and requires ~20GB of hard-drive space (using default compression). For the solar radiation, spatial gaps are infilled using a 3x3 moving average repeated 3 times. To minimise the runtime
-#' in extracting data, the netCDF file should be stored locally and not on a network drive. Also, building the file requires installation of 7zip.
+#' One netCDF file is created that contains (by default) daily precipitation, daily precipitation RMSE, minimum daily temperature, maximum daily temperature,
+#' daily vapour pressure at 9am and 3pm, daily solar radiation data, daily precipitation RMSE and monthly precipitation. The default data spans from 1/1/1900 to yesterday
+#' and requires ~50GB of hard-drive space (using default compression).
+#'
+#' To minimise the runtime in extracting data, the netCDF file should be stored locally and not on a network drive.
 #'
 #' The climate data is sourced from the  Bureau of Meteorology Australian Water Availability Project
 #' (\url{http://www.bom.gov.au/jsp/awap/}.  For details see Jones et al. (2009).
@@ -17,7 +18,7 @@
 #' be ran prior.
 #'
 #' The function can be used to a build netCDF file from scratch or to update an existing netCDF file previously
-#' derived from this function. To not build or update a variable, set its respective URL to \code{NA}.
+#' derived from this function..
 #'
 #' @param ncdfFilename is a file path (as string) and name to the netCDF file.
 #' If only a file name is given, then the file is assumed to exist / be created in \code{getwd()}. The default file name and path is \code{file.path(getwd(),'BOMcatchr_data.nc')}.
@@ -404,7 +405,8 @@ grid_build <- function(
                           varname = 'Time',
                           vartype = 'NC_FLOAT',
                           dimensions = 'Time',
-                          deflate = compressionLevel)
+                          deflate = compressionLevel,
+                          fletcher32 = T)
       RNetCDF::att.put.nc(grp,'Time',
                           "units",
                           "NC_CHAR",
@@ -420,7 +422,8 @@ grid_build <- function(
                           varname = 'Long',
                           vartype = 'NC_DOUBLE',
                           dimensions = 'Long',
-                          deflate = compressionLevel)
+                          deflate = compressionLevel,
+                          fletcher32 = T)
       RNetCDF::att.put.nc(grp,'Long',
                           "units",
                           "NC_CHAR",
@@ -438,7 +441,8 @@ grid_build <- function(
                           varname = 'Lat',
                           vartype = 'NC_DOUBLE',
                           dimensions = 'Lat',
-                          deflate = compressionLevel)
+                          deflate = compressionLevel,
+                          fletcher32 = T)
       RNetCDF::att.put.nc(grp,'Lat',
                           "units",
                           "NC_CHAR",
@@ -491,25 +495,29 @@ grid_build <- function(
                           dimensions = c('Long', 'Lat', 'Time'),
                           chunking = T,
                           chunksizes = chunksizes,
-                          deflate = compressionLevel)
+                          deflate = compressionLevel,
+                          fletcher32 = T)
 
       RNetCDF::var.def.nc(ncfile = grp,
                           varname = paste0(ivar,'.sourceDate'),
                           vartype = 'NC_UINT',
                           dimensions = c('Time'),
-                          deflate = compressionLevel)
+                          deflate = compressionLevel,
+                          fletcher32 = T)
 
       RNetCDF::var.def.nc(ncfile = grp,
                           varname = paste0(ivar,'.createDate'),
                           vartype = 'NC_UINT',
                           dimensions = c('Time'),
-                          deflate = compressionLevel)
+                          deflate = compressionLevel,
+                          fletcher32 = T)
 
       RNetCDF::var.def.nc(ncfile = grp,
                           varname = paste0(ivar,'.numStations'),
                           vartype = 'NC_INT',
                           dimensions = c('Time'),
-                          deflate = compressionLevel)
+                          deflate = compressionLevel,
+                          fletcher32 = T)
 
       # Add variable attributes
       RNetCDF::att.put.nc(grp,

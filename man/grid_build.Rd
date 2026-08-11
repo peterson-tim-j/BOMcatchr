@@ -60,10 +60,11 @@ A string containing the full file name to the netCDF file.
 grid_build creates one netCDF file of daily climate data.
 
 
-One netCDF file is created than contains precipitation, minimum
-daily temperature, maximum daily temperature and vapour pressure and the solar radiation data. It should span from 1/1/1900 to yesterday
-and requires ~20GB of hard-drive space (using default compression). For the solar radiation, spatial gaps are infilled using a 3x3 moving average repeated 3 times. To minimise the runtime
-in extracting data, the netCDF file should be stored locally and not on a network drive. Also, building the file requires installation of 7zip.
+One netCDF file is created that contains (by default) daily precipitation, daily precipitation RMSE, minimum daily temperature, maximum daily temperature,
+daily vapour pressure at 9am and 3pm, daily solar radiation data, daily precipitation RMSE and monthly precipitation. The default data spans from 1/1/1900 to yesterday
+and requires ~50GB of hard-drive space (using default compression).
+
+To minimise the runtime in extracting data, the netCDF file should be stored locally and not on a network drive.
 
 The climate data is sourced from the  Bureau of Meteorology Australian Water Availability Project
 (\url{http://www.bom.gov.au/jsp/awap/}.  For details see Jones et al. (2009).
@@ -72,7 +73,7 @@ The output from this function is required for all data extraction functions with
 be ran prior.
 
 The function can be used to a build netCDF file from scratch or to update an existing netCDF file previously
-derived from this function. To not build or update a variable, set its respective URL to \code{NA}.
+derived from this function..
 }
 \examples{
 # The example shows how to build the netCDF data cubes.
