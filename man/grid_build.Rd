@@ -11,7 +11,8 @@ grid_build(
   vars = "",
   keepFiles = FALSE,
   compressionLevel = 5,
-  vars.sourceData = grid_sources()
+  vars.sourceData = grid_sources(),
+  chunksizes = NULL
 )
 }
 \arguments{
@@ -41,9 +42,23 @@ Note, data extraction runtime may slightly increase with the level of compressio
 
 \item{vars.sourceData}{is a data.frame of variable unit, time step and source URLs. This input is provided in-case the default URLs need to be changed.
 The default is \code{grid_sources())}}
+
+\item{chunksizes}{netCDF chunk size expressed as the number of elements along each dimension (see \code{RNetCDF::var.def.nc} for details). Here the default
+is \code{NULL}, which informs the NetCDF library to use a default chunking strategy intended to give reasonable performance for building and reading the grids.
+Alternatively, to further reduce the time required to extract long time-series at a few grid cells the input can be changed to, say, \code{c(20, 20, 365)}, where the
+first two elements are for the spatial coordinate chunks and the third is for time. Importantly, such prioritising of the time dimension dramatically increases the
+time required to build the netCDF grids. Finally, the \code{chunksizes} can only be set when a new variable is added to a file. Once the variable
+is created, \code{chunksizes} cannot be modified.}
 }
 \value{
-A string containing the full file name to the netCDF file.
+A list of data.frames, one for each time step size (i.e. daily or monthly), giving an error code for each time step and variable.
+The codes are as follows:
+\itemize{
+ \item{ 1: Successfully downloaded timestep and added it to the netCDF file.}
+ \item{ 0: No code recorded (default). This is likely because the timestep was prior to the start of the available BOM data.}
+ \item{-1: Error downloading the grid data for the timestep.}
+ \item{-2: Error importing the downloaded data into the netCDF file.}
+}
 }
 \description{
 \code{grid_build} builds one netCDF file containing Australian climate data.
@@ -52,10 +67,11 @@ A string containing the full file name to the netCDF file.
 grid_build creates one netCDF file of daily climate data.
 
 
-One netCDF file is created than contains precipitation, minimum
-daily temperature, maximum daily temperature and vapour pressure and the solar radiation data. It should span from 1/1/1900 to yesterday
-and requires ~20GB of hard-drive space (using default compression). For the solar radiation, spatial gaps are infilled using a 3x3 moving average repeated 3 times. To minimise the runtime
-in extracting data, the netCDF file should be stored locally and not on a network drive. Also, building the file requires installation of 7zip.
+One netCDF file is created that contains (by default) daily precipitation, daily precipitation RMSE, minimum daily temperature, maximum daily temperature,
+daily vapour pressure at 9am and 3pm, daily solar radiation data, daily precipitation RMSE and monthly precipitation. The default data spans from 1/1/1900 to yesterday
+and requires ~50GB of hard-drive space (using default compression).
+
+To minimise the runtime in extracting data, the netCDF file should be stored locally and not on a network drive.
 
 The climate data is sourced from the  Bureau of Meteorology Australian Water Availability Project
 (\url{http://www.bom.gov.au/jsp/awap/}.  For details see Jones et al. (2009).
@@ -64,7 +80,7 @@ The output from this function is required for all data extraction functions with
 be ran prior.
 
 The function can be used to a build netCDF file from scratch or to update an existing netCDF file previously
-derived from this function. To not build or update a variable, set its respective URL to \code{NA}.
+derived from this function..
 }
 \examples{
 # The example shows how to build the netCDF data cubes.
@@ -80,14 +96,14 @@ ncdfFilename = tempfile(fileext='.nc')
 
 \donttest{
 # Build netCDF grids for daily precipitation and only over the defined time period.
-file.names = grid_build(ncdfFilename=ncdfFilename,
+dataErr_df = grid_build(ncdfFilename=ncdfFilename,
              updateFrom=startDate,
              updateTo=endDate,
              vars = c('precip'))
 
 # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 # the same file names but \code{updateFrom=NA}.
-file.names = grid_build(ncdfFilename=ncdfFilename,
+dataErr_df = grid_build(ncdfFilename=ncdfFilename,
              updateFrom=NA)
 
  # Remove temp. file

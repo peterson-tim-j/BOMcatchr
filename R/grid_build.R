@@ -5,10 +5,11 @@
 #' grid_build creates one netCDF file of daily climate data.
 #'
 #' @details
-#' One netCDF file is created than contains precipitation, minimum
-#' daily temperature, maximum daily temperature and vapour pressure and the solar radiation data. It should span from 1/1/1900 to yesterday
-#' and requires ~20GB of hard-drive space (using default compression). For the solar radiation, spatial gaps are infilled using a 3x3 moving average repeated 3 times. To minimise the runtime
-#' in extracting data, the netCDF file should be stored locally and not on a network drive. Also, building the file requires installation of 7zip.
+#' One netCDF file is created that contains (by default) daily precipitation, daily precipitation RMSE, minimum daily temperature, maximum daily temperature,
+#' daily vapour pressure at 9am and 3pm, daily solar radiation data, daily precipitation RMSE and monthly precipitation. The default data spans from 1/1/1900 to yesterday
+#' and requires ~50GB of hard-drive space (using default compression).
+#'
+#' To minimise the runtime in extracting data, the netCDF file should be stored locally and not on a network drive.
 #'
 #' The climate data is sourced from the  Bureau of Meteorology Australian Water Availability Project
 #' (\url{http://www.bom.gov.au/jsp/awap/}.  For details see Jones et al. (2009).
@@ -17,7 +18,7 @@
 #' be ran prior.
 #'
 #' The function can be used to a build netCDF file from scratch or to update an existing netCDF file previously
-#' derived from this function. To not build or update a variable, set its respective URL to \code{NA}.
+#' derived from this function..
 #'
 #' @param ncdfFilename is a file path (as string) and name to the netCDF file.
 #' If only a file name is given, then the file is assumed to exist / be created in \code{getwd()}. The default file name and path is \code{file.path(getwd(),'BOMcatchr_data.nc')}.
@@ -39,8 +40,22 @@
 #' Note, data extraction runtime may slightly increase with the level of compression. The default is \code{5}.
 #' @param vars.sourceData is a data.frame of variable unit, time step and source URLs. This input is provided in-case the default URLs need to be changed.
 #' The default is \code{grid_sources())}
+#' @param chunksizes netCDF chunk size expressed as the number of elements along each dimension (see \code{RNetCDF::var.def.nc} for details). Here the default
+#' is \code{NULL}, which informs the NetCDF library to use a default chunking strategy intended to give reasonable performance for building and reading the grids.
+#' Alternatively, to further reduce the time required to extract long time-series at a few grid cells the input can be changed to, say, \code{c(20, 20, 365)}, where the
+#' first two elements are for the spatial coordinate chunks and the third is for time. Importantly, such prioritising of the time dimension dramatically increases the
+#' time required to build the netCDF grids. Finally, the \code{chunksizes} can only be set when a new variable is added to a file. Once the variable
+#' is created, \code{chunksizes} cannot be modified.
+#'
 #' @return
-#' A string containing the full file name to the netCDF file.
+#' A list of data.frames, one for each time step size (i.e. daily or monthly), giving an error code for each time step and variable.
+#' The codes are as follows:
+#' \itemize{
+#'  \item{ 1: Successfully downloaded timestep and added it to the netCDF file.}
+#'  \item{ 0: No code recorded (default). This is likely because the timestep was prior to the start of the available BOM data.}
+#'  \item{-1: Error downloading the grid data for the timestep.}
+#'  \item{-2: Error importing the downloaded data into the netCDF file.}
+#' }
 #'
 #' @seealso
 #' \code{\link{grid_summary}} for summarising the built data.
@@ -66,14 +81,14 @@
 #'
 #' \donttest{
 #' # Build netCDF grids for daily precipitation and only over the defined time period.
-#' file.names = grid_build(ncdfFilename=ncdfFilename,
+#' dataErr_df = grid_build(ncdfFilename=ncdfFilename,
 #'              updateFrom=startDate,
 #'              updateTo=endDate,
 #'              vars = c('precip'))
 #'
 #' # Now, to demonstrate updating the netCDF grids to one day ago, rerun with
 #' # the same file names but \code{updateFrom=NA}.
-#' file.names = grid_build(ncdfFilename=ncdfFilename,
+#' dataErr_df = grid_build(ncdfFilename=ncdfFilename,
 #'              updateFrom=NA)
 #'
 #'  # Remove temp. file
@@ -87,7 +102,8 @@ grid_build <- function(
   vars = '',
   keepFiles=FALSE,
   compressionLevel = 5,
-  vars.sourceData = grid_sources() )  {
+  vars.sourceData = grid_sources(),
+  chunksizes = NULL)  {
 
   # Get system time to estimate run time at the end.
   sys.start.time = Sys.time()
@@ -96,7 +112,7 @@ grid_build <- function(
   if (!is.character(ncdfFilename))
     .pretty_stop('ncdfFilename is invalid. It must be a character string for the file name.')
 
-  # Get workingFolder
+  # Get working folder
   workingFolder = dirname(ncdfFilename)
   if (workingFolder == '.')
     workingFolder = getwd()
@@ -142,7 +158,7 @@ grid_build <- function(
   # Set number of variables
   nvars = length(vars)
 
-  # Check that the ncdf files
+  # Check that the ncdf file exists.
   vars.prior = c()
   if (file.exists(ncdfFilename)) {
     # Get the list of existing variables.
@@ -209,6 +225,13 @@ grid_build <- function(
     .pretty_stop('The update dates are invalid. updateFrom must be prior to updateTo')
   #----------------
 
+  # Check chunksizes
+  if ( !is.null(chunksizes) &&  !is.vector(chunksizes))
+       .pretty_stop('The input chunksizes is invalid. It must be NULL or a vector of three integers greater than or equal to one.')
+  if ( is.vector(chunksizes) && length(chunksizes) != 3)
+       .pretty_stop('The input chunksizes is invalid. If inputting a vector it must be three integers greater than or equal to one.')
+  if ( is.vector(chunksizes) && any(chunksizes<1))
+    .pretty_stop('The input chunksizes is invalid. If inputting a vector it must be three integers greater than or equal to one.')
 
   # Increase maximum file download time from 60 sec to 300 sec.
   # This is following the request from Em. Prof. Brian Ripley on 9/12/2020.
@@ -389,7 +412,8 @@ grid_build <- function(
                           varname = 'Time',
                           vartype = 'NC_FLOAT',
                           dimensions = 'Time',
-                          deflate = compressionLevel)
+                          deflate = compressionLevel,
+                          fletcher32 = T)
       RNetCDF::att.put.nc(grp,'Time',
                           "units",
                           "NC_CHAR",
@@ -405,7 +429,8 @@ grid_build <- function(
                           varname = 'Long',
                           vartype = 'NC_DOUBLE',
                           dimensions = 'Long',
-                          deflate = compressionLevel)
+                          deflate = compressionLevel,
+                          fletcher32 = T)
       RNetCDF::att.put.nc(grp,'Long',
                           "units",
                           "NC_CHAR",
@@ -423,7 +448,8 @@ grid_build <- function(
                           varname = 'Lat',
                           vartype = 'NC_DOUBLE',
                           dimensions = 'Lat',
-                          deflate = compressionLevel)
+                          deflate = compressionLevel,
+                          fletcher32 = T)
       RNetCDF::att.put.nc(grp,'Lat',
                           "units",
                           "NC_CHAR",
@@ -470,29 +496,35 @@ grid_build <- function(
       grp = RNetCDF::grp.inq.nc(ncout, ncdf.grid.name)$self
 
       # Define variable in group
-      RNetCDF::var.def.nc(grp,
-                          ivar,
-                          'NC_FLOAT',
-                          c('Long', 'Lat', 'Time'),
-                          deflate = compressionLevel)
+      RNetCDF::var.def.nc(ncfile = grp,
+                          varname = ivar,
+                          vartype = 'NC_FLOAT',
+                          dimensions = c('Long', 'Lat', 'Time'),
+                          chunking = T,
+                          chunksizes = chunksizes,
+                          deflate = compressionLevel,
+                          fletcher32 = T)
 
-      RNetCDF::var.def.nc(grp,
-                          paste0(ivar,'.sourceDate'),
-                          'NC_UINT',
-                          c('Time'),
-                          deflate = compressionLevel)
+      RNetCDF::var.def.nc(ncfile = grp,
+                          varname = paste0(ivar,'.sourceDate'),
+                          vartype = 'NC_UINT',
+                          dimensions = c('Time'),
+                          deflate = compressionLevel,
+                          fletcher32 = T)
 
-      RNetCDF::var.def.nc(grp,
-                          paste0(ivar,'.createDate'),
-                          'NC_UINT',
-                          c('Time'),
-                          deflate = compressionLevel)
+      RNetCDF::var.def.nc(ncfile = grp,
+                          varname = paste0(ivar,'.createDate'),
+                          vartype = 'NC_UINT',
+                          dimensions = c('Time'),
+                          deflate = compressionLevel,
+                          fletcher32 = T)
 
-      RNetCDF::var.def.nc(grp,
-                          paste0(ivar,'.numStations'),
-                          'NC_INT',
-                          c('Time'),
-                          deflate = compressionLevel)
+      RNetCDF::var.def.nc(ncfile = grp,
+                          varname = paste0(ivar,'.numStations'),
+                          vartype = 'NC_INT',
+                          dimensions = c('Time'),
+                          deflate = compressionLevel,
+                          fletcher32 = T)
 
       # Add variable attributes
       RNetCDF::att.put.nc(grp,
@@ -623,13 +655,16 @@ grid_build <- function(
                 format.Date(updateFrom,'%Y-%m-%d'),' to ',
                 format.Date(updateTo,'%Y-%m-%d')));
 
+  # Build list of DFs recording success/errors per variable and time step
+  buildSummary = list()
+  has_errors = F
+  for (ivar.timestep in unique(vars.all$time.step)) {
+    buildSummary[[ ivar.timestep]] = data.frame(date = as.Date(numeric()),
+                                               row.names	= NULL)
+  }
+
   message('... Downloading data for each variable and importing to netcdf file:')
   ncout <- RNetCDF::open.nc(ncdfFilename, write=T)
-
-  buildSummary.df = data.frame(Imported=rep(0, length(vars.2modify)),
-                           Errors=rep(0, length(vars.2modify)),
-                           row.names = vars.2modify)
-
   for (ivar in vars.2modify) {
 
     # Get group for current var
@@ -644,6 +679,11 @@ grid_build <- function(
     # Set time points to update for the time step of this variable
     timepoints2Update = .get_ncdf_dates(updateFrom, updateTo, ivar.timestep)
     ntimepoints2Update = length(timepoints2Update)
+
+    # Add date to output df
+    if ( nrow(buildSummary[[ ivar.timestep ]]) ==0 )
+      buildSummary[[ ivar.timestep ]][1:ntimepoints2Update,'date'] = timepoints2Update
+    buildSummary[[ ivar.timestep ]][1:ntimepoints2Update, ivar] = rep(0, ntimepoints2Update)
 
     # Setup progress bar
     pbar <- progress::progress_bar$new(
@@ -717,12 +757,15 @@ grid_build <- function(
                               count = 1,
                               na.mode=1)
 
-          buildSummary.df[ivar,]$Imported = buildSummary.df[ivar,]$Imported + 1
+          buildSummary[[ ivar.timestep ]][i, ivar] = 1
+
         },error = function(cond) {
-          buildSummary.df[ivar,]$Errors = buildSummary.df[ivar,]$Errors + 1
+          buildSummary[[ ivar.timestep ]][i, ivar] = -2
+          has_errors = T
         })
       } else {
-        buildSummary.df[ivar,]$Errors = buildSummary.df[ivar,]$Errors + 1
+        buildSummary[[ ivar.timestep ]][i, ivar] = -1
+        has_errors = T
       }
 
       # Delete downloaded file.
@@ -765,10 +808,13 @@ grid_build <- function(
   # Close the file, writing data to disk
   RNetCDF::close.nc(ncout)
 
-  message('Data construction FINISHED.')
+  message('Data file construction FINISHED.')
+  if (has_errors) {
+    message('WARNING: Some errors were encountered downloading and/or importing the data.')
+    message('         Check the output list variable for details.')
+  } else
+    message('Zerp errors were encountered downloading and/or importing the data.')
 
-  message('Summary of time points successfully imported (and errors).')
-  print(buildSummary.df)
 
   duration <- difftime(Sys.time(), sys.start.time, units="secs")
   x <- abs(as.numeric(duration))
@@ -776,6 +822,6 @@ grid_build <- function(
             x %/% 86400,  x %% 86400 %/%
             3600, x %% 3600 %/% 60,  x %% 60 %/% 1))
 
-  return(ncdfFilename)
+  return(buildSummary)
 
 }

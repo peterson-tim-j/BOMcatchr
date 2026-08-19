@@ -46,7 +46,8 @@ extract_nstations <- function(ncfile,
     # Build vector of data dates and get netCDF index to the dates
     data.timepoints = .get_ncdf_dates(data.existing[ivar,]$from,
                                      data.existing[ivar,]$to,
-                                     data.existing[ivar,]$time.step)
+                                     data.existing[ivar,]$time.step,
+                                     as.Date(data.existing[ivar,]$date.start, format = '%Y-%m-%d'))
 
     data.ind = .get_ncdf_date_index(data.existing[ivar,]$time.datum,
                                    data.timepoints,

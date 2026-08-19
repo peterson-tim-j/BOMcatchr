@@ -13,7 +13,7 @@ grid_summary(ncfile)
 data.frame summarising the attributes of each variable in the netCDF file. The data.frame includes the
 following columns:
 \itemize{
- \item{\code{group}: string for the netCDF group in which the variable is placed,}
+ \item{\code{group}: string for the netCDF group in which the variable is placed.}
  \item{\code{var.string}: string for the group and variable name.}
  \item{\code{from} : Date variable for the start of the first time step containing data.}
  \item{\code{to} : Date variable for the end of the last time step containing data.}
@@ -24,7 +24,7 @@ following columns:
 }
 }
 \description{
-\code{grid_summary} sumarises the netCDF variables, units and date ranges.
+\code{grid_summary} summarises the variables, units and date ranges of an existing netCDF file.
 }
 \details{
 This function opens an existing netCDF file built using the package and
