@@ -639,10 +639,10 @@ grid_build <- function(
     ivar.url.ext = vars.all[ivar,]$data.file.extension
     ivar.file.ext = vars.all[ivar,]$data.file.format
     ivar.timestep = vars.all[ivar,]$time.step
-    ivar.startdate = as.Date(vars.all[ivar,]$date.start, format = '%Y-%m-%d')
+    #ivar.startdate = as.Date(vars.all[ivar,]$date.start, format = '%Y-%m-%d')
 
     # Set time points to update for the time step of this variable
-    timepoints2Update = .get_ncdf_dates(updateFrom, updateTo, ivar.timestep, ivar.startdate)
+    timepoints2Update = .get_ncdf_dates(updateFrom, updateTo, ivar.timestep)
     ntimepoints2Update = length(timepoints2Update)
 
     # Setup progress bar

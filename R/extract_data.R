@@ -481,7 +481,7 @@ extract_data <- function(
 
   # Get netCDF geometry
   ncdf.dataFrom = min(vars.extract.summary$from)
-  ncdf.dataTo = max(vars.extract.summary$to)
+  ncdf.dataTo = min(vars.extract.summary$to)
 
   # Build and provide summary of extraction dates and data extent.
   message('Extraction data summary:')
@@ -670,7 +670,6 @@ extract_data <- function(
     point.weights$coords = cbind(as.numeric(terra::crds(locations)[,1]),
                                  as.numeric(terra::crds(locations)[,2]))
   }
-  #terra::tmpFiles(remove = TRUE, old = TRUE)
 
   if (getET) {
     message('... Extracted DEM elevations from AWS (using tmax coordinate and GDA94).')
@@ -711,8 +710,7 @@ extract_data <- function(
     # Recalculate the time points to extract.
     timepoints2Extract[[ivar]] = .get_ncdf_dates(extractFrom,
                                                  extractTo,
-                                                 vars.extract.summary[ivar,]$time.step,
-                                                 vars.extract.summary[ivar,]$from
+                                                 vars.extract.summary[ivar,]$time.step
                                                  )
 
     # Get index to required netCDF layers
@@ -727,8 +725,9 @@ extract_data <- function(
       format = paste("    ",ivar,": :current of :total  [:bar] :percent in :elapsed",sep=''),
       total = ntimepoints2Extract, clear = FALSE, width= 80)
 
-    # Initialise matrix foe extracted data
-    data.brick[[ivar]] = matrix(NA, nrow = ntimepoints2Extract, ncol = nrow(point.weights$coords))
+    # Initialise matrix for extracted data. NOTE, the number of time steps should only change
+    # with the time step size and not the length of the source data.
+    data.brick[[ivar]] = matrix(NA, nrow = length(timepoints2Extract[[ivar]]), ncol = nrow(point.weights$coords))
 
     # Open connection to netCDF file
     ncout <- RNetCDF::open.nc(ncdfFilename)
@@ -736,9 +735,9 @@ extract_data <- function(
     # Loop through each ind time point of variable and get data
     for (j in 1:ntimepoints2Extract){
 
-      # Read netCDF layer
+      # Read netCDF layer. Date of time step is given by names(ind)
       r <- extract_layer(ncdf.cond = ncout,
-                         extract.date = timepoints2Extract[[ivar]][j],
+                         extract.date = as.Date(names(ind)[j]),
                          var = ivar,
                          vars.summary = vars.extract.summary[ivar,]
                          )
@@ -752,7 +751,8 @@ extract_data <- function(
       coords_ext$ymax = min(coords_ext$ymax + terra::res(r)[2], r_ext$ymax)
 
       # Extract data for each variable
-      data.brick[[ivar]][j,] = .extract_point_data(r = r,
+      k = which( timepoints2Extract[[ivar]] == as.Date(names(ind)[j]))
+      data.brick[[ivar]][k,] = .extract_point_data(r = r,
                                     interp.method = interp.method.vars[[ivar]],
                                     coords = point.weights$coords,
                                     do.infill =T,
@@ -772,7 +772,7 @@ extract_data <- function(
   }
 
   # The source data can have the following types of gaps:
-  # 1, Missing a few clustered grid cells
+  # 1. Missing a few clustered grid cells
   # 2. Entire day of observations missing, often nationally
   # 3. Date of gap is prior to the given observation type starting (eg solar radiation starts from 1/1/1990)
   #
@@ -788,7 +788,6 @@ extract_data <- function(
                                  row.names = vars
                                  )
   infill.summary.df$pre.filled = sapply(data.brick, num.NAs)
-
   if (missing.method[2] != '') {
     message('   ... Linearly interpolating gaps.')
     data.brick = mapply(.do_interpolation,
@@ -802,6 +801,7 @@ extract_data <- function(
     message('   ... Skipping linear interpolation of gaps.')
   }
 
+  # Now do the back filling
   if (missing.method[3] != '') {
     message('   ... Backfilling dates prior to the start of observations (if required).')
     data.brick = mapply(.do_backfilling,
@@ -830,7 +830,7 @@ extract_data <- function(
     precip.str = vars.extract.summary['precip',]$var.string
     tmax.str = vars.extract.summary['tmax',]$var.string
 
-    #Build vector of daily time steps
+    #Build one vector of daily time steps
     timepoints2Extract = timepoints2Extract[[1]]
     ntimepoints2Extract = length(timepoints2Extract)
 
