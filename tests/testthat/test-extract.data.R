@@ -14,7 +14,7 @@ test_that("netCDF grid can be created",
           ncdfFilename = tempfile(fileext = '.nc')
 
           # Build netCDF grids for all data but only over the defined time period.
-          file.names = grid_build(ncdfFilename=ncdfFilename,
+          build_status = grid_build(ncdfFilename=ncdfFilename,
                                    updateFrom=startDate,
                                    updateTo=endDate)
         },
