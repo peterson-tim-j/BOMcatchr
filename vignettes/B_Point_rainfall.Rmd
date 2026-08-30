@@ -36,7 +36,7 @@ ncdfFilename = tempfile(fileext='.nc')
 ```
 Now with the inputs defined we can download the gridded data and build the netCDF file. Note, here \code{vars} is set to only download daily precipitation.
 ```{r}
-fnames = grid_build(ncdfFilename = ncdfFilename,
+status = grid_build(ncdfFilename = ncdfFilename,
                          updateFrom = dataFrom,
                          updateTo = dataTo,
                          vars = c('tmax', 'precip', 'precip.monthly'))
