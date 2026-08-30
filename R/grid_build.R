@@ -41,11 +41,8 @@
 #' @param vars.sourceData is a data.frame of variable unit, time step and source URLs. This input is provided in-case the default URLs need to be changed.
 #' The default is \code{grid_sources())}
 #' @param chunksizes netCDF chunk size expressed as the number of elements along each dimension (see \code{RNetCDF::var.def.nc} for details). Here the default
-#' is \code{NULL}, which informs the NetCDF library to use a default chunking strategy intended to give reasonable performance for building and reading the grids.
-#' Alternatively, to further reduce the time required to extract long time-series at a few grid cells the input can be changed to, say, \code{c(20, 20, 365)}, where the
-#' first two elements are for the spatial coordinate chunks and the third is for time. Importantly, such prioritising of the time dimension dramatically increases the
-#' time required to build the netCDF grids. Finally, the \code{chunksizes} can only be set when a new variable is added to a file. Once the variable
-#' is created, \code{chunksizes} cannot be modified.
+#' is \code{c(30, 30, 5)}, which vignette 1 shows speeds-up extract by 110 times compared to the NetCDF library default chunking strategy (input \code{NULL) to use this strategy).
+#'  Note, the \code{chunksizes} can only be set when a new variable is added to a file. Once the variable is created, \code{chunksizes} cannot be modified.
 #'
 #' @return
 #' A list of data.frames, one for each time step size (i.e. daily or monthly), giving an error code for each time step and variable.
@@ -103,7 +100,7 @@ grid_build <- function(
   keepFiles=FALSE,
   compressionLevel = 5,
   vars.sourceData = grid_sources(),
-  chunksizes = NULL)  {
+  chunksizes = c(30, 30, 5))  {
 
   # Get system time to estimate run time at the end.
   sys.start.time = Sys.time()
