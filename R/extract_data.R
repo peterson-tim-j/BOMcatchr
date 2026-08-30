@@ -704,6 +704,9 @@ extract_data <- function(
   # timestep source data to be jointly extracted.
   timepoints2Extract = list()
 
+  # Open connection to netCDF
+  ncout <- RNetCDF::open.nc(ncdfFilename)
+
   # look though each variable and time step to get the required data
   for (ivar in vars) {
 
@@ -719,57 +722,79 @@ extract_data <- function(
                               vars.extract.summary[ivar,]$from,
                               vars.extract.summary[ivar,]$to)
 
+    # Open connection to netcdf group for latter reading.
+    grp = RNetCDF::grp.inq.nc(ncout,
+                              grpname = vars.extract.summary[ivar,]$group
+                              )$self
+
+    # Get netCDF cell row/col for each spatial coordinate.
+    r <- extract_layer(ncdf.cond = ncout,
+                       extract.date = timepoints2Extract[[ivar]][1],
+                       var = ivar,
+                       vars.summary = vars.extract.summary[ivar,])
+    icols = terra::colFromX(r, point.weights$coords[, 1])
+    irows = terra::rowFromY(r, point.weights$coords[, 2])
+    ncells = length(irows)
+
     # Setup progress bar
-    ntimepoints2Extract = length(ind)
     pbar <- progress::progress_bar$new(
       format = paste("    ",ivar,": :current of :total  [:bar] :percent in :elapsed",sep=''),
-      total = ntimepoints2Extract, clear = FALSE, width= 80)
+      total = nrow(point.weights$coords) ,
+      clear = FALSE,
+      width= 80,
+      show_after = 0)
 
-    # Initialise matrix for extracted data. NOTE, the number of time steps should only change
-    # with the time step size and not the length of the source data.
-    data.brick[[ivar]] = matrix(NA, nrow = length(timepoints2Extract[[ivar]]), ncol = nrow(point.weights$coords))
+    # Initialise matrix foe extracted data
+    data.brick[[ivar]] = matrix(NA, nrow = length(ind), ncol = ncells)
 
-    # Open connection to netCDF file
-    ncout <- RNetCDF::open.nc(ncdfFilename)
+    if (!islocationsPolygon && interp.method == 'bilinear') {
+      # Get position of adjacent cells if points are to be extracted.
+      # Neighbouring cell values are used to interpolate to the required points.
+      adj_cells = terra::cells(r, locations, method=interp.method, weights = T)
+      j = grep('c', colnames(adj_cells))
+      adj_icols = sapply(j, function(x){terra::colFromCell(r, adj_cells[, x])})
+      adj_irows = sapply(j, function(x){terra::rowFromCell(r, adj_cells[, x])})
+      j = grep('w', colnames(adj_cells))
+      adj_weights =  adj_cells[, j]
 
-    # Loop through each ind time point of variable and get data
-    for (j in 1:ntimepoints2Extract){
+      # Loop through each ind time point of variable and get data from all adjacent
+      # cells to each required point. Get the cell values and apply weights, effectively
+      # doing the bilinear interpolation.
+      for (j in 1:ncells){
+        data_tmp = matrix(NA, nrow = length(ind), ncol = ncol(adj_icols))
+        for (k in 1:ncol(adj_icols)) {
+          data_tmp[, k] = RNetCDF::var.get.nc(grp,
+                                              ivar,
+                                              start = c(adj_icols[j,k],adj_irows[j,k], ind[1]),
+                                              count=c(1, 1, length(ind)),
+                                              na.mode = 1
+                                              )
+        }
 
-      # Read netCDF layer. Date of time step is given by names(ind)
-      r <- extract_layer(ncdf.cond = ncout,
-                         extract.date = as.Date(names(ind)[j]),
-                         var = ivar,
-                         vars.summary = vars.extract.summary[ivar,]
-                         )
+        # Do bilinear interpolation using weights
+        data.brick[[ivar]][,j] = data_tmp %*% adj_weights[j, ]
 
-      # Extend of locations, used for cropping. Buffer added for points in 1 cell.
-      coords_ext = terra::ext(locations)
-      r_ext = terra::ext(r)
-      coords_ext$xmin = max(coords_ext$xmin - terra::res(r)[1], r_ext$xmin)
-      coords_ext$ymin = max(coords_ext$ymin - terra::res(r)[2], r_ext$ymin)
-      coords_ext$xmax = min(coords_ext$xmax + terra::res(r)[1], r_ext$xmax)
-      coords_ext$ymax = min(coords_ext$ymax + terra::res(r)[2], r_ext$ymax)
+        # Update progress bar
+        pbar$tick()
+      }
+    } else {
+      # Loop through each ind time point of variable and get data
+      for (j in 1:ncells){
+        data.brick[[ivar]][,j] = RNetCDF::var.get.nc(grp,
+                                                     ivar,
+                                                     start = c(icols[j],irows[j], ind[1]),
+                                                     count=c(1, 1, length(ind)),
+                                                     na.mode = 1
+                                                     )
 
-      # Extract data for each variable
-      k = which( timepoints2Extract[[ivar]] == as.Date(names(ind)[j]))
-      data.brick[[ivar]][k,] = .extract_point_data(r = r,
-                                    interp.method = interp.method.vars[[ivar]],
-                                    coords = point.weights$coords,
-                                    do.infill =T,
-                                    ext = coords_ext,
-                                    interpMax = missing.method[1])
-
-      # Update progress bar
-      pbar$tick()
+        # Update progress bar
+        pbar$tick()
+      }
     }
-
-    # clear memory
-    rm(r)
-    gc(verbose = F)
-
-    # close connection
-    RNetCDF::close.nc(ncout)
   }
+
+  # close connection
+  RNetCDF::close.nc(ncout)
 
   # The source data can have the following types of gaps:
   # 1. Missing a few clustered grid cells
