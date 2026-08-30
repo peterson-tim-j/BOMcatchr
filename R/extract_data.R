@@ -707,6 +707,9 @@ extract_data <- function(
   # Open connection to netCDF
   ncout <- RNetCDF::open.nc(ncdfFilename)
 
+  # Flag for data on HDD
+  matrix_on_HDD = F
+
   # look though each variable and time step to get the required data
   for (ivar in vars) {
 
@@ -745,7 +748,18 @@ extract_data <- function(
       show_after = 0)
 
     # Initialise matrix foe extracted data
-    data.brick[[ivar]] = matrix(NA, nrow = length(ind), ncol = ncells)
+    #data.brick[[ivar]] = matrix(NA, nrow = length(ind), ncol = ncells)
+    tryCatch({
+        if (matrix_on_HDD)
+          stop()
+        data.brick[[ivar]] = bigmemory::big.matrix(nrow = length(ind), ncol = ncells, init = NA)
+      }, error = function(e) {
+        if (!matrix_on_HDD)
+          message('... Initialising extracted cell data matrix on HDD - given the limited RAM for the extractions.')
+        matrix_on_HDD = T
+        data.brick[[ivar]] = bigmemory::big.matrix(nrow = length(ind), ncol = ncells, init = NA, backingfile = 'BOMcatchr.bin')
+      }
+    )
 
     if (!islocationsPolygon && interp.method == 'bilinear') {
       # Get position of adjacent cells if points are to be extracted.
