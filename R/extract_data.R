@@ -679,10 +679,15 @@ extract_data <- function(
       .pretty_stop('No internet connection appears available to get elevation data. Check connection.')
 
     crsAUS = sf::st_crs("EPSG:4283")
-    DEMpoints = elevatr::get_elev_point(locations=data.frame(x=point.weights$coords[,1],
-                                                             y=point.weights$coords[,2]),
-                                        prj = crsAUS,
-                                        src='aws',ncpu=8, z=ET.DEM.res)
+    suppressWarnings({
+      DEMpoints = elevatr::get_elev_point(locations=data.frame(x=point.weights$coords[,1],
+                                                               y=point.weights$coords[,2]),
+                                          prj = crsAUS,
+                                          src='aws',
+                                          ncpu=future::availableCores(),
+                                          z=ET.DEM.res)
+    })
+
     DEMpoints = DEMpoints$elevation
     if (any(is.na(DEMpoints))) {
       warning('NA DEM values were derived. Trying increasing the resolution zoom.')
