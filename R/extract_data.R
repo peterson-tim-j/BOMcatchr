@@ -810,6 +810,19 @@ extract_data <- function(
   # close connection
   RNetCDF::close.nc(ncout)
 
+  # big.memory fn to count num. NAs
+  num.NAs <- function(x){
+    if (is(x,'big.matrix')) {
+      total_nas = 0
+      for (i in 1:ncol(x)) {
+        total_nas <- total_nas + sum(is.na(x[, i]))
+      }
+    } else {
+      total_nas = sum(is.na(x))
+    }
+    return(total_nas)
+  }
+
   # The source data can have the following types of gaps:
   # 1. Missing a few clustered grid cells
   # 2. Entire day of observations missing, often nationally
@@ -820,7 +833,6 @@ extract_data <- function(
   # 2. Entire day missing: linear interpolation over time when only a 1-2 days are missing.
   # 3. Prior to first obs: Apply the average for each day from the observational record within the dates extracted.
   message('... Infilling data gaps by interpolating over time, then back-filling.')
-  num.NAs <- function(x){sum(is.na(x))}
   infill.summary.df = data.frame(pre.filled = rep(NA, nvars),
                                  post.time.interpolated = rep(NA, nvars),
                                  post.backfilling = rep(NA, nvars),
