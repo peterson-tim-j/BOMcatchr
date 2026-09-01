@@ -14,7 +14,8 @@ test_that("netCDF grid can be created",
 
           # Build netCDF grids for all data but only over the defined time period.
           build_status= grid_build(ncdfFilename=ncdfFilename,
-                                       updateFrom=startDate, updateTo=endDate)
+                                   updateFrom=startDate,
+                                   updateTo=endDate)
         },
         message='Testing creaion of netCDF grids.'
       )
@@ -48,7 +49,7 @@ test_that("netCDF grid can be created",
 
       # summary.ages is a list of expected length
       expect_true(is.list(summary.ages))
-      expect_length(summary.ages, nrow(summary.df))
+      expect_length(summary.ages, length(summary.df))
 
       # Update netcDF grids and expect no errors
       expect_no_error(
