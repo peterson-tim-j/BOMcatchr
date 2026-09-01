@@ -159,9 +159,9 @@ ncdfFilename = tempfile(fileext='.nc')
 # Only precip data is to be added to the netCDF files.
 # This is because the URLs for the other variables are set to zero.
 \donttest{
-file.name = grid_build(ncdfFilename=ncdfFilename,
-             updateFrom=startDate,
-             updateTo=endDate,
+file.name = grid_build(ncdfFilename = ncdfFilename,
+             updateFrom = startDate,
+             updateTo = endDate,
              vars = c('precip'))
 
 # Load example catchment boundary.
@@ -169,11 +169,11 @@ catch <- extract_locations('catchment',c('407214'))
 
 # Extract daily precip. data (not Tmin, Tmax, VPD, ET).
 # Note, the input "locations" can also be a file to a ESRI shape file.
-climateData = extract_data(ncdfFilename=file.name,
-              extractFrom=startDate,
-              extractTo=endDate,
+climateData = extract_data(ncdfFilename = ncdfFilename,
+              extractFrom = startDate,
+              extractTo = endDate,
               vars = c('precip'),
-              locations=catch,
+              locations = catch,
               temporal.timestep = 'daily')
 
 # Extract the daily catchment average data.
