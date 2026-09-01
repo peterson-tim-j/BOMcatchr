@@ -121,9 +121,9 @@
 #' # Only precip data is to be added to the netCDF files.
 #' # This is because the URLs for the other variables are set to zero.
 #' \donttest{
-#' file.name = grid_build(ncdfFilename=ncdfFilename,
-#'              updateFrom=startDate,
-#'              updateTo=endDate,
+#' file.name = grid_build(ncdfFilename = ncdfFilename,
+#'              updateFrom = startDate,
+#'              updateTo = endDate,
 #'              vars = c('precip'))
 #'
 #' # Load example catchment boundary.
@@ -131,11 +131,11 @@
 #'
 #' # Extract daily precip. data (not Tmin, Tmax, VPD, ET).
 #' # Note, the input "locations" can also be a file to a ESRI shape file.
-#' climateData = extract_data(ncdfFilename=file.name,
-#'               extractFrom=startDate,
-#'               extractTo=endDate,
+#' climateData = extract_data(ncdfFilename = ncdfFilename,
+#'               extractFrom = startDate,
+#'               extractTo = endDate,
 #'               vars = c('precip'),
-#'               locations=catch,
+#'               locations = catch,
 #'               temporal.timestep = 'daily')
 #'
 #' # Extract the daily catchment average data.
@@ -684,7 +684,6 @@ extract_data <- function(
                                                                y=point.weights$coords[,2]),
                                           prj = crsAUS,
                                           src='aws',
-                                          ncpu=future::availableCores(),
                                           z=ET.DEM.res)
     })
 
@@ -817,7 +816,7 @@ extract_data <- function(
 
   # big.memory fn to count num. NAs
   num.NAs <- function(x){
-    if (is(x,'big.matrix')) {
+    if (inherits(x,'big.matrix')) {
       total_nas = 0
       for (i in 1:ncol(x)) {
         total_nas <- total_nas + sum(is.na(x[, i]))
