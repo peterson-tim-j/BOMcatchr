@@ -32,16 +32,16 @@
 #' @param vars is a vector of variables names to build or update. The available variables are: daily daily maximum temperature, minimum temperature,
 #' daily precipitation, daily precipitation root-mean-square-error (RMSE), monthly precipitation, daily 9am and 3pm vapour pressure grids and
 #' daily solar radiation The input vector for these options are \code{c('tmax', 'tmin', 'precip', 'precip.RMSE', 'precip.monthly',
-#' 'vprp_9am', 'vprp_3pm', 'solarrad')}. Any or all of the defaults are available. If \code{vars=''} and the netCDF does not exist, then the default is
-#' all available variables as provided by \code{rownames(grid_sources())}. However, if \code{vars=''} and the netCDF file does exist, then default
+#' 'vprp_9am', 'vprp_3pm', 'solarrad')}. Any or all of the defaults are available. If \code{vars = ''} and the netCDF does not exist, then the default is
+#' all available variables as provided by \code{rownames(grid_sources())}. However, if \code{vars = ''} and the netCDF file does exist, then default
 #' is to use the variable names in the file.
 #' @param keepFiles is a logical scalar to keep the downloaded gridded data files. The default is \code{FALSE}.
 #' @param compressionLevel is the netCDF compression level between 1 (low) and 9 (high), and \code{NA} for no compression.
 #' Note, data extraction runtime may slightly increase with the level of compression. The default is \code{5}.
 #' @param vars.sourceData is a data.frame of variable unit, time step and source URLs. This input is provided in-case the default URLs need to be changed.
-#' The default is \code{grid_sources())}
+#' The default is \code{grid_sources()}
 #' @param chunksizes netCDF chunk size expressed as the number of elements along each dimension (see \code{RNetCDF::var.def.nc} for details). Here the default
-#' is \code{c(30, 30, 5)}, which vignette 1 shows speeds-up extract by 110 times compared to the NetCDF library default chunking strategy (input \code{NULL) to use this strategy).
+#' is \code{c(30, 30, 5)}, which vignette 1 shows speeds-up extract by 110 times compared to the NetCDF library default chunking strategy set by an input of \code{NULL}.
 #'  Note, the \code{chunksizes} can only be set when a new variable is added to a file. Once the variable is created, \code{chunksizes} cannot be modified.
 #'
 #' @return
@@ -671,7 +671,6 @@ grid_build <- function(
     ivar.url.ext = vars.all[ivar,]$data.file.extension
     ivar.file.ext = vars.all[ivar,]$data.file.format
     ivar.timestep = vars.all[ivar,]$time.step
-    #ivar.startdate = as.Date(vars.all[ivar,]$date.start, format = '%Y-%m-%d')
 
     # Set time points to update for the time step of this variable
     timepoints2Update = .get_ncdf_dates(updateFrom, updateTo, ivar.timestep)
@@ -805,13 +804,16 @@ grid_build <- function(
   # Close the file, writing data to disk
   RNetCDF::close.nc(ncout)
 
+  # Remove empty list items form returned status
+  ind = unlist(lapply(buildSummary, 'nrow'))>0
+  buildSummary = buildSummary[ind]
+
   message('Data file construction FINISHED.')
   if (has_errors) {
     message('WARNING: Some errors were encountered downloading and/or importing the data.')
     message('         Check the output list variable for details.')
   } else
     message('Zerp errors were encountered downloading and/or importing the data.')
-
 
   duration <- difftime(Sys.time(), sys.start.time, units="secs")
   x <- abs(as.numeric(duration))
