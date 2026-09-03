@@ -565,9 +565,9 @@ extract_data <- function(
   }
 
   # Build a matrix of catchment weights, lat longs, and a look up table for each catchment.
-  message('... Building catchment weights for each grid.')
+  message('... Building location weights for each grid.')
 
-  # Set crs for each grid, then copy to eaxh variable.
+  # Set crs for each grid, then copy to each variable.
   ngrids = length(grids.extract)
   crs.grid = vector('list',ngrids)
   for (igrid in grids.extract) {
@@ -617,8 +617,8 @@ extract_data <- function(
     RNetCDF::close.nc(ncout)
 
     for (i in 1:length(locations)) {
-        if (i%%10 ==0 ) {
-          message(paste('   ... Building weights for catchment ', i,' of ',length(locations)));
+        if (i%%50 ==0 ) {
+          message(paste('   ... Building weights for polygon ', i,' of ',length(locations)));
           terra::tmpFiles(remove = TRUE, old = TRUE)
         }
 
@@ -752,18 +752,14 @@ extract_data <- function(
       show_after = 0)
 
     # Initialise matrix foe extracted data
-    #data.brick[[ivar]] = matrix(NA, nrow = length(ind), ncol = ncells)
-    tryCatch({
-        if (matrix_on_HDD)
-          stop()
-        data.brick[[ivar]] = bigmemory::big.matrix(nrow = length(ind), ncol = ncells, init = NA)
-      }, error = function(e) {
-        if (!matrix_on_HDD)
-          message('... Initialising extracted cell data matrix on HDD - given the limited RAM for the extractions.')
-        matrix_on_HDD = T
-        data.brick[[ivar]] = bigmemory::big.matrix(nrow = length(ind), ncol = ncells, init = NA, backingfile = 'BOMcatchr.bin')
-      }
-    )
+    if (matrix_on_HDD && memuse::howbig(length(ind), ncells) < (memuse::Sys.meminfo()$freeram*0.8)) {
+      data.brick[[ivar]] = matrix(NA, nrow = length(ind), ncol = ncells)
+    } else {
+      if (!matrix_on_HDD)
+        message(paste('   ... Initialising matrix for extracted cell data on HDD - given that 80% of available RAM (',memuse::Sys.meminfo()$freeram*0.8 ,') is insufficient.'))
+      matrix_on_HDD = T
+      data.brick[[ivar]] = bigmemory::big.matrix(nrow = length(ind), ncol = ncells, init = NA, backingfile = 'BOMcatchr_tmp_matrix.bin')
+    }
 
     if (!islocationsPolygon && interp.method == 'bilinear') {
       # Get position of adjacent cells if points are to be extracted.

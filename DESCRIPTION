@@ -23,7 +23,8 @@ Imports:
     elevatr,
     progress,
     terra (>= 1.9),
-    bigmemory
+    bigmemory,
+    memuse
 Suggests: 
     knitr,
     rmarkdown,
