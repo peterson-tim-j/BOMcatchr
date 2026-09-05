@@ -88,6 +88,7 @@
 #' @param ET.missing_method character string for interpolation method for missing variables required for ET calculation. The options are \code{'monthly average'}, \code{'seasonal average'}, \code{'DoY average'} and \code{'neighbouring average'}. Default is \code{'DoY average'} but when the extraction duration is less than two years, the default is \code{'neighbouring average'}. See \code{\link[Evapotranspiration]{ReadInputs}}
 #' @param ET.abnormal_method character string for interpolation method for abnormal variables required for ET calculation (e.g. Tmin > Tmax). Options and defaults are as for \code{ET.missing_method}. See \code{\link[Evapotranspiration]{ReadInputs}}
 #' @param ET.constants list of constants from Evapotranspiration package required for ET calculations. To get the data use the command \code{data(constants)}. Default is \code{list()}.
+#' @param force_HDD force large matrix to be off RAMM and on the HDD, using \code{bigmemory::big.matrix()}. This is included only for package testing. Default is \code{FALSE}.
 #'
 #' @return
 #' When \code{locations} are polygons and \code{spatial.fn} is not \code{NA} or \code{""}, then the returned variable is a list variable containing two data.frames. The first is the areal aggregated climate
@@ -167,7 +168,8 @@ extract_data <- function(
     ET.timestep = 'monthly',
     ET.missing_method="DoY average",
     ET.abnormal_method='DoY average',
-    ET.constants=list())  {
+    ET.constants=list(),
+    force_HDD = F)  {
 
   # Get system time to estimate run time at the end.
   sys.start.time = Sys.time()
@@ -752,13 +754,20 @@ extract_data <- function(
       show_after = 0)
 
     # Initialise matrix foe extracted data
-    if (!matrix_on_HDD && memuse::howbig(length(ind), ncells) < (memuse::Sys.meminfo()$freeram*0.8)) {
+    if (!force_HDD && (!matrix_on_HDD && memuse::howbig(length(ind), ncells) < (memuse::Sys.meminfo()$freeram*0.8))) {
       data.brick[[ivar]] = matrix(NA, nrow = length(ind), ncol = ncells)
     } else {
+      if (force_HDD)
       if (!matrix_on_HDD)
-        message(paste('   ... Initialising matrix for extracted cell data on HDD - given that 80% of available RAM (',memuse::Sys.meminfo()$freeram*0.8 ,') is insufficient.'))
+        message('    Forcing initialising of matrix for extracted cell data onto the HDD')
+      else
+        message(paste('    Initialising matrix for extracted cell data on HDD - given that 80% of available RAM (',memuse::Sys.meminfo()$freeram*0.8 ,') is insufficient.'))
       matrix_on_HDD = T
-      data.brick[[ivar]] = bigmemory::big.matrix(nrow = length(ind), ncol = ncells, init = NA, backingfile = 'BOMcatchr_tmp_matrix.bin')
+      data.brick[[ivar]] = bigmemory::big.matrix(nrow = length(ind),
+                                                 ncol = ncells,
+                                                 init = NA,
+                                                 backingfile = 'BOMcatchr_tmp_matrix.bin',
+                                                 descriptorfile = 'BOMcatchr_tmp_matrix.bin.desc')
     }
 
     if (!islocationsPolygon && interp.method == 'bilinear') {
