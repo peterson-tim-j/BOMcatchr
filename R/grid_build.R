@@ -598,7 +598,8 @@ grid_build <- function(
     updateTo = min(vars.summary[vars.2update,]$from)
     message('       - updateTo increased to ensure no time gaps for any variables.')
   }
-  if (any(updateTo > vars.summary[vars.2update,]$to)) {
+  if (any(updateTo > vars.summary[vars.2update,]$to) &&
+      any(updateTo < vars.summary[vars.2update,]$to) ) {
     updateTo = max(vars.summary[vars.2update,]$to)
     message('       - updateTo increased to ensure all variables have the same end date.')
   }
@@ -813,7 +814,7 @@ grid_build <- function(
     message('WARNING: Some errors were encountered downloading and/or importing the data.')
     message('         Check the output list variable for details.')
   } else
-    message('Zerp errors were encountered downloading and/or importing the data.')
+    message('Zero errors were encountered downloading and/or importing the data.')
 
   duration <- difftime(Sys.time(), sys.start.time, units="secs")
   x <- abs(as.numeric(duration))
