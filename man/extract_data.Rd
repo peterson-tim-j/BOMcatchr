@@ -23,7 +23,8 @@ extract_data(
   ET.timestep = "monthly",
   ET.missing_method = "DoY average",
   ET.abnormal_method = "DoY average",
-  ET.constants = list()
+  ET.constants = list(),
+  force_HDD = F
 )
 }
 \arguments{
@@ -93,6 +94,8 @@ an estimate of the wet areal potential evapotranspiration.}
 \item{ET.abnormal_method}{character string for interpolation method for abnormal variables required for ET calculation (e.g. Tmin > Tmax). Options and defaults are as for \code{ET.missing_method}. See \code{\link[Evapotranspiration]{ReadInputs}}}
 
 \item{ET.constants}{list of constants from Evapotranspiration package required for ET calculations. To get the data use the command \code{data(constants)}. Default is \code{list()}.}
+
+\item{force_HDD}{force large matrix to be off RAMM and on the HDD, using \code{bigmemory::big.matrix()}. This is included only for package testing. Default is \code{FALSE}.}
 }
 \value{
 When \code{locations} are polygons and \code{spatial.fn} is not \code{NA} or \code{""}, then the returned variable is a list variable containing two data.frames. The first is the areal aggregated climate
