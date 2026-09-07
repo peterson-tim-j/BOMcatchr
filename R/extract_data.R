@@ -640,6 +640,7 @@ extract_data <- function(
         w.LongLat = terra::crds(w, na.rm= F)
         filt = is.finite(w.vals) & w.vals>0
         w.vals = w.vals[filt]
+        w.vals = pmin(1, w.vals)
         w.LongLat = w.LongLat[filt, ]
 
         # Get area of cells (in metres) that have a weight >0
@@ -655,8 +656,11 @@ extract_data <- function(
         w.vals = w.vals/sum(w.vals);
 
         # Add to data set of all locations
+        if (i==1)
+          point.weights$lookup[i,] = c(1,length(w.vals))
+        else
+          point.weights$lookup[i,] = point.weights$lookup[i-1,2] + c(1,length(w.vals))
         point.weights$w = c(point.weights$w, w.vals)
-        point.weights$lookup[i,] = c(1,length(w.vals))
         point.weights$coords = rbind(point.weights$coords, w.LongLat)
 
         # Clean up
