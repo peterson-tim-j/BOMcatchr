@@ -758,7 +758,8 @@ extract_data <- function(
       show_after = 0)
 
     # Initialise matrix foe extracted data
-    if (!force_HDD && (!matrix_on_HDD && memuse::howbig(length(ind), ncells) < (memuse::Sys.meminfo()$freeram*0.8))) {
+    if (!force_HDD &&
+        (!matrix_on_HDD && memuse::howbig(nrow = as.numeric(length(ind)), ncol = as.numeric(ncells)) < (memuse::Sys.meminfo()$freeram*0.8))) {
       data.brick[[ivar]] = matrix(NA, nrow = length(ind), ncol = ncells)
     } else {
       if (force_HDD)
