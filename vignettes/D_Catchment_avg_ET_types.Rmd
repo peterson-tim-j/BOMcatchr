@@ -2,7 +2,11 @@
 title: "4. Area weighted evapotranspiration estimates"
 description: >
   This vignette shows how to estimate various measures of the area weighted evapotranspiration.
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    code_folding: show
+  rmarkdown:
+    html_vignette
 vignette: >
   %\VignetteIndexEntry{4. Area weighted evapotranspiration estimates}
   %\VignetteEngine{knitr::rmarkdown}
@@ -34,7 +38,7 @@ ncdfFilename = tempfile(fileext='.nc')
 
 Next, let's make the data grids over this period.
 ```{r}
-grid_build(ncdfFilename = ncdfFilename,
+status = grid_build(ncdfFilename = ncdfFilename,
                    updateFrom = date.from,
                    updateTo = date.to,
                    vars = c('precip','tmin', 'tmax',
@@ -175,19 +179,28 @@ climateData.ET.Turc = extract_data(ncdfFilename = ncdfFilename,
 ```
 Next let's plot each measure of the area weighted evaporation at each catchment.
 
-```{r}
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 10
 
-par(mfrow=c(1,2))
+par(mfrow=c(2,1))
 for (i in 1:length(site_ID)) {
   filt = climateData.ET.HargreavesSamani$temporal$Location.ID == site_ID[i]
   d = ISOdate(climateData.ET.HargreavesSamani$temporal$year,
               climateData.ET.HargreavesSamani$temporal$month,
               climateData.ET.HargreavesSamani$temporal$day)
-  plot(d[filt], climateData.ET.HargreavesSamani$temporal$et[filt],
-              col='black',lty=1, xlim = c(ISOdate(2010,1,1), ISOdate(2010,12,1)),
-              ylim=c(0, 30),type='l', ylab='ET [mm/d]',xlab='Date')
+  plot(d[filt],
+       climateData.ET.HargreavesSamani$temporal$et[filt],
+       col='black',
+       lty=1,
+       xlim = c(ISOdate(2010,1,1),
+       ISOdate(2010,12,1)),
+       ylim=c(0, 30),
+       type='l',
+       ylab='ET [mm/d]',
+       xlab='Date',
+       main=paste('Catchment ID',site_ID[i])
+       )
 
   filt = climateData.ET.JensenHaise$temporal$Location.ID == site_ID[i]
   d = ISOdate(climateData.ET.JensenHaise$temporal$year,

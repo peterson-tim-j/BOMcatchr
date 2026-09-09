@@ -3,7 +3,11 @@ title: "3. Area weighted PET and precipitation and maps"
 description: >
   This vignette shows how to build the netCDF data file and then
   extract the area weighted PET and precipitation data for a catchment over a user defined period. The errors introduced from not using area weighted methods (e.g centroid) are then demonstrated.
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    code_folding: show
+  rmarkdown:
+    html_vignette
 vignette: >
   %\VignetteIndexEntry{3. Area weighted PET and precipitation and maps}
   %\VignetteEngine{knitr::rmarkdown}
@@ -30,23 +34,51 @@ First, let's define the start and end dates for data grids and the file names.
 
 ```{r}
 date.from = as.Date("2010-07-01","%Y-%m-%d")
-date.to = as.Date("2010-10-31","%Y-%m-%d")
+date.to = as.Date("2010-12-31","%Y-%m-%d")
 
 ncdfFilename = tempfile(fileext='.nc')
 ```
 
 Next, let's make the data grids over this period.
 ```{r}
-fname = grid_build(ncdfFilename = ncdfFilename,
+status = grid_build(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'))
 ```
-## Load catchment boundaries
+## Load catchment boundaries and map
 Now that we have the meteorological data we can begin extracting data for two catchments. To make it easy to get the require location data, the package includes the function \code{extract_locations}, which pulls vector spatial data from the BOM Australian Hydrological Geospatial Fabric.  Here it to used to obtain the boundaries for two catchments within the Loddon basin, Victoria. However, shape files of polygons can easily be used once imported into R.
+
 ```{r}
 catch <- extract_locations('catchment',c('407214','407220'))
 site_ID <- catch$stationno
+```
+
+To further illustrate the extraction of the geofabric data, let's also extract the Loddon drainage basin, simplified stream network and the rainfall gauges.
+
+```{R}
+dr <- extract_locations('river_region',43637156)
+riv <- extract_locations('river_simple',NA)
+gauge <- extract_locations('water_gauge',NA)
+```
+
+Next, we can filter the stream network and gauges to those in the drainage basin.
+
+```{R}
+gauge <- gauge[dr]
+riv <- riv[dr]
+```
+
+Finally, let's map the drainage basin (black), stream network (blue), stream gauges (grey) and the example catchment boundaries (red).
+
+```{r class.source = 'fold-hide'}
+#| fig.width = 4,
+#| fig.height = 6
+
+terra::plot(dr, border='black')
+terra::plot(catch, border='red', add = TRUE)
+terra::plot(riv, col='blue', add = TRUE)
+terra::plot(gauge, col='grey', add = TRUE)
 ```
 
 ## Extract daily precipitation and PET data
@@ -55,11 +87,13 @@ Here the daily area weighted average precipitation and PET is extracted across t
 Here Morton's wet-environment areal evapotranspiration was estimated (other options are available). The use of Morton's CREA formulation is defined by setting the _ET.function_ variable to \code{'ET.MortonCRAE'}. The calculation of the areal wet environment PET is defined by setting Morton's specific variable \code{ET.Mortons.est} to \code{'wet areal ET'} (note, other options exist within _BOMcatchr_ for both variables). Lastly, following [McMahon et al, (2013)](https://hess.copernicus.org/articles/17/1331/2013/hess-17-1331-2013.pdf), Morton's PET is calculated at a monthly time step (not daily) to improve its reliability. The monthly estimate is then interpolated to daily.
 
 The estimation of ET uses the _evapotranspiration_ package. It requires a set of constants, which are loaded as follows.
+
 ```{r}
 data(constants,package='Evapotranspiration')
 ```
 
 The area weighted daily meteorological variables and PET can then be calculated as follows, given \code{vars} includes \code{et}. Note, because only two months are being extracted, the default method to handle missing data and anomalies (e.g. Tmin > Tmax) during ET calculations is automatically changed from the default of \code{"DoY average"} to \code{"neighbouring average"}.
+
 ```{r}
 climateData.daily = extract_data(ncdfFilename=ncdfFilename,
                       extractFrom=date.from,
@@ -74,9 +108,10 @@ climateData.daily = extract_data(ncdfFilename=ncdfFilename,
                       ET.Mortons.est='wet areal ET',
                       ET.constants= constants)
 ```
+
 Next time series of the extracted daily precipitation and PET for each catchment is plotted. The precipitation plots show both the area weighted estimate and the spatial variability on each day (as +/- one standard deviation).
 
-```{r}
+```{r class.source = 'fold-hide'}
 #| fig.width = 6,
 #| fig.height = 8
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
@@ -178,7 +213,8 @@ PrecipData.monthly = extract_data(ncdfFilename=ncdfFilename,
                      temporal.fn.inner = 'sum')
 ```
 The monthly total precipitation can then be mapped to show the spatial variability. Before mapping, let's add a function to map a panel of maps and for the maps to have a common colour bar.
-```{r}
+
+```{r class.source = 'fold-hide'}
 panel.maps <- function(r, v, plot.labels, colourbar.label='') {
 
   n.plots = terra::nlyr(r)
@@ -219,12 +255,13 @@ panel.maps <- function(r, v, plot.labels, colourbar.label='') {
     axis(1, at = pretty(seq(zlim[1], zlim[2], length.out = 5)), las = 1)
     mtext(colourbar.label, side = 1, line = 2, cex = 0.9)
 }
-
 ```
+
 Now let's call the function to map the monthly rainfall.
-```{r}
+
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
-#| fig.height = 6
+#| fig.height = 10
 map.labels = gsub( 'precip_', '',names(PrecipData.monthly[[2:5]]))
 map.labels = gsub( '_', '-',map.labels)
 
@@ -250,9 +287,10 @@ metData.monthly = extract_data(ncdfFilename=ncdfFilename,
                      ET.constants= constants)
 ```
 The monthly total PET can then be mapped to show the spatial variability. The map below shows considerable spatial variability. Much of this variability would not emerges if only point PET at the catchment centroid was used.
-```{r}
+
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
-#| fig.height = 6
+#| fig.height = 10
 colInd = which(startsWith(names(metData.monthly), "et_"))
 plot.data = metData.monthly[[colInd]]
 
@@ -260,9 +298,10 @@ panel.maps(plot.data, catch, map.labels, "PET (mm/month)")
 ```
 
 Now that we have maps of the rainfall and PET, we can calculate and map the monthly rainfall deficit.
-```{r}
+
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
-#| fig.height = 6
+#| fig.height = 10
 colnames.all = names(metData.monthly)
 colInd.P = which(startsWith(colnames.all, "precip_"))
 colInd.PET = which(startsWith(colnames.all, "et_"))
@@ -287,6 +326,7 @@ Here area weighted catchment rainfall deficit estimates are compared to point es
 ```{r}
 centroid = terra::centroids(catch)
 ```
+
 Next, the meteorological data and PET are derived using both the area weighted approach and centroids.
 ```{r}
 metData.monthly.weighted = extract_data(ncdfFilename=ncdfFilename,
@@ -315,8 +355,9 @@ metData.monthly.centroid = extract_data(ncdfFilename=ncdfFilename,
                      ET.constants =  constants)
 ```
 
-Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduced a mean error of 8 - 18  mm/month.
-```{r}
+Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduced a bias of 1.5 to 6  mm/month.
+
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 6
 par(mfrow=c(2,3), mar =  c(5, 7.5, 4, 2.7) + 0.1)
@@ -332,21 +373,28 @@ for (i in 1:length(site_ID)) {
        metData.monthly.weighted$temporal$day[filt]))
 
   # Precipitation
-  plot(x = metData.date,
-       y = metData.monthly.weighted$temporal$precip[filt],
+  xdata = metData.date
+  ydata_1 = metData.monthly.weighted$temporal$precip[filt]
+  ydata_2 = metData.monthly.centroid$precip[filt]
+  shared_limits <- range(c(ydata_1, ydata_2))
+  shared_limits[1] = floor(shared_limits[1])
+  shared_limits[2] = ceiling(shared_limits[2]*1.25)
+  plot(x = xdata,
+       y = ydata_1,
        type = "l",
        col = "#e31a1c",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, 200),
+       ylim = shared_limits,
        ylab = "Precip. [mm/month]",
        xlab = "2010",
        xaxs = "i",
        bty = "l",
-       yaxs = "i")
-
-  lines(x = metData.date,
-        y = metData.monthly.centroid$precip[filt],
+       yaxs = "i",
+       main=paste('Catchment ID',site_ID[i],': Precip.' ),
+       )
+  lines(x = xdata,
+        y = ydata_2,
         col = "#bc80bd",
         lwd = 1.2)
 
@@ -359,50 +407,67 @@ for (i in 1:length(site_ID)) {
          legend = c("Areal weighted", "Centroid"),
          xpd = NA)
 
+  rmse = round(sqrt(mean((ydata_1 - ydata_2)^2)), 2)
+  bias = round(mean(ydata_1 - ydata_2), 1)
+  text(x=(xdata[1] + 5), y=shared_limits[2]*0.85, adj = c(0,0),
+       labels = paste('RMSE =', rmse, 'mm/month\nBias =', bias, 'mm/month'))
+
   # PET
-  plot(x = metData.date,
-       y = metData.monthly.weighted$temporal$et[filt],
+  xdata = metData.date
+  ydata_1 = metData.monthly.weighted$temporal$et[filt]
+  ydata_2 = metData.monthly.centroid$et[filt]
+  shared_limits <- range(c(ydata_1, ydata_2))
+  shared_limits[1] = floor(shared_limits[1])
+  shared_limits[2] = ceiling(shared_limits[2]*1.25)
+  plot(x = xdata,
+       y = ydata_1,
        type = "l",
        col = "#e31a1c",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       main=paste('Catchment ID',site_ID[i]),
-       ylim = c(0, 120),
+       main=paste('Catchment ID',site_ID[i],': PET'),
+       ylim = shared_limits,
        ylab = "PET [mm/month]",
        xlab = "2010", xaxs = "i",
        bty = "l",
        yaxs = "i")
 
-  lines(metData.date, metData.monthly.centroid$et[filt],
+  lines(x = xdata,
+       y = ydata_2,
         col = "#bc80bd", lwd = 1.2)
 
-  # Deficit
-  precip.deficit.weighted =  metData.monthly.weighted$temporal$precip[filt] -
-                             metData.monthly.weighted$temporal$et[filt]
+  rmse = round(sqrt(mean((ydata_1 - ydata_2)^2)), 2)
+  bias = round(mean(ydata_1 - ydata_2), 1)
+  text(x=(xdata[1] + 5), y=shared_limits[2]*0.85, adj = c(0,0),
+       labels = paste('RMSE =', rmse, 'mm/month\nBias =', bias, 'mm/month'))
 
-  plot(x = metData.date,
-       y = precip.deficit.weighted,
+  # Deficit
+  xdata = metData.date
+  ydata_1 = metData.monthly.weighted$temporal$precip[filt] - metData.monthly.weighted$temporal$et[filt]
+  ydata_2 = metData.monthly.centroid$precip[filt] - metData.monthly.centroid$et[filt]
+  shared_limits <- range(c(ydata_1, ydata_2))
+  shared_limits[1] = floor(shared_limits[1])
+  shared_limits[2] = ceiling(shared_limits[2]*1.35)
+  plot(x = xdata,
+       y = ydata_1,
        type = "l",
        col = "#e31a1c",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, 140),
+       ylim = shared_limits,
        ylab = "P - PET [mm/month]",
        xlab = "2010",
        xaxs = "i",
        bty = "l",
-       yaxs = "i")
+       yaxs = "i",
+       main=paste('Catchment ID',site_ID[i],': Deficit')
+       )
 
-  precip.deficit.centroid =  metData.monthly.centroid$precip[filt] -
-                             metData.monthly.centroid$et[filt]
+  lines(xdata, ydata_2, col = "#bc80bd", lwd = 1.2)
 
-  lines(metData.date, precip.deficit.centroid, col = "#bc80bd", lwd = 1.2)
-
-  text(x = par("usr")[1]+2,
-       y = par("usr")[3]+10,
-       labels = paste('Mean diff. =',round(mean(precip.deficit.weighted -
-              precip.deficit.centroid),1),'mm/month'),
-       adj = c(0, 0))
+  rmse = round(sqrt(mean((ydata_1 - ydata_2)^2)), 2)
+  bias = round(mean(ydata_1 - ydata_2), 1)
+  text(x=(xdata[1] + 5), y=shared_limits[2]*0.8, adj = c(0,0),
+       labels = paste('RMSE =', rmse, 'mm/month\nBias =', bias, 'mm/month'))
 }
 ```
-

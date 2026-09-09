@@ -7,7 +7,7 @@ test_that("netCDF grid can be created",
       expect_no_error(
         {
           # Set dates for building netCDFs and extracting data from yesterday to one week ago.
-          startDate = as.Date("2010-08-01","%Y-%m-%d")
+          startDate = as.Date("2010-07-01","%Y-%m-%d")
           endDate = as.Date("2010-09-30","%Y-%m-%d")
 
           # Set names for netCDF files (in the system temp. directory).
@@ -50,7 +50,7 @@ test_that("netCDF grid can be created",
 
       # Test df dimensions
       expect_true(is.data.frame(climateData.P$temporal))
-      expect_shape(climateData.P$temporal, dim = c(4, 6))
+      expect_shape(climateData.P$temporal, dim = c(6, 6))
 
       expect_no_error(
         {
@@ -80,7 +80,7 @@ test_that("netCDF grid can be created",
 
       # Test df dimensions
       expect_true(is.data.frame(climateData.P_PET$temporal))
-      expect_shape(climateData.P_PET$temporal, dim = c(4, 11))
+      expect_shape(climateData.P_PET$temporal, dim = c(6, 11))
 
       # check data is finite
       expect_true(all(is.finite(climateData.P$temporal[,5])), 'Test precip results are finite')
@@ -92,30 +92,50 @@ test_that("netCDF grid can be created",
           centroid = terra::centroids(catch)
 
           # Extract point monthly data P for Bet Bet Creek.
-          climateData.P= extract_data(ncdfFilename=ncdfFilename,
+          climateData.P.centroid = extract_data(ncdfFilename=ncdfFilename,
                                       extractFrom=startDate,
                                       extractTo=endDate,
                                       locations=centroid,
                                       vars = c('precip'),
                                       temporal.timestep = 'weekly',
                                       temporal.fn.inner = 'sum',
-                                      spatial.fn='var');
+                                      spatial.fn='var')
         },
         message='Testing extraction of point P weekly data.'
       )
 
       expect_no_error(
         {
-          # Extract point monthly data P for Bet Bet Creek.
-          climateData.P= extract_data(ncdfFilename=ncdfFilename,
+          # Extract area weighted monthly data P for Bet Bet Creek.
+          climateData.P.area = extract_data(ncdfFilename=ncdfFilename,
                                       extractFrom=startDate,
                                       extractTo=endDate,
                                       locations=catch,
                                       vars = c('precip'),
-                                      temporal.timestep = 'monthly',
-                                      temporal.fn.inner = 'sum');
+                                      temporal.timestep = 'weekly',
+                                      temporal.fn.inner = 'sum')
+
+          rmse = mean((climateData.P.area$temporal$precip - climateData.P.centroid$precip)^2)
+          bias = mean(climateData.P.area$temporal$precip - climateData.P.centroid$precip)
+
+          message(paste('.. RMSE b/w centroid and weighted area =', rmse, 'mm/week' ))
+          message(paste('.. Bias b/w centroid and weighted area =', bias, 'mm/week' ))
         },
         message='Testing extraction of mapped P monthly data.'
+      )
+
+      expect_lt(
+        {
+          mean((climateData.P.area$temporal$precip - climateData.P.centroid$precip)^2)
+        },
+        1.4
+      )
+
+      expect_lt(
+        {
+          mean(climateData.P.area$temporal$precip - climateData.P.centroid$precip)
+        },
+        0.6
       )
     }
 )

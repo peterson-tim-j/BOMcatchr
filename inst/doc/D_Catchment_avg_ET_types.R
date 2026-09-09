@@ -12,7 +12,7 @@ date.to = as.Date("2010-12-31","%Y-%m-%d")
 ncdfFilename = tempfile(fileext='.nc')
 
 ## -----------------------------------------------------------------------------
-grid_build(ncdfFilename = ncdfFilename,
+status = grid_build(ncdfFilename = ncdfFilename,
                    updateFrom = date.from,
                    updateTo = date.to,
                    vars = c('precip','tmin', 'tmax',
@@ -141,16 +141,25 @@ climateData.ET.Turc = extract_data(ncdfFilename = ncdfFilename,
                                ET.timestep = 'daily',
                                ET.constants = constants)
 
-## -----------------------------------------------------------------------------
-par(mfrow=c(1,2))
+## ----class.source = 'fold-hide'-----------------------------------------------
+par(mfrow=c(2,1))
 for (i in 1:length(site_ID)) {
   filt = climateData.ET.HargreavesSamani$temporal$Location.ID == site_ID[i]
   d = ISOdate(climateData.ET.HargreavesSamani$temporal$year,
               climateData.ET.HargreavesSamani$temporal$month,
               climateData.ET.HargreavesSamani$temporal$day)
-  plot(d[filt], climateData.ET.HargreavesSamani$temporal$et[filt],
-              col='black',lty=1, xlim = c(ISOdate(2010,1,1), ISOdate(2010,12,1)),
-              ylim=c(0, 30),type='l', ylab='ET [mm/d]',xlab='Date')
+  plot(d[filt],
+       climateData.ET.HargreavesSamani$temporal$et[filt],
+       col='black',
+       lty=1,
+       xlim = c(ISOdate(2010,1,1),
+       ISOdate(2010,12,1)),
+       ylim=c(0, 30),
+       type='l',
+       ylab='ET [mm/d]',
+       xlab='Date',
+       main=paste('Catchment ID',site_ID[i])
+       )
 
   filt = climateData.ET.JensenHaise$temporal$Location.ID == site_ID[i]
   d = ISOdate(climateData.ET.JensenHaise$temporal$year,

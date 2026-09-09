@@ -4,7 +4,11 @@ description: >
   This vignette shows how to build extract water-year and seasonal area weighted
   precipitation, climatology, anomaly and cumulative anomaly. Interpolation error in the daily
   precipitation is also estimated.
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    code_folding: show
+  rmarkdown:
+    html_vignette
 vignette: >
   %\VignetteIndexEntry{5. Water-year and seasonal area precipitation and error estimates}
   %\VignetteEngine{knitr::rmarkdown}
@@ -34,7 +38,7 @@ ncdfFilename = tempfile(fileext='.nc')
 
 Next, let's make the data grids over this period. Note, the monthly root mean square interpolation error (RMSE) gridded data is not provided the Bureau of Meteorology and is therefore not able to be used below.
 ```{r}
-fname = grid_build(ncdfFilename = ncdfFilename,
+status = grid_build(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('precip', 'precip.RMSE', 'precip.monthly'))
@@ -75,7 +79,7 @@ climateData.annual.err = extract_data(ncdfFilename = ncdfFilename,
                       spatial.fn = 'var')
 ```
 
-```{r}
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 6
 
@@ -205,7 +209,8 @@ climateData.month2wateryear$temporal = climateData.month2wateryear$temporal[filt
 ```
 
 Now let's compare the two estimates of water year precipitation at the two catchments. The blue line shows the water year total rainfall calculated from the daily data, with the black vertical bars denoting the estimated 5th to 95th error from the interpolation of rain gauges. The red line shows the the water year total rainfall calculated from the monthly data.
-```{r}
+
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 6
 
@@ -271,6 +276,7 @@ for (i in 1:length(site_ID)) {
          cex=0.75)
 }
 ```
+
 ## Seasonal rainfall climatology
 Multiple more advanced measures can also be derived. To demonstrate, first the area weighted average seasonal rainfall is calculated using both the daily and monthly data. To achieve this only two changes are required. The input \code{temporal.timestep} is changed to \code{'seasonal'} and the temporal function \code{temporal.fn.inner} is changed to \code{'clim'}. Below this is used to calculate the average total precipitation for each season.
 
@@ -286,7 +292,7 @@ clim.seasonal = extract_data(ncdfFilename = ncdfFilename,
                       spatial.fn = 'var')
 ```
 
-```{r}
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 6
 
@@ -367,7 +373,8 @@ cumannom.seasonal = extract_data(ncdfFilename = ncdfFilename,
 ```
 
 Now let's compare the two estimates the precipitation anomaly and cumulative anomaly at the two catchments. The blue line shows that calculated from the daily data and the red line shows that calculated from the monthly data.
-```{r}
+
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 6
 
@@ -480,9 +487,9 @@ rle.wateryear <- extract_data(ncdfFilename = ncdfFilename,
              spatial.fn = 'var')
 ```
 
-Now let's plot the median water-year precipitation event duration.
+Now let's mean the median water-year precipitation event duration.
 
-```{r}
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 6
 
