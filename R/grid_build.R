@@ -590,9 +590,9 @@ grid_build <- function(
 
   # If the earliest and latest dates from existing data differ, then
   # change updateFrom and updateTo
-  if (any(updateFrom > vars.summary[vars.2update,]$from)) {
-    updateFrom = min(vars.summary[vars.2update,]$from)
-    message('       - updateFrom reduced to ensure all variables have the same start date.')
+  if (any(updateFrom > vars.summary[vars.2update,]$to)) {
+    updateFrom = min(vars.summary[vars.2update,]$to)
+    message('       - updateFrom reduced to ensure no time gaps for any variables.')
   }
   if (any(updateTo < vars.summary[vars.2update,]$from)) {
     updateTo = min(vars.summary[vars.2update,]$from)
