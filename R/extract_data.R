@@ -784,13 +784,19 @@ extract_data <- function(
       adj_irows = sapply(j, function(x){terra::rowFromCell(r, adj_cells[, x])})
       j = grep('w', colnames(adj_cells))
       adj_weights =  adj_cells[, j]
+      if (ncells==1) {
+        adj_icols = matrix(adj_icols, nrow=1)
+        adj_irows = matrix(adj_irows, nrow=1)
+        adj_weights = matrix(adj_weights, nrow=1)
+      }
 
       # Loop through each ind time point of variable and get data from all adjacent
       # cells to each required point. Get the cell values and apply weights, effectively
       # doing the bilinear interpolation.
+      n_adj_icols = ncol(adj_icols)
       for (j in 1:ncells){
-        data_tmp = matrix(NA, nrow = length(ind), ncol = ncol(adj_icols))
-        for (k in 1:ncol(adj_icols)) {
+        data_tmp = matrix(NA, nrow = length(ind), ncol = n_adj_icols)
+        for (k in 1:n_adj_icols) {
           data_tmp[, k] = RNetCDF::var.get.nc(grp,
                                               ivar,
                                               start = c(adj_icols[j,k],adj_irows[j,k], ind[1]),
