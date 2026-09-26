@@ -685,7 +685,10 @@ grid_build <- function(
     # Setup progress bar
     pbar <- progress::progress_bar$new(
       format = paste("    ",ivar,": :current of :total  [:bar] :percent in :elapsed",sep=''),
-      total = ntimepoints2Update, clear = FALSE, width= 80)
+      total = ntimepoints2Update,
+      clear = FALSE,
+      width= 100,
+      show_after = 0)
 
     for (i in 1:ntimepoints2Update){
 
