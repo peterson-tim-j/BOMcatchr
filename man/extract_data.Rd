@@ -9,6 +9,7 @@ extract_data(
   extractFrom = as.Date("1900-01-01", "\%Y-\%m-\%d"),
   extractTo = as.Date(Sys.Date(), "\%Y-\%m-\%d"),
   vars = "",
+  vars_derived = "",
   locations = NA,
   temporal.timestep = "daily",
   temporal.fn.outer = NA,
@@ -16,14 +17,7 @@ extract_data(
   spatial.fn = "var",
   interp.method = "",
   missing.method = c("5", "linear", "mean"),
-  ET.function = "ET.MortonCRAE",
-  ET.DEM.res = 10,
-  ET.Mortons.est = "wet areal ET",
-  ET.Turc.humid = F,
-  ET.timestep = "monthly",
-  ET.missing_method = "DoY average",
-  ET.abnormal_method = "DoY average",
-  ET.constants = list(),
+  DEM.res = 10,
   force_HDD = F
 )
 }
@@ -41,6 +35,8 @@ daily solar radiation and evapotranspiration. The input vector for these options
 To calculate the ET, all of the required inputs for the calculation ET must also be extracted (i.e. the input for such would generally be
 \code{c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et')}. Any or all of the defaults are available. The default \code{''} and this will result in
 all of the variables in the netCDF file and provided by \code{rownames(BOMcatchr::grid_summary(ncdfFilename))}.}
+
+\item{vars_derived}{TO DO}
 
 \item{locations}{is either an output \code{terraa::vect} onjhect from \code{\link{extract_locations}}, the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
 already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the EPSG:4283 datum (i.e. GDA94), and the first column must be a unique ID.}
@@ -74,26 +70,8 @@ will then be assigned a value from a user-defined function from these observatio
 The default function is \code{mean}. Other standard functions (e.g. \code{median}) or user defined functions can be used.
 The default for this input is \code{c('5', 'linear', 'mean')}. All gap filling method can be turned off with the input \code{c('0', '', '')}, which is useful to identify the interpolated data points.}
 
-\item{ET.function}{character string for the evapotranspiration function to be used. The methods that can be derived from the gridded data are are \code{\link[Evapotranspiration]{ET.Abtew}},
-\code{\link[Evapotranspiration]{ET.HargreavesSamani}}, \code{\link[Evapotranspiration]{ET.JensenHaise}}, \code{\link[Evapotranspiration]{ET.Makkink}}, \code{\link[Evapotranspiration]{ET.McGuinnessBordne}}, \code{\link[Evapotranspiration]{ET.MortonCRAE}} ,
-\code{\link[Evapotranspiration]{ET.MortonCRWE}}, \code{\link[Evapotranspiration]{ET.Turc}}. Default is \code{\link[Evapotranspiration]{ET.MortonCRAE}} i.e. the  complementary relationship for areal evapotranspiration .}
-
-\item{ET.DEM.res}{is the zoom resolution for the land surface elevation and is required to calculate the ET. \code{elevatr} package is used to extract elevation (metres) from
+\item{DEM.res}{is the zoom resolution for the land surface elevation and is required to calculate the ET. \code{elevatr} package is used to extract elevation (metres) from
 AWS Open Data Terrain Tiles. This input controls the zoom resolution. Higher values increase accuracy, but are significantly slower. See details. Default is 10.}
-
-\item{ET.Mortons.est}{character string for the type of Morton's ET estimate. For \code{ET.MortonCRAE}, the options are \code{potential ET},\code{wet areal ET} or \code{actual areal ET}.
-For \code{ET.MortonCRWE}, the options are \code{potential ET} or \code{shallow lake ET}. The default is \code{wet areal ET}, which when \code{ET.function = 'ET.MortonCRAE'} it provides
-an estimate of the wet areal potential evapotranspiration.}
-
-\item{ET.Turc.humid}{logical variable for the Turc function using the humid adjustment.See \code{\link[Evapotranspiration]{ET.Turc}}. For now this is fixed at \code{F}.}
-
-\item{ET.timestep}{character string for the evapotranpiration time step. Options are \code{daily},  \code{monthly}, \code{annual} but the options are dependent upon the chosen \code{ET.function}. The default is \code{'monthly'}.}
-
-\item{ET.missing_method}{character string for interpolation method for missing variables required for ET calculation. The options are \code{'monthly average'}, \code{'seasonal average'}, \code{'DoY average'} and \code{'neighbouring average'}. Default is \code{'DoY average'} but when the extraction duration is less than two years, the default is \code{'neighbouring average'}. See \code{\link[Evapotranspiration]{ReadInputs}}}
-
-\item{ET.abnormal_method}{character string for interpolation method for abnormal variables required for ET calculation (e.g. Tmin > Tmax). Options and defaults are as for \code{ET.missing_method}. See \code{\link[Evapotranspiration]{ReadInputs}}}
-
-\item{ET.constants}{list of constants from Evapotranspiration package required for ET calculations. To get the data use the command \code{data(constants)}. Default is \code{list()}.}
 
 \item{force_HDD}{force large matrix to be off RAMM and on the HDD, using \code{bigmemory::big.matrix()}. This is included only for package testing. Default is \code{FALSE}.}
 }
@@ -136,7 +114,7 @@ are dependent upon the end date extracted. Re-running the estimation of ET with 
 prior to 1990.
 
 Some measures of ET require land surface elevation. Here, elevation at the centre of each 0.05 degree grid cell is obtained using the \code{elevatr} package, which here uses data from the
-Amazon Web Service AWS Open Data Terrain Tiles. The data sources change with the user set \code{ET.DEM.res} zoom. The options are
+Amazon Web Service AWS Open Data Terrain Tiles. The data sources change with the user set \code{DEM.res} zoom. The options are
 1 to 15. The default of 10 is reasonably computationally efficient and has a resolution of about 108 m, with is acceptable
 given the 0.05 degree resolution of the BOM source data grids equates to about 5 km x 5 km.
 For details see \url{https://github.com/tilezen/joerd/blob/master/docs/data-sources.md}
