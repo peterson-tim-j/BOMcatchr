@@ -162,12 +162,170 @@ ET_Makkink <- function(timepoints = NA,
   return(ET_est)
 }
 
+ET_McGuinnessBordne <- function(timepoints = NA,
+                       tmin = NA,
+                       tmax = NA,
+                       lat = NA,
+                       elev = NA,
+                       ET_constants = NA,
+                       ET_timestep = 'monthly',
+                       ET_missing_method = "DoY average",
+                       ET_abnormal_method = "DoY average") {
+
+  # Built and infill data frame require for evaporation package.
+  dataPP <- .ET_buildInputs(timepoints,
+                            tmin = tmin,
+                            tmax = tmax,
+                            ET_missing_method = ET_missing_method,
+                            ET_abnormal_method = ET_abnormal_method)
+
+  # Update constants for the current location
+  ET_constants = c(ET_constants, Elev = elev,  lat = lat, lat_rad = ET_constants$lat / 180.0*pi)
+
+  # Call  ET package
+  ET_est <- Evapotranspiration::ET.McGuinnessBordne( dataPP,
+                                                     ET_constants,
+                                                     ts = ET_timestep,
+                                                     solar="data",
+                                                     AdditionalStats = 'no',
+                                                     message = 'no')
+
+  # Down scale to daily if estimated at monthly
+  ET_est <- .ET_downscale(timepoints, ET_est, ET_timestep)
+
+  return(ET_est)
+}
+
+ET_MortonCRAE <- function(timepoints = NA,
+                          tmin = NA,
+                          tmax = NA,
+                          precip = NA,
+                          vprp_3pm = NA,
+                          solarrad = NA,
+                          lat = NA,
+                          elev = NA,
+                          ET_Mortons_est = 'wet areal ET',
+                          ET_constants = NA,
+                          ET_timestep = 'monthly',
+                          ET_missing_method = "DoY average",
+                          ET_abnormal_method = "DoY average") {
+
+  # Built and infill data frame require for evaporation package.
+  dataPP <- .ET_buildInputs(timepoints,
+                            tmin = tmin,
+                            tmax = tmax,
+                            precip = precip,
+                            vprp = vprp_3pm,
+                            solarrad = solarrad,
+                            ET_missing_method = ET_missing_method,
+                            ET_abnormal_method = ET_abnormal_method)
+
+  # Update constants for the current location
+  ET_constants = c(ET_constants, Elev = elev,  lat = lat, lat_rad = ET_constants$lat / 180.0*pi)
+
+  # Call  ET package
+  ET_est <- Evapotranspiration::ET.MortonCRAE( dataPP,
+                                               ET_constants,
+                                               ts = ET_timestep,
+                                               solar="data",
+                                               Tdew=FALSE,
+                                               est=ET_Mortons_est,
+                                               AdditionalStats = 'no',
+                                               message = 'no')
+
+  # Down scale to daily if estimated at monthly
+  ET_est <- .ET_downscale(timepoints, ET_est, ET_timestep)
+
+  return(ET_est)
+}
+
+ET_MortonCRWE <- function(timepoints = NA,
+                          tmin = NA,
+                          tmax = NA,
+                          precip = NA,
+                          vprp_3pm = NA,
+                          solarrad = NA,
+                          lat = NA,
+                          elev = NA,
+                          ET_Mortons_est = 'shallow lake ET',
+                          ET_constants = NA,
+                          ET_timestep = 'monthly',
+                          ET_missing_method = "DoY average",
+                          ET_abnormal_method = "DoY average") {
+
+  # Built and infill data frame require for evaporation package.
+  dataPP <- .ET_buildInputs(timepoints,
+                            tmin = tmin,
+                            tmax = tmax,
+                            precip = precip,
+                            vprp = vprp_3pm,
+                            solarrad = solarrad,
+                            ET_missing_method = ET_missing_method,
+                            ET_abnormal_method = ET_abnormal_method)
+
+  # Update constants for the current location
+  ET_constants = c(ET_constants, Elev = elev,  lat = lat, lat_rad = ET_constants$lat / 180.0*pi)
+
+  # Call  ET package
+  ET_est <- Evapotranspiration::ET.MortonCRWE( dataPP,
+                                               ET_constants,
+                                               ts = ET_timestep,
+                                               solar="data",
+                                               Tdew=FALSE,
+                                               est=ET_Mortons_est,
+                                               AdditionalStats = 'no',
+                                               message = 'no')
+
+  # Down scale to daily if estimated at monthly
+  ET_est <- .ET_downscale(timepoints, ET_est, ET_timestep)
+
+  return(ET_est)
+}
+
+ET_Turc <- function(timepoints = NA,
+                    tmin = NA,
+                    tmax = NA,
+                    solarrad = NA,
+                    lat = NA,
+                    elev = NA,
+                    ET_constants = NA,
+                    ET_timestep = 'monthly',
+                    ET_missing_method = "DoY average",
+                    ET_abnormal_method = "DoY average") {
+
+  # Built and infill data frame require for evaporation package.
+  dataPP <- .ET_buildInputs(timepoints,
+                            tmin = tmin,
+                            tmax = tmax,
+                            solarrad = solarrad,
+                            ET_missing_method = ET_missing_method,
+                            ET_abnormal_method = ET_abnormal_method)
+
+  # Update constants for the current location
+  ET_constants = c(ET_constants, Elev = elev,  lat = lat, lat_rad = ET_constants$lat / 180.0*pi)
+
+  # Call  ET package
+  ET_est <- Evapotranspiration::ET.Turc( dataPP,
+                                         ET_constants,
+                                         ts = ET_timestep,
+                                         solar="data",
+                                         AdditionalStats = 'no',
+                                         message = 'no')
+
+  # Down scale to daily if estimated at monthly
+  ET_est <- .ET_downscale(timepoints, ET_est, ET_timestep)
+
+  return(ET_est)
+}
+
+# ET handler functions
+#-------------------------------------------------------------------------------
 .ET_buildInputs <- function (timepoints = NA,
                              tmin = NA,
                              tmax = NA,
-                             vprm = NA,
-                             solarrad = NA,
                              precip = NA,
+                             vprp  = NA,
+                             solarrad = NA,
                              ET_missing_method,
                              ET_abnormal_method) {
 
@@ -176,7 +334,7 @@ ET_Makkink <- function(timepoints = NA,
                   Tmax = all(!is.na(tmax)),
                   Rs = all(!is.na(solarrad)),
                   Precip = all(!is.na(precip)),
-                  va = all(!is.na(vprm))
+                  va = all(!is.na(vprp))
                 )
     # Build data from of daily climate data
     ntimepoints = length(timepoints)
@@ -187,7 +345,7 @@ ET_Makkink <- function(timepoints = NA,
                          Tmax   = if ( has_data['Tmax'  ] ) tmax     else rep(NA,ntimepoints),
                          Rs     = if ( has_data['Rs'    ] ) solarrad else rep(NA,ntimepoints),
                          Precip = if ( has_data['Precip'] ) precip   else rep(NA,ntimepoints),
-                         va     = if ( has_data['va'    ] ) vprm/10  else rep(NA,ntimepoints)
+                         va     = if ( has_data['va'    ] ) vprp/10  else rep(NA,ntimepoints)
                          )
 
     # Remove columns without extracted data
@@ -201,6 +359,17 @@ ET_Makkink <- function(timepoints = NA,
       dataRAW$va <- NULL
     if ( !has_data['Precip'])
       dataRAW$Precip <- NULL
+
+    # # Check ET interpolation methods are appropriate if duration is <2 years
+    # if ( diff(range(timepoints))  < 2*365){
+    #   if (ET_missing_method!='neighbouring average' || ET_abnormal_method!='neighbouring average' ) {
+    #     message('    WARNING: The extraction duration is < 2 years and ET is to be derived.');
+    #     message('             Hence, ET_missing_method and ET_abnormal_method is changed to "neighbouring average".');
+    #
+    #     ET_missing_method = "neighbouring average"
+    #     ET_abnormal_method = "neighbouring average"
+    #   }
+    # }
 
     # Convert to required format for ET package.
     ET_vars = c('Tmax', 'Tmin', 'Rs', 'Precip', 'va')

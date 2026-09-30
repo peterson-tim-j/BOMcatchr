@@ -492,19 +492,6 @@ extract_data <- function(
 
   message(paste('    Data will be extracted from ',format.Date(extractFrom,'%Y-%m-%d'),' to ', format.Date(extractTo,'%Y-%m-%d'),' at ',length(locations),' locations '));
 
-  # # Check ET interpolation methods are appropriate if duration is <2 years
-  # if (getET) {
-  #   if ( (extractTo - extractFrom) < 2*365){
-  #     if (ET.missing_method!='neighbouring average' || ET.abnormal_method!='neighbouring average' ) {
-  #       message('    WARNING: The extraction duration is < 2 years and getET = TRUE.');
-  #       message('             Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".');
-  #
-  #       ET.missing_method = "neighbouring average"
-  #       ET.abnormal_method = "neighbouring average"
-  #     }
-  #   }
-  # }
-
   # Check temporal analysis function is valid.
   message('Setting up data extraction:')
   message('... Testing aggregation functions:')
@@ -741,7 +728,7 @@ extract_data <- function(
       show_after = 0)
 
     # Initialise matrix foe extracted data
-    if (!force_HDD && 
+    if (!force_HDD &&
     (!matrix_on_HDD && memuse::howbig(nrow = as.numeric(length(ind)), ncol = as.numeric(ncells)) < (memuse::Sys.meminfo()$freeram*0.8))) {
       data.brick[[ivar]] = matrix(NA, nrow = length(ind), ncol = ncells)
     } else {
@@ -908,7 +895,6 @@ extract_data <- function(
           ind_vars = which(names(data.brick) %in% FUN_vars)
           vars.timesteps = c(vars.timesteps, vars.timesteps[[ ind_vars[1] ]])
         }, error = function(e) {
-          message('TESTING 123')
           warning(paste('The following derived variable function failed and is being skipped:', vars_derived[[i]][[1]],'\n',
                         'Please carefully test the derived funcion.\nThe error message from the derived function was:\n',e),
                   immediate. = T)
