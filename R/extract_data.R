@@ -30,7 +30,7 @@
 #' prior to 1990.
 #'
 #' Some measures of ET require land surface elevation. Here, elevation at the centre of each 0.05 degree grid cell is obtained using the \code{elevatr} package, which here uses data from the
-#' Amazon Web Service AWS Open Data Terrain Tiles. The data sources change with the user set \code{ET.DEM.res} zoom. The options are
+#' Amazon Web Service AWS Open Data Terrain Tiles. The data sources change with the user set \code{DEM.res} zoom. The options are
 #' 1 to 15. The default of 10 is reasonably computationally efficient and has a resolution of about 108 m, with is acceptable
 #' given the 0.05 degree resolution of the BOM source data grids equates to about 5 km x 5 km.
 #' For details see \url{https://github.com/tilezen/joerd/blob/master/docs/data-sources.md}
@@ -50,6 +50,7 @@
 #' To calculate the ET, all of the required inputs for the calculation ET must also be extracted (i.e. the input for such would generally be
 #' \code{c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et')}. Any or all of the defaults are available. The default \code{''} and this will result in
 #' all of the variables in the netCDF file and provided by \code{rownames(BOMcatchr::grid_summary(ncdfFilename))}.
+#' @param vars_derived TO DO
 #' @param locations is either an output \code{terraa::vect} onjhect from \code{\link{extract_locations}}, the full file name to an ESRI shape file of points or polygons (latter assumed to be catchment boundaries) or a shape file
 #' already imported using readShapeSpatial(). Either way the shape file must be in long/lat (i.e. not projected), use the EPSG:4283 datum (i.e. GDA94), and the first column must be a unique ID.
 #' @param temporal.timestep character string for the time step of the output data. The options are \code{daily}, \code{weekly}, \code{monthly}, \code{quarterly},
@@ -75,19 +76,8 @@
 #' will then be assigned a value from a user-defined function from these observations (NB: when only one observed value exists for the day, then the observed value is returned).
 #' The default function is \code{mean}. Other standard functions (e.g. \code{median}) or user defined functions can be used.
 #' The default for this input is \code{c('5', 'linear', 'mean')}. All gap filling method can be turned off with the input \code{c('0', '', '')}, which is useful to identify the interpolated data points.
-#' @param ET.function character string for the evapotranspiration function to be used. The methods that can be derived from the gridded data are are \code{\link[Evapotranspiration]{ET.Abtew}},
-#' \code{\link[Evapotranspiration]{ET.HargreavesSamani}}, \code{\link[Evapotranspiration]{ET.JensenHaise}}, \code{\link[Evapotranspiration]{ET.Makkink}}, \code{\link[Evapotranspiration]{ET.McGuinnessBordne}}, \code{\link[Evapotranspiration]{ET.MortonCRAE}} ,
-#' \code{\link[Evapotranspiration]{ET.MortonCRWE}}, \code{\link[Evapotranspiration]{ET.Turc}}. Default is \code{\link[Evapotranspiration]{ET.MortonCRAE}} i.e. the  complementary relationship for areal evapotranspiration .
-#' @param ET.DEM.res is the zoom resolution for the land surface elevation and is required to calculate the ET. \code{elevatr} package is used to extract elevation (metres) from
+#' @param DEM.res is the zoom resolution for the land surface elevation and is required to calculate the ET. \code{elevatr} package is used to extract elevation (metres) from
 #' AWS Open Data Terrain Tiles. This input controls the zoom resolution. Higher values increase accuracy, but are significantly slower. See details. Default is 10.
-#' @param ET.Mortons.est character string for the type of Morton's ET estimate. For \code{ET.MortonCRAE}, the options are \code{potential ET},\code{wet areal ET} or \code{actual areal ET}.
-#' For \code{ET.MortonCRWE}, the options are \code{potential ET} or \code{shallow lake ET}. The default is \code{wet areal ET}, which when \code{ET.function = 'ET.MortonCRAE'} it provides
-#' an estimate of the wet areal potential evapotranspiration.
-#' @param ET.Turc.humid logical variable for the Turc function using the humid adjustment.See \code{\link[Evapotranspiration]{ET.Turc}}. For now this is fixed at \code{F}.
-#' @param ET.timestep character string for the evapotranpiration time step. Options are \code{daily},  \code{monthly}, \code{annual} but the options are dependent upon the chosen \code{ET.function}. The default is \code{'monthly'}.
-#' @param ET.missing_method character string for interpolation method for missing variables required for ET calculation. The options are \code{'monthly average'}, \code{'seasonal average'}, \code{'DoY average'} and \code{'neighbouring average'}. Default is \code{'DoY average'} but when the extraction duration is less than two years, the default is \code{'neighbouring average'}. See \code{\link[Evapotranspiration]{ReadInputs}}
-#' @param ET.abnormal_method character string for interpolation method for abnormal variables required for ET calculation (e.g. Tmin > Tmax). Options and defaults are as for \code{ET.missing_method}. See \code{\link[Evapotranspiration]{ReadInputs}}
-#' @param ET.constants list of constants from Evapotranspiration package required for ET calculations. To get the data use the command \code{data(constants)}. Default is \code{list()}.
 #' @param force_HDD force large matrix to be off RAMM and on the HDD, using \code{bigmemory::big.matrix()}. This is included only for package testing. Default is \code{FALSE}.
 #'
 #' @return
@@ -154,6 +144,7 @@ extract_data <- function(
     extractFrom = as.Date("1900-01-01","%Y-%m-%d"),
     extractTo  = as.Date(Sys.Date(),"%Y-%m-%d"),
     vars = '',
+    vars_derived = list(),
     locations = NA,
     temporal.timestep = 'daily',
     temporal.fn.outer = NA,
@@ -161,14 +152,7 @@ extract_data <- function(
     spatial.fn = 'var',
     interp.method = '',
     missing.method = c('5', 'linear', 'mean'),
-    ET.function = 'ET.MortonCRAE',
-    ET.DEM.res = 10,
-    ET.Mortons.est = 'wet areal ET',
-    ET.Turc.humid=F,
-    ET.timestep = 'monthly',
-    ET.missing_method="DoY average",
-    ET.abnormal_method='DoY average',
-    ET.constants=list(),
+    DEM.res = 10,
     force_HDD = F)  {
 
   # Get system time to estimate run time at the end.
@@ -196,12 +180,11 @@ extract_data <- function(
   if (length(vars)==1 && vars=='') {
     vars = rownames(grid_summary(ncdfFilename))
   }
-  # Check if vars include ET. If so remove and set getET=T
-  getET = F
-  if (any(vars %in% 'et')) {
-    ind = which(vars %in% 'et')
-    vars = vars[-ind]
-    getET = T
+
+  # Check if derived vars required eg ET
+  has_vars_derived = F
+  if (is.list(vars_derived)) {
+    has_vars_derived = T
   }
 
   # first variable defines the raster geometry used.
@@ -310,88 +293,88 @@ extract_data <- function(
     .pretty_stop(paste('When temporal.fn.outer is a character string for a recognised package built-in function,',
                       'temporal.fn.inner cannot be NA.'))
 
-  # Check ET inputs
-  if (getET) {
-    if (!exists('ET.constants'))
-      .pretty_stop('ET.constants must be input when getET = TRUE. Use the command: data(constants)')
+  # # Check ET inputs
+  # if (getET) {
+  #   if (!exists('ET.constants'))
+  #     .pretty_stop('ET.constants must be input when getET = TRUE. Use the command: data(constants)')
+  #
+  #   if (!is.list(ET.constants))
+  #     .pretty_stop('ET.constants must be a list variable when getET = TRUE. Use the command: data(constants)')
+  #
+  #   if (length(ET.constants)==0)
+  #     .pretty_stop('ET.constants must be a list variable when getET = TRUE. Using the command: data(constants)')
+  #
+  #   # Check the ET function is one of the acceptable forms
+  #   ET.function.all =c('ET.Abtew', 'ET.HargreavesSamani', 'ET.JensenHaise','ET.Makkink', 'ET.McGuinnessBordne','ET.MortonCRAE' , 'ET.MortonCRWE','ET.Turc')
+  #   if (!any(ET.function == ET.function.all)) {
+  #     .pretty_stop(paste('The ET.function must be one of the following:',ET.function.all))
+  #   }
+  #
+  #   # Check the ET function is one of the acceptable forms
+  #   ET.timestep.all =c('daily', 'monthly', 'annual')
+  #   if (!any(ET.timestep == ET.timestep.all)) {
+  #     .pretty_stop(paste('The ET.timestep must be one of the following:',ET.timestep.all))
+  #   }
+  #
+  #   # Check that extractFrom and extractTo span more than one ET timestep
+  #   if (ET.timestep == 'monthly') {
+  #     if (zoo::as.yearmon(timepoints2Extract[1]) == zoo::as.yearmon(timepoints2Extract[length(timepoints2Extract)]))
+  #       .pretty_stop('When the ET.timestep is monthly, the extraction dates must span more than one month.')
+  #   }
+  #   if (ET.timestep == 'annual') {
+  #     if (format(timepoints2Extract[1],'%Y') == format(timepoints2Extract[length(timepoints2Extract)],'%Y'))
+  #       .pretty_stop('When the ET.timestep is annual, the extraction dates must span more than one year.')
+  #   }
+  #
+  #   # Check the appropriate time step is used.
+  #   if ( (ET.function == 'ET.MortonCRAE' || ET.function == 'ET.MortonCRWE') && ET.timestep=='daily' ) {
+  #     .pretty_stop('The ET.timstep must be monthly or annual when using ET.MortonCRAE or ET.MortonCRWE')
+  #   }
+  #
+  #   # Check the appropriate Mortons type is specified.
+  #   if ( ET.function == 'ET.MortonCRAE' && !(ET.Mortons.est %in% c('potential ET', 'wet areal ET', 'actual areal ET'))) {
+  #     .pretty_stop('The ET.Mortons.est for Mortons CREA must be: potential ET, wet areal ET or actual areal ET.')
+  #   }
+  #   if ( ET.function == 'ET.MortonCRWE' && !(ET.Mortons.est %in% c('potential ET', 'shallow lake ET'))) {
+  #     .pretty_stop('The ET.Mortons.est for Mortons CRWE must be: potential ET or shallow lake ET.')
+  #   }
+  #
+  #   # Build a data from of the inputs required for each ET function.
+  #   ET.inputdata.req = data.frame(ET.function=ET.function.all, Tmin=rep(F,length(ET.function.all)), Tmax=rep(F,length(ET.function.all)), va=rep(F,length(ET.function.all)), Rs=rep(F,length(ET.function.all)), Precip=rep(F,length(ET.function.all)) )
+  #   ET.inputdata.req[1,2:6] =  c(T,T,F,T,F)       #ET.Abtew
+  #   ET.inputdata.req[2,2:6] =  c(T,T,F,F,F)       #ET.HargreavesSamani
+  #   ET.inputdata.req[3,2:6] =  c(T,T,F,T,F)       #ET.JensenHaise
+  #   ET.inputdata.req[4,2:6] =  c(T,T,F,T,F)       #ET.Makkink
+  #   ET.inputdata.req[5,2:6] =  c(T,T,F,F,F)       #ET.McGuinnessBordne
+  #   ET.inputdata.req[6,2:6] =  c(T,T,T,T,T)       #ET.MortonCRAE
+  #   ET.inputdata.req[7,2:6] =  c(T,T,T,T,T)       #ET.MortonCRWE
+  #   ET.inputdata.req[8,2:6] =  c(T,T,F,T,F)       #ET.Turc
+  #   ET.var.names = colnames(ET.inputdata.req)
+  #
+  #   # Get list of required ET variable names
+  #   ind = which(ET.function == ET.function.all)
+  #   ET.inputdata.filt = ET.inputdata.req[ind,]
+  #   ind = unlist(ET.inputdata.req[ind,2:6])
+  #   ind = c(F, ind)
+  #   ET.var.names = ET.var.names[ind]
+  #
+  #   # Check if all required inputs are to be extracted for type of ET
+  #   if (ET.inputdata.filt$Tmin[1] && !('tmin' %in% vars))
+  #     .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: tmin')
+  #   if (ET.inputdata.filt$Tmax[1] && !('tmax' %in% vars))
+  #     .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: tmax')
+  #   if (ET.inputdata.filt$va[1] && !('vprp_3pm' %in% vars))
+  #     .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: vprp_3pm')
+  #   if (ET.inputdata.filt$Precip[1] && !('precip' %in% vars))
+  #     .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: precip')
+  #   if (ET.inputdata.filt$Rs[1] && !('solarrad' %in% vars))
+  #       .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: solarrad')
+  if (!is.numeric(DEM.res))
+    .pretty_stop('DEM.res must be a numeric value between 1 anf 15.')
 
-    if (!is.list(ET.constants))
-      .pretty_stop('ET.constants must be a list variable when getET = TRUE. Use the command: data(constants)')
+  if (DEM.res < 1 || DEM.res>15)
+    .pretty_stop('DEM.res must be a numeric value between 1 anf 15.')
 
-    if (length(ET.constants)==0)
-      .pretty_stop('ET.constants must be a list variable when getET = TRUE. Using the command: data(constants)')
-
-    # Check the ET function is one of the acceptable forms
-    ET.function.all =c('ET.Abtew', 'ET.HargreavesSamani', 'ET.JensenHaise','ET.Makkink', 'ET.McGuinnessBordne','ET.MortonCRAE' , 'ET.MortonCRWE','ET.Turc')
-    if (!any(ET.function == ET.function.all)) {
-      .pretty_stop(paste('The ET.function must be one of the following:',ET.function.all))
-    }
-
-    # Check the ET function is one of the acceptable forms
-    ET.timestep.all =c('daily', 'monthly', 'annual')
-    if (!any(ET.timestep == ET.timestep.all)) {
-      .pretty_stop(paste('The ET.timestep must be one of the following:',ET.timestep.all))
-    }
-
-    # Check that extractFrom and extractTo span more than one ET timestep
-    if (ET.timestep == 'monthly') {
-      if (zoo::as.yearmon(timepoints2Extract[1]) == zoo::as.yearmon(timepoints2Extract[length(timepoints2Extract)]))
-        .pretty_stop('When the ET.timestep is monthly, the extraction dates must span more than one month.')
-    }
-    if (ET.timestep == 'annual') {
-      if (format(timepoints2Extract[1],'%Y') == format(timepoints2Extract[length(timepoints2Extract)],'%Y'))
-        .pretty_stop('When the ET.timestep is annual, the extraction dates must span more than one year.')
-    }
-
-    # Check the appropriate time step is used.
-    if ( (ET.function == 'ET.MortonCRAE' || ET.function == 'ET.MortonCRWE') && ET.timestep=='daily' ) {
-      .pretty_stop('The ET.timstep must be monthly or annual when using ET.MortonCRAE or ET.MortonCRWE')
-    }
-
-    # Check the appropriate Mortons type is specified.
-    if ( ET.function == 'ET.MortonCRAE' && !(ET.Mortons.est %in% c('potential ET', 'wet areal ET', 'actual areal ET'))) {
-      .pretty_stop('The ET.Mortons.est for Mortons CREA must be: potential ET, wet areal ET or actual areal ET.')
-    }
-    if ( ET.function == 'ET.MortonCRWE' && !(ET.Mortons.est %in% c('potential ET', 'shallow lake ET'))) {
-      .pretty_stop('The ET.Mortons.est for Mortons CRWE must be: potential ET or shallow lake ET.')
-    }
-
-    # Build a data from of the inputs required for each ET function.
-    ET.inputdata.req = data.frame(ET.function=ET.function.all, Tmin=rep(F,length(ET.function.all)), Tmax=rep(F,length(ET.function.all)), va=rep(F,length(ET.function.all)), Rs=rep(F,length(ET.function.all)), Precip=rep(F,length(ET.function.all)) )
-    ET.inputdata.req[1,2:6] =  c(T,T,F,T,F)       #ET.Abtew
-    ET.inputdata.req[2,2:6] =  c(T,T,F,F,F)       #ET.HargreavesSamani
-    ET.inputdata.req[3,2:6] =  c(T,T,F,T,F)       #ET.JensenHaise
-    ET.inputdata.req[4,2:6] =  c(T,T,F,T,F)       #ET.Makkink
-    ET.inputdata.req[5,2:6] =  c(T,T,F,F,F)       #ET.McGuinnessBordne
-    ET.inputdata.req[6,2:6] =  c(T,T,T,T,T)       #ET.MortonCRAE
-    ET.inputdata.req[7,2:6] =  c(T,T,T,T,T)       #ET.MortonCRWE
-    ET.inputdata.req[8,2:6] =  c(T,T,F,T,F)       #ET.Turc
-    ET.var.names = colnames(ET.inputdata.req)
-
-    # Get list of required ET variable names
-    ind = which(ET.function == ET.function.all)
-    ET.inputdata.filt = ET.inputdata.req[ind,]
-    ind = unlist(ET.inputdata.req[ind,2:6])
-    ind = c(F, ind)
-    ET.var.names = ET.var.names[ind]
-
-    # Check if all required inputs are to be extracted for type of ET
-    if (ET.inputdata.filt$Tmin[1] && !('tmin' %in% vars))
-      .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: tmin')
-    if (ET.inputdata.filt$Tmax[1] && !('tmax' %in% vars))
-      .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: tmax')
-    if (ET.inputdata.filt$va[1] && !('vprp_3pm' %in% vars))
-      .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: vprp_3pm')
-    if (ET.inputdata.filt$Precip[1] && !('precip' %in% vars))
-      .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: precip')
-    if (ET.inputdata.filt$Rs[1] && !('solarrad' %in% vars))
-        .pretty_stop('Calculation of ET for the given function requires the following variable to be extracted: solarrad')
-    if (!is.numeric(ET.DEM.res))
-      .pretty_stop('ET.DEM.res must be a numeric value between 1 anf 15.')
-
-    if (ET.DEM.res < 1 || ET.DEM.res>15)
-      .pretty_stop('ET.DEM.res must be a numeric value between 1 anf 15.')
-  }
 
   # Open file with polygons
   if (is.character(locations)) {
@@ -508,19 +491,6 @@ extract_data <- function(
   }
 
   message(paste('    Data will be extracted from ',format.Date(extractFrom,'%Y-%m-%d'),' to ', format.Date(extractTo,'%Y-%m-%d'),' at ',length(locations),' locations '));
-
-  # Check ET interpolation methods are appropriate if duration is <2 years
-  if (getET) {
-    if ( (extractTo - extractFrom) < 2*365){
-      if (ET.missing_method!='neighbouring average' || ET.abnormal_method!='neighbouring average' ) {
-        message('    WARNING: The extraction duration is < 2 years and getET = TRUE.');
-        message('             Hence, ET.missing_method and ET.abnormal_method is changed to "neighbouring average".');
-
-        ET.missing_method = "neighbouring average"
-        ET.abnormal_method = "neighbouring average"
-      }
-    }
-  }
 
   # Check temporal analysis function is valid.
   message('Setting up data extraction:')
@@ -677,9 +647,13 @@ extract_data <- function(
                                  as.numeric(terra::crds(locations)[,2]))
   }
 
-  if (getET) {
-    message('... Extracted DEM elevations from AWS (using tmax coordinate and GDA94).')
+  if (has_vars_derived) {
 
+    # Checking derived variable functions and variables to be extracted.
+    message('... Testing derived variable function inputs.')
+    .vars_derived_check(extractFrom, extractTo, vars, vars_derived)
+
+    message('... Extracted DEM elevations from AWS (using tmax coordinate and GDA94).')
     # Test internet connection
     if (!curl::has_internet())
       .pretty_stop('No internet connection appears available to get elevation data. Check connection.')
@@ -690,7 +664,7 @@ extract_data <- function(
                                                                y=point.weights$coords[,2]),
                                           prj = crsAUS,
                                           src='aws',
-                                          z=ET.DEM.res)
+                                          z=DEM.res)
     })
 
     DEMpoints = DEMpoints$elevation
@@ -754,12 +728,12 @@ extract_data <- function(
       format = paste("    ",ivar,": :current of :total  [:bar] :percent in :elapsed",sep=''),
       total = nrow(point.weights$coords) ,
       clear = FALSE,
-      width= 80,
+      width= 100,
       show_after = 0)
 
     # Initialise matrix foe extracted data
     if (!force_HDD &&
-        (!matrix_on_HDD && memuse::howbig(nrow = as.numeric(length(ind)), ncol = as.numeric(ncells)) < (memuse::Sys.meminfo()$freeram*0.8))) {
+    (!matrix_on_HDD && memuse::howbig(nrow = as.numeric(length(ind)), ncol = as.numeric(ncells)) < (memuse::Sys.meminfo()$freeram*0.8))) {
       data.brick[[ivar]] = matrix(NA, nrow = length(ind), ncol = ncells)
     } else {
       if (force_HDD)
@@ -784,19 +758,13 @@ extract_data <- function(
       adj_irows = sapply(j, function(x){terra::rowFromCell(r, adj_cells[, x])})
       j = grep('w', colnames(adj_cells))
       adj_weights =  adj_cells[, j]
-      if (ncells==1) {
-        adj_icols = matrix(adj_icols, nrow=1)
-        adj_irows = matrix(adj_irows, nrow=1)
-        adj_weights = matrix(adj_weights, nrow=1)
-      }
 
       # Loop through each ind time point of variable and get data from all adjacent
       # cells to each required point. Get the cell values and apply weights, effectively
       # doing the bilinear interpolation.
-      n_adj_icols = ncol(adj_icols)
       for (j in 1:ncells){
-        data_tmp = matrix(NA, nrow = length(ind), ncol = n_adj_icols)
-        for (k in 1:n_adj_icols) {
+        data_tmp = matrix(NA, nrow = length(ind), ncol = ncol(adj_icols))
+        for (k in 1:ncol(adj_icols)) {
           data_tmp[, k] = RNetCDF::var.get.nc(grp,
                                               ivar,
                                               start = c(adj_icols[j,k],adj_irows[j,k], ind[1]),
@@ -888,159 +856,56 @@ extract_data <- function(
   message('    Summary of NAs initially, and after each step.')
   print(infill.summary.df)
 
-  # Calculate ET at each grid cell and time point.
-  # NOTE, va is divided by 10 to go from hPa to Kpa
-  nlocations = length(locations)
-  if (getET) {
+  # Built list of time steps labels each variable. Used for aggregation.
+  vars.timesteps = as.list(vars.extract.summary$time.step)
+
+  # Calculate derived variables at each grid cell and time point.
+  if (has_vars_derived) {
 
     # Check no NAs remain in input data
     if (sum(infill.summary.df$post.backfilling)>0)
-      .pretty_stop('ET cannot be calculated when NAs remain in data. Try reducing the extractFrom date to allow interpolation of time gaps.')
+      .pretty_stop('Derived variables cannot be calculated when NAs remain in data. Try reducing the extractFrom date to allow interpolation of time gaps.')
 
-    # Get strings to each netcdf group and variable
-    precip.str = vars.extract.summary['precip',]$var.string
-    tmax.str = vars.extract.summary['tmax',]$var.string
+    # Get output name of derived vars
+    vars_derived_names =  names(vars_derived)
 
-    #Build one vector of daily time steps
-    timepoints2Extract = timepoints2Extract[[1]]
-    ntimepoints2Extract = length(timepoints2Extract)
+    message('... Calculating each derived variable at all grid cells.')
+    for (i in 1:length(vars_derived)) {
+      # Get variable name, but if missing create generic name.
+      vars_derived_name = names(vars_derived)[i]
+      if (!is.character(vars_derived_name) || nchar(vars_derived_name)==0)
+        vars_derived_name = vars_derived[[i]][[1]]
 
-    # Setup progress bar
-    message('... Calculating daily ET at each grid cell.')
-    for (i in 1:nlocations) {
+      # Call derived function for each column in data.brick, then bind into a matrix.
+      tryCatch({
+          data.brick[[ vars_derived_name]] <- do.call(
+            cbind,
+            .vars_derived_est_by_column(
+              timepoints = timepoints2Extract[[1]],
+              grid_data = data.brick,
+              coords = point.weights$coords,
+              DEMpoints = DEMpoints,
+              vars_derived = vars_derived[[i]]
+            )
+          )
 
-        # Get indexes to grid cells of current location, i
-        ind = point.weights$lookup[i,1]:point.weights$lookup[i,2]
+          # Add new variable name to list of vars
+          vars = c(vars, vars_derived_name)
+          nvars = length(vars)
 
-        # Initialise outputa
-        ET.est = matrix(NA,ntimepoints2Extract ,length(ind))
-
-        pbar <- progress::progress_bar$new(
-          format = paste("    Location",i,": :current grid cells of :total  [:bar] :percent in :elapsed"),
-          total = length(ind), clear = FALSE, width= 80)
-
-        # Loop through each grid cell
-        k=0;
-        for (j in ind) {
-
-          # Update progress bar
-          pbar$tick()
-
-          # Update grid cell counter
-          k=k+1
-
-          # Check lat, Elev and precip are finite scalers.
-          if (any(!is.finite(DEMpoints[j]))) {
-            message(paste('WARNING: ET set to NA for location',i,'at grid cell',j, 'because of a non-finite elevation value.'))
-            message(paste('   Elevation value:' ,DEMpoints[j]))
-            ET.est[,k] = NA;
-            next
-          }
-
-          # Build data from of daily climate data
-          dataRAW = data.frame(Year =  as.integer(format.Date(timepoints2Extract,"%Y")),
-                               Month= as.integer(format.Date(timepoints2Extract,"%m")),
-                               Day= as.integer(format.Date(timepoints2Extract,"%d")),
-                               Tmin   = if ('tmin' %in% vars) data.brick[['tmin']][,j]     else rep(NA,ntimepoints2Extract),
-                               Tmax   = if ('tmax' %in% vars) data.brick[['tmax']][,j]     else rep(NA,ntimepoints2Extract),
-                               Rs     = if ('solarrad' %in% vars) data.brick[['solarrad']][,j] else rep(NA,ntimepoints2Extract),
-                               va     = if ('vprp_3pm' %in% vars) data.brick[['vprp_3pm']][,j]/10  else rep(NA,ntimepoints2Extract),
-                               Precip = if ('precip' %in% vars) data.brick[['precip']][,j]   else rep(NA,ntimepoints2Extract)
-                               )
-
-          # Remove columns without extracted data
-          if (!('tmin' %in% vars))
-            dataRAW$Tmin <- NULL
-          if (!('tmax' %in% vars))
-            dataRAW$Tmax <- NULL
-          if (!('solarrad' %in% vars))
-            dataRAW$Rs <- NULL
-          if (!('vprp_3pm' %in% vars))
-            dataRAW$va <- NULL
-          if (!('precip' %in% vars))
-            dataRAW$Precip <- NULL
-
-          # Convert to required format for ET package.
-          # Note, missing_method changed from NULL to "DoY average" because individual grid cells can be NA. eg
-          dataPP=Evapotranspiration::ReadInputs(ET.var.names ,dataRAW,constants=NA,stopmissing = c(99,99,99),
-                                                interp_missing_days=T, interp_missing_entries=T, interp_abnormal=T,
-                                                missing_method=ET.missing_method, abnormal_method=ET.abnormal_method, message = "no")
-
-          # Update constants for the site
-          ET.constants$Elev = DEMpoints[j]
-          ET.constants$lat = point.weights$coords[j,2]
-          ET.constants$lat_rad = ET.constants$lat / 180.0*pi
-
-          # Call  ET package
-          if (ET.function=='ET.Abtew') {
-            results <- Evapotranspiration::ET.Abtew(dataPP, ET.constants, ts=ET.timestep,solar="data",AdditionalStats='no', message='no');
-          } else if(ET.function=='ET.HargreavesSamani') {
-            results <- Evapotranspiration::ET.HargreavesSamani(dataPP, ET.constants, ts=ET.timestep,AdditionalStats='no', message='no');
-          } else if(ET.function=='ET.JensenHaise') {
-            results <- Evapotranspiration::ET.JensenHaise(dataPP, ET.constants, ts=ET.timestep,solar="data",AdditionalStats='no', message='no');
-          } else if(ET.function=='ET.Makkink') {
-            results <- Evapotranspiration::ET.Makkink(dataPP, ET.constants, ts=ET.timestep,solar="data",AdditionalStats='no', message='no');
-          } else if(ET.function=='ET.McGuinnessBordne') {
-            results <- Evapotranspiration::ET.McGuinnessBordne(dataPP, ET.constants, ts=ET.timestep,AdditionalStats='no', message='no');
-          } else if(ET.function=='ET.MortonCRAE') {
-            results <- Evapotranspiration::ET.MortonCRAE(dataPP, ET.constants,est=ET.Mortons.est, ts=ET.timestep,solar="data",Tdew=FALSE, AdditionalStats='no', message='no');
-          } else if(ET.function=='ET.MortonCRWE') {
-            results <- Evapotranspiration::ET.MortonCRWE(dataPP, ET.constants,est=ET.Mortons.est, ts=ET.timestep,solar="data",Tdew=FALSE, AdditionalStats='no', message='no');
-          } else if(ET.function=='ET.Turc') {
-            results <- Evapotranspiration::ET.Turc(dataPP, ET.constants, ts=ET.timestep,solar="data",humid=F, AdditionalStats='no', message='no');
-          } #else if (ET.function=='ET.PenmanMonteith') {
-          #  results <- Evapotranspiration::ET.PenmanMonteith(dataPP, ET.constants, ts=ET.timestep, solar="data", wind="no", message="no", AdditionalStats="no")
-          #}
-
-
-          # Interpolate monthly or annual data
-          if (ET.timestep=='monthly' || ET.timestep=='annual') {
-            # Get the last day of each month
-            last.day.month = zoo::as.Date(zoo::as.yearmon(stats::time(results$ET.Monthly)), frac = 1)
-
-            # Get days per month
-            days.per.month = as.integer(format.Date(zoo::as.Date(zoo::as.yearmon(stats::time(results$ET.Monthly)), frac = 1),'%d'))
-
-            # Set the first month to the start date for extraction.
-            start.day.month = as.numeric(format(timepoints2Extract,"%d"))[1]
-            days.per.month[1] = days.per.month[1] - start.day.month + 1
-
-            # Set the last month to the end date for extraction.
-            end.day.month = as.numeric(format(timepoints2Extract,"%d"))[length(timepoints2Extract)]
-            days.per.month[length(days.per.month)] = end.day.month
-
-            # Calculate average ET per day of each month
-            monthly.ET.as.daily = zoo::zoo( as.numeric(results$ET.Monthly/days.per.month), last.day.month)
-
-            # Spline interpolate Monthly average ET
-            timepoints2Extract.as.zoo = zoo::zoo(NA,timepoints2Extract);
-            ET.est.tmp = zoo::na.approx(merge(monthly.ET.as.daily, dates=timepoints2Extract.as.zoo)[, 1],
-                                        rule=2)
-            filt = stats::time(ET.est.tmp)>=stats::start(timepoints2Extract.as.zoo) &
-                   stats::time(ET.est.tmp)<=stats::end(timepoints2Extract.as.zoo)
-            ET.est.tmp = pmax(0.0, as.numeric( ET.est.tmp));
-            ET.est.tmp = ET.est.tmp[filt]
-            ET.est[,k] = ET.est.tmp;
-          } else {
-            ET.est[,k] = results$ET.Daily
-          }
+          # Find time step of the first input variable used by the derived variable
+          # and assign this time step to the output.
+          FUN_vars = names(formals(vars_derived[[i]][[1]]))
+          ind_vars = which(names(data.brick) %in% FUN_vars)
+          vars.timesteps = c(vars.timesteps, vars.timesteps[[ ind_vars[1] ]])
+        }, error = function(e) {
+          warning(paste('The following derived variable function failed and is being skipped:', vars_derived[[i]][[1]],'\n',
+                        'Please carefully test the derived funcion.\nThe error message from the derived function was:\n',e),
+                  immediate. = T)
         }
-        if (i==1) {
-          data.brick[['et']] = ET.est
-        } else {
-          data.brick[['et']] = cbind(data.brick[['et']], ET.est)
-        }
+      )
     }
-
-    # Add ET variable back into vars
-    vars = c(vars,'et')
-    nvars = length(vars)
   }
-
-  # Set time steps for each variable.
-  vars.timesteps = as.list(vars.extract.summary$time.step)
-  if ('et' %in% vars)
-    vars.timesteps = as.list(rep('days',nvars))
 
   # Get the number of time steps for each variable. This is reported to allow the user to
   # easily see when a timestep is, say, shorter than other time steps (eg ends before the week).
@@ -1074,7 +939,7 @@ extract_data <- function(
   # calculate the catchment average and variance.
   #--------------------
   message('... Calculating area weighted results at required time-step.')
-  for (i in 1:nlocations) {
+  for (i in 1:length(locations)) {
 
     # Do the temporal aggregation
     data.brick.timaAgg = vector('list', nvars)

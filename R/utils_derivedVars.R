@@ -1,5 +1,92 @@
+.vars_derived_inbuilt_funs <- function() {
+  c('ET_HargreavesSamani',
+    'ET_JensenHaise',
+    'ET_Makkink',
+    'ET_McGuinnessBordne',
+    'ET_MortonCRAE',
+    'ET_MortonCRWE',
+    'ET_Turc')
+}
+
+.vars_derived_check <- function(extractFrom, extractTo, vars, vars_derived) {
+
+  # Check derived vars are a list of lists
+  if (!is.list(vars_derived) || !all(sapply(vars_derived, is.list)))
+    .pretty_stop('The derived variables input must be a list of lists.')
+
+  # Get list of all possible vars
+  vars_all <- rownames(grid_sources())
+
+  # Check each derived var
+  for (ivars_derived in vars_derived) {
+    # Test derived function  exists.
+    FUN = ivars_derived[[1]]
+    ivars_derived = ivars_derived[-1]
+    if (!exists(FUN, mode = 'function'))
+      .pretty_stop(paste('The following derived function could not be found:', FUN))
+
+    # Get input vars to derived function that in vars_all
+    FUN_vars = names(formals(FUN))
+    ind_vars = FUN_vars %in% vars_all
+    FUN_vars = FUN_vars[ind_vars]
+
+    # Check input vars are to be extracted.
+    ind_vars = !( FUN_vars %in% vars)
+    if (any(ind_vars))
+      .pretty_stop(paste0('The derived function, ', FUN,
+                         ', requires the following additional variable to be extracted: ',
+                         paste(FUN_vars[ind_vars], collapse = ', ')))
+
+    # Is an inbuilt derived function?
+    is_inbuilt = FUN %in% .vars_derived_inbuilt_funs()
+
+    # Check inbuilt functions care called with the required inputs
+    if (is_inbuilt) {
+
+      # Check required inputs are provided to derived function.
+      FUN_vars = names(formals(FUN))
+      ind_vars = names(ivars_derived) %in% FUN_vars
+      if (!all(ind_vars))
+      .pretty_stop(paste0('The input derived function, ', FUN,
+                          ', list item includes the variables that are not available within the built in function: ',
+                          paste(names(ivars_derived)[ind_vars], collapse = ', ')))
+
+      # Is extraction duration <2 years.
+      is_le_2y= (extractTo - extractFrom)  < 2*365
+
+      # Error if missing method is inappropriate for short record.
+      if ('ET_missing_method' %in% names(formals(FUN))) {
+        if ('ET_missing_method' %in% names(ivars_derived))
+          ET_missing_method = ivars_derived$ET_missing_method
+        else
+          ET_missing_method = formals(FUN)$ET_missing_method
+
+        # Check ET interpolation methods are appropriate if duration is <2 years
+        if (is_le_2y  && ET_missing_method!='neighbouring average')
+            .pretty_stop(paste('When the extraction duration is < 2 years, the in-built derived function,', FUN,',\n',
+                         'requires "ET_missing_method" and it must be specified and set to "neighbouring average".'))
+        }
+
+      # Error if abnormal method is inappropriate for short record.
+      if ('ET_abnormal_method' %in% names(formals(FUN))) {
+        if ('ET_abnormal_method' %in% names(ivars_derived))
+          ET_abnormal_method = ivars_derived$ET_abnormal_method
+        else
+          ET_abnormal_method = formals(FUN)$ET_abnormal_method
+
+        # Check ET interpolation methods are appropriate if duration is <2 years
+        if (is_le_2y  && ET_abnormal_method!='neighbouring average')
+          .pretty_stop('When the extraction duration is < 2 years,  the in-built derived function,', FUN,',\n',
+                       'requires "ET_abnormal_method" and it must be set to "neighbouring average".');
+      }
+    }
+  }
+}
+
+
 .vars_derived_est_by_column <- function(timepoints, grid_data, coords, DEMpoints, vars_derived) {
 
+  # Get name of derived function, and then collate other non-data inputs
   FUN = vars_derived[[1]]
   vars_derived = vars_derived[-1]
   vars_derived = c(list(timepoints=timepoints),
@@ -359,17 +446,6 @@ ET_Turc <- function(timepoints = NA,
       dataRAW$va <- NULL
     if ( !has_data['Precip'])
       dataRAW$Precip <- NULL
-
-    # # Check ET interpolation methods are appropriate if duration is <2 years
-    # if ( diff(range(timepoints))  < 2*365){
-    #   if (ET_missing_method!='neighbouring average' || ET_abnormal_method!='neighbouring average' ) {
-    #     message('    WARNING: The extraction duration is < 2 years and ET is to be derived.');
-    #     message('             Hence, ET_missing_method and ET_abnormal_method is changed to "neighbouring average".');
-    #
-    #     ET_missing_method = "neighbouring average"
-    #     ET_abnormal_method = "neighbouring average"
-    #   }
-    # }
 
     # Convert to required format for ET package.
     ET_vars = c('Tmax', 'Tmin', 'Rs', 'Precip', 'va')
