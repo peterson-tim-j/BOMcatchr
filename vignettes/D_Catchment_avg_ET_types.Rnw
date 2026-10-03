@@ -60,122 +60,81 @@ The estimation of ET uses the _evapotranspiration_ package. It requires a set of
 data(constants,package='Evapotranspiration')
 ```
 
-Next, all 11 ET measures are derived. For each measure, only the following commands change: \code{ET.function} , \code{ET.timestep} and \code{ET.Mortons.est} (when Morton's estimate is derived).
+Next, all 10 ET measures are derived. The first step is to build a list of the inputs for each derived variable and then collate them into a list of lists. Note, the list of inputs must start with the function name and then the named inputs - excluding the extraction time steps, the required gridded observation variable names, the coordinates and the land surface elevation of the grid cells.
+
+Also, the inputs \code{ET_missing_method} and \code{ET_abnormal_method} normally do not need to be defined, but are done so here because the short extraction length of less than two years prohibits the use of the default daily average, \code{DoY average}.
+
+Lastly, here only built-in derived functions are used. However, user defined functions can also be input.
 ```{R}
-climateData.ET.HargreavesSamani = extract_data(ncdfFilename = ncdfFilename,
-                                extractFrom = date.from,
-                                extractTo = date.to,
-                                vars = c('tmax', 'tmin', 'et'),
-                                locations = catch,
-                                spatial.fn = 'IQR',
-                                ET.function = 'ET.HargreavesSamani',
-                                ET.timestep = 'daily',
-                                ET.constants = constants)
+derived_var_fns <- list(ET_HS = list( FUN = 'ET_HargreavesSamani',
+                                            ET_missing_method = 'neighbouring average',
+                                            ET_abnormal_method = 'neighbouring average',
+                                            ET_constants = constants,
+                                            ET_timestep = 'daily'),
+                        ET_JH = list( FUN = 'ET_JensenHaise',
+                                            ET_missing_method = 'neighbouring average',
+                                            ET_abnormal_method = 'neighbouring average',
+                                            ET_constants = constants,
+                                            ET_timestep = 'daily'),
+                        ET_M =  list( FUN = 'ET_Makkink',
+                                            ET_missing_method = 'neighbouring average',
+                                            ET_abnormal_method = 'neighbouring average',
+                                            ET_constants = constants,
+                                            ET_timestep = 'daily'),
+                        ET_MB = list( FUN = 'ET_McGuinnessBordne',
+                                            ET_missing_method = 'neighbouring average',
+                                            ET_abnormal_method = 'neighbouring average',
+                                            ET_constants = constants,
+                                            ET_timestep = 'daily'),
+                        ET_T =  list( FUN = 'ET_Turc',
+                                            ET_missing_method = 'neighbouring average',
+                                            ET_abnormal_method = 'neighbouring average',
+                                            ET_constants = constants,
+                                            ET_timestep = 'daily'),
+                        ET_CRAE_PET = list( FUN = 'ET_MortonCRAE',
+                                            ET_Mortons_est = 'potential ET',
+                                            ET_missing_method = 'neighbouring average',
+                                            ET_abnormal_method = 'neighbouring average',
+                                            ET_constants = constants,
+                                            ET_timestep = 'monthly'),
+                        ET_CRAE_aPET = list(FUN = 'ET_MortonCRAE',
+                                            ET_Mortons_est = 'wet areal ET',
+                                            ET_missing_method = 'neighbouring average',
+                                            ET_abnormal_method = 'neighbouring average',
+                                            ET_constants = constants,
+                                            ET_timestep = 'monthly'),
+                        ET_CRAE_aET = list( FUN = 'ET_MortonCRAE',
+                                            ET_Mortons_est = 'actual areal ET',
+                                            ET_missing_method = 'neighbouring average',
+                                            ET_abnormal_method = 'neighbouring average',
+                                            ET_constants = constants,
+                                            ET_timestep = 'monthly'),
+                        ET_CRWE_lake = list(FUN = 'ET_MortonCRWE',
+                                            ET_Mortons_est = 'shallow lake ET',
+                                            ET_missing_method = 'neighbouring average',
+                                            ET_abnormal_method = 'neighbouring average',
+                                            ET_constants = constants,
+                                            ET_timestep = 'monthly'),
+                        ET_CRWE_PET  = list(FUN = 'ET_MortonCRWE',
+                                            ET_Mortons_est = 'potential ET',
+                                            ET_missing_method = 'neighbouring average',
+                                            ET_abnormal_method = 'neighbouring average',
+                                            ET_constants = constants,
+                                            ET_timestep = 'monthly')
+                        )
+```
+Now we can call the extraction functiion and derive all ET estimates in one call.
+```{R}
+climateData = extract_data(ncdfFilename=ncdfFilename,
+                               extractFrom=date.from,
+                               extractTo=as.Date("2010-05-31","%Y-%m-%d"),
+                               vars = c('precip', 'tmin', 'tmax', 'vprp_3pm','solarrad'),
+                               vars_derived = derived_var_fns,
+                               locations=catch,
+                               temporal.timestep = 'daily',
+                               temporal.fn.inner ='sum',
+                               spatial.fn = 'IQR')
 
-climateData.ET.JensenHaise = extract_data(ncdfFilename = ncdfFilename,
-                                extractFrom = date.from,
-                                extractTo = date.to,
-                                vars = c('tmax', 'tmin', 'solarrad', 'et'),
-                                locations = catch,
-                                spatial.fn = 'IQR',
-                                ET.function = 'ET.JensenHaise',
-                                ET.timestep = 'daily',
-                                ET.constants = constants)
-
-climateData.ET.Makkink = extract_data(ncdfFilename = ncdfFilename,
-                                extractFrom = date.from,
-                                extractTo = date.to,
-                                vars = c('tmax', 'tmin','solarrad', 'et'),
-                                locations = catch,
-                                spatial.fn = 'IQR',
-                                ET.function = 'ET.Makkink',
-                                ET.timestep = 'daily',
-                                ET.constants = constants)
-
-climateData.ET.McGuinnessBordne = extract_data(ncdfFilename = ncdfFilename,
-                               extractFrom = date.from,
-                               extractTo = date.to,
-                               vars = c('tmax', 'tmin', 'et'),
-                               locations = catch,
-                               spatial.fn = 'IQR',
-                               ET.function = 'ET.McGuinnessBordne',
-                               ET.timestep = 'daily',
-                               ET.constants = constants)
-
-climateData.ET.MortonCRAE = extract_data(ncdfFilename = ncdfFilename,
-                               extractFrom = date.from,
-                               extractTo = date.to,
-                               vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
-                               locations = catch,
-                               spatial.fn = 'IQR',
-                               ET.function = 'ET.MortonCRAE',
-                               ET.timestep = 'monthly',
-                               ET.constants = constants)
-
-climateData.ET.MortonCRAE.potentialET = extract_data(ncdfFilename = ncdfFilename,
-                               extractFrom = date.from,
-                               extractTo = date.to,
-                               vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
-                               locations = catch,
-                               spatial.fn = 'IQR',
-                               ET.function = 'ET.MortonCRAE',
-                               ET.timestep = 'monthly',
-                               ET.Mortons.est = 'potential ET',
-                               ET.constants = constants)
-
-climateData.ET.MortonCRAE.wetarealET = extract_data(ncdfFilename = ncdfFilename,
-                               extractFrom = date.from,
-                               extractTo = date.to,
-                               vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
-                               locations = catch,
-                               spatial.fn = 'IQR',
-                               ET.function = 'ET.MortonCRAE',
-                               ET.timestep = 'monthly',
-                               ET.Mortons.est = 'wet areal ET',
-                               ET.constants = constants)
-
-climateData.ET.MortonCRAE.actualarealET = extract_data(ncdfFilename = ncdfFilename,
-                               extractFrom = date.from,
-                               extractTo = date.to,
-                               vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
-                               locations = catch,
-                               spatial.fn = 'IQR',
-                               ET.function = 'ET.MortonCRAE',
-                               ET.timestep = 'monthly',
-                               ET.Mortons.est = 'actual areal ET',
-                               ET.constants = constants)
-
-climateData.ET.MortonCRWE = extract_data(ncdfFilename = ncdfFilename,
-                               extractFrom = date.from,
-                               extractTo = date.to,
-                               vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
-                               locations = catch,
-                               spatial.fn = 'IQR',
-                               ET.function = 'ET.MortonCRWE',
-                               ET.timestep = 'monthly',
-                               ET.Mortons.est = 'potential ET',
-                               ET.constants = constants)
-
-climateData.ET.MortonCRWE.shallowLake = extract_data(ncdfFilename = ncdfFilename,
-                               extractFrom = date.from,
-                               extractTo = date.to,
-                               vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
-                               locations = catch,
-                               spatial.fn = 'IQR',
-                               ET.function = 'ET.MortonCRWE',
-                               ET.timestep = 'monthly',
-                               ET.Mortons.est = 'shallow lake ET',
-                               ET.constants = constants)
-
-climateData.ET.Turc = extract_data(ncdfFilename = ncdfFilename,
-                               extractFrom = date.from,
-                               extractTo = date.to,
-                               vars = c('tmax', 'tmin', 'solarrad', 'et'),
-                               locations = catch,
-                               spatial.fn = 'IQR',
-                               ET.function = 'ET.Turc',
-                               ET.timestep = 'daily',
-                               ET.constants = constants)
 ```
 Next let's plot each measure of the area weighted evaporation at each catchment.
 
@@ -185,12 +144,13 @@ Next let's plot each measure of the area weighted evaporation at each catchment.
 
 par(mfrow=c(2,1))
 for (i in 1:length(site_ID)) {
-  filt = climateData.ET.HargreavesSamani$temporal$Location.ID == site_ID[i]
-  d = ISOdate(climateData.ET.HargreavesSamani$temporal$year,
-              climateData.ET.HargreavesSamani$temporal$month,
-              climateData.ET.HargreavesSamani$temporal$day)
+  filt = climateData$temporal$Location.ID == site_ID[i]
+
+  d = ISOdate(climateData$temporal$year,
+              climateData$temporal$month,
+              climateData$temporal$day)
   plot(d[filt],
-       climateData.ET.HargreavesSamani$temporal$et[filt],
+       climateData$temporal$ET_HS[filt],
        col='black',
        lty=1,
        xlim = c(ISOdate(2010,1,1),
@@ -202,68 +162,49 @@ for (i in 1:length(site_ID)) {
        main=paste('Catchment ID',site_ID[i])
        )
 
-  filt = climateData.ET.JensenHaise$temporal$Location.ID == site_ID[i]
-  d = ISOdate(climateData.ET.JensenHaise$temporal$year,
-              climateData.ET.JensenHaise$temporal$month,
-              climateData.ET.JensenHaise$temporal$day)
-  lines(d[filt], climateData.ET.JensenHaise$temporal$et[filt],
-              col='red',lty=1)
+  lines(d[filt],
+        climateData$temporal$ET_JH[filt],
+        col='red',
+        lty=1)
 
-  filt = climateData.ET.Makkink$temporal$Location.ID==407214
-  d = ISOdate(climateData.ET.Makkink$temporal$year,
-              climateData.ET.Makkink$temporal$month,
-              climateData.ET.Makkink$temporal$day)
-  lines(d[filt], climateData.ET.Makkink$temporal$et[filt],
-              col='green',lty=1)
+  lines(d[filt],
+        climateData$temporal$ET_M[filt],
+        col='green',
+        lty=1)
 
-  filt = climateData.ET.McGuinnessBordne$temporal$Location.ID == site_ID[i]
-  d = ISOdate(climateData.ET.McGuinnessBordne$temporal$year,
-              climateData.ET.McGuinnessBordne$temporal$month,
-              climateData.ET.McGuinnessBordne$temporal$day)
-  lines(d[filt], climateData.ET.McGuinnessBordne$temporal$et[filt],
-              col='blue',lty=1)
+  lines(d[filt],
+        climateData$temporal$ET_MB[filt],
+        col='blue',
+        lty=1)
 
-  filt = climateData.ET.MortonCRAE.potentialET$temporal$Location.ID == site_ID[i]
-  d = ISOdate(climateData.ET.MortonCRAE.potentialET$temporal$year,
-              climateData.ET.MortonCRAE.potentialET$temporal$month,
-              climateData.ET.MortonCRAE.potentialET$temporal$day)
-  lines(d[filt], climateData.ET.MortonCRAE.potentialET$temporal$et[filt],
-              col='black',lty=2)
+  lines(d[filt], climateData$temporal$ET_T[filt],
+        col='purple',
+        lty=3)
 
-  filt = climateData.ET.MortonCRAE.wetarealET$temporal$Location.ID == site_ID[i]
-  d = ISOdate(climateData.ET.MortonCRAE.wetarealET$temporal$year,
-              climateData.ET.MortonCRAE.wetarealET$temporal$month,
-              climateData.ET.MortonCRAE.wetarealET$temporal$day)
-  lines(d[filt], climateData.ET.MortonCRAE.wetarealET$temporal$et[filt],
-              col='red',lty=2)
+  lines(d[filt],
+        climateData$temporal$ET_CRAE_PET[filt],
+        col='black',
+        lty=2)
 
-  filt = climateData.ET.MortonCRAE.actualarealET$temporal$Location.ID == site_ID[i]
-  d = ISOdate(climateData.ET.MortonCRAE.actualarealET$temporal$year,
-              climateData.ET.MortonCRAE.actualarealET$temporal$month,
-              climateData.ET.MortonCRAE.actualarealET$temporal$day)
-  lines(d[filt], climateData.ET.MortonCRAE.actualarealET$temporal$et[filt],
-              col='green',lty=2)
+  lines(d[filt],
+        climateData$temporal$ET_CRAE_aPET[filt],
+        col='red',
+        lty=2)
 
-  filt = climateData.ET.MortonCRWE$temporal$Location.ID == site_ID[i]
-  d = ISOdate(climateData.ET.MortonCRWE$temporal$year,
-              climateData.ET.MortonCRWE$temporal$month,
-              climateData.ET.MortonCRWE$temporal$day)
-  lines(d[filt], climateData.ET.MortonCRWE$temporal$et[filt],
-              col='blue',lty=2)
+  lines(d[filt],
+        climateData$temporal$ET_CRAE_aET[filt],
+        col='green',
+        lty=2)
 
-  filt = climateData.ET.MortonCRWE.shallowLake$temporal$Location.ID == site_ID[i]
-  d = ISOdate(climateData.ET.MortonCRWE.shallowLake$temporal$year,
-              climateData.ET.MortonCRWE.shallowLake$temporal$month,
-              climateData.ET.MortonCRWE.shallowLake$temporal$day)
-  lines(d[filt], climateData.ET.MortonCRWE.shallowLake$temporal$et[filt],
-              col='black',lty=3)
+  lines(d[filt],
+        climateData$temporal$ET_CRWE_lake[filt],
+        col='blue',
+        lty=2)
 
-  filt = climateData.ET.Turc$temporal$Location.ID == site_ID[i]
-  d = ISOdate(climateData.ET.Turc$temporal$year,
-              climateData.ET.Turc$temporal$month,
-              climateData.ET.Turc$temporal$day)
-  lines(d[filt], climateData.ET.Turc$temporal$et[filt],
-              col='red',lty=3)
+  lines(d[filt],
+        climateData$temporal$ET_CRWE_PET[filt],
+        col='black',
+        lty=3)
 
 }
 
@@ -272,13 +213,13 @@ legend(x='topright', legend=c(
   'Jensen Haise (PET)',
   'Makkink (ref. crop)',
   'McGuinness Bordne (PET)',
+  'Turc (ref. crop, non-humid)',
   'Morton CRAE (PET)',
   'Morton CRAE (wet areal ET)',
   'Morton CRAE (actual areal ET)',
   'Morton CRWE (PET)',
-  'Morton CRWE (shallow Lake)',
-  'Turc (ref. crop, non-humid)'),
-  lty = c(1,1,1,1,2,2,2,2,3,3),
-  col=c('black','red','green','blue','black','red','green','blue','black','red')
+  'Morton CRWE (shallow Lake)'),
+  lty = c(1,1,1,1,1,2,2,2,3,3),
+  col=c('black','red','green','blue','purple','black','red','green','blue','black')
 )
 ```

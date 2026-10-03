@@ -92,21 +92,26 @@ The estimation of ET uses the _evapotranspiration_ package. It requires a set of
 data(constants,package='Evapotranspiration')
 ```
 
-The area weighted daily meteorological variables and PET can then be calculated as follows, given \code{vars} includes \code{et}. Note, because only two months are being extracted, the default method to handle missing data and anomalies (e.g. Tmin > Tmax) during ET calculations is automatically changed from the default of \code{"DoY average"} to \code{"neighbouring average"}.
+The area weighted daily meteorological variables and PET can then be calculated by first defining the inputs for the derived ET function. Note, because only two months are being extracted, the default method to handle missing data and anomalies (e.g. Tmin > Tmax) during ET calculations is changed from the default of \code{"DoY average"} to \code{"neighbouring average"}.
 
 ```{r}
-climateData.daily = extract_data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
-                      vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
-                      locations=catch,
-                      temporal.timestep = 'daily',
-                      temporal.fn.inner ='sum',
-                      spatial.fn = 'var',
-                      ET.function='ET.MortonCRAE',
-                      ET.timestep = 'monthly',
-                      ET.Mortons.est='wet areal ET',
-                      ET.constants= constants)
+derived_var_fn = list(ET_CRAE_aPET = list(FUN = 'ET_MortonCRAE',
+                                          ET_Mortons_est = 'wet areal ET',
+                                          ET_missing_method = 'neighbouring average',
+                                          ET_abnormal_method = 'neighbouring average',
+                                          ET_constants = constants,
+                                          ET_timestep = 'monthly'),
+                       )
+
+climateData.daily = extract_data( ncdfFilename=ncdfFilename,
+                                  extractFrom=date.from,
+                                  extractTo=date.to,
+                                  vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'),
+                                  vars_derived = derived_var_fn,
+                                  locations=catch,
+                                  temporal.timestep = 'daily',
+                                  temporal.fn.inner ='sum',
+                                  spatial.fn = 'var')
 ```
 
 Next time series of the extracted daily precipitation and PET for each catchment is plotted. The precipitation plots show both the area weighted estimate and the spatial variability on each day (as +/- one standard deviation).
@@ -164,7 +169,7 @@ for (i in 1:length(site_ID)) {
   # Plot evap data.
   par(new = TRUE)
   plot(climateData.daily.date,
-       climateData.daily$temporal$et[filt],
+       climateData.daily$temporal$ET_CRAE_aPET[filt],
        col = "#bc80bd",
        lwd = 2,
        ylab = "",
@@ -203,14 +208,14 @@ To extract the monthly totals, \code{temporal.timestep} is set to \code{'monthly
 First let's extract only precipitation.
 
 ```{r}
-PrecipData.monthly = extract_data(ncdfFilename=ncdfFilename,
-                     extractFrom = date.from,
-                     extractTo = date.to,
-                     vars = c('precip'),
-                     locations=catch,
-                     spatial.fn = '',
-                     temporal.timestep = 'monthly',
-                     temporal.fn.inner = 'sum')
+PrecipData.monthly = extract_data( ncdfFilename=ncdfFilename,
+                                   extractFrom = date.from,
+                                   extractTo = date.to,
+                                   vars = c('precip'),
+                                   locations=catch,
+                                   spatial.fn = '',
+                                   temporal.timestep = 'monthly',
+                                   temporal.fn.inner = 'sum')
 ```
 The monthly total precipitation can then be mapped to show the spatial variability. Before mapping, let's add a function to map a panel of maps and for the maps to have a common colour bar.
 
@@ -274,17 +279,14 @@ Next let's extract all variables and calculate the PET and then map.
 
 ```{r}
 metData.monthly = extract_data(ncdfFilename=ncdfFilename,
-                     extractFrom=date.from,
-                     extractTo=date.to,
-                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
-                     locations=catch,
-                     spatial.fn = '',
-                     temporal.timestep = 'monthly',
-                     temporal.fn.inner = 'sum',
-                     ET.function = 'ET.MortonCRAE',
-                     ET.timestep = 'monthly',
-                     ET.Mortons.est='wet areal ET',
-                     ET.constants= constants)
+                               extractFrom=date.from,
+                               extractTo=date.to,
+                               vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'),
+                               vars_derived = derived_var_fn,
+                               locations=catch,
+                               spatial.fn = '',
+                               temporal.timestep = 'monthly',
+                               temporal.fn.inner = 'sum')
 ```
 The monthly total PET can then be mapped to show the spatial variability. The map below shows considerable spatial variability. Much of this variability would not emerges if only point PET at the catchment centroid was used.
 
@@ -332,27 +334,21 @@ Next, the meteorological data and PET are derived using both the area weighted a
 metData.monthly.weighted = extract_data(ncdfFilename=ncdfFilename,
                      extractFrom = date.from,
                      extractTo=date.to,
-                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
+                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'),
+                     vars_derived = derived_var_fn,
                      locations = catch,
                      spatial.fn = 'var',
                      temporal.timestep = 'monthly',
-                     temporal.fn.inner = 'sum',
-                     ET.function = 'ET.MortonCRAE',
-                     ET.timestep = 'monthly',
-                     ET.Mortons.est = 'wet areal ET',
-                     ET.constants =  constants)
+                     temporal.fn.inner = 'sum')
 
 metData.monthly.centroid = extract_data(ncdfFilename=ncdfFilename,
                      extractFrom = date.from,
                      extractTo = date.to,
-                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
+                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'),
+                     vars_derived = derived_var_fn,
                      locations = centroid,
                      temporal.timestep = 'monthly',
-                     temporal.fn.inner = 'sum',
-                     ET.function='ET.MortonCRAE',
-                     ET.timestep = 'monthly',
-                     ET.Mortons.est = 'wet areal ET',
-                     ET.constants =  constants)
+                     temporal.fn.inner = 'sum')
 ```
 
 Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduced a bias of 1.5 to 6  mm/month.
@@ -414,8 +410,8 @@ for (i in 1:length(site_ID)) {
 
   # PET
   xdata = metData.date
-  ydata_1 = metData.monthly.weighted$temporal$et[filt]
-  ydata_2 = metData.monthly.centroid$et[filt]
+  ydata_1 = metData.monthly.weighted$temporal$ET_CRAE_aPET[filt]
+  ydata_2 = metData.monthly.centroid$ET_CRAE_aPET[filt]
   shared_limits <- range(c(ydata_1, ydata_2))
   shared_limits[1] = floor(shared_limits[1])
   shared_limits[2] = ceiling(shared_limits[2]*1.25)
@@ -443,8 +439,8 @@ for (i in 1:length(site_ID)) {
 
   # Deficit
   xdata = metData.date
-  ydata_1 = metData.monthly.weighted$temporal$precip[filt] - metData.monthly.weighted$temporal$et[filt]
-  ydata_2 = metData.monthly.centroid$precip[filt] - metData.monthly.centroid$et[filt]
+  ydata_1 = metData.monthly.weighted$temporal$precip[filt] - metData.monthly.weighted$temporal$ET_CRAE_aPET[filt]
+  ydata_2 = metData.monthly.centroid$precip[filt] - metData.monthly.centroid$ET_CRAE_aPET[filt]
   shared_limits <- range(c(ydata_1, ydata_2))
   shared_limits[1] = floor(shared_limits[1])
   shared_limits[2] = ceiling(shared_limits[2]*1.35)
