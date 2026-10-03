@@ -3,7 +3,11 @@ title: "1. Make source data grids"
 description: >
   This vignette shows how to build the netCDF data file and then
   update it to new start and end dates.
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    code_folding: show
+  rmarkdown:
+    html_vignette
 vignette: >
   %\VignetteIndexEntry{1. Make source data grids}
   %\VignetteEngine{knitr::rmarkdown}
@@ -73,9 +77,10 @@ The number of weather stations used to create each grid changes over time, which
 ```{R}
 nstations <- BOMcatchr::extract_nstations(ncdfFilename)
 ```
+
 Now let's plot the number of stations over time.
-<div class="fold s">
-```{R}
+
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 6
 
@@ -94,7 +99,6 @@ Now let's plot the number of stations over time.
          type='l')
  }
 ```
-</div>
 
 ## Update an existing variable
 
@@ -140,12 +144,14 @@ status <- grid_build(ncdfFilename=ncdfFilename,
 ```
 
 Now let's check that the file includes both the prior four variables plus solar radiation.
+
 ```{r}
 summary.df <- BOMcatchr::grid_summary(ncdfFilename)
 summary.df
 ```
 
 And finally, again let's plot the source data age of the grids (note, for the demonstration we're again assuming it is 12 days into the future).
+
 ```{r}
 #| fig.width = 8,
 #| fig.height = 5
@@ -160,8 +166,7 @@ To optimise the grid build and extract time, trials were undertake using a range
 
 Overall the result show that the build time speed-up is about equal to the default when the spatial chunks are 20 grid cells or greater and the time chunks are five days or less. More importantly, these settings result in an extract time over 110 times faster than the default. The package default chunk size is hence \code{c(30, 30, 5)}.
 
-<div class="fold s">
-```{r}
+```{r class.source = 'fold-hide'}
 #| fig.width = 6,
 #| fig.height = 10
 
@@ -506,4 +511,3 @@ plot_res(data, doTotal = T, doLegend = F)
 plot_res(data, doTotal = T, asSpeedup = T, doLegend = F)
 
 ```
-</div>

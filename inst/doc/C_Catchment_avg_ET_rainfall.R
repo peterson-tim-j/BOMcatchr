@@ -7,12 +7,12 @@ library(BOMcatchr)
 
 ## -----------------------------------------------------------------------------
 date.from = as.Date("2010-07-01","%Y-%m-%d")
-date.to = as.Date("2010-10-31","%Y-%m-%d")
+date.to = as.Date("2010-12-31","%Y-%m-%d")
 
 ncdfFilename = tempfile(fileext='.nc')
 
 ## -----------------------------------------------------------------------------
-fname = grid_build(ncdfFilename = ncdfFilename,
+status = grid_build(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'))
@@ -20,6 +20,21 @@ fname = grid_build(ncdfFilename = ncdfFilename,
 ## -----------------------------------------------------------------------------
 catch <- extract_locations('catchment',c('407214','407220'))
 site_ID <- catch$stationno
+
+## -----------------------------------------------------------------------------
+dr <- extract_locations('river_region',43637156)
+riv <- extract_locations('river_simple',NA)
+gauge <- extract_locations('water_gauge',NA)
+
+## -----------------------------------------------------------------------------
+gauge <- gauge[dr]
+riv <- riv[dr]
+
+## ----class.source = 'fold-hide'-----------------------------------------------
+terra::plot(dr, border='black')
+terra::plot(catch, border='red', add = TRUE)
+terra::plot(riv, col='blue', add = TRUE)
+terra::plot(gauge, col='grey', add = TRUE)
 
 ## -----------------------------------------------------------------------------
 data(constants,package='Evapotranspiration')
@@ -38,7 +53,7 @@ climateData.daily = extract_data(ncdfFilename=ncdfFilename,
                       ET.Mortons.est='wet areal ET',
                       ET.constants= constants)
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
@@ -127,7 +142,7 @@ PrecipData.monthly = extract_data(ncdfFilename=ncdfFilename,
                      temporal.timestep = 'monthly',
                      temporal.fn.inner = 'sum')
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 panel.maps <- function(r, v, plot.labels, colourbar.label='') {
 
   n.plots = terra::nlyr(r)
@@ -169,8 +184,7 @@ panel.maps <- function(r, v, plot.labels, colourbar.label='') {
     mtext(colourbar.label, side = 1, line = 2, cex = 0.9)
 }
 
-
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 map.labels = gsub( 'precip_', '',names(PrecipData.monthly[[2:5]]))
 map.labels = gsub( '_', '-',map.labels)
 
@@ -192,13 +206,13 @@ metData.monthly = extract_data(ncdfFilename=ncdfFilename,
                      ET.Mortons.est='wet areal ET',
                      ET.constants= constants)
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 colInd = which(startsWith(names(metData.monthly), "et_"))
 plot.data = metData.monthly[[colInd]]
 
 panel.maps(plot.data, catch, map.labels, "PET (mm/month)")
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 colnames.all = names(metData.monthly)
 colInd.P = which(startsWith(colnames.all, "precip_"))
 colInd.PET = which(startsWith(colnames.all, "et_"))
@@ -245,7 +259,7 @@ metData.monthly.centroid = extract_data(ncdfFilename=ncdfFilename,
                      ET.Mortons.est = 'wet areal ET',
                      ET.constants =  constants)
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow=c(2,3), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the daily precipitation and PET.
@@ -259,21 +273,28 @@ for (i in 1:length(site_ID)) {
        metData.monthly.weighted$temporal$day[filt]))
 
   # Precipitation
-  plot(x = metData.date,
-       y = metData.monthly.weighted$temporal$precip[filt],
+  xdata = metData.date
+  ydata_1 = metData.monthly.weighted$temporal$precip[filt]
+  ydata_2 = metData.monthly.centroid$precip[filt]
+  shared_limits <- range(c(ydata_1, ydata_2))
+  shared_limits[1] = floor(shared_limits[1])
+  shared_limits[2] = ceiling(shared_limits[2]*1.25)
+  plot(x = xdata,
+       y = ydata_1,
        type = "l",
        col = "#e31a1c",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, 200),
+       ylim = shared_limits,
        ylab = "Precip. [mm/month]",
        xlab = "2010",
        xaxs = "i",
        bty = "l",
-       yaxs = "i")
-
-  lines(x = metData.date,
-        y = metData.monthly.centroid$precip[filt],
+       yaxs = "i",
+       main=paste('Catchment ID',site_ID[i],': Precip.' ),
+       )
+  lines(x = xdata,
+        y = ydata_2,
         col = "#bc80bd",
         lwd = 1.2)
 
@@ -286,49 +307,67 @@ for (i in 1:length(site_ID)) {
          legend = c("Areal weighted", "Centroid"),
          xpd = NA)
 
+  rmse = round(sqrt(mean((ydata_1 - ydata_2)^2)), 2)
+  bias = round(mean(ydata_1 - ydata_2), 1)
+  text(x=(xdata[1] + 5), y=shared_limits[2]*0.85, adj = c(0,0),
+       labels = paste('RMSE =', rmse, 'mm/month\nBias =', bias, 'mm/month'))
+
   # PET
-  plot(x = metData.date,
-       y = metData.monthly.weighted$temporal$et[filt],
+  xdata = metData.date
+  ydata_1 = metData.monthly.weighted$temporal$et[filt]
+  ydata_2 = metData.monthly.centroid$et[filt]
+  shared_limits <- range(c(ydata_1, ydata_2))
+  shared_limits[1] = floor(shared_limits[1])
+  shared_limits[2] = ceiling(shared_limits[2]*1.25)
+  plot(x = xdata,
+       y = ydata_1,
        type = "l",
        col = "#e31a1c",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       main=paste('Catchment ID',site_ID[i]),
-       ylim = c(0, 120),
+       main=paste('Catchment ID',site_ID[i],': PET'),
+       ylim = shared_limits,
        ylab = "PET [mm/month]",
        xlab = "2010", xaxs = "i",
        bty = "l",
        yaxs = "i")
 
-  lines(metData.date, metData.monthly.centroid$et[filt],
+  lines(x = xdata,
+       y = ydata_2,
         col = "#bc80bd", lwd = 1.2)
 
-  # Deficit
-  precip.deficit.weighted =  metData.monthly.weighted$temporal$precip[filt] -
-                             metData.monthly.weighted$temporal$et[filt]
+  rmse = round(sqrt(mean((ydata_1 - ydata_2)^2)), 2)
+  bias = round(mean(ydata_1 - ydata_2), 1)
+  text(x=(xdata[1] + 5), y=shared_limits[2]*0.85, adj = c(0,0),
+       labels = paste('RMSE =', rmse, 'mm/month\nBias =', bias, 'mm/month'))
 
-  plot(x = metData.date,
-       y = precip.deficit.weighted,
+  # Deficit
+  xdata = metData.date
+  ydata_1 = metData.monthly.weighted$temporal$precip[filt] - metData.monthly.weighted$temporal$et[filt]
+  ydata_2 = metData.monthly.centroid$precip[filt] - metData.monthly.centroid$et[filt]
+  shared_limits <- range(c(ydata_1, ydata_2))
+  shared_limits[1] = floor(shared_limits[1])
+  shared_limits[2] = ceiling(shared_limits[2]*1.35)
+  plot(x = xdata,
+       y = ydata_1,
        type = "l",
        col = "#e31a1c",
        lwd = 1.2,
        mgp = c(2, 0.5, 0),
-       ylim = c(0, 140),
+       ylim = shared_limits,
        ylab = "P - PET [mm/month]",
        xlab = "2010",
        xaxs = "i",
        bty = "l",
-       yaxs = "i")
+       yaxs = "i",
+       main=paste('Catchment ID',site_ID[i],': Deficit')
+       )
 
-  precip.deficit.centroid =  metData.monthly.centroid$precip[filt] -
-                             metData.monthly.centroid$et[filt]
+  lines(xdata, ydata_2, col = "#bc80bd", lwd = 1.2)
 
-  lines(metData.date, precip.deficit.centroid, col = "#bc80bd", lwd = 1.2)
-
-  text(x = par("usr")[1]+2,
-       y = par("usr")[3]+10,
-       labels = paste('Mean diff. =',round(mean(precip.deficit.weighted -
-              precip.deficit.centroid),1),'mm/month'),
-       adj = c(0, 0))
+  rmse = round(sqrt(mean((ydata_1 - ydata_2)^2)), 2)
+  bias = round(mean(ydata_1 - ydata_2), 1)
+  text(x=(xdata[1] + 5), y=shared_limits[2]*0.8, adj = c(0,0),
+       labels = paste('RMSE =', rmse, 'mm/month\nBias =', bias, 'mm/month'))
 }
 

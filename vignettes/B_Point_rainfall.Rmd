@@ -2,7 +2,11 @@
 title: "2. Reliability of point daily and monthly data"
 description: >
   This vignette demonstrates the reliability of the package by comparing extracted data against observations from six rainfall and temperate gauges. The building and extraction of data at user-defined time-step is first demonstrated.
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    code_folding: show
+  rmarkdown:
+    html_vignette
 vignette: >
   %\VignetteIndexEntry{2. Reliability of point daily and monthly data}
   %\VignetteEngine{knitr::rmarkdown}
@@ -54,6 +58,7 @@ coords = terra::vect(weather_gauge_loc,
 
 n_sites = nrow(coords)
 ```
+
 Now let's download a polygon of Australia and map the extraction location on top of it (as red circles).
 
 ```{r}
@@ -73,11 +78,12 @@ terra::add_legend('bottomleft',
                   lty=c(1,NA)
                   )
 ```
+
 To evidence the weather gauges being close to the centre of each grid cell, the maps below show the boundary and centre of the grid cells neighbouring each gauge. The red circle show the location of the gauge. The black cross the centre of the grid cell, which is the point at which the grid cell estimate corresponds to (i.e. here not the lower-left). The grey squares are the boundaries of each grid cell.
 
 The maps show that the gauges are less than 0.01 degrees from the centre of a grid cell. This equates to approximately less than 1 km and is unlikely to introduce major error in the latter comparisons extracted data at the grid cell.
 
-```{r}
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 8
 
@@ -126,6 +132,7 @@ for (i in 1:n_sites){
   terra::points(crd, pch='o', col='red')
 }
 ```
+
 ## Extract gridded data
 Now let's extract the gridded data at the four locations. The data is extracted from the netCDF file \code{ncdfFilename} and between the dates \code{extractFrom} and \code{extractTo}.
 
@@ -142,7 +149,7 @@ extracted.data = extract_data(ncdfFilename = ncdfFilename,
 ## Plot the extracted data over time
 Now let's plot time series of the extracted daily precipitation and maximum temperature.
 
-```{r}
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 12
 
@@ -183,7 +190,7 @@ Overall, the results show that the gridded rainfall has a RMSE of 1 to 5mm mm/da
 
 On the maximum temperature, it generally has a low RMSE of 0.6 to 2 degree Celsius and an absolute bias of 0.1 to 0.4 C. The only exception is gauge 79103 with an RMSE of 3 C and bias of -2 C, but this gauge it at an elevation of 1150 m and on a summit. In comparison, Table 2B in Jones et al. 2009 reports an RMSE of 1.2 C and a zero bias. Overall, the error in the maximum temperature is generally low and below that of Jones et al. (2009). Again the errors shown below are very unlikely to arise from the package data handling.
 
-```{r}
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 12
 par(mfrow = c(n_sites, 3),
@@ -274,6 +281,7 @@ extracted.daily2monthly = extract_data(ncdfFilename = ncdfFilename,
                                         temporal.fn.inner = 'sum',
                                         ET.function='')
 ```
+
 Next let's extract the monthly data product.
 ```{r}
 extracted.monthly = extract_data(ncdfFilename = ncdfFilename,
@@ -293,7 +301,7 @@ The centre column shows the monthly gauged precipitation vs the extracted monthl
 
 The right column shows the extracted monthly precipitation against the extracted daily precipitation summed to monthly. It does not show an obvious difference between the two estimates of monthly precipitation, though the most southern gauges the summed daily precipitation is slighly higher then the monthly gridded precipitation (as least for 2010).
 
-```{r}
+```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 12
 par(mfrow = c(n_sites, 3),
@@ -326,9 +334,8 @@ for (i in 1:n_sites){
   rmse = round(sqrt(mean((xdata - ydata)^2)), 1)
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
-       labels = paste('RMSE = ', rmse, 'mm/month'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
-       labels = paste('Bias = ', bias, 'mm/month'))
+       labels = paste('RMSE= ', rmse, 'mm/month\nBias= ', bias, 'mm/month'))
+
   ydata = extracted.monthly$precip.monthly[filt]
   shared_limits <- range(c(xdata, ydata))
   plot(xdata,
@@ -343,9 +350,7 @@ for (i in 1:n_sites){
   rmse = round(sqrt(mean((xdata - ydata)^2)), 1)
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
-       labels = paste('RMSE = ', rmse, 'mm/month'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
-       labels = paste('Bias = ', bias, 'mm/month'))
+       labels = paste('RMSE= ', rmse, 'mm/month\nBias= ', bias, 'mm/month'))
 
   xdata = extracted.monthly$precip.monthly[filt]
   ydata = extracted.daily2monthly[ filt, 'precip']
@@ -362,8 +367,6 @@ for (i in 1:n_sites){
   rmse = round(sqrt(mean((xdata - ydata)^2)), 1)
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
-       labels = paste('RMSE = ', rmse, 'mm/month'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
-       labels = paste('Bias = ', bias, 'mm/month'))
+       labels = paste('RMSE= ', rmse, 'mm/month\nBias= ', bias, 'mm/month'))
 }
 ```

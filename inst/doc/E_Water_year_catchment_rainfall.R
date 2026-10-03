@@ -12,7 +12,7 @@ date.to = as.Date("2015-12-31","%Y-%m-%d")
 ncdfFilename = tempfile(fileext='.nc')
 
 ## -----------------------------------------------------------------------------
-fname = grid_build(ncdfFilename = ncdfFilename,
+status = grid_build(ncdfFilename = ncdfFilename,
                          updateFrom = date.from,
                          updateTo = date.to,
                          vars = c('precip', 'precip.RMSE', 'precip.monthly'))
@@ -43,7 +43,7 @@ climateData.annual.err = extract_data(ncdfFilename = ncdfFilename,
                       temporal.fn.inner = sqrd_sum,
                       spatial.fn = 'var')
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot the precipitation.
@@ -155,7 +155,7 @@ filt = climateData.month2wateryear$temporal$months.per.timestep == 12
 climateData.month2wateryear$temporal = climateData.month2wateryear$temporal[filt, ]
 
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot.
@@ -229,7 +229,7 @@ clim.seasonal = extract_data(ncdfFilename = ncdfFilename,
                       temporal.fn.inner = 'sum',
                       spatial.fn = 'var')
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow=c(length(site_ID), 1),
     mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
@@ -299,7 +299,7 @@ cumannom.seasonal = extract_data(ncdfFilename = ncdfFilename,
                       temporal.fn.inner = 'sum',
                       spatial.fn = 'var')
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow=c(2,2), mar =  c(5, 7.5, 4, 2.7) + 0.1)
 
 # Loop through each catchment and plot.
@@ -402,7 +402,7 @@ rle.wateryear <- extract_data(ncdfFilename = ncdfFilename,
              temporal.fn.inner = runlength_precip,
              spatial.fn = 'var')
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow=c(length(site_ID), 1),
     mar =  c(5, 7.5, 4, 2.7) + 0.1)
 

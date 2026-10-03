@@ -13,7 +13,7 @@ dataTo = as.Date("2010-12-31","%Y-%m-%d")
 ncdfFilename = tempfile(fileext='.nc')
 
 ## -----------------------------------------------------------------------------
-fnames = grid_build(ncdfFilename = ncdfFilename,
+status = grid_build(ncdfFilename = ncdfFilename,
                          updateFrom = dataFrom,
                          updateTo = dataTo,
                          vars = c('tmax', 'precip', 'precip.monthly'))
@@ -42,7 +42,7 @@ terra::add_legend('bottomleft',
                   lty=c(1,NA)
                   )
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow = c(n_sites/2, 2),
     pty = "s",
     cex = 0.75)
@@ -96,7 +96,7 @@ extracted.data = extract_data(ncdfFilename = ncdfFilename,
                                         vars = c('tmax', 'precip'),
                                         ET.function='')
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow = c(n_sites, 2), cex = 0.5)
 for (i in 1:n_sites){
   filt = extracted.data$Location.ID == coords$site_ID[i]
@@ -123,7 +123,7 @@ for (i in 1:n_sites){
 ## -----------------------------------------------------------------------------
 data("weather_gauge_obs")
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow = c(n_sites, 3),
     mar = c(5, 5, 1.5, 1.5),
     pty = "s",
@@ -215,7 +215,7 @@ extracted.monthly = extract_data(ncdfFilename = ncdfFilename,
                                         temporal.timestep = 'monthly',
                                         ET.function='')
 
-## -----------------------------------------------------------------------------
+## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow = c(n_sites, 3),
     mar = c(5, 5, 1.5, 1.5),
     pty = "s",
@@ -246,9 +246,8 @@ for (i in 1:n_sites){
   rmse = round(sqrt(mean((xdata - ydata)^2)), 1)
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
-       labels = paste('RMSE = ', rmse, 'mm/month'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
-       labels = paste('Bias = ', bias, 'mm/month'))
+       labels = paste('RMSE= ', rmse, 'mm/month\nBias= ', bias, 'mm/month'))
+
   ydata = extracted.monthly$precip.monthly[filt]
   shared_limits <- range(c(xdata, ydata))
   plot(xdata,
@@ -263,9 +262,7 @@ for (i in 1:n_sites){
   rmse = round(sqrt(mean((xdata - ydata)^2)), 1)
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
-       labels = paste('RMSE = ', rmse, 'mm/month'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
-       labels = paste('Bias = ', bias, 'mm/month'))
+       labels = paste('RMSE= ', rmse, 'mm/month\nBias= ', bias, 'mm/month'))
 
   xdata = extracted.monthly$precip.monthly[filt]
   ydata = extracted.daily2monthly[ filt, 'precip']
@@ -282,8 +279,6 @@ for (i in 1:n_sites){
   rmse = round(sqrt(mean((xdata - ydata)^2)), 1)
   bias = round(mean(xdata - ydata), 1)
   text(x=shared_limits[1], y=shared_limits[2]*0.9, adj = c(0,0),
-       labels = paste('RMSE = ', rmse, 'mm/month'))
-  text(x=shared_limits[1], y=shared_limits[2]*0.8, adj = c(0,0),
-       labels = paste('Bias = ', bias, 'mm/month'))
+       labels = paste('RMSE= ', rmse, 'mm/month\nBias= ', bias, 'mm/month'))
 }
 
