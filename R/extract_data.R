@@ -183,7 +183,7 @@ extract_data <- function(
 
   # Check if derived vars required eg ET
   has_vars_derived = F
-  if (is.list(vars_derived)) {
+  if (is.list(vars_derived) && length(vars_derived)>0) {
     has_vars_derived = T
   }
 
@@ -643,8 +643,7 @@ extract_data <- function(
     point.weights$w = rep(1,length(locations))
     point.weights$lookup = cbind(as.matrix( seq(1,length(locations),by=1) ),
                                      as.matrix( seq(1,length(locations),by=1) ))
-    point.weights$coords = cbind(as.numeric(terra::crds(locations)[,1]),
-                                 as.numeric(terra::crds(locations)[,2]))
+    point.weights$coords = terra::crds(locations)
   }
 
   if (has_vars_derived) {
