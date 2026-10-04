@@ -126,11 +126,11 @@ derived_var_fns <- list(ET_HS = list( FUN = 'ET_HargreavesSamani',
 Now we can call the extraction functiion and derive all ET estimates in one call.
 ```{R}
 climateData = extract_data(ncdfFilename=ncdfFilename,
-                               extractFrom=date.from,
-                               extractTo=as.Date("2010-05-31","%Y-%m-%d"),
+                               extractFrom = date.from,
+                               extractTo = date.to,
                                vars = c('precip', 'tmin', 'tmax', 'vprp_3pm','solarrad'),
                                vars_derived = derived_var_fns,
-                               locations=catch,
+                               locations = catch,
                                temporal.timestep = 'daily',
                                temporal.fn.inner ='sum',
                                spatial.fn = 'IQR')

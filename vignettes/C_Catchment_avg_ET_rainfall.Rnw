@@ -100,7 +100,7 @@ derived_var_fn = list(ET_CRAE_aPET = list(FUN = 'ET_MortonCRAE',
                                           ET_missing_method = 'neighbouring average',
                                           ET_abnormal_method = 'neighbouring average',
                                           ET_constants = constants,
-                                          ET_timestep = 'monthly'),
+                                          ET_timestep = 'monthly')
                        )
 
 climateData.daily = extract_data( ncdfFilename=ncdfFilename,
@@ -293,7 +293,7 @@ The monthly total PET can then be mapped to show the spatial variability. The ma
 ```{r class.source = 'fold-hide'}
 #| fig.width = 8,
 #| fig.height = 10
-colInd = which(startsWith(names(metData.monthly), "et_"))
+colInd = which(startsWith(names(metData.monthly), "ET_"))
 plot.data = metData.monthly[[colInd]]
 
 panel.maps(plot.data, catch, map.labels, "PET (mm/month)")
@@ -306,7 +306,7 @@ Now that we have maps of the rainfall and PET, we can calculate and map the mont
 #| fig.height = 10
 colnames.all = names(metData.monthly)
 colInd.P = which(startsWith(colnames.all, "precip_"))
-colInd.PET = which(startsWith(colnames.all, "et_"))
+colInd.PET = which(startsWith(colnames.all, "ET_"))
 
 for (i in 1:length(colInd.P)) {
   ind.P = colInd.P[i]
@@ -351,7 +351,7 @@ metData.monthly.centroid = extract_data(ncdfFilename=ncdfFilename,
                      temporal.fn.inner = 'sum')
 ```
 
-Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduced a bias of 1.5 to 6  mm/month.
+Now let's compare the two estimates of precipitation, PET and rainfall deficit. The right most plots below show the rainfall deficit. It shows that using centroid estimate introduced a bias of 2 to 6  mm/month.
 
 ```{r class.source = 'fold-hide'}
 #| fig.width = 8,
