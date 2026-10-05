@@ -453,8 +453,8 @@ extract_data <- function(
   }
 
   # If gap filling it turned off, then ET cannot be calculated.
-  if ( missing.method[2] == '' && getET)
-    .pretty_stop('ET cannot be calculated when gap interpolation is off. Change missing.method[2] to an accepted method other than "".')
+  if ( missing.method[2] == '' && has_vars_derived)
+    .pretty_stop('The derived variables (e.g. ET functions) cannot be calculated when gap interpolation is off. Change missing.method[2] to an accepted method other than "".')
 
   # Check if the spatial data should be returned or analysed.
   do.spatial.analysis=F
