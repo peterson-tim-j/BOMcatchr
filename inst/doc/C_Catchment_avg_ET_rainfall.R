@@ -40,18 +40,23 @@ terra::plot(gauge, col='grey', add = TRUE)
 data(constants,package='Evapotranspiration')
 
 ## -----------------------------------------------------------------------------
-climateData.daily = extract_data(ncdfFilename=ncdfFilename,
-                      extractFrom=date.from,
-                      extractTo=date.to,
-                      vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
-                      locations=catch,
-                      temporal.timestep = 'daily',
-                      temporal.fn.inner ='sum',
-                      spatial.fn = 'var',
-                      ET.function='ET.MortonCRAE',
-                      ET.timestep = 'monthly',
-                      ET.Mortons.est='wet areal ET',
-                      ET.constants= constants)
+derived_var_fn = list(ET_CRAE_aPET = list(FUN = 'ET_MortonCRAE',
+                                          ET_Mortons_est = 'wet areal ET',
+                                          ET_missing_method = 'neighbouring average',
+                                          ET_abnormal_method = 'neighbouring average',
+                                          ET_constants = constants,
+                                          ET_timestep = 'monthly')
+                       )
+
+climateData.daily = extract_data( ncdfFilename=ncdfFilename,
+                                  extractFrom=date.from,
+                                  extractTo=date.to,
+                                  vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'),
+                                  vars_derived = derived_var_fn,
+                                  locations=catch,
+                                  temporal.timestep = 'daily',
+                                  temporal.fn.inner ='sum',
+                                  spatial.fn = 'var')
 
 ## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow=c(2,1), mar =  c(5, 7.5, 4, 2.7) + 0.1)
@@ -104,7 +109,7 @@ for (i in 1:length(site_ID)) {
   # Plot evap data.
   par(new = TRUE)
   plot(climateData.daily.date,
-       climateData.daily$temporal$et[filt],
+       climateData.daily$temporal$ET_CRAE_aPET[filt],
        col = "#bc80bd",
        lwd = 2,
        ylab = "",
@@ -133,14 +138,14 @@ for (i in 1:length(site_ID)) {
 }
 
 ## -----------------------------------------------------------------------------
-PrecipData.monthly = extract_data(ncdfFilename=ncdfFilename,
-                     extractFrom = date.from,
-                     extractTo = date.to,
-                     vars = c('precip'),
-                     locations=catch,
-                     spatial.fn = '',
-                     temporal.timestep = 'monthly',
-                     temporal.fn.inner = 'sum')
+PrecipData.monthly = extract_data( ncdfFilename=ncdfFilename,
+                                   extractFrom = date.from,
+                                   extractTo = date.to,
+                                   vars = c('precip'),
+                                   locations=catch,
+                                   spatial.fn = '',
+                                   temporal.timestep = 'monthly',
+                                   temporal.fn.inner = 'sum')
 
 ## ----class.source = 'fold-hide'-----------------------------------------------
 panel.maps <- function(r, v, plot.labels, colourbar.label='') {
@@ -194,20 +199,17 @@ panel.maps(plot.data, catch, map.labels, "Precip. (mm/month)")
 
 ## -----------------------------------------------------------------------------
 metData.monthly = extract_data(ncdfFilename=ncdfFilename,
-                     extractFrom=date.from,
-                     extractTo=date.to,
-                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
-                     locations=catch,
-                     spatial.fn = '',
-                     temporal.timestep = 'monthly',
-                     temporal.fn.inner = 'sum',
-                     ET.function = 'ET.MortonCRAE',
-                     ET.timestep = 'monthly',
-                     ET.Mortons.est='wet areal ET',
-                     ET.constants= constants)
+                               extractFrom=date.from,
+                               extractTo=date.to,
+                               vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'),
+                               vars_derived = derived_var_fn,
+                               locations=catch,
+                               spatial.fn = '',
+                               temporal.timestep = 'monthly',
+                               temporal.fn.inner = 'sum')
 
 ## ----class.source = 'fold-hide'-----------------------------------------------
-colInd = which(startsWith(names(metData.monthly), "et_"))
+colInd = which(startsWith(names(metData.monthly), "ET_"))
 plot.data = metData.monthly[[colInd]]
 
 panel.maps(plot.data, catch, map.labels, "PET (mm/month)")
@@ -215,7 +217,7 @@ panel.maps(plot.data, catch, map.labels, "PET (mm/month)")
 ## ----class.source = 'fold-hide'-----------------------------------------------
 colnames.all = names(metData.monthly)
 colInd.P = which(startsWith(colnames.all, "precip_"))
-colInd.PET = which(startsWith(colnames.all, "et_"))
+colInd.PET = which(startsWith(colnames.all, "ET_"))
 
 for (i in 1:length(colInd.P)) {
   ind.P = colInd.P[i]
@@ -237,27 +239,21 @@ centroid = terra::centroids(catch)
 metData.monthly.weighted = extract_data(ncdfFilename=ncdfFilename,
                      extractFrom = date.from,
                      extractTo=date.to,
-                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
+                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'),
+                     vars_derived = derived_var_fn,
                      locations = catch,
                      spatial.fn = 'var',
                      temporal.timestep = 'monthly',
-                     temporal.fn.inner = 'sum',
-                     ET.function = 'ET.MortonCRAE',
-                     ET.timestep = 'monthly',
-                     ET.Mortons.est = 'wet areal ET',
-                     ET.constants =  constants)
+                     temporal.fn.inner = 'sum')
 
 metData.monthly.centroid = extract_data(ncdfFilename=ncdfFilename,
                      extractFrom = date.from,
                      extractTo = date.to,
-                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad', 'et'),
+                     vars = c('tmax', 'tmin', 'precip', 'vprp_3pm', 'solarrad'),
+                     vars_derived = derived_var_fn,
                      locations = centroid,
                      temporal.timestep = 'monthly',
-                     temporal.fn.inner = 'sum',
-                     ET.function='ET.MortonCRAE',
-                     ET.timestep = 'monthly',
-                     ET.Mortons.est = 'wet areal ET',
-                     ET.constants =  constants)
+                     temporal.fn.inner = 'sum')
 
 ## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow=c(2,3), mar =  c(5, 7.5, 4, 2.7) + 0.1)
@@ -314,8 +310,8 @@ for (i in 1:length(site_ID)) {
 
   # PET
   xdata = metData.date
-  ydata_1 = metData.monthly.weighted$temporal$et[filt]
-  ydata_2 = metData.monthly.centroid$et[filt]
+  ydata_1 = metData.monthly.weighted$temporal$ET_CRAE_aPET[filt]
+  ydata_2 = metData.monthly.centroid$ET_CRAE_aPET[filt]
   shared_limits <- range(c(ydata_1, ydata_2))
   shared_limits[1] = floor(shared_limits[1])
   shared_limits[2] = ceiling(shared_limits[2]*1.25)
@@ -343,8 +339,8 @@ for (i in 1:length(site_ID)) {
 
   # Deficit
   xdata = metData.date
-  ydata_1 = metData.monthly.weighted$temporal$precip[filt] - metData.monthly.weighted$temporal$et[filt]
-  ydata_2 = metData.monthly.centroid$precip[filt] - metData.monthly.centroid$et[filt]
+  ydata_1 = metData.monthly.weighted$temporal$precip[filt] - metData.monthly.weighted$temporal$ET_CRAE_aPET[filt]
+  ydata_2 = metData.monthly.centroid$precip[filt] - metData.monthly.centroid$ET_CRAE_aPET[filt]
   shared_limits <- range(c(ydata_1, ydata_2))
   shared_limits[1] = floor(shared_limits[1])
   shared_limits[2] = ceiling(shared_limits[2]*1.35)

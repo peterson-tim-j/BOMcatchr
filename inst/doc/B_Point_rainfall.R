@@ -93,8 +93,7 @@ extracted.data = extract_data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coords,
-                                        vars = c('tmax', 'precip'),
-                                        ET.function='')
+                                        vars = c('tmax', 'precip'))
 
 ## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow = c(n_sites, 2), cex = 0.5)
@@ -203,8 +202,7 @@ extracted.daily2monthly = extract_data(ncdfFilename = ncdfFilename,
                                         locations = coords,
                                         vars = c('precip'),
                                         temporal.timestep = 'monthly',
-                                        temporal.fn.inner = 'sum',
-                                        ET.function='')
+                                        temporal.fn.inner = 'sum')
 
 ## -----------------------------------------------------------------------------
 extracted.monthly = extract_data(ncdfFilename = ncdfFilename,
@@ -212,8 +210,7 @@ extracted.monthly = extract_data(ncdfFilename = ncdfFilename,
                                         extractTo = dataTo,
                                         locations = coords,
                                         vars = c('precip.monthly'),
-                                        temporal.timestep = 'monthly',
-                                        ET.function='')
+                                        temporal.timestep = 'monthly')
 
 ## ----class.source = 'fold-hide'-----------------------------------------------
 par(mfrow = c(n_sites, 3),

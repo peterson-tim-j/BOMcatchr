@@ -142,8 +142,7 @@ extracted.data = extract_data(ncdfFilename = ncdfFilename,
                                         extractFrom = dataFrom,
                                         extractTo = dataTo,
                                         locations = coords,
-                                        vars = c('tmax', 'precip'),
-                                        ET.function='')
+                                        vars = c('tmax', 'precip'))
 ```
 
 ## Plot the extracted data over time
@@ -278,8 +277,7 @@ extracted.daily2monthly = extract_data(ncdfFilename = ncdfFilename,
                                         locations = coords,
                                         vars = c('precip'),
                                         temporal.timestep = 'monthly',
-                                        temporal.fn.inner = 'sum',
-                                        ET.function='')
+                                        temporal.fn.inner = 'sum')
 ```
 
 Next let's extract the monthly data product.
@@ -289,17 +287,16 @@ extracted.monthly = extract_data(ncdfFilename = ncdfFilename,
                                         extractTo = dataTo,
                                         locations = coords,
                                         vars = c('precip.monthly'),
-                                        temporal.timestep = 'monthly',
-                                        ET.function='')
+                                        temporal.timestep = 'monthly')
 ```
 
 Now we can compare the extracted estimates of monthly precipitation with the gauge monthly precipitation.
 
-The left column shows the monthly gauged precipitation vs the extracted daily precipitation summed to monthly. It shows that the daily gridded data summed to monthly has a RMSE of 4 to 84 and an absolute bias of 1 to 45 mm/month. In comparison, the cross-validation of the gauge interpolations techniques used by the BoM (see Table 3A in Jones et al. 2009 at \url(https://doi.org/10.1071/ES09032)) show an RMSE for 2001-2007 of 21 mm/month and a bias of 0.5 mm/month. Additionally, Fig 8A in Jones et al. 2009 shows a very strong north-south gradient in the monthly rainfall RMSE that range from below 10 mm/month in the south to over 50 mm/month in the north. Similarly, the northern gauge reported here (33247) show a higher RMSE of 84 mm/month while the southern gauges (70263, 9741, 79103 and 91259) show a much lower RMSE of 3.5 to 24 mm/month. Again, the gauge 79103 at an elevation of 1150 m and on a summit has a higher RMSE of 24 mm/month. Overall, the rainfall errors reported below are very comparable to that reported by Jones et al. (2009). Hence the errors shown below are very unlikely to arise from the package data handling and aggregation to a monthly time-step.
+The left column shows the monthly gauged precipitation vs the extracted daily precipitation summed to monthly. It shows that the daily gridded data summed to monthly has a RMSE of 4 to 85 and an absolute bias of 1 to 45 mm/month. In comparison, the cross-validation of the gauge interpolations techniques used by the BoM (see Table 3A in Jones et al. 2009 at \url(https://doi.org/10.1071/ES09032)) show an RMSE for 2001-2007 of 21 mm/month and a bias of 0.5 mm/month. Additionally, Fig 8A in Jones et al. 2009 shows a very strong north-south gradient in the monthly rainfall RMSE that range from below 10 mm/month in the south to over 50 mm/month in the north. Similarly, the northern gauge reported here (33247) show a higher RMSE of 85 mm/month while the southern gauges (70263, 9741, 79103 and 91259) show a much lower RMSE of 3.5 to 24 mm/month. Again, the gauge 79103 at an elevation of 1150 m and on a summit has a higher RMSE of 24 mm/month. Overall, the rainfall errors reported below are very comparable to that reported by Jones et al. (2009). Hence the errors shown below are very unlikely to arise from the package data handling and aggregation to a monthly time-step.
 
 The centre column shows the monthly gauged precipitation vs the extracted monthly precipitation (i.e. the gridded monthly precipitation). It shows a very comparable RMSE and bias to the daily gridded precipitation in the left column.
 
-The right column shows the extracted monthly precipitation against the extracted daily precipitation summed to monthly. It does not show an obvious difference between the two estimates of monthly precipitation, though the most southern gauges the summed daily precipitation is slighly higher then the monthly gridded precipitation (as least for 2010).
+The right column shows the extracted monthly precipitation against the extracted daily precipitation summed to monthly. It does not show an obvious difference between the two estimates of monthly precipitation, though at the most southern gauges the summed daily precipitation is slightly higher then the monthly gridded precipitation (as least for 2010).
 
 ```{r class.source = 'fold-hide'}
 #| fig.width = 8,
