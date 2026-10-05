@@ -63,8 +63,8 @@
 
         # Check ET interpolation methods are appropriate if duration is <2 years
         if (is_le_2y  && ET_missing_method!='neighbouring average')
-            .pretty_stop(paste('When the extraction duration is < 2 years, the in-built derived function,', FUN,',\n',
-                         'requires "ET_missing_method" and it must be specified and set to "neighbouring average".'))
+            .pretty_stop(paste('When the extraction duration is < 2 years, the in-built derived function,', FUN,
+                         ', requires "ET_missing_method" and it must be specified and set to "neighbouring average".'))
         }
 
       # Error if abnormal method is inappropriate for short record.
@@ -76,8 +76,8 @@
 
         # Check ET interpolation methods are appropriate if duration is <2 years
         if (is_le_2y  && ET_abnormal_method!='neighbouring average')
-          .pretty_stop('When the extraction duration is < 2 years,  the in-built derived function,', FUN,',\n',
-                       'requires "ET_abnormal_method" and it must be set to "neighbouring average".');
+          .pretty_stop(paste('When the extraction duration is < 2 years, the in-built derived function,', FUN,
+                             ', requires "ET_abnormal_method" and it must be specified and set to "neighbouring average".'))
       }
     }
   }
